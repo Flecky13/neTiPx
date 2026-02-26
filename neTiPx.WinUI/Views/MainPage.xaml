@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Class="neTiPx.WinUI.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:neTiPx.WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="using:neTiPx.WinUI.ViewModels"
+    mc:Ignorable="d"
+    Background="{ThemeResource AppBackgroundBrush}">
+    <Page.DataContext>
+        <viewModels:ShellViewModel />
+    </Page.DataContext>
+    <Grid Background="{ThemeResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="AppTitleBar" Height="40" Padding="12,6">
+            <TextBlock Text="neTiPx" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </Grid>
+
+        <NavigationView
+            x:Name="RootNavView"
+            Grid.Row="1"
+            PaneDisplayMode="Left"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            Background="{ThemeResource AppBackgroundBrush}"
+            SelectionChanged="RootNavView_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Adapter Auswahl" Tag="Adapters">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7C3;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="IP Konfiguration" Tag="IpConfig">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE839;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Tools" Tag="Tools">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B8;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Info" Tag="Info">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.PaneFooter>
+                <StackPanel Spacing="8" Padding="12,8">
+                    <TextBlock Text="Theme" FontSize="12" Opacity="0.7" />
+                    <ComboBox
+                        x:Name="ThemeCombo"
+                        ItemsSource="{Binding ThemeOptions}"
+                        SelectedItem="{Binding SelectedThemeOption, Mode=TwoWay}"
+                        DisplayMemberPath="DisplayName"
+                        SelectionChanged="ThemeCombo_SelectionChanged" />
+                </StackPanel>
+            </NavigationView.PaneFooter>
+
+            <NavigationView.Content>
+                <Frame x:Name="ContentFrame" />
+            </NavigationView.Content>
+        </NavigationView>
+    </Grid>
+</Page>

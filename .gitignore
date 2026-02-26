@@ -1,0 +1,122 @@
+## Visual Studio / User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+.localhistory/
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x86/
+x64/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Ww][Ii][Nn]32/
+[Ww][Ii][Nn]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Ll]og[Ss]/
+
+## IDE directories
+.vs/
+.vscode/
+.idea/
+.rider/
+.gradle/
+
+## Code Analysis and Tools
+_ReSharper*/
+_TeamCity*/
+*.DotSettings.user
+.analyzers/
+.roslynator.json
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+NuGetBackup/
+nuget.config.local
+
+## Testing
+TestResults/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+
+## Windows / OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+.AppleDouble
+.LSOverride
+*.manifest
+
+## Temporary files
+~$*
+*~
+*.tmp
+*.temp
+*.cache
+*.bak
+*.backup
+*.swp
+*.swo
+
+## Database & Project files
+*.dbmdl
+*.dbproj.schemaview
+*.db
+*.sqlite
+*.mdb
+
+## Publishing
+*.publishsettings
+PublishProfiles/
+publish/
+PublishProfiles*.pubxml
+*.pubxml.user
+
+## Code generation
+orleans.codegen.cs
+ServiceFabricBackup/
+
+## Other
+*.Cache
+ClientBin/
+*.jfm
+*.pfx
+*.msi
+*.msix
+*.msixbundle
+*.appxbundle
+*.appx
+
+## Backup folder
+.backup/
+
+## User settings override
+appsettings.local.json
+config.local.json
+settings.local.json
+
+## Generated files
+*.g.cs
+*.g.i.cs
+*.xaml.g.cs
+*.designer.cs

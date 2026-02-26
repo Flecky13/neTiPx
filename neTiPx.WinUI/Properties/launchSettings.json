@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "neTiPx.WinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "neTiPx.WinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
