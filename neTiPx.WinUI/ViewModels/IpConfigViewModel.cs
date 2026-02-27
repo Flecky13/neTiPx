@@ -771,24 +771,24 @@ namespace neTiPx.WinUI.ViewModels
                 return false;
             }
 
-            // Convert to binary and check if it's a valid subnet mask
             var bytes = ip.GetAddressBytes();
-            var bits = new System.Collections.BitArray(bytes);
-            bool hasZero = false;
-
-            for (int i = bits.Length - 1; i >= 0; i--)
+            if (bytes.Length != 4)
             {
-                if (!bits[i])
-                {
-                    hasZero = true;
-                }
-                else if (hasZero)
-                {
-                    return false; // Found 1 after 0
-                }
+                return false;
             }
 
-            return true;
+            var mask = ((uint)bytes[0] << 24) |
+                       ((uint)bytes[1] << 16) |
+                       ((uint)bytes[2] << 8) |
+                       bytes[3];
+
+            if (mask == 0)
+            {
+                return false;
+            }
+
+            var inverted = ~mask;
+            return (inverted & (inverted + 1)) == 0;
         }
 
         private async Task UpdateStatusAsync()
