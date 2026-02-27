@@ -79,6 +79,7 @@ namespace neTiPx.WinUI.ViewModels
                     if (_selectedProfile != null)
                     {
                         _selectedProfile.PropertyChanged += SelectedProfile_PropertyChanged;
+                        ReloadSelectedProfileSettingsAsync().ConfigureAwait(false);
                     }
 
                     OnPropertyChanged(nameof(IsProfileSelected));
@@ -97,6 +98,116 @@ namespace neTiPx.WinUI.ViewModels
             }
 
             ValidateProfile();
+        }
+
+        private Task ReloadSelectedProfileSettingsAsync()
+        {
+            if (SelectedProfile == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            if (string.Equals(SelectedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
+            {
+                LoadProfileFromNic(SelectedProfile);
+                return Task.CompletedTask;
+            }
+
+            var values = _configStore.ReadAll();
+            var hasConfigSettings = HasPersistedProfileSettings(values, SelectedProfile.Name);
+
+            if (hasConfigSettings)
+            {
+                LoadProfileFromConfig(values, SelectedProfile);
+                return Task.CompletedTask;
+            }
+
+            LoadProfileFromNic(SelectedProfile);
+            return Task.CompletedTask;
+        }
+
+        private void LoadProfileFromConfig(Dictionary<string, string> values, IpProfile targetProfile)
+        {
+            var configProfile = ReadProfile(values, targetProfile.Name);
+
+            targetProfile.Gateway = configProfile.Gateway;
+            targetProfile.Dns1 = configProfile.Dns1;
+            targetProfile.Dns2 = configProfile.Dns2;
+
+            targetProfile.IpAddresses.Clear();
+            foreach (var entry in configProfile.IpAddresses)
+            {
+                targetProfile.IpAddresses.Add(new IpAddressEntry
+                {
+                    IpAddress = entry.IpAddress,
+                    SubnetMask = entry.SubnetMask
+                });
+            }
+
+            if (targetProfile.IpAddresses.Count == 0)
+            {
+                targetProfile.IpAddresses.Add(new IpAddressEntry());
+            }
+        }
+
+        private static void LoadProfileFromNic(IpProfile targetProfile)
+        {
+            if (string.IsNullOrWhiteSpace(targetProfile.AdapterName))
+            {
+                return;
+            }
+
+            var networkInfoService = new NetworkInfoService();
+            var config = networkInfoService.GetIpv4Config(targetProfile.AdapterName);
+            if (config == null)
+            {
+                return;
+            }
+
+            targetProfile.Gateway = config.Gateway ?? string.Empty;
+            targetProfile.Dns1 = config.Dns1 ?? string.Empty;
+            targetProfile.Dns2 = config.Dns2 ?? string.Empty;
+
+            targetProfile.IpAddresses.Clear();
+            foreach (var (ipAddress, subnetMask) in config.IpAddresses)
+            {
+                targetProfile.IpAddresses.Add(new IpAddressEntry
+                {
+                    IpAddress = ipAddress,
+                    SubnetMask = subnetMask
+                });
+            }
+
+            if (targetProfile.IpAddresses.Count == 0)
+            {
+                targetProfile.IpAddresses.Add(new IpAddressEntry());
+            }
+        }
+
+        private static bool HasPersistedProfileSettings(Dictionary<string, string> values, string profileName)
+        {
+            static bool HasValue(Dictionary<string, string> source, string key)
+            {
+                return source.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value);
+            }
+
+            if (HasValue(values, $"{profileName}.GW") ||
+                HasValue(values, $"{profileName}.DNS1") ||
+                HasValue(values, $"{profileName}.DNS2") ||
+                HasValue(values, $"{profileName}.DNS"))
+            {
+                return true;
+            }
+
+            for (int i = 1; i <= 10; i++)
+            {
+                if (HasValue(values, $"{profileName}.IP_{i}"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool IsProfileSelected => SelectedProfile != null;
@@ -364,6 +475,7 @@ namespace neTiPx.WinUI.ViewModels
 
             SaveProfile();
             ValidationMessage = "Profil angewendet";
+            ReloadSelectedProfileSettingsAsync().ConfigureAwait(false);
         }
 
         private static List<string> GetProfileNames(Dictionary<string, string> values)

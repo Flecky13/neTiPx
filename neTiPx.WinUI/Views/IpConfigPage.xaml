@@ -318,11 +318,6 @@
                     </Border>
                 </StackPanel>
             </Grid>
-
-            <!-- Schließen-Button -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Command="{Binding CloseCommand}">Schließen</Button>
-            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>

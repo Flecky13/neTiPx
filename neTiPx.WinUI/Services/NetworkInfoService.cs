@@ -113,6 +113,67 @@ namespace neTiPx.WinUI.Services
             }
         }
 
+        public class Ipv4Config
+        {
+            public string? Gateway { get; set; }
+            public string? Dns1 { get; set; }
+            public string? Dns2 { get; set; }
+            public List<(string IpAddress, string SubnetMask)> IpAddresses { get; set; } = new();
+        }
+
+        public Ipv4Config? GetIpv4Config(string adapterName)
+        {
+            try
+            {
+                var adapter = FindAdapter(adapterName);
+                if (adapter == null || adapter.OperationalStatus != OperationalStatus.Up)
+                {
+                    return null;
+                }
+
+                var props = adapter.GetIPProperties();
+                var config = new Ipv4Config();
+
+                // Get Gateway
+                var gateways = props.GatewayAddresses
+                    .Where(g => g.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(g => g.Address.ToString())
+                    .ToList();
+                if (gateways.Any())
+                {
+                    config.Gateway = gateways.First();
+                }
+
+                // Get DNS Servers
+                var dnsServers = props.DnsAddresses
+                    .Where(d => d.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(d => d.ToString())
+                    .ToList();
+                if (dnsServers.Count > 0)
+                    config.Dns1 = dnsServers[0];
+                if (dnsServers.Count > 1)
+                    config.Dns2 = dnsServers[1];
+
+                // Get IP Addresses and Subnet Masks
+                var unicastAddresses = props.UnicastAddresses
+                    .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .ToList();
+
+                foreach (var addr in unicastAddresses)
+                {
+                    var ipAddress = addr.Address.ToString();
+                    var subnetMask = addr.IPv4Mask?.ToString() ?? "255.255.255.0";
+                    config.IpAddresses.Add((ipAddress, subnetMask));
+                }
+
+                return config;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private static NetworkInterface? FindAdapter(string adapterName)
         {
             if (string.IsNullOrWhiteSpace(adapterName))
