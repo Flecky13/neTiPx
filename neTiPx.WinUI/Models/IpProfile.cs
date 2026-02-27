@@ -9,7 +9,8 @@ namespace neTiPx.WinUI.Models
         private string _adapterName = string.Empty;
         private string _mode = "DHCP";
         private string _gateway = string.Empty;
-        private string _dns = string.Empty;
+        private string _dns1 = string.Empty;
+        private string _dns2 = string.Empty;
 
         public string Name
         {
@@ -35,10 +36,42 @@ namespace neTiPx.WinUI.Models
             set => SetProperty(ref _gateway, value);
         }
 
+        public string Dns1
+        {
+            get => _dns1;
+            set => SetProperty(ref _dns1, value);
+        }
+
+        public string Dns2
+        {
+            get => _dns2;
+            set => SetProperty(ref _dns2, value);
+        }
+
+        // Legacy property for backward compatibility
         public string Dns
         {
-            get => _dns;
-            set => SetProperty(ref _dns, value);
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_dns1))
+                    return _dns2;
+                if (string.IsNullOrWhiteSpace(_dns2))
+                    return _dns1;
+                return $"{_dns1},{_dns2}";
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    _dns1 = string.Empty;
+                    _dns2 = string.Empty;
+                    return;
+                }
+
+                var parts = value.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                _dns1 = parts.Length > 0 ? parts[0].Trim() : string.Empty;
+                _dns2 = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+            }
         }
 
         public ObservableCollection<IpAddressEntry> IpAddresses { get; } = new ObservableCollection<IpAddressEntry>();

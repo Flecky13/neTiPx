@@ -71,6 +71,7 @@
 
             <converters:GatewayStatusToBrushConverter x:Key="GatewayStatusToBrushConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

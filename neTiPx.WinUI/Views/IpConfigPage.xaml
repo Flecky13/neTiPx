@@ -15,16 +15,16 @@
 
     <ScrollViewer>
         <StackPanel Spacing="16" Padding="24">
-            <!-- Header mit Image -->
+            <!-- Header mit Image (gleiche Höhe wie AdapterPage) -->
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
                         <TextBlock Text="IP Konfiguration" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Verwalte die Netzwerkeinstellungen" />
+                        <TextBlock Text="Verwalte mehrere IP-Profile und Netzwerkeinstellungen" />
                     </StackPanel>
                     <Image
                         Grid.Column="1"
-                        Source="ms-appx:///images/toolicon.png"
+                        Source="ms-appx:///Assets/toolicon.png"
                         Width="120"
                         Height="120"
                         VerticalAlignment="Center"
@@ -32,101 +32,288 @@
                 </Grid>
             </Border>
 
-            <Grid ColumnDefinitions="*,280">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup>
-                        <VisualState x:Name="WideState">
-                            <VisualState.StateTriggers>
-                                <AdaptiveTrigger MinWindowWidth="900" />
-                            </VisualState.StateTriggers>
-                        </VisualState>
-                        <VisualState x:Name="NarrowState">
-                            <VisualState.StateTriggers>
-                                <AdaptiveTrigger MinWindowWidth="0" />
-                            </VisualState.StateTriggers>
-                            <VisualState.Setters>
-                                <Setter Target="StatusCardGrid.(Grid.Column)" Value="0" />
-                                <Setter Target="StatusCardGrid.(Grid.ColumnSpan)" Value="1" />
-                                <Setter Target="MainContent.(Grid.Column)" Value="0" />
-                                <Setter Target="MainContent.(Grid.ColumnSpan)" Value="1" />
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
+            <!-- Hauptbereich: Profile (Links) | Settings (Mitte) | Status (Rechts) -->
+            <Grid ColumnDefinitions="280,*,300" ColumnSpacing="16">
+                <!-- Linker Bereich: Profil-Liste -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="IP Profile" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                <StackPanel Grid.Column="0" Spacing="16" x:Name="MainContent">
-                    <Border Style="{StaticResource CardBorder}">
+                        <!-- Profil-Liste -->
+                        <ListView
+                            ItemsSource="{Binding IpProfiles}"
+                            SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
+                            SelectionMode="Single"
+                            MaxHeight="400">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:IpProfile">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="4">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="{x:Bind Name, Mode=OneWay}"
+                                            VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Command="{Binding DataContext.DeleteProfileCommand, ElementName=PageRoot}"
+                                            CommandParameter="{Binding}"
+                                            ToolTipService.ToolTip="Profil löschen"
+                                            Padding="4"
+                                            MinWidth="0"
+                                            Background="Transparent"
+                                            BorderThickness="0">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <!-- Button: Neues Profil -->
+                        <Button
+                            Command="{Binding AddProfileCommand}"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE710;" FontSize="16" />
+                                <TextBlock Text="Neues Profil" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mittlerer Bereich: Settings -->
+                <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Profil-Einstellungen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+
+                            <!-- Profilname -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Profilname" FontWeight="SemiBold" />
+                                <TextBox
+                                    Text="{Binding SelectedProfile.Name, Mode=TwoWay}"
+                                    PlaceholderText="z.B. Büro, Heimnetzwerk..."
+                                    IsEnabled="{Binding IsProfileSelected}" />
+                            </StackPanel>
+
+                            <!-- Netzwerkkarte -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Netzwerkkarte" FontWeight="SemiBold" />
+                                <ComboBox
+                                    ItemsSource="{Binding AdapterList}"
+                                    SelectedItem="{Binding SelectedProfile.AdapterName, Mode=TwoWay}"
+                                    PlaceholderText="Adapter wählen..."
+                                    HorizontalAlignment="Stretch"
+                                    IsEnabled="{Binding IsProfileSelected}" />
+                            </StackPanel>
+
+                            <!-- IP Modus -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="IP Modus" FontWeight="SemiBold" />
+                                <RadioButtons
+                                    ItemsSource="{Binding IpModeOptions}"
+                                    SelectedItem="{Binding SelectedProfile.Mode, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsProfileSelected}" />
+                            </StackPanel>
+
+                            <!-- Gateway -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Gateway" FontWeight="SemiBold" />
+                                <TextBox
+                                    Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
+                                    PlaceholderText="192.168.1.1"
+                                    IsEnabled="{Binding IsManual}" />
+                            </StackPanel>
+
+                            <!-- DNS Server -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="DNS Server" FontWeight="SemiBold" />
+                                <TextBox
+                                    Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
+                                    PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
+                                    Margin="0,0,0,8"
+                                    IsEnabled="{Binding IsManual}" />
+                                <TextBox
+                                    Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
+                                    PlaceholderText="DNS 2 (z.B. 8.8.4.4)"
+                                    IsEnabled="{Binding IsManual}" />
+                            </StackPanel>
+
+                            <!-- IP Adressen -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="IP Adressen" FontWeight="SemiBold" />
+
+                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
+                                    <TextBlock Text="IP Adresse" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock Grid.Column="2" Text="Aktion" FontWeight="SemiBold" FontSize="12" />
+                                </Grid>
+
+                                <ItemsRepeater ItemsSource="{Binding SelectedProfile.IpAddresses}">
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="models:IpAddressEntry">
+                                            <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8" ColumnSpacing="8">
+                                                <TextBox
+                                                    Text="{x:Bind IpAddress, Mode=TwoWay}"
+                                                    PlaceholderText="192.168.1.10"
+                                                    IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
+                                                <TextBox
+                                                    Grid.Column="1"
+                                                    Text="{x:Bind SubnetMask, Mode=TwoWay}"
+                                                    PlaceholderText="255.255.255.0"
+                                                    IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTipService.ToolTip="IP entfernen"
+                                                    Padding="8"
+                                                    IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}">
+                                                    <FontIcon Glyph="&#xE74D;" FontSize="16" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+
+                                <Button
+                                    Command="{Binding AddIpCommand}"
+                                    HorizontalAlignment="Left"
+                                    IsEnabled="{Binding IsManual}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE710;" FontSize="14" />
+                                        <TextBlock Text="IP Adresse hinzufügen" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Rechter Bereich: Buttons und Status -->
+                <StackPanel Grid.Column="2" Spacing="16">
+                    <!-- Aktions-Buttons -->
+                    <Border Style="{StaticResource CardBorder}" Padding="16">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Adapter" Style="{StaticResource SectionTitle}" />
-                            <ComboBox
-                                ItemsSource="{Binding AdapterList}"
-                                SelectedItem="{Binding SelectedAdapter, Mode=TwoWay}"
-                                PlaceholderText="Adapter Auswahl" />
-                            <TextBlock Text="IP Modus" FontWeight="SemiBold" />
-                            <RadioButtons ItemsSource="{Binding IpModeOptions}" SelectedItem="{Binding SelectedIpMode, Mode=TwoWay}" />
+                            <TextBlock Text="Aktionen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+
+                            <Button
+                                Command="{Binding ApplyCommand}"
+                                HorizontalAlignment="Stretch"
+                                Style="{StaticResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="16" />
+                                    <TextBlock Text="Anwenden" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button
+                                Command="{Binding SaveCommand}"
+                                HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE74E;" FontSize="16" />
+                                    <TextBlock Text="Speichern" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Validierungs-Nachricht -->
+                            <Border
+                                Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+                                Padding="12"
+                                CornerRadius="4"
+                                Visibility="{Binding ValidationMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                                <TextBlock
+                                    Text="{Binding ValidationMessage}"
+                                    TextWrapping="Wrap"
+                                    FontSize="12" />
+                            </Border>
                         </StackPanel>
                     </Border>
 
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="Gateway und DNS" Style="{StaticResource SectionTitle}" />
-                            <TextBox Text="{Binding GatewayAddress, Mode=TwoWay}" PlaceholderText="Gateway" IsEnabled="{Binding IsManual}" />
-                            <TextBox Text="{Binding DnsServer, Mode=TwoWay}" PlaceholderText="DNS Server" IsEnabled="{Binding IsManual}" />
-                        </StackPanel>
-                    </Border>
+                    <!-- Status-Bereich -->
+                    <Border Style="{StaticResource CardBorder}" Padding="16">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="IP Adressen" Style="{StaticResource SectionTitle}" />
-                            <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
-                                <TextBlock Text="IP Adresse" FontWeight="SemiBold" />
-                                <TextBlock Grid.Column="1" Text="Subnetz" FontWeight="SemiBold" />
-                                <TextBlock Grid.Column="2" Text="Aktion" FontWeight="SemiBold" />
-                            </Grid>
-                            <ItemsRepeater ItemsSource="{Binding IpAddresses}">
-                                <ItemsRepeater.ItemTemplate>
-                                    <DataTemplate x:DataType="models:IpAddressEntry">
-                                        <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
-                                            <TextBox Text="{x:Bind IpAddress, Mode=TwoWay}" PlaceholderText="192.168.0.10" IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                            <TextBox Grid.Column="1" Text="{x:Bind SubnetMask, Mode=TwoWay}" PlaceholderText="255.255.255.0" IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                            <Button
-                                                Grid.Column="2"
-                                                Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
-                                                CommandParameter="{Binding}"
-                                                IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}">
-                                                <FontIcon Glyph="&#xE74D;" />
-                                            </Button>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsRepeater.ItemTemplate>
-                            </ItemsRepeater>
+                            <!-- Gateway Status -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse
+                                        Width="12"
+                                        Height="12"
+                                        Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding GatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding SelectedProfile.Gateway}" FontSize="11" Opacity="0.7" />
+                                <TextBlock Text="{Binding GatewayPingText}" FontSize="11" Opacity="0.7" />
+                            </StackPanel>
 
-                            <Button HorizontalAlignment="Left" Command="{Binding AddIpCommand}" IsEnabled="{Binding IsManual}">IP Adresse hinzufuegen</Button>
+                            <!-- DNS1 Status -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse
+                                        Width="12"
+                                        Height="12"
+                                        Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Dns1StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding SelectedProfile.Dns1}" FontSize="11" Opacity="0.7" />
+                                <TextBlock Text="{Binding Dns1PingText}" FontSize="11" Opacity="0.7" />
+                            </StackPanel>
+
+                            <!-- DNS2 Status -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse
+                                        Width="12"
+                                        Height="12"
+                                        Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                        VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Dns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding SelectedProfile.Dns2}" FontSize="11" Opacity="0.7" />
+                                <TextBlock Text="{Binding Dns2PingText}" FontSize="11" Opacity="0.7" />
+                            </StackPanel>
+
+                            <!-- Qualitäts-Ampel -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Verbindungsqualität" FontWeight="SemiBold" FontSize="12" />
+                                <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="12" HorizontalAlignment="Center">
+                                    <Ellipse
+                                        Width="20"
+                                        Height="20"
+                                        Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                        Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        StrokeThickness="1" />
+                                    <Ellipse
+                                        Grid.Column="1"
+                                        Width="20"
+                                        Height="20"
+                                        Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                        Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        StrokeThickness="1" />
+                                    <Ellipse
+                                        Grid.Column="2"
+                                        Width="20"
+                                        Height="20"
+                                        Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                        Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        StrokeThickness="1" />
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-
-                <Border x:Name="StatusCardGrid" Grid.Column="1" Style="{StaticResource CardBorder}">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Gateway Status" Style="{StaticResource SectionTitle}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse
-                                Width="10"
-                                Height="10"
-                                Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
-                                VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding GatewayStatusText}" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding GatewayAddress}" />
-                        <TextBlock Text="{Binding GatewayPingText}" />
-                    </StackPanel>
-                </Border>
             </Grid>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                <Button Style="{StaticResource PrimaryAction}" Command="{Binding ApplyCommand}">Anwenden</Button>
-                <Button Command="{Binding SaveCommand}">Speichern</Button>
-                <Button Command="{Binding CloseCommand}">Schliessen</Button>
+            <!-- Schließen-Button -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Command="{Binding CloseCommand}">Schließen</Button>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

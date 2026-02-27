@@ -64,9 +64,20 @@ namespace neTiPx.WinUI.Services
                     commands.Add($"netsh interface ipv4 add address name=\"{ni.Name}\" addr={entry.IpAddress} mask={entry.SubnetMask}");
                 }
 
-                if (IsValidIPv4(profile.Dns))
+                // Set DNS servers
+                if (IsValidIPv4(profile.Dns1))
                 {
-                    commands.Add($"netsh interface ipv4 set dns name=\"{ni.Name}\" source=static addr={profile.Dns} register=primary");
+                    commands.Add($"netsh interface ipv4 set dns name=\"{ni.Name}\" source=static addr={profile.Dns1} register=primary");
+
+                    if (IsValidIPv4(profile.Dns2))
+                    {
+                        commands.Add($"netsh interface ipv4 add dns name=\"{ni.Name}\" addr={profile.Dns2} index=2");
+                    }
+                }
+                else if (IsValidIPv4(profile.Dns2))
+                {
+                    // If only DNS2 is set, use it as primary
+                    commands.Add($"netsh interface ipv4 set dns name=\"{ni.Name}\" source=static addr={profile.Dns2} register=primary");
                 }
             }
 

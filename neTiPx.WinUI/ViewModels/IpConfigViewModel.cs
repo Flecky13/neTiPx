@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TimersTimer = System.Timers.Timer;
@@ -19,29 +21,34 @@ namespace neTiPx.WinUI.ViewModels
         private readonly TimersTimer _pingTimer;
         private readonly SynchronizationContext? _uiContext;
 
-        private string _selectedIpMode = "DHCP";
-        private bool _isManual;
-        private string _gatewayAddress = string.Empty;
-        private string _dnsServer = string.Empty;
-        private string _gatewayStatusText = "Unknown";
+        private IpProfile? _selectedProfile;
+        private string _gatewayStatusText = "Unbekannt";
         private string _gatewayPingText = "Ping: -";
         private GatewayStatusKind _gatewayStatusKind = GatewayStatusKind.Unknown;
-        private string? _selectedAdapter;
-        private string _profileName = "IP #1";
+        private string _dns1StatusText = "Unbekannt";
+        private string _dns1PingText = "Ping: -";
+        private GatewayStatusKind _dns1StatusKind = GatewayStatusKind.Unknown;
+        private string _dns2StatusText = "Unbekannt";
+        private string _dns2PingText = "Ping: -";
+        private GatewayStatusKind _dns2StatusKind = GatewayStatusKind.Unknown;
+        private string _validationMessage = string.Empty;
+        private bool _hasValidationErrors = false;
 
         public IpConfigViewModel()
         {
             AdapterList = new ObservableCollection<string>();
             IpModeOptions = new ObservableCollection<string> { "DHCP", "Manual" };
-            IpAddresses = new ObservableCollection<IpAddressEntry>();
+            IpProfiles = new ObservableCollection<IpProfile>();
 
             LoadAdapters();
-            LoadProfileFromConfig();
+            LoadProfilesFromConfig();
 
             AddIpCommand = new RelayCommand(AddIpAddress);
             RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress);
-            ApplyCommand = new RelayCommand(ApplyProfile);
-            SaveCommand = new RelayCommand(SaveProfile);
+            AddProfileCommand = new RelayCommand(AddProfile);
+            DeleteProfileCommand = new RelayCommand<IpProfile>(DeleteProfile);
+            ApplyCommand = new RelayCommand(ApplyProfile, CanApplyProfile);
+            SaveCommand = new RelayCommand(SaveProfile, CanSaveProfile);
             CloseCommand = new RelayCommand(() => App.MainWindow.Close());
 
             _uiContext = SynchronizationContext.Current;
@@ -49,50 +56,78 @@ namespace neTiPx.WinUI.ViewModels
             {
                 AutoReset = true
             };
-            _pingTimer.Elapsed += async (_, _) => await UpdateGatewayStatusAsync();
+            _pingTimer.Elapsed += async (_, _) => await UpdateStatusAsync();
             _pingTimer.Start();
         }
 
         public ObservableCollection<string> AdapterList { get; }
-
-        public string? SelectedAdapter
-        {
-            get => _selectedAdapter;
-            set => SetProperty(ref _selectedAdapter, value);
-        }
-
         public ObservableCollection<string> IpModeOptions { get; }
+        public ObservableCollection<IpProfile> IpProfiles { get; }
 
-        public string SelectedIpMode
+        public IpProfile? SelectedProfile
         {
-            get => _selectedIpMode;
+            get => _selectedProfile;
             set
             {
-                if (SetProperty(ref _selectedIpMode, value))
+                if (_selectedProfile != null)
                 {
-                    IsManual = string.Equals(value, "Manual", StringComparison.OrdinalIgnoreCase);
+                    _selectedProfile.PropertyChanged -= SelectedProfile_PropertyChanged;
+                }
+
+                if (SetProperty(ref _selectedProfile, value))
+                {
+                    if (_selectedProfile != null)
+                    {
+                        _selectedProfile.PropertyChanged += SelectedProfile_PropertyChanged;
+                    }
+
+                    OnPropertyChanged(nameof(IsProfileSelected));
+                    OnPropertyChanged(nameof(IsManual));
+                    ValidateProfile();
+                    UpdateStatusAsync().ConfigureAwait(false);
                 }
             }
         }
 
-        public bool IsManual
+        private void SelectedProfile_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            get => _isManual;
-            set => SetProperty(ref _isManual, value);
+            if (e.PropertyName == nameof(IpProfile.Mode))
+            {
+                OnPropertyChanged(nameof(IsManual));
+            }
+
+            ValidateProfile();
         }
 
-        public ObservableCollection<IpAddressEntry> IpAddresses { get; }
+        public bool IsProfileSelected => SelectedProfile != null;
 
-        public string GatewayAddress
+        public bool IsManual => SelectedProfile != null &&
+                                string.Equals(SelectedProfile.Mode, "Manual", StringComparison.OrdinalIgnoreCase);
+
+        public string ValidationMessage
         {
-            get => _gatewayAddress;
-            set => SetProperty(ref _gatewayAddress, value);
+            get => _validationMessage;
+            set
+            {
+                if (SetProperty(ref _validationMessage, value))
+                {
+                    ApplyCommand?.RaiseCanExecuteChanged();
+                    SaveCommand?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
-        public string DnsServer
+        public bool HasValidationErrors
         {
-            get => _dnsServer;
-            set => SetProperty(ref _dnsServer, value);
+            get => _hasValidationErrors;
+            set
+            {
+                if (SetProperty(ref _hasValidationErrors, value))
+                {
+                    ApplyCommand?.RaiseCanExecuteChanged();
+                    SaveCommand?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string GatewayStatusText
@@ -113,8 +148,46 @@ namespace neTiPx.WinUI.ViewModels
             set => SetProperty(ref _gatewayStatusKind, value);
         }
 
+        public string Dns1StatusText
+        {
+            get => _dns1StatusText;
+            set => SetProperty(ref _dns1StatusText, value);
+        }
+
+        public string Dns1PingText
+        {
+            get => _dns1PingText;
+            set => SetProperty(ref _dns1PingText, value);
+        }
+
+        public GatewayStatusKind Dns1StatusKind
+        {
+            get => _dns1StatusKind;
+            set => SetProperty(ref _dns1StatusKind, value);
+        }
+
+        public string Dns2StatusText
+        {
+            get => _dns2StatusText;
+            set => SetProperty(ref _dns2StatusText, value);
+        }
+
+        public string Dns2PingText
+        {
+            get => _dns2PingText;
+            set => SetProperty(ref _dns2PingText, value);
+        }
+
+        public GatewayStatusKind Dns2StatusKind
+        {
+            get => _dns2StatusKind;
+            set => SetProperty(ref _dns2StatusKind, value);
+        }
+
         public RelayCommand AddIpCommand { get; }
         public RelayCommand<IpAddressEntry> RemoveIpCommand { get; }
+        public RelayCommand AddProfileCommand { get; }
+        public RelayCommand<IpProfile> DeleteProfileCommand { get; }
         public RelayCommand ApplyCommand { get; }
         public RelayCommand SaveCommand { get; }
         public RelayCommand CloseCommand { get; }
@@ -136,115 +209,180 @@ namespace neTiPx.WinUI.ViewModels
             }
         }
 
-        private void LoadProfileFromConfig()
+        private void LoadProfilesFromConfig()
         {
             var values = _configStore.ReadAll();
-            var name = GetFirstProfileName(values) ?? "IP #1";
-            _profileName = name;
+            var profileNames = GetProfileNames(values);
 
-            var profile = ReadProfile(values, name);
-            SelectedAdapter = NormalizeAdapterName(profile.AdapterName);
-            SelectedIpMode = profile.Mode;
-            GatewayAddress = profile.Gateway;
-            DnsServer = profile.Dns;
+            IpProfiles.Clear();
 
-            IpAddresses.Clear();
-            foreach (var entry in profile.IpAddresses)
+            if (profileNames.Count == 0)
             {
-                IpAddresses.Add(entry);
+                // Create default profile
+                var defaultProfile = new IpProfile { Name = "IP #1" };
+                defaultProfile.IpAddresses.Add(new IpAddressEntry());
+                IpProfiles.Add(defaultProfile);
+            }
+            else
+            {
+                foreach (var name in profileNames)
+                {
+                    var profile = ReadProfile(values, name);
+                    if (profile.IpAddresses.Count == 0)
+                    {
+                        profile.IpAddresses.Add(new IpAddressEntry());
+                    }
+                    IpProfiles.Add(profile);
+                }
             }
 
-            if (IpAddresses.Count == 0)
+            SelectedProfile = IpProfiles.FirstOrDefault();
+        }
+
+        private void AddProfile()
+        {
+            var newNumber = IpProfiles.Count + 1;
+            var newName = $"IP #{newNumber}";
+
+            // Ensure unique name
+            while (IpProfiles.Any(p => p.Name == newName))
             {
-                IpAddresses.Add(new IpAddressEntry());
+                newNumber++;
+                newName = $"IP #{newNumber}";
             }
+
+            var newProfile = new IpProfile
+            {
+                Name = newName,
+                Mode = "DHCP"
+            };
+            newProfile.IpAddresses.Add(new IpAddressEntry());
+
+            IpProfiles.Add(newProfile);
+            SelectedProfile = newProfile;
         }
 
-        private void AddIpAddress()
+        private void DeleteProfile(IpProfile? profile)
         {
-            IpAddresses.Add(new IpAddressEntry());
-        }
-
-        private void RemoveIpAddress(IpAddressEntry? entry)
-        {
-            if (entry == null)
+            if (profile == null || IpProfiles.Count <= 1)
             {
                 return;
             }
 
-            IpAddresses.Remove(entry);
-            if (IpAddresses.Count == 0)
+            var index = IpProfiles.IndexOf(profile);
+            IpProfiles.Remove(profile);
+
+            // Select adjacent profile
+            if (index >= IpProfiles.Count)
             {
-                IpAddresses.Add(new IpAddressEntry());
+                index = IpProfiles.Count - 1;
             }
+            SelectedProfile = IpProfiles[index];
+
+            // Remove from config
+            var values = _configStore.ReadAll();
+            RemoveProfileFromConfig(values, profile.Name);
+            _configStore.WriteAll(values);
+        }
+
+        private void AddIpAddress()
+        {
+            if (SelectedProfile == null)
+            {
+                return;
+            }
+
+            SelectedProfile.IpAddresses.Add(new IpAddressEntry());
+        }
+
+        private void RemoveIpAddress(IpAddressEntry? entry)
+        {
+            if (entry == null || SelectedProfile == null)
+            {
+                return;
+            }
+
+            SelectedProfile.IpAddresses.Remove(entry);
+            if (SelectedProfile.IpAddresses.Count == 0)
+            {
+                SelectedProfile.IpAddresses.Add(new IpAddressEntry());
+            }
+        }
+
+        private bool CanSaveProfile()
+        {
+            return SelectedProfile != null && !HasValidationErrors;
         }
 
         private void SaveProfile()
         {
+            if (SelectedProfile == null)
+            {
+                return;
+            }
+
+            ValidateProfile();
+            if (HasValidationErrors)
+            {
+                return;
+            }
+
             var values = _configStore.ReadAll();
-            var profile = BuildProfileFromFields();
-
-            values["Adapter1"] = SelectedAdapter ?? values.GetValueOrDefault("Adapter1", string.Empty);
-
-            UpdateProfile(values, profile);
+            UpdateProfile(values, SelectedProfile);
             _configStore.WriteAll(values);
+
+            ValidationMessage = "Profil gespeichert";
+        }
+
+        private bool CanApplyProfile()
+        {
+            return SelectedProfile != null && !HasValidationErrors;
         }
 
         private void ApplyProfile()
         {
-            var profile = BuildProfileFromFields();
-            var (success, error) = _networkService.ApplyProfile(profile);
+            if (SelectedProfile == null)
+            {
+                return;
+            }
+
+            ValidateProfile();
+            if (HasValidationErrors)
+            {
+                return;
+            }
+
+            var (success, error) = _networkService.ApplyProfile(SelectedProfile);
             if (!success)
             {
-                GatewayStatusText = error ?? "Fehler beim Anwenden.";
+                ValidationMessage = error ?? "Fehler beim Anwenden.";
+                HasValidationErrors = true;
+                GatewayStatusText = "Fehler";
                 GatewayStatusKind = GatewayStatusKind.Bad;
                 return;
             }
 
             SaveProfile();
+            ValidationMessage = "Profil angewendet";
         }
 
-        private IpProfile BuildProfileFromFields()
-        {
-            var profile = new IpProfile
-            {
-                Name = _profileName,
-                AdapterName = SelectedAdapter ?? string.Empty,
-                Mode = SelectedIpMode,
-                Gateway = GatewayAddress.Trim(),
-                Dns = DnsServer.Trim()
-            };
-
-            foreach (var entry in IpAddresses)
-            {
-                if (!string.IsNullOrWhiteSpace(entry.IpAddress) || !string.IsNullOrWhiteSpace(entry.SubnetMask))
-                {
-                    profile.IpAddresses.Add(new IpAddressEntry
-                    {
-                        IpAddress = entry.IpAddress.Trim(),
-                        SubnetMask = entry.SubnetMask.Trim()
-                    });
-                }
-            }
-
-            return profile;
-        }
-
-        private static string? GetFirstProfileName(Dictionary<string, string> values)
+        private static List<string> GetProfileNames(Dictionary<string, string> values)
         {
             if (values.TryGetValue("IpProfileNames", out var names) && !string.IsNullOrWhiteSpace(names))
             {
                 return names.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(n => n.Trim())
-                    .FirstOrDefault(n => n.Length > 0);
+                    .Where(n => n.Length > 0)
+                    .ToList();
             }
 
+            // Check for legacy profile
             if (values.Keys.Any(k => k.StartsWith("IpTab1", StringComparison.OrdinalIgnoreCase)))
             {
-                return "IP #1";
+                return new List<string> { "IP #1" };
             }
 
-            return null;
+            return new List<string>();
         }
 
         private IpProfile ReadProfile(Dictionary<string, string> values, string name)
@@ -253,15 +391,15 @@ namespace neTiPx.WinUI.ViewModels
 
             if (values.TryGetValue($"{name}.Adapter", out var adapter))
             {
-                profile.AdapterName = adapter;
+                profile.AdapterName = NormalizeAdapterName(adapter);
             }
             else if (values.TryGetValue("Adapter1", out var adapter1))
             {
-                profile.AdapterName = adapter1;
+                profile.AdapterName = NormalizeAdapterName(adapter1);
             }
             else if (values.TryGetValue("IpTab1Adapter", out var legacyAdapter))
             {
-                profile.AdapterName = legacyAdapter;
+                profile.AdapterName = NormalizeAdapterName(legacyAdapter);
             }
 
             if (values.TryGetValue($"{name}.Mode", out var mode))
@@ -282,13 +420,28 @@ namespace neTiPx.WinUI.ViewModels
                 profile.Gateway = legacyGw;
             }
 
-            if (values.TryGetValue($"{name}.DNS", out var dns))
+            // Try new DNS format first (DNS1, DNS2)
+            if (values.TryGetValue($"{name}.DNS1", out var dns1))
             {
-                profile.Dns = dns;
+                profile.Dns1 = dns1;
             }
-            else if (values.TryGetValue("IpTab1DNS", out var legacyDns))
+
+            if (values.TryGetValue($"{name}.DNS2", out var dns2))
             {
-                profile.Dns = legacyDns;
+                profile.Dns2 = dns2;
+            }
+
+            // Fall back to old DNS format
+            if (string.IsNullOrWhiteSpace(profile.Dns1) && string.IsNullOrWhiteSpace(profile.Dns2))
+            {
+                if (values.TryGetValue($"{name}.DNS", out var dns))
+                {
+                    profile.Dns = dns; // This will split into Dns1 and Dns2
+                }
+                else if (values.TryGetValue("IpTab1DNS", out var legacyDns))
+                {
+                    profile.Dns = legacyDns;
+                }
             }
 
             var entries = ReadProfileIpEntries(values, name);
@@ -370,13 +523,15 @@ namespace neTiPx.WinUI.ViewModels
 
             if (!names.Contains(profile.Name, StringComparer.OrdinalIgnoreCase))
             {
-                names.Insert(0, profile.Name);
+                names.Add(profile.Name);
             }
 
             values[$"{profile.Name}.Adapter"] = profile.AdapterName;
             values[$"{profile.Name}.Mode"] = profile.Mode;
             values[$"{profile.Name}.GW"] = profile.Gateway;
             values[$"{profile.Name}.DNS"] = profile.Dns;
+            values[$"{profile.Name}.DNS1"] = profile.Dns1;
+            values[$"{profile.Name}.DNS2"] = profile.Dns2;
 
             var existingKeys = values.Keys.Where(k => k.StartsWith(profile.Name + ".IP_", StringComparison.OrdinalIgnoreCase)
                 || k.StartsWith(profile.Name + ".Subnet_", StringComparison.OrdinalIgnoreCase)).ToList();
@@ -401,12 +556,160 @@ namespace neTiPx.WinUI.ViewModels
             values["IpProfileNames"] = string.Join(",", names);
         }
 
-        private async Task UpdateGatewayStatusAsync()
+        private void RemoveProfileFromConfig(Dictionary<string, string> values, string profileName)
         {
-            var address = GatewayAddress?.Trim();
+            // Remove profile from list
+            var names = new List<string>();
+            if (values.TryGetValue("IpProfileNames", out var list) && !string.IsNullOrWhiteSpace(list))
+            {
+                names = list.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(n => n.Trim())
+                    .Where(n => n.Length > 0 && !string.Equals(n, profileName, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            values["IpProfileNames"] = string.Join(",", names);
+
+            // Remove profile keys
+            var keysToRemove = values.Keys
+                .Where(k => k.StartsWith(profileName + ".", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                values.Remove(key);
+            }
+        }
+
+        private void ValidateProfile()
+        {
+            if (SelectedProfile == null)
+            {
+                ValidationMessage = string.Empty;
+                HasValidationErrors = false;
+                return;
+            }
+
+            var errors = new List<string>();
+
+            // Validate profile name
+            if (string.IsNullOrWhiteSpace(SelectedProfile.Name))
+            {
+                errors.Add("Profilname erforderlich");
+            }
+
+            // Validate adapter
+            if (string.IsNullOrWhiteSpace(SelectedProfile.AdapterName))
+            {
+                errors.Add("Netzwerkkarte erforderlich");
+            }
+
+            // Validate manual mode settings
+            if (IsManual)
+            {
+                // Validate Gateway
+                if (!string.IsNullOrWhiteSpace(SelectedProfile.Gateway) && !IsValidIpAddress(SelectedProfile.Gateway))
+                {
+                    errors.Add("Gateway-Adresse ungültig");
+                }
+
+                // Validate DNS1
+                if (!string.IsNullOrWhiteSpace(SelectedProfile.Dns1) && !IsValidIpAddress(SelectedProfile.Dns1))
+                {
+                    errors.Add("DNS1-Adresse ungültig");
+                }
+
+                // Validate DNS2
+                if (!string.IsNullOrWhiteSpace(SelectedProfile.Dns2) && !IsValidIpAddress(SelectedProfile.Dns2))
+                {
+                    errors.Add("DNS2-Adresse ungültig");
+                }
+
+                // Validate IP Addresses
+                foreach (var entry in SelectedProfile.IpAddresses)
+                {
+                    if (!string.IsNullOrWhiteSpace(entry.IpAddress))
+                    {
+                        if (!IsValidIpAddress(entry.IpAddress))
+                        {
+                            errors.Add($"IP-Adresse ungültig: {entry.IpAddress}");
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(entry.SubnetMask) && !IsValidSubnetMask(entry.SubnetMask))
+                        {
+                            errors.Add($"Subnetzmaske ungültig: {entry.SubnetMask}");
+                        }
+                    }
+                }
+            }
+
+            HasValidationErrors = errors.Count > 0;
+            ValidationMessage = HasValidationErrors ? string.Join(", ", errors) : "Validierung erfolgreich";
+        }
+
+        private static bool IsValidIpAddress(string ipAddress)
+        {
+            return IPAddress.TryParse(ipAddress, out _);
+        }
+
+        private static bool IsValidSubnetMask(string subnetMask)
+        {
+            if (!IPAddress.TryParse(subnetMask, out var ip))
+            {
+                return false;
+            }
+
+            // Convert to binary and check if it's a valid subnet mask
+            var bytes = ip.GetAddressBytes();
+            var bits = new System.Collections.BitArray(bytes);
+            bool hasZero = false;
+
+            for (int i = bits.Length - 1; i >= 0; i--)
+            {
+                if (!bits[i])
+                {
+                    hasZero = true;
+                }
+                else if (hasZero)
+                {
+                    return false; // Found 1 after 0
+                }
+            }
+
+            return true;
+        }
+
+        private async Task UpdateStatusAsync()
+        {
+            if (SelectedProfile == null || !IsManual)
+            {
+                PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                return;
+            }
+
+            // Check Gateway
+            await CheckHostStatusAsync(
+                SelectedProfile.Gateway,
+                (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+
+            // Check DNS1
+            await CheckHostStatusAsync(
+                SelectedProfile.Dns1,
+                (status, ping, kind) => PostDns1Status(status, ping, kind));
+
+            // Check DNS2
+            await CheckHostStatusAsync(
+                SelectedProfile.Dns2,
+                (status, ping, kind) => PostDns2Status(status, ping, kind));
+        }
+
+        private static async Task CheckHostStatusAsync(string address, Action<string, string, GatewayStatusKind> callback)
+        {
             if (string.IsNullOrWhiteSpace(address))
             {
-                PostGatewayStatus("No gateway", "Ping: -", GatewayStatusKind.Unknown);
+                callback("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
@@ -417,18 +720,19 @@ namespace neTiPx.WinUI.ViewModels
                 if (reply.Status == IPStatus.Success)
                 {
                     var ms = reply.RoundtripTime;
-                    var statusText = ms <= 20 ? "Reachable" : "Slow";
-                    var statusKind = ms <= 20 ? GatewayStatusKind.Good : GatewayStatusKind.Warning;
-                    PostGatewayStatus(statusText, $"Ping: {ms} ms", statusKind);
+                    var statusText = ms <= 20 ? "Erreichbar" : ms <= 100 ? "Langsam" : "Sehr langsam";
+                    var statusKind = ms <= 20 ? GatewayStatusKind.Good :
+                                   ms <= 100 ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
+                    callback(statusText, $"Ping: {ms} ms", statusKind);
                 }
                 else
                 {
-                    PostGatewayStatus("Unreachable", "Ping: timeout", GatewayStatusKind.Bad);
+                    callback("Nicht erreichbar", "Ping: timeout", GatewayStatusKind.Bad);
                 }
             }
             catch
             {
-                PostGatewayStatus("Error", "Ping: failed", GatewayStatusKind.Bad);
+                callback("Fehler", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
             }
         }
 
@@ -447,6 +751,42 @@ namespace neTiPx.WinUI.ViewModels
                 GatewayStatusText = statusText;
                 GatewayPingText = pingText;
                 GatewayStatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostDns1Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                Dns1StatusText = statusText;
+                Dns1PingText = pingText;
+                Dns1StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                Dns1StatusText = statusText;
+                Dns1PingText = pingText;
+                Dns1StatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostDns2Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                Dns2StatusText = statusText;
+                Dns2PingText = pingText;
+                Dns2StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                Dns2StatusText = statusText;
+                Dns2PingText = pingText;
+                Dns2StatusKind = statusKind;
             }, null);
         }
     }
