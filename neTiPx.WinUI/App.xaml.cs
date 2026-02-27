@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -45,6 +46,9 @@ namespace neTiPx.WinUI
             MainWindow.Title = "neTiPx";
             MainWindow.ExtendsContentIntoTitleBar = true;
 
+            SetWindowIcon(MainWindow);
+            SetWindowIcon(HoverWindow);
+
             ThemeService.ApplyTheme(rootFrame);
 
             _ = rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
@@ -60,6 +64,18 @@ namespace neTiPx.WinUI
                 args.Cancel = true;
                 WindowHelper.Hide(MainWindow);
             };
+        }
+
+        private static void SetWindowIcon(Window window)
+        {
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "toolicon.ico");
+            if (!File.Exists(iconPath))
+            {
+                return;
+            }
+
+            var appWindow = WindowHelper.GetAppWindow(window);
+            appWindow.SetIcon(iconPath);
         }
 
         public static void ExitApp()

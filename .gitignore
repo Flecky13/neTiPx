@@ -10,6 +10,9 @@ Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
 .localhistory/
+## bilder sammlung
+[Ii]mages/
+[Oo]utakes/
 
 ## Build results
 [Dd]ebug/
