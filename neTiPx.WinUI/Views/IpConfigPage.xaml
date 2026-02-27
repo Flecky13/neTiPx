@@ -33,7 +33,7 @@
             </Border>
 
             <!-- Hauptbereich: Profile (Links) | Settings (Mitte) | Status (Rechts) -->
-            <Grid ColumnDefinitions="280,*,300" ColumnSpacing="16">
+            <Grid ColumnDefinitions="200,*,210" ColumnSpacing="16">
                 <!-- Linker Bereich: Profil-Liste -->
                 <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
                     <StackPanel Spacing="12">
@@ -110,10 +110,18 @@
                             <!-- IP Modus -->
                             <StackPanel Spacing="8">
                                 <TextBlock Text="IP Modus" FontWeight="SemiBold" />
-                                <RadioButtons
-                                    ItemsSource="{Binding IpModeOptions}"
-                                    SelectedItem="{Binding SelectedProfile.Mode, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsProfileSelected}" />
+                                <StackPanel Orientation="Horizontal" Spacing="24">
+                                    <RadioButton
+                                        Content="DHCP"
+                                        GroupName="IpMode"
+                                        IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=DHCP}"
+                                        IsEnabled="{Binding IsProfileSelected}" />
+                                    <RadioButton
+                                        Content="Manual"
+                                        GroupName="IpMode"
+                                        IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=Manual}"
+                                        IsEnabled="{Binding IsProfileSelected}" />
+                                </StackPanel>
                             </StackPanel>
 
                             <!-- Gateway -->
