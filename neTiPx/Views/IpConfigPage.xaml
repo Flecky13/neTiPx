@@ -244,12 +244,12 @@
                     </Border>
 
                     <!-- Status-Bereich -->
-                    <Border Style="{StaticResource CardBorder}" Padding="16">
+                    <Border Style="{StaticResource CardBorder}" Padding="16" Visibility="{Binding ShowConnectionQualityIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Spacing="16">
                             <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
                             <!-- Gateway Status -->
-                            <StackPanel Spacing="4">
+                            <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse
@@ -264,7 +264,7 @@
                             </StackPanel>
 
                             <!-- DNS1 Status -->
-                            <StackPanel Spacing="4">
+                            <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse
@@ -279,7 +279,7 @@
                             </StackPanel>
 
                             <!-- DNS2 Status -->
-                            <StackPanel Spacing="4">
+                            <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse
@@ -294,12 +294,13 @@
                             </StackPanel>
 
                             <!-- Qualitäts-Ampel -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="8" Visibility="{Binding ShowConnectionQualityIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="Verbindungsqualität" FontWeight="SemiBold" FontSize="12" />
                                 <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="12" HorizontalAlignment="Center">
                                     <Ellipse
                                         Width="20"
                                         Height="20"
+                                        Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}"
                                         Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
                                         Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
                                         StrokeThickness="1" />
@@ -307,6 +308,7 @@
                                         Grid.Column="1"
                                         Width="20"
                                         Height="20"
+                                        Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}"
                                         Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
                                         Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
                                         StrokeThickness="1" />
@@ -314,6 +316,7 @@
                                         Grid.Column="2"
                                         Width="20"
                                         Height="20"
+                                        Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}"
                                         Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
                                         Stroke="{ThemeResource CardStrokeColorDefaultBrush}"
                                         StrokeThickness="1" />

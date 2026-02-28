@@ -162,9 +162,9 @@
 
                         <!-- Drei Checkboxen für Gateway/DNS -->
                         <StackPanel Spacing="6">
-                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" />
-                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" />
-                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" />
+                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" Checked="CheckGatewayCheckBox_Checked" Unchecked="CheckGatewayCheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

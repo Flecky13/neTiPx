@@ -13,6 +13,9 @@ namespace neTiPx.Services
             public ColorTheme? ColorTheme { get; set; }
             public bool HoverWindowEnabled { get; set; } = true;
             public int HoverWindowDelaySeconds { get; set; } = 1;
+            public bool CheckConnectionGateway { get; set; } = true;
+            public bool CheckConnectionDns1 { get; set; } = true;
+            public bool CheckConnectionDns2 { get; set; } = true;
         }
 
         public UserSettings ReadUserSettings()
@@ -100,7 +103,13 @@ namespace neTiPx.Services
                 new XAttribute("delaySeconds", settings.HoverWindowDelaySeconds)
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement);
+            var connectionStatusElement = new XElement("connectionStatus",
+                new XAttribute("checkGateway", settings.CheckConnectionGateway),
+                new XAttribute("checkDns1", settings.CheckConnectionDns1),
+                new XAttribute("checkDns2", settings.CheckConnectionDns2)
+            );
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -149,6 +158,23 @@ namespace neTiPx.Services
                     if (int.TryParse((string?)hoverWindowElement.Attribute("delaySeconds"), out var delay))
                     {
                         settings.HoverWindowDelaySeconds = delay;
+                    }
+                }
+
+                var connectionStatusElement = root.Element("connectionStatus");
+                if (connectionStatusElement != null)
+                {
+                    if (bool.TryParse((string?)connectionStatusElement.Attribute("checkGateway"), out var checkGw))
+                    {
+                        settings.CheckConnectionGateway = checkGw;
+                    }
+                    if (bool.TryParse((string?)connectionStatusElement.Attribute("checkDns1"), out var checkDns1))
+                    {
+                        settings.CheckConnectionDns1 = checkDns1;
+                    }
+                    if (bool.TryParse((string?)connectionStatusElement.Attribute("checkDns2"), out var checkDns2))
+                    {
+                        settings.CheckConnectionDns2 = checkDns2;
                     }
                 }
 

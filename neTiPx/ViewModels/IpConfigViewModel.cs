@@ -21,6 +21,7 @@ namespace neTiPx.ViewModels
         private readonly ConfigStore _configStore = new ConfigStore();
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
+        private readonly SettingsService _settingsService = new SettingsService();
         private readonly TimersTimer _pingTimer;
         private readonly SynchronizationContext? _uiContext;
         private bool _isLoadingProfile = false;
@@ -499,6 +500,25 @@ namespace neTiPx.ViewModels
         {
             get => _dns2StatusKind;
             set => SetProperty(ref _dns2StatusKind, value);
+        }
+
+        public bool ShowGatewayStatus => _settingsService.GetCheckConnectionGateway();
+
+        public bool ShowDns1Status => _settingsService.GetCheckConnectionDns1();
+
+        public bool ShowDns2Status => _settingsService.GetCheckConnectionDns2();
+
+        public bool ShowConnectionQualityIndicator =>
+            _settingsService.GetCheckConnectionGateway() ||
+            _settingsService.GetCheckConnectionDns1() ||
+            _settingsService.GetCheckConnectionDns2();
+
+        public void RefreshConnectionStatusVisibility()
+        {
+            OnPropertyChanged(nameof(ShowGatewayStatus));
+            OnPropertyChanged(nameof(ShowDns1Status));
+            OnPropertyChanged(nameof(ShowDns2Status));
+            OnPropertyChanged(nameof(ShowConnectionQualityIndicator));
         }
 
         public RelayCommand AddIpCommand { get; }
@@ -1013,9 +1033,33 @@ namespace neTiPx.ViewModels
             var dns1 = NormalizeHostAddress(SelectedProfile.Dns1);
             var dns2 = NormalizeHostAddress(SelectedProfile.Dns2);
 
-            await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
-            await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
-            await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+            // Nur prüfen, wenn in den Settings aktiviert
+            if (_settingsService.GetCheckConnectionGateway())
+            {
+                await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+            }
+            else
+            {
+                PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+            }
+
+            if (_settingsService.GetCheckConnectionDns1())
+            {
+                await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
+            }
+            else
+            {
+                PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+            }
+
+            if (_settingsService.GetCheckConnectionDns2())
+            {
+                await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+            }
+            else
+            {
+                PostDns2Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+            }
         }
 
         private static string NormalizeHostAddress(string? address)

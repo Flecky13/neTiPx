@@ -117,6 +117,14 @@ namespace neTiPx.Views
                 HoverWindowDelayCombo.IsEnabled = hoverEnabled;
             }
 
+            // Verbindungsstatus-Einstellungen laden
+            if (CheckGatewayCheckBox != null && CheckDns1CheckBox != null && CheckDns2CheckBox != null)
+            {
+                CheckGatewayCheckBox.IsChecked = _settingsService.GetCheckConnectionGateway();
+                CheckDns1CheckBox.IsChecked = _settingsService.GetCheckConnectionDns1();
+                CheckDns2CheckBox.IsChecked = _settingsService.GetCheckConnectionDns2();
+            }
+
             _isLoading = false;
         }
 
@@ -198,6 +206,54 @@ namespace neTiPx.Views
             };
 
             _settingsService.SetHoverWindowDelaySeconds(delaySeconds);
+        }
+
+        private void CheckGatewayCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCheckConnectionGateway(true);
+        }
+
+        private void CheckGatewayCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCheckConnectionGateway(false);
+        }
+
+        private void CheckDns1CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCheckConnectionDns1(true);
+        }
+
+        private void CheckDns1CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCheckConnectionDns1(false);
+        }
+
+        private void CheckDns2CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCheckConnectionDns2(true);
+        }
+
+        private void CheckDns2CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCheckConnectionDns2(false);
         }
     }
 }

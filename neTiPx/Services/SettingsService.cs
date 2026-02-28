@@ -87,5 +87,44 @@ namespace neTiPx.Services
             settings.HoverWindowDelaySeconds = delaySeconds;
             _userSettingsStore.WriteUserSettings(settings);
         }
+
+        public bool GetCheckConnectionGateway()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CheckConnectionGateway;
+        }
+
+        public void SetCheckConnectionGateway(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CheckConnectionGateway = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetCheckConnectionDns1()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CheckConnectionDns1;
+        }
+
+        public void SetCheckConnectionDns1(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CheckConnectionDns1 = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetCheckConnectionDns2()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CheckConnectionDns2;
+        }
+
+        public void SetCheckConnectionDns2(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CheckConnectionDns2 = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
     }
 }
