@@ -19,6 +19,8 @@ namespace neTiPx.WinUI
         public static ThemeService ThemeService { get; } = new ThemeService();
 
         private TrayService? _trayService;
+        private const int MIN_WIDTH = 1280;
+        private const int MIN_HEIGHT = 940;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -51,9 +53,18 @@ namespace neTiPx.WinUI
 
             // Set minimum window size and enforce it
             var appWindow = WindowHelper.GetAppWindow(MainWindow);
-            var minWidth = 1280;// Minimale Breite in Pixeln
-            var minHeight = 920; // Minimale Höhe in Pixeln
-            appWindow.ResizeClient(new Windows.Graphics.SizeInt32(minWidth, minHeight));
+
+            // Set minimum size using OverlappedPresenter
+            if (appWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.SetBorderAndTitleBar(true, true);
+                presenter.IsResizable = true;
+                presenter.IsMaximizable = true;
+                presenter.IsMinimizable = true;
+            }
+
+            // Set initial and minimum size
+            appWindow.Resize(new Windows.Graphics.SizeInt32(MIN_WIDTH, MIN_HEIGHT));
 
             ThemeService.ApplyTheme(rootFrame);
 
@@ -66,12 +77,15 @@ namespace neTiPx.WinUI
             // Enforce minimum size when user tries to resize
             appWindow.Changed += (sender, args) =>
             {
-                var size = appWindow.Size;
-                if (size.Width < minWidth || size.Height < minHeight)
+                if (args.DidSizeChange)
                 {
-                    appWindow.ResizeClient(new Windows.Graphics.SizeInt32(
-                        Math.Max(size.Width, minWidth),
-                        Math.Max(size.Height, minHeight)));
+                    var size = appWindow.Size;
+                    if (size.Width < MIN_WIDTH || size.Height < MIN_HEIGHT)
+                    {
+                        appWindow.Resize(new Windows.Graphics.SizeInt32(
+                            Math.Max(size.Width, MIN_WIDTH),
+                            Math.Max(size.Height, MIN_HEIGHT)));
+                    }
                 }
             };
 
