@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Diagnostics;
 
 namespace neTiPx.Services
 {
@@ -36,7 +37,7 @@ namespace neTiPx.Services
                 if (enabled)
                 {
                     var exePath = GetExecutablePath();
-                    if (!string.IsNullOrWhiteSpace(exePath) && File.Exists(exePath))
+                    if (!string.IsNullOrWhiteSpace(exePath))
                     {
                         key.SetValue(ValueName, $"\"{exePath}\"");
                     }
@@ -57,6 +58,18 @@ namespace neTiPx.Services
             if (!string.IsNullOrWhiteSpace(processPath))
             {
                 return processPath;
+            }
+
+            try
+            {
+                var modulePath = Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrWhiteSpace(modulePath))
+                {
+                    return modulePath;
+                }
+            }
+            catch
+            {
             }
 
             return Path.Combine(AppContext.BaseDirectory, "neTiPx.exe");
