@@ -16,6 +16,8 @@ namespace neTiPx.Services
             public bool CheckConnectionGateway { get; set; } = true;
             public bool CheckConnectionDns1 { get; set; } = true;
             public bool CheckConnectionDns2 { get; set; } = true;
+            public int PingThresholdFast { get; set; } = 20;
+            public int PingThresholdNormal { get; set; } = 50;
         }
 
         public UserSettings ReadUserSettings()
@@ -106,7 +108,9 @@ namespace neTiPx.Services
             var connectionStatusElement = new XElement("connectionStatus",
                 new XAttribute("checkGateway", settings.CheckConnectionGateway),
                 new XAttribute("checkDns1", settings.CheckConnectionDns1),
-                new XAttribute("checkDns2", settings.CheckConnectionDns2)
+                new XAttribute("checkDns2", settings.CheckConnectionDns2),
+                new XAttribute("thresholdFast", settings.PingThresholdFast),
+                new XAttribute("thresholdNormal", settings.PingThresholdNormal)
             );
 
             var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement);
@@ -175,6 +179,14 @@ namespace neTiPx.Services
                     if (bool.TryParse((string?)connectionStatusElement.Attribute("checkDns2"), out var checkDns2))
                     {
                         settings.CheckConnectionDns2 = checkDns2;
+                    }
+                    if (int.TryParse((string?)connectionStatusElement.Attribute("thresholdFast"), out var thresholdFast))
+                    {
+                        settings.PingThresholdFast = thresholdFast;
+                    }
+                    if (int.TryParse((string?)connectionStatusElement.Attribute("thresholdNormal"), out var thresholdNormal))
+                    {
+                        settings.PingThresholdNormal = thresholdNormal;
                     }
                 }
 

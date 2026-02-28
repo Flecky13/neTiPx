@@ -1087,7 +1087,7 @@ namespace neTiPx.ViewModels
             return candidate;
         }
 
-        private static async Task CheckHostStatusAsync(string address, Action<string, string, GatewayStatusKind> callback)
+        private async Task CheckHostStatusAsync(string address, Action<string, string, GatewayStatusKind> callback)
         {
             if (string.IsNullOrWhiteSpace(address))
             {
@@ -1102,9 +1102,14 @@ namespace neTiPx.ViewModels
                 if (reply.Status == IPStatus.Success)
                 {
                     var ms = reply.RoundtripTime;
-                    var statusText = ms <= 20 ? "Erreichbar" : ms <= 100 ? "Langsam" : "Sehr langsam";
-                    var statusKind = ms <= 20 ? GatewayStatusKind.Good :
-                                   ms <= 100 ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
+
+                    // Hole die Schwellwerte aus den Einstellungen
+                    int thresholdFast = _settingsService.GetPingThresholdFast();
+                    int thresholdNormal = _settingsService.GetPingThresholdNormal();
+
+                    var statusText = ms <= thresholdFast ? "Erreichbar" : ms <= thresholdNormal ? "Langsam" : "Sehr langsam";
+                    var statusKind = ms <= thresholdFast ? GatewayStatusKind.Good :
+                                   ms <= thresholdNormal ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
                     callback(statusText, $"Ping: {ms} ms", statusKind);
                 }
                 else

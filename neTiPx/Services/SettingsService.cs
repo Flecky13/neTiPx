@@ -126,5 +126,32 @@ namespace neTiPx.Services
             settings.CheckConnectionDns2 = enabled;
             _userSettingsStore.WriteUserSettings(settings);
         }
+
+        public int GetPingThresholdFast()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.PingThresholdFast;
+        }
+
+        public void SetPingThresholdFast(int value)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.PingThresholdFast = value;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetPingThresholdNormal()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.PingThresholdNormal;
+        }
+
+        public void SetPingThresholdNormal(int value)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.PingThresholdNormal = value;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
     }
 }

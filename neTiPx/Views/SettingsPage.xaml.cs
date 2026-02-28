@@ -125,6 +125,15 @@ namespace neTiPx.Views
                 CheckDns2CheckBox.IsChecked = _settingsService.GetCheckConnectionDns2();
             }
 
+            // Ping-Schwellwert-Einstellungen laden
+            if (PingThresholdFastTextBox != null)
+            {
+                PingThresholdFastTextBox.Text = _settingsService.GetPingThresholdFast().ToString();
+            }
+            if (PingThresholdNormalTextBox != null)
+            {
+                PingThresholdNormalTextBox.Text = _settingsService.GetPingThresholdNormal().ToString();
+            }
             _isLoading = false;
         }
 
@@ -255,5 +264,34 @@ namespace neTiPx.Views
 
             _settingsService.SetCheckConnectionDns2(false);
         }
+
+        private void PingThresholdFastTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            if (PingThresholdFastTextBox != null && int.TryParse(PingThresholdFastTextBox.Text, out int value))
+            {
+                if (value >= 1 && value <= 200)
+                {
+                    _settingsService.SetPingThresholdFast(value);
+                }
+            }
+        }
+
+        private void PingThresholdNormalTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            if (PingThresholdNormalTextBox != null && int.TryParse(PingThresholdNormalTextBox.Text, out int value))
+            {
+                if (value >= 1 && value <= 200)
+                {
+                    _settingsService.SetPingThresholdNormal(value);
+                }
+            }
+        }
+
     }
 }

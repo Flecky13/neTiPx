@@ -124,41 +124,45 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" />
 
-                        <!-- Drei Zahlenfelder für Ping-Schwellenwerte -->
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                            <!-- Schnell -->
-                            <StackPanel Grid.Column="0" Spacing="4">
-                                <TextBlock Text="Schnell" FontWeight="SemiBold" FontSize="12" />
+                        <!-- Ping-Schwellenwerte: zweizeilig -->
+                        <StackPanel Spacing="8">
+                            <!-- Zeile 1: Labels -->
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock Text="Schnell (ms):" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="&lt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock Text="Normal:" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="&gt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock Text="Langsam (ms)" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Zeile 2: TextBoxes mit Normal in der Mitte -->
+                            <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                                <!-- Schnell TextBox -->
                                 <TextBox
                                     x:Name="PingThresholdFastTextBox"
-                                    Text="20"
                                     InputScope="Number"
                                     MaxLength="3"
-                                    HorizontalAlignment="Stretch" />
-                            </StackPanel>
+                                    Width="60"
+                                    TextChanged="PingThresholdFastTextBox_TextChanged" />
 
-                            <!-- Normal -->
-                            <StackPanel Grid.Column="1" Spacing="4">
-                                <TextBlock Text="Normal" FontWeight="SemiBold" FontSize="12" />
+                                <!-- Operator < -->
+                                <TextBlock Text="&lt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+
+                                <!-- Normal Text -->
+                                <TextBlock Text="Normal" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" MinWidth="60" TextAlignment="Center" />
+
+                                <!-- Operator > -->
+                                <TextBlock Text="&gt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+
+                                <!-- Normal TextBox -->
                                 <TextBox
                                     x:Name="PingThresholdNormalTextBox"
-                                    Text="50"
                                     InputScope="Number"
                                     MaxLength="3"
-                                    HorizontalAlignment="Stretch" />
+                                    Width="60"
+                                    TextChanged="PingThresholdNormalTextBox_TextChanged" />
                             </StackPanel>
-
-                            <!-- Langsam -->
-                            <StackPanel Grid.Column="2" Spacing="4">
-                                <TextBlock Text="Langsam" FontWeight="SemiBold" FontSize="12" />
-                                <TextBox
-                                    x:Name="PingThresholdSlowTextBox"
-                                    Text="100"
-                                    InputScope="Number"
-                                    MaxLength="3"
-                                    HorizontalAlignment="Stretch" />
-                            </StackPanel>
-                        </Grid>
+                        </StackPanel>
 
                         <!-- Drei Checkboxen für Gateway/DNS -->
                         <StackPanel Spacing="6">
