@@ -163,7 +163,6 @@
                                             <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8" ColumnSpacing="8">
                                                 <TextBox
                                                     Text="{x:Bind IpAddress, Mode=TwoWay}"
-                                                    PlaceholderText="192.168.1.10"
                                                     IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
                                                 <TextBox
                                                     Grid.Column="1"
