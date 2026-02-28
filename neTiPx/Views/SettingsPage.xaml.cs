@@ -29,7 +29,7 @@ namespace neTiPx.Views
         private readonly AdapterStore _adapterStore;
         private List<ColorTheme> _colorThemes = new();
         private List<string> _adapterList = new();
-        private bool _isLoading = false;
+        private bool _isLoading = true;
 
         public SettingsPage()
         {
@@ -95,11 +95,36 @@ namespace neTiPx.Views
                 SecondaryAdapterCombo.SelectedItem = adapterSettings.SecondaryAdapter;
             }
 
+            // Hover Window Einstellungen laden
+            if (HoverWindowStateCombo != null && HoverWindowDelayCombo != null)
+            {
+                bool hoverEnabled = _settingsService.GetHoverWindowEnabled();
+                int hoverDelay = _settingsService.GetHoverWindowDelaySeconds();
+
+                HoverWindowStateCombo.SelectedIndex = hoverEnabled ? 0 : 1;
+
+                // Verzögerung basierend auf Sekunden setzen
+                HoverWindowDelayCombo.SelectedIndex = hoverDelay switch
+                {
+                    1 => 0,
+                    2 => 1,
+                    3 => 2,
+                    4 => 3,
+                    _ => 0
+                };
+
+                // Verzögerung ComboBox aktivieren/deaktivieren basierend auf Hover-Status
+                HoverWindowDelayCombo.IsEnabled = hoverEnabled;
+            }
+
             _isLoading = false;
         }
 
         private void ColorSchemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_isLoading)
+                return;
+
             if (ColorSchemeCombo.SelectedItem is ColorSchemeItem item)
             {
                 _colorThemeApplier.Apply(item.Theme);
@@ -139,6 +164,40 @@ namespace neTiPx.Views
             var settings = _adapterStore.ReadAdapters();
             settings.SecondaryAdapter = (string?)SecondaryAdapterCombo.SelectedItem ?? string.Empty;
             _adapterStore.WriteAdapters(settings);
+        }
+
+        private void HoverWindowStateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            if (HoverWindowDelayCombo == null)
+                return;
+
+            bool isActive = HoverWindowStateCombo.SelectedIndex == 0;
+
+            // Hover Window aktivieren/deaktivieren
+            _settingsService.SetHoverWindowEnabled(isActive);
+
+            // Verzögerung ComboBox aktivieren/deaktivieren
+            HoverWindowDelayCombo.IsEnabled = isActive;
+        }
+
+        private void HoverWindowDelayCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            int delaySeconds = HoverWindowDelayCombo.SelectedIndex switch
+            {
+                0 => 1,
+                1 => 2,
+                2 => 3,
+                3 => 4,
+                _ => 1
+            };
+
+            _settingsService.SetHoverWindowDelaySeconds(delaySeconds);
         }
     }
 }

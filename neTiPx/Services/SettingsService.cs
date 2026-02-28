@@ -45,10 +45,8 @@ namespace neTiPx.Services
 
         public void SetColorTheme(ColorTheme colorTheme)
         {
-            var settings = new UserSettingsStore.UserSettings
-            {
-                ColorTheme = colorTheme
-            };
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ColorTheme = colorTheme;
             _userSettingsStore.WriteUserSettings(settings);
         }
 
@@ -62,6 +60,32 @@ namespace neTiPx.Services
         {
             // Diese Methode wird jetzt nicht mehr verwendet,
             // aber für Rückwärtskompatibilität erhalten wir sie
+        }
+
+        public bool GetHoverWindowEnabled()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.HoverWindowEnabled;
+        }
+
+        public void SetHoverWindowEnabled(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.HoverWindowEnabled = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetHoverWindowDelaySeconds()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.HoverWindowDelaySeconds;
+        }
+
+        public void SetHoverWindowDelaySeconds(int delaySeconds)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.HoverWindowDelaySeconds = delaySeconds;
+            _userSettingsStore.WriteUserSettings(settings);
         }
     }
 }

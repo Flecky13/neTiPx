@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Timers;
+using System.Threading.Tasks;
 using Microsoft.UI.Dispatching;
 using neTiPx.Helpers;
 using neTiPx.Views;
@@ -153,7 +154,13 @@ namespace neTiPx.Services
             {
                 _isMouseOver = true;
                 _enterCursorPosition = GetCursorPosition();
-                ShowHoverWindow();
+
+                // Hover Window nur anzeigen, wenn es aktiviert ist
+                var settingsService = new SettingsService();
+                if (settingsService.GetHoverWindowEnabled())
+                {
+                    ShowHoverWindow();
+                }
             }
 
             _leaveTimer.Stop();
@@ -184,9 +191,20 @@ namespace neTiPx.Services
         {
             _dispatcherQueue.TryEnqueue(async () =>
             {
-                await _hoverWindow.RefreshAsync();
-                WindowHelper.Show(_hoverWindow);
-                WindowHelper.PositionHoverWindow(_hoverWindow, 20, 10);
+                // Hole die Verzögerungs-Einstellung
+                var settingsService = new SettingsService();
+                int delayMs = settingsService.GetHoverWindowDelaySeconds() * 1000;
+
+                // Warte die konfigutrierte Zeit
+                await Task.Delay(delayMs);
+
+                // Prüfe ob wir immer noch hovern (sicherheitshalber)
+                if (_isMouseOver)
+                {
+                    await _hoverWindow.RefreshAsync();
+                    WindowHelper.Show(_hoverWindow);
+                    WindowHelper.PositionHoverWindow(_hoverWindow, 20, 10);
+                }
             });
         }
 

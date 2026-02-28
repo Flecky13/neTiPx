@@ -80,11 +80,42 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Oben Rechts: Platzhalter -->
+                <!-- Oben Rechts: Maus Over Info Fenster -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="2">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="Maus Over Info Fenster" Style="{StaticResource SectionTitle}" />
+
+                        <!-- Vertikales Layout für die zwei Dropdowns untereinander -->
+                        <StackPanel Spacing="8">
+
+                            <!-- Aktiv/Inaktiv Dropdown mit Label -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Anzeige" FontWeight="SemiBold" FontSize="12" />
+                                <ComboBox
+                                    x:Name="HoverWindowStateCombo"
+                                    HorizontalAlignment="Stretch"
+                                    SelectionChanged="HoverWindowStateCombo_SelectionChanged"
+                                    PlaceholderText="Wählen...">
+                                    <ComboBoxItem>Aktiv</ComboBoxItem>
+                                    <ComboBoxItem>Inaktiv</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- Verzögerung Dropdown mit Label -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Verzögert" FontWeight="SemiBold" FontSize="12" />
+                                <ComboBox
+                                    x:Name="HoverWindowDelayCombo"
+                                    HorizontalAlignment="Stretch"
+                                    SelectionChanged="HoverWindowDelayCombo_SelectionChanged"
+                                    PlaceholderText="Wählen...">
+                                    <ComboBoxItem>1 Sek.</ComboBoxItem>
+                                    <ComboBoxItem>2 Sek.</ComboBoxItem>
+                                    <ComboBoxItem>3 Sek.</ComboBoxItem>
+                                    <ComboBoxItem>4 Sek.</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
