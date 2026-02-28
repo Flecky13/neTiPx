@@ -1001,7 +1001,7 @@ namespace neTiPx.ViewModels
 
         private async Task UpdateStatusAsync()
         {
-            if (SelectedProfile == null || !IsManual)
+            if (SelectedProfile == null)
             {
                 PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
@@ -1009,20 +1009,38 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            // Check Gateway
-            await CheckHostStatusAsync(
-                SelectedProfile.Gateway,
-                (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+            var gateway = NormalizeHostAddress(SelectedProfile.Gateway);
+            var dns1 = NormalizeHostAddress(SelectedProfile.Dns1);
+            var dns2 = NormalizeHostAddress(SelectedProfile.Dns2);
 
-            // Check DNS1
-            await CheckHostStatusAsync(
-                SelectedProfile.Dns1,
-                (status, ping, kind) => PostDns1Status(status, ping, kind));
+            await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+            await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
+            await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+        }
 
-            // Check DNS2
-            await CheckHostStatusAsync(
-                SelectedProfile.Dns2,
-                (status, ping, kind) => PostDns2Status(status, ping, kind));
+        private static string NormalizeHostAddress(string? address)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                return string.Empty;
+            }
+
+            var candidate = address.Trim();
+
+            if (candidate.Contains(','))
+            {
+                candidate = candidate.Split(',')[0].Trim();
+            }
+            else if (candidate.Contains(';'))
+            {
+                candidate = candidate.Split(';')[0].Trim();
+            }
+            else if (candidate.Contains(' '))
+            {
+                candidate = candidate.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+            }
+
+            return candidate;
         }
 
         private static async Task CheckHostStatusAsync(string address, Action<string, string, GatewayStatusKind> callback)
@@ -1050,9 +1068,13 @@ namespace neTiPx.ViewModels
                     callback("Nicht erreichbar", "Ping: timeout", GatewayStatusKind.Bad);
                 }
             }
+            catch (PingException)
+            {
+                callback("Nicht erreichbar", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
+            }
             catch
             {
-                callback("Fehler", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
+                callback("Fehler", "Ping: Fehler", GatewayStatusKind.Bad);
             }
         }
 

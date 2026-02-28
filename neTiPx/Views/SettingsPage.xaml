@@ -119,11 +119,53 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Mitte Links: Platzhalter -->
+                <!-- Mitte Links: Verbindungsstatus -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="0">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" />
+
+                        <!-- Drei Zahlenfelder für Ping-Schwellenwerte -->
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <!-- Schnell -->
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Schnell" FontWeight="SemiBold" FontSize="12" />
+                                <TextBox
+                                    x:Name="PingThresholdFastTextBox"
+                                    Text="20"
+                                    InputScope="Number"
+                                    MaxLength="3"
+                                    HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <!-- Normal -->
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Normal" FontWeight="SemiBold" FontSize="12" />
+                                <TextBox
+                                    x:Name="PingThresholdNormalTextBox"
+                                    Text="50"
+                                    InputScope="Number"
+                                    MaxLength="3"
+                                    HorizontalAlignment="Stretch" />
+                            </StackPanel>
+
+                            <!-- Langsam -->
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="Langsam" FontWeight="SemiBold" FontSize="12" />
+                                <TextBox
+                                    x:Name="PingThresholdSlowTextBox"
+                                    Text="100"
+                                    InputScope="Number"
+                                    MaxLength="3"
+                                    HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Drei Checkboxen für Gateway/DNS -->
+                        <StackPanel Spacing="6">
+                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" />
+                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" />
+                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
