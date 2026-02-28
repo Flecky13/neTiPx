@@ -33,25 +33,27 @@
 
             <!-- Dropdown Menüs nebeneinander -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                <!-- Primaerer Adapter Dropdown -->
+                <!-- Primaerer Adapter Text -->
                 <Border Style="{StaticResource CardBorder}" Grid.Column="0">
                     <StackPanel Spacing="12">
                         <TextBlock Text="NIC 1 - Primaerer Adapter" Style="{StaticResource SectionTitle}" />
-                        <ComboBox
-                            ItemsSource="{Binding AdapterList}"
-                            SelectedItem="{Binding SelectedAdapterPrimary, Mode=TwoWay}"
-                            PlaceholderText="Adapter waehlen..." />
+                        <TextBlock
+                            Text="{Binding SelectedAdapterPrimary}"
+                            FontSize="14"
+                            Foreground="{ThemeResource AppTextColor}"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
-                <!-- Sekundaerer Adapter Dropdown -->
+                <!-- Sekundaerer Adapter Text -->
                 <Border Style="{StaticResource CardBorder}" Grid.Column="1">
                     <StackPanel Spacing="12">
                         <TextBlock Text="NIC 2 - Sekundaerer Adapter" Style="{StaticResource SectionTitle}" />
-                        <ComboBox
-                            ItemsSource="{Binding AdapterList}"
-                            SelectedItem="{Binding SelectedAdapterSecondary, Mode=TwoWay}"
-                            PlaceholderText="Adapter waehlen..." />
+                        <TextBlock
+                            Text="{Binding SelectedAdapterSecondary}"
+                            FontSize="14"
+                            Foreground="{ThemeResource AppTextColor}"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
             </Grid>

@@ -14,7 +14,6 @@ namespace neTiPx.WinUI.ViewModels
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
         private string? _selectedAdapterPrimary;
         private string? _selectedAdapterSecondary;
-        private bool _isLoading;
 
         // Primary Adapter Properties
         private string? _primaryAdapterName;
@@ -34,8 +33,6 @@ namespace neTiPx.WinUI.ViewModels
 
         public AdapterViewModel()
         {
-            AdapterList = new ObservableCollection<string>();
-
             // Initialize collections for Primary Adapter
             PrimaryAdapterIpV4List = new ObservableCollection<string>();
             PrimaryAdapterDns4List = new ObservableCollection<string>();
@@ -48,11 +45,8 @@ namespace neTiPx.WinUI.ViewModels
             SecondaryAdapterIpV6List = new ObservableCollection<string>();
             SecondaryAdapterDns6List = new ObservableCollection<string>();
 
-            LoadAdapters();
             LoadSelectionFromConfig();
         }
-
-        public ObservableCollection<string> AdapterList { get; }
 
         // Primary Adapter Collections
         public ObservableCollection<string> PrimaryAdapterIpV4List { get; }
@@ -69,11 +63,10 @@ namespace neTiPx.WinUI.ViewModels
         public string? SelectedAdapterPrimary
         {
             get => _selectedAdapterPrimary;
-            set
+            private set
             {
                 if (SetProperty(ref _selectedAdapterPrimary, value))
                 {
-                    SaveSelectionToConfig();
                     UpdatePrimaryAdapterInfo();
                     OnPropertyChanged(nameof(IsPrimaryAdapterSelected));
                 }
@@ -83,11 +76,10 @@ namespace neTiPx.WinUI.ViewModels
         public string? SelectedAdapterSecondary
         {
             get => _selectedAdapterSecondary;
-            set
+            private set
             {
                 if (SetProperty(ref _selectedAdapterSecondary, value))
                 {
-                    SaveSelectionToConfig();
                     UpdateSecondaryAdapterInfo();
                     OnPropertyChanged(nameof(IsSecondaryAdapterSelected));
                 }
@@ -168,57 +160,11 @@ namespace neTiPx.WinUI.ViewModels
             set => SetProperty(ref _secondaryAdapterGateway6, value);
         }
 
-        private void LoadAdapters()
-        {
-            var adapters = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .Where(n => n.GetPhysicalAddress() != null && n.GetPhysicalAddress().GetAddressBytes().Length > 0)
-                .Select(n => n.Name)
-                .Distinct()
-                .OrderBy(n => n)
-                .ToList();
-
-            AdapterList.Clear();
-            foreach (var adapter in adapters)
-            {
-                AdapterList.Add(adapter);
-            }
-        }
-
         private void LoadSelectionFromConfig()
         {
-            _isLoading = true;
-            try
-            {
-                var settings = _adapterStore.ReadAdapters();
-                if (!string.IsNullOrWhiteSpace(settings.PrimaryAdapter))
-                {
-                    SelectedAdapterPrimary = settings.PrimaryAdapter;
-                }
-                if (!string.IsNullOrWhiteSpace(settings.SecondaryAdapter))
-                {
-                    SelectedAdapterSecondary = settings.SecondaryAdapter;
-                }
-            }
-            finally
-            {
-                _isLoading = false;
-            }
-        }
-
-        private void SaveSelectionToConfig()
-        {
-            if (_isLoading)
-            {
-                return;
-            }
-
-            var settings = new AdapterStore.AdapterSettings
-            {
-                PrimaryAdapter = SelectedAdapterPrimary ?? string.Empty,
-                SecondaryAdapter = SelectedAdapterSecondary ?? string.Empty
-            };
-            _adapterStore.WriteAdapters(settings);
+            var adapterSettings = _adapterStore.ReadAdapters();
+            SelectedAdapterPrimary = adapterSettings.PrimaryAdapter;
+            SelectedAdapterSecondary = adapterSettings.SecondaryAdapter;
         }
 
         private void UpdatePrimaryAdapterInfo()

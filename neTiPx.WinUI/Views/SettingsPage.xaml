@@ -52,11 +52,31 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Oben Mitte: Platzhalter -->
+                <!-- Oben Mitte: Adapter Auswahl -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="1">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <!-- Primärer Adapter -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Primärer Adapter (NIC 1):" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox
+                                x:Name="PrimaryAdapterCombo"
+                                HorizontalAlignment="Stretch"
+                                PlaceholderText="Adapter wählen..."
+                                SelectionChanged="PrimaryAdapterCombo_SelectionChanged" />
+                        </StackPanel>
+
+                        <!-- Sekundärer Adapter -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Sekundärer Adapter (NIC 2):" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox
+                                x:Name="SecondaryAdapterCombo"
+                                HorizontalAlignment="Stretch"
+                                PlaceholderText="Adapter wählen..."
+                                SelectionChanged="SecondaryAdapterCombo_SelectionChanged" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
