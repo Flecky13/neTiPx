@@ -11,11 +11,18 @@ namespace neTiPx.WinUI.Models
         private string _gateway = string.Empty;
         private string _dns1 = string.Empty;
         private string _dns2 = string.Empty;
+        private bool _isDirty;
 
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, value);
+            set
+            {
+                if (SetProperty(ref _name, value))
+                {
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
         }
 
         public string AdapterName
@@ -47,6 +54,20 @@ namespace neTiPx.WinUI.Models
             get => _dns2;
             set => SetProperty(ref _dns2, value);
         }
+
+        public bool IsDirty
+        {
+            get => _isDirty;
+            set
+            {
+                if (SetProperty(ref _isDirty, value))
+                {
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
+        }
+
+        public string DisplayName => IsDirty ? $"{Name} *" : Name;
 
         // Legacy property for backward compatibility
         public string Dns

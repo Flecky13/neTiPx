@@ -41,8 +41,10 @@
 
                         <!-- Profil-Liste -->
                         <ListView
+                            x:Name="ProfileListView"
                             ItemsSource="{Binding IpProfiles}"
-                            SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
+                            SelectedItem="{Binding SelectedProfile, Mode=OneWay}"
+                            SelectionChanged="ProfileListView_SelectionChanged"
                             SelectionMode="Single"
                             MaxHeight="400">
                             <ListView.ItemTemplate>
@@ -50,7 +52,7 @@
                                     <Grid ColumnDefinitions="*,Auto" Padding="4">
                                         <TextBlock
                                             Grid.Column="0"
-                                            Text="{x:Bind Name, Mode=OneWay}"
+                                            Text="{Binding DisplayName}"
                                             VerticalAlignment="Center" />
                                         <Button
                                             Grid.Column="1"

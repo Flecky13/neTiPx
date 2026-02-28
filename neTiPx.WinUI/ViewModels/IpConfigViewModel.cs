@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -72,14 +74,14 @@ namespace neTiPx.WinUI.ViewModels
             {
                 if (_selectedProfile != null)
                 {
-                    _selectedProfile.PropertyChanged -= SelectedProfile_PropertyChanged;
+                    DetachProfileHandlers(_selectedProfile);
                 }
 
                 if (SetProperty(ref _selectedProfile, value))
                 {
                     if (_selectedProfile != null)
                     {
-                        _selectedProfile.PropertyChanged += SelectedProfile_PropertyChanged;
+                        AttachProfileHandlers(_selectedProfile);
                         LoadProfileSettingsOnProfileChangeAsync().ConfigureAwait(false);
                     }
 
@@ -90,8 +92,36 @@ namespace neTiPx.WinUI.ViewModels
             }
         }
 
-        private void SelectedProfile_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void AttachProfileHandlers(IpProfile profile)
         {
+            profile.PropertyChanged += SelectedProfile_PropertyChanged;
+            profile.IpAddresses.CollectionChanged += SelectedProfile_IpAddresses_CollectionChanged;
+
+            foreach (var entry in profile.IpAddresses)
+            {
+                entry.PropertyChanged += IpAddressEntry_PropertyChanged;
+            }
+        }
+
+        private void DetachProfileHandlers(IpProfile profile)
+        {
+            profile.PropertyChanged -= SelectedProfile_PropertyChanged;
+            profile.IpAddresses.CollectionChanged -= SelectedProfile_IpAddresses_CollectionChanged;
+
+            foreach (var entry in profile.IpAddresses)
+            {
+                entry.PropertyChanged -= IpAddressEntry_PropertyChanged;
+            }
+        }
+
+        private void SelectedProfile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // Skip IsDirty and DisplayName changes to prevent feedback loops
+            if (e.PropertyName == nameof(IpProfile.IsDirty) || e.PropertyName == nameof(IpProfile.DisplayName))
+            {
+                return;
+            }
+
             if (e.PropertyName == nameof(IpProfile.Mode))
             {
                 OnPropertyChanged(nameof(IsManual));
@@ -105,6 +135,75 @@ namespace neTiPx.WinUI.ViewModels
             else
             {
                 ValidateProfile();
+            }
+
+            MarkSelectedProfileDirty();
+        }
+
+        private void SelectedProfile_IpAddresses_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems.OfType<IpAddressEntry>())
+                {
+                    item.PropertyChanged -= IpAddressEntry_PropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (var item in e.NewItems.OfType<IpAddressEntry>())
+                {
+                    item.PropertyChanged += IpAddressEntry_PropertyChanged;
+                }
+            }
+
+            ValidateProfile();
+            MarkSelectedProfileDirty();
+        }
+
+        private void IpAddressEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            ValidateProfile();
+            MarkSelectedProfileDirty();
+        }
+
+        private void MarkSelectedProfileDirty()
+        {
+            if (_isLoadingProfile || SelectedProfile == null)
+            {
+                return;
+            }
+
+            SelectedProfile.IsDirty = true;
+        }
+
+        public bool SaveCurrentProfileForProfileSwitch()
+        {
+            if (SelectedProfile == null)
+            {
+                return true;
+            }
+
+            ValidateProfile();
+            if (HasValidationErrors)
+            {
+                return false;
+            }
+
+            var values = _configStore.ReadAll();
+            UpdateProfile(values, SelectedProfile);
+            _configStore.WriteAll(values);
+            SelectedProfile.IsDirty = false;
+            ValidationMessage = "Profil gespeichert";
+            return true;
+        }
+
+        public void DiscardCurrentProfileChangesMarker()
+        {
+            if (SelectedProfile != null)
+            {
+                SelectedProfile.IsDirty = false;
             }
         }
 
@@ -133,6 +232,7 @@ namespace neTiPx.WinUI.ViewModels
                     var nicLoaded = LoadProfileFromNic(SelectedProfile);
                     ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
                     HasValidationErrors = false;
+                    SelectedProfile.IsDirty = false;
                     return Task.CompletedTask;
                 }
 
@@ -158,6 +258,7 @@ namespace neTiPx.WinUI.ViewModels
 
                 ValidationMessage = "Configuration gelesen";
                 HasValidationErrors = false;
+                SelectedProfile.IsDirty = false;
                 return Task.CompletedTask;
             }
             finally
@@ -439,6 +540,7 @@ namespace neTiPx.WinUI.ViewModels
                 // Create default profile
                 var defaultProfile = new IpProfile { Name = "IP #1" };
                 defaultProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+                defaultProfile.IsDirty = false;
                 IpProfiles.Add(defaultProfile);
             }
             else
@@ -450,6 +552,7 @@ namespace neTiPx.WinUI.ViewModels
                     {
                         profile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
                     }
+                    profile.IsDirty = false;
                     IpProfiles.Add(profile);
                 }
             }
@@ -475,6 +578,7 @@ namespace neTiPx.WinUI.ViewModels
                 Mode = "DHCP"
             };
             newProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+            newProfile.IsDirty = false;
 
             IpProfiles.Add(newProfile);
             SelectedProfile = newProfile;
@@ -550,6 +654,7 @@ namespace neTiPx.WinUI.ViewModels
             _configStore.WriteAll(values);
 
             ValidationMessage = "Profil gespeichert";
+            SelectedProfile.IsDirty = false;
         }
 
         private bool CanApplyProfile()
@@ -584,6 +689,7 @@ namespace neTiPx.WinUI.ViewModels
             ReloadProfileFromNicAsync().ConfigureAwait(false);
             SaveProfile();
             ValidationMessage = "Profil angewendet";
+            SelectedProfile.IsDirty = false;
         }
 
         private static List<string> GetProfileNames(Dictionary<string, string> values)
