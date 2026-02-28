@@ -84,7 +84,6 @@ namespace neTiPx.WinUI.ViewModels
 
                     OnPropertyChanged(nameof(IsProfileSelected));
                     OnPropertyChanged(nameof(IsManual));
-                    ValidateProfile();
                     UpdateStatusAsync().ConfigureAwait(false);
                 }
             }
@@ -95,9 +94,19 @@ namespace neTiPx.WinUI.ViewModels
             if (e.PropertyName == nameof(IpProfile.Mode))
             {
                 OnPropertyChanged(nameof(IsManual));
+                // Reload settings when mode changes (DHCP reads from NIC, Manual from Config)
+                ReloadSelectedProfileSettingsAsync().ConfigureAwait(false);
             }
-
-            ValidateProfile();
+            else if (e.PropertyName == nameof(IpProfile.AdapterName))
+            {
+                // Reload settings when adapter changes
+                ReloadSelectedProfileSettingsAsync().ConfigureAwait(false);
+                // Don't call ValidateProfile here, ReloadSelectedProfileSettingsAsync already sets the status message
+            }
+            else
+            {
+                ValidateProfile();
+            }
         }
 
         private Task ReloadSelectedProfileSettingsAsync()
@@ -109,7 +118,9 @@ namespace neTiPx.WinUI.ViewModels
 
             if (string.Equals(SelectedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
             {
-                LoadProfileFromNic(SelectedProfile);
+                var loaded = LoadProfileFromNic(SelectedProfile);
+                ValidationMessage = loaded ? "Settings gelesen" : "Keine Settings vorhanden";
+                HasValidationErrors = false;
                 return Task.CompletedTask;
             }
 
@@ -119,10 +130,14 @@ namespace neTiPx.WinUI.ViewModels
             if (hasConfigSettings)
             {
                 LoadProfileFromConfig(values, SelectedProfile);
+                ValidationMessage = "Configuration gelesen";
+                HasValidationErrors = false;
                 return Task.CompletedTask;
             }
 
-            LoadProfileFromNic(SelectedProfile);
+            var nicLoaded = LoadProfileFromNic(SelectedProfile);
+            ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
+            HasValidationErrors = false;
             return Task.CompletedTask;
         }
 
@@ -150,18 +165,18 @@ namespace neTiPx.WinUI.ViewModels
             }
         }
 
-        private static void LoadProfileFromNic(IpProfile targetProfile)
+        private static bool LoadProfileFromNic(IpProfile targetProfile)
         {
             if (string.IsNullOrWhiteSpace(targetProfile.AdapterName))
             {
-                return;
+                return false;
             }
 
             var networkInfoService = new NetworkInfoService();
             var config = networkInfoService.GetIpv4Config(targetProfile.AdapterName);
             if (config == null)
             {
-                return;
+                return false;
             }
 
             targetProfile.Gateway = config.Gateway ?? string.Empty;
@@ -182,6 +197,8 @@ namespace neTiPx.WinUI.ViewModels
             {
                 targetProfile.IpAddresses.Add(new IpAddressEntry());
             }
+
+            return true;
         }
 
         private static bool HasPersistedProfileSettings(Dictionary<string, string> values, string profileName)
@@ -474,8 +491,8 @@ namespace neTiPx.WinUI.ViewModels
             }
 
             SaveProfile();
+            ReloadSelectedProfileSettingsAsync();
             ValidationMessage = "Profil angewendet";
-            ReloadSelectedProfileSettingsAsync().ConfigureAwait(false);
         }
 
         private static List<string> GetProfileNames(Dictionary<string, string> values)
