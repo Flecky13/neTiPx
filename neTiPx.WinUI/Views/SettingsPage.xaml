@@ -44,10 +44,34 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="Theme" Style="{StaticResource SectionTitle}" />
                         <TextBlock Text="Wählen Sie das Erscheinungsbild" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-                        <ComboBox
-                            x:Name="ThemeCombo"
-                            HorizontalAlignment="Stretch"
-                            SelectionChanged="ThemeCombo_SelectionChanged" />
+
+                        <!-- Grid für Theme und Farbauswahl nebeneinander -->
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="ThemeColumn" Width="*" />
+                                <ColumnDefinition x:Name="ColorColumn" Width="0" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Theme Auswahl -->
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Themen" FontSize="12" Opacity="0.7" />
+                                <ComboBox
+                                    x:Name="ThemeCombo"
+                                    HorizontalAlignment="Stretch"
+                                    DisplayMemberPath="DisplayName"
+                                    SelectionChanged="ThemeCombo_SelectionChanged" />
+                            </StackPanel>
+
+                            <!-- Custom Farbschema Auswahl -->
+                            <StackPanel x:Name="CustomColorPanel" Grid.Column="1" Spacing="4" Visibility="Collapsed">
+                                <TextBlock Text="Farbschema" FontSize="12" Opacity="0.7" />
+                                <ComboBox
+                                    x:Name="ColorSchemeCombo"
+                                    HorizontalAlignment="Stretch"
+                                    DisplayMemberPath="DisplayName"
+                                    SelectionChanged="ColorSchemeCombo_SelectionChanged" />
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
 

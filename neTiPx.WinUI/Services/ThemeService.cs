@@ -6,7 +6,8 @@ namespace neTiPx.WinUI.Services
     {
         System,
         Light,
-        Dark
+        Dark,
+        Custom
     }
 
     public sealed class ThemeOptionItem
@@ -47,6 +48,7 @@ namespace neTiPx.WinUI.Services
             {
                 ThemeOption.Light => ElementTheme.Light,
                 ThemeOption.Dark => ElementTheme.Dark,
+                ThemeOption.Custom => ElementTheme.Light, // Custom nutzt erstmal Light als Basis
                 _ => ElementTheme.Default
             };
         }
