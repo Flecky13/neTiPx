@@ -19,6 +19,7 @@ namespace neTiPx.WinUI.ViewModels
     public sealed class IpConfigViewModel : ObservableObject
     {
         private readonly ConfigStore _configStore = new ConfigStore();
+        private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
         private readonly TimersTimer _pingTimer;
         private readonly SynchronizationContext? _uiContext;
@@ -191,9 +192,7 @@ namespace neTiPx.WinUI.ViewModels
                 return false;
             }
 
-            var values = _configStore.ReadAll();
-            UpdateProfile(values, SelectedProfile);
-            _configStore.WriteAll(values);
+            _ipProfileStore.SaveProfile(SelectedProfile);
             SelectedProfile.IsDirty = false;
             ValidationMessage = "Profil gespeichert";
             return true;
@@ -218,16 +217,18 @@ namespace neTiPx.WinUI.ViewModels
             {
                 _isLoadingProfile = true;
 
-                // Always load profile from INI first
-                var values = _configStore.ReadAll();
-                var iniProfile = ReadProfile(values, SelectedProfile.Name);
+                // Always load profile from XML first
+                if (!_ipProfileStore.TryGetProfile(SelectedProfile.Name, out var storedProfile))
+                {
+                    return Task.CompletedTask;
+                }
 
-                // Copy mode and basic settings from INI
-                SelectedProfile.Mode = iniProfile.Mode;
-                SelectedProfile.AdapterName = iniProfile.AdapterName;
+                // Copy mode and basic settings from XML
+                SelectedProfile.Mode = storedProfile.Mode;
+                SelectedProfile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
 
                 // If mode is DHCP, load remaining settings from NIC
-                if (string.Equals(iniProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(storedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
                 {
                     var nicLoaded = LoadProfileFromNic(SelectedProfile);
                     ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
@@ -236,13 +237,13 @@ namespace neTiPx.WinUI.ViewModels
                     return Task.CompletedTask;
                 }
 
-                // If mode is Manual, load remaining settings from INI
-                SelectedProfile.Gateway = iniProfile.Gateway;
-                SelectedProfile.Dns1 = iniProfile.Dns1;
-                SelectedProfile.Dns2 = iniProfile.Dns2;
+                // If mode is Manual, load remaining settings from XML
+                SelectedProfile.Gateway = storedProfile.Gateway;
+                SelectedProfile.Dns1 = storedProfile.Dns1;
+                SelectedProfile.Dns2 = storedProfile.Dns2;
 
                 SelectedProfile.IpAddresses.Clear();
-                foreach (var entry in iniProfile.IpAddresses)
+                foreach (var entry in storedProfile.IpAddresses)
                 {
                     SelectedProfile.IpAddresses.Add(new IpAddressEntry
                     {
@@ -309,12 +310,11 @@ namespace neTiPx.WinUI.ViewModels
                     return Task.CompletedTask;
                 }
 
-                var values = _configStore.ReadAll();
-                var hasConfigSettings = HasPersistedProfileSettings(values, SelectedProfile.Name);
+                var hasConfigSettings = _ipProfileStore.HasPersistedProfileSettings(SelectedProfile.Name);
 
-                if (hasConfigSettings)
+                if (hasConfigSettings && _ipProfileStore.TryGetProfile(SelectedProfile.Name, out var storedProfile))
                 {
-                    LoadProfileFromConfig(values, SelectedProfile);
+                    LoadProfileFromStore(storedProfile, SelectedProfile);
                     ValidationMessage = "Configuration gelesen";
                     HasValidationErrors = false;
                     return Task.CompletedTask;
@@ -331,17 +331,15 @@ namespace neTiPx.WinUI.ViewModels
             }
         }
 
-        private void LoadProfileFromConfig(Dictionary<string, string> values, IpProfile targetProfile)
+        private static void LoadProfileFromStore(IpProfile sourceProfile, IpProfile targetProfile)
         {
-            var configProfile = ReadProfile(values, targetProfile.Name);
-
-            targetProfile.Mode = configProfile.Mode;
-            targetProfile.Gateway = configProfile.Gateway;
-            targetProfile.Dns1 = configProfile.Dns1;
-            targetProfile.Dns2 = configProfile.Dns2;
+            targetProfile.Mode = sourceProfile.Mode;
+            targetProfile.Gateway = sourceProfile.Gateway;
+            targetProfile.Dns1 = sourceProfile.Dns1;
+            targetProfile.Dns2 = sourceProfile.Dns2;
 
             targetProfile.IpAddresses.Clear();
-            foreach (var entry in configProfile.IpAddresses)
+            foreach (var entry in sourceProfile.IpAddresses)
             {
                 targetProfile.IpAddresses.Add(new IpAddressEntry
                 {
@@ -530,12 +528,11 @@ namespace neTiPx.WinUI.ViewModels
 
         private void LoadProfilesFromConfig()
         {
-            var values = _configStore.ReadAll();
-            var profileNames = GetProfileNames(values);
+            var profiles = _ipProfileStore.ReadAllProfiles();
 
             IpProfiles.Clear();
 
-            if (profileNames.Count == 0)
+            if (profiles.Count == 0)
             {
                 // Create default profile
                 var defaultProfile = new IpProfile { Name = "IP #1" };
@@ -545,9 +542,9 @@ namespace neTiPx.WinUI.ViewModels
             }
             else
             {
-                foreach (var name in profileNames)
+                foreach (var profile in profiles)
                 {
-                    var profile = ReadProfile(values, name);
+                    profile.AdapterName = NormalizeAdapterName(profile.AdapterName);
                     if (profile.IpAddresses.Count == 0)
                     {
                         profile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
@@ -575,7 +572,8 @@ namespace neTiPx.WinUI.ViewModels
             var newProfile = new IpProfile
             {
                 Name = newName,
-                Mode = "DHCP"
+                Mode = "DHCP",
+                AdapterName = null
             };
             newProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
             newProfile.IsDirty = false;
@@ -601,10 +599,8 @@ namespace neTiPx.WinUI.ViewModels
             }
             SelectedProfile = IpProfiles[index];
 
-            // Remove from config
-            var values = _configStore.ReadAll();
-            RemoveProfileFromConfig(values, profile.Name);
-            _configStore.WriteAll(values);
+            // Remove from profile storage
+            _ipProfileStore.RemoveProfile(profile.Name);
         }
 
         private void AddIpAddress()
@@ -649,9 +645,7 @@ namespace neTiPx.WinUI.ViewModels
                 return;
             }
 
-            var values = _configStore.ReadAll();
-            UpdateProfile(values, SelectedProfile);
-            _configStore.WriteAll(values);
+            _ipProfileStore.SaveProfile(SelectedProfile);
 
             ValidationMessage = "Profil gespeichert";
             SelectedProfile.IsDirty = false;
@@ -816,7 +810,7 @@ namespace neTiPx.WinUI.ViewModels
             return "DHCP";
         }
 
-        private string NormalizeAdapterName(string adapter)
+        private string? NormalizeAdapterName(string? adapter)
         {
             if (string.IsNullOrWhiteSpace(adapter))
             {

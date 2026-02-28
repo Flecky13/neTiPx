@@ -6,7 +6,7 @@ namespace neTiPx.WinUI.Models
     public sealed class IpProfile : ObservableObject
     {
         private string _name = "IP #1";
-        private string _adapterName = string.Empty;
+        private string? _adapterName = string.Empty;
         private string _mode = "DHCP";
         private string _gateway = string.Empty;
         private string _dns1 = string.Empty;
@@ -25,7 +25,7 @@ namespace neTiPx.WinUI.Models
             }
         }
 
-        public string AdapterName
+        public string? AdapterName
         {
             get => _adapterName;
             set => SetProperty(ref _adapterName, value);
