@@ -6,6 +6,7 @@ namespace neTiPx.WinUI.Services
     {
         private const string SectionName = "AppSettings";
         private const string ThemeKey = "Theme";
+        private const string ColorSchemeKey = "ColorScheme";
 
         public ThemeOption GetThemeOption()
         {
@@ -31,6 +32,18 @@ namespace neTiPx.WinUI.Services
             };
 
             IniFile.Write(SectionName, ThemeKey, value, path);
+        }
+
+        public string GetColorSchemeName()
+        {
+            var path = ConfigFileHelper.GetConfigIniPath();
+            return IniFile.Read(SectionName, ColorSchemeKey, "Blau", path);
+        }
+
+        public void SetColorSchemeName(string colorSchemeName)
+        {
+            var path = ConfigFileHelper.GetConfigIniPath();
+            IniFile.Write(SectionName, ColorSchemeKey, colorSchemeName, path);
         }
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -69,6 +71,20 @@ namespace neTiPx.WinUI
             // Set initial and minimum size
             _appWindow.Resize(new Windows.Graphics.SizeInt32(MIN_WIDTH, MIN_HEIGHT));
             ThemeService.ApplyTheme(rootFrame);
+
+            var themeSettingsService = new ThemeSettingsService();
+            var settingsService = new SettingsService();
+            var colorThemeApplier = new ColorThemeApplier();
+
+            var savedColorName = settingsService.GetColorSchemeName();
+            var themes = themeSettingsService.LoadThemes();
+            var selectedTheme = themes.FirstOrDefault(t => string.Equals(t.Name, savedColorName, StringComparison.OrdinalIgnoreCase))
+                               ?? themes.FirstOrDefault(t => string.Equals(t.Name, "Blau", StringComparison.OrdinalIgnoreCase));
+
+            if (selectedTheme != null)
+            {
+                colorThemeApplier.Apply(selectedTheme);
+            }
 
             _ = rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
             MainWindow.Activate();

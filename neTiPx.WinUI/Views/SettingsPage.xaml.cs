@@ -1,88 +1,71 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.WinUI.Models;
 using neTiPx.WinUI.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace neTiPx.WinUI.Views
 {
     public sealed class ColorSchemeItem
     {
-        public ColorSchemeItem(string displayName, string value)
+        public ColorSchemeItem(string displayName, ColorTheme theme)
         {
             DisplayName = displayName;
-            Value = value;
+            Theme = theme;
         }
 
         public string DisplayName { get; }
-        public string Value { get; }
+        public ColorTheme Theme { get; }
     }
 
     public partial class SettingsPage : Page
     {
+        private readonly ThemeSettingsService _themeService;
+        private readonly SettingsService _settingsService;
+        private readonly ColorThemeApplier _colorThemeApplier;
+        private List<ColorTheme> _colorThemes = new();
+
         public SettingsPage()
         {
             InitializeComponent();
             Loaded += SettingsPage_Loaded;
+            _themeService = new ThemeSettingsService();
+            _settingsService = new SettingsService();
+            _colorThemeApplier = new ColorThemeApplier();
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
-            // Theme Options initialisieren
-            ThemeCombo.ItemsSource = new[]
+            // Color Themes laden
+            _colorThemes = _themeService.LoadThemes();
+            var colorSchemeItems = new List<ColorSchemeItem>();
+            foreach (var theme in _colorThemes)
             {
-                new ThemeOptionItem("System", ThemeOption.System),
-                new ThemeOptionItem("Hell", ThemeOption.Light),
-                new ThemeOptionItem("Dunkel", ThemeOption.Dark),
-                new ThemeOptionItem("Custom", ThemeOption.Custom)
-            };
-
-            // Color Scheme Options initialisieren
-            ColorSchemeCombo.ItemsSource = new[]
-            {
-                new ColorSchemeItem("Rot", "Red"),
-                new ColorSchemeItem("Orange", "Orange"),
-                new ColorSchemeItem("Gelb", "Yellow"),
-                new ColorSchemeItem("Blau", "Blue"),
-                new ColorSchemeItem("Grün", "Green"),
-                new ColorSchemeItem("Braun", "Brown"),
-                new ColorSchemeItem("Grau", "Gray")
-            };
-
-            // Aktuelles Theme auswählen
-            var currentTheme = App.ThemeService.CurrentTheme;
-            for (int i = 0; i < ThemeCombo.Items.Count; i++)
-            {
-                if (ThemeCombo.Items[i] is ThemeOptionItem item && item.Value == currentTheme)
-                {
-                    ThemeCombo.SelectedIndex = i;
-                    break;
-                }
+                colorSchemeItems.Add(new ColorSchemeItem(theme.Name, theme));
             }
-        }
+            ColorSchemeCombo.ItemsSource = colorSchemeItems;
 
-        private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ThemeCombo.SelectedItem is ThemeOptionItem item)
+            var selectedColorName = _settingsService.GetColorSchemeName();
+            var selectedColor = colorSchemeItems.FirstOrDefault(item =>
+                string.Equals(item.DisplayName, selectedColorName, StringComparison.OrdinalIgnoreCase));
+
+            if (selectedColor != null)
             {
-                bool isCustom = item.Value == ThemeOption.Custom;
-                
-                // Custom Color Panel ein-/ausblenden und Spaltenbreiten anpassen
-                if (isCustom)
-                {
-                    CustomColorPanel.Visibility = Visibility.Visible;
-                    ThemeColumn.Width = new GridLength(1, GridUnitType.Star);
-                    ColorColumn.Width = new GridLength(1, GridUnitType.Star);
-                }
-                else
-                {
-                    CustomColorPanel.Visibility = Visibility.Collapsed;
-                    ThemeColumn.Width = new GridLength(1, GridUnitType.Star);
-                    ColorColumn.Width = new GridLength(0);
-                }
+                ColorSchemeCombo.SelectedItem = selectedColor;
+                _colorThemeApplier.Apply(selectedColor.Theme);
+            }
+            else
+            {
+                var defaultBlue = colorSchemeItems.FirstOrDefault(item =>
+                    string.Equals(item.DisplayName, "Blau", StringComparison.OrdinalIgnoreCase));
 
-                // Nur für nicht-Custom Themes das Theme setzen
-                if (!isCustom)
+                if (defaultBlue != null)
                 {
-                    App.ThemeService.SetThemeOption(item.Value);
+                    ColorSchemeCombo.SelectedItem = defaultBlue;
+                    _colorThemeApplier.Apply(defaultBlue.Theme);
+                    _settingsService.SetColorSchemeName(defaultBlue.DisplayName);
                 }
             }
         }
@@ -91,8 +74,8 @@ namespace neTiPx.WinUI.Views
         {
             if (ColorSchemeCombo.SelectedItem is ColorSchemeItem item)
             {
-                // TODO: Hier später die Custom Theme Farben anwenden
-                // Für jetzt nur ein Platzhalter
+                _colorThemeApplier.Apply(item.Theme);
+                _settingsService.SetColorSchemeName(item.DisplayName);
             }
         }
     }
