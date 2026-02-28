@@ -55,19 +55,12 @@
                         <FontIcon Glyph="&#xE946;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Einstellungen" Tag="Settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
-
-            <NavigationView.PaneFooter>
-                <StackPanel Spacing="8" Padding="12,8">
-                    <TextBlock Text="Theme" FontSize="12" Opacity="0.7" />
-                    <ComboBox
-                        x:Name="ThemeCombo"
-                        ItemsSource="{Binding ThemeOptions}"
-                        SelectedItem="{Binding SelectedThemeOption, Mode=TwoWay}"
-                        DisplayMemberPath="DisplayName"
-                        SelectionChanged="ThemeCombo_SelectionChanged" />
-                </StackPanel>
-            </NavigationView.PaneFooter>
 
             <NavigationView.Content>
                 <Frame x:Name="ContentFrame" />

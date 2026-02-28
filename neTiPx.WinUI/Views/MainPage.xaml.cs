@@ -46,14 +46,9 @@ namespace neTiPx.WinUI.Views
                 case "Info":
                     ContentFrame.Navigate(typeof(InfoPage));
                     break;
-            }
-        }
-
-        private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ThemeCombo.SelectedItem is Services.ThemeOptionItem item)
-            {
-                App.ThemeService.SetThemeOption(item.Value);
+                case "Settings":
+                    ContentFrame.Navigate(typeof(SettingsPage));
+                    break;
             }
         }
 
