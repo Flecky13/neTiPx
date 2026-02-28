@@ -91,5 +91,26 @@ namespace neTiPx.WinUI.Helpers
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Adapter.xml");
             }
         }
+
+        public static string GetUserSettingsXmlPath()
+        {
+            try
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var dir = Path.Combine(appData, "neTiPx");
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                var target = Path.Combine(dir, "User_Settings.xml");
+
+                return target;
+            }
+            catch
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "User_Settings.xml");
+            }
+        }
     }
 }

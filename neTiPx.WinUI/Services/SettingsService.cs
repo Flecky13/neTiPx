@@ -1,4 +1,5 @@
 using neTiPx.WinUI.Helpers;
+using neTiPx.WinUI.Models;
 
 namespace neTiPx.WinUI.Services
 {
@@ -7,6 +8,8 @@ namespace neTiPx.WinUI.Services
         private const string SectionName = "AppSettings";
         private const string ThemeKey = "Theme";
         private const string ColorSchemeKey = "ColorScheme";
+
+        private readonly UserSettingsStore _userSettingsStore = new UserSettingsStore();
 
         public ThemeOption GetThemeOption()
         {
@@ -34,16 +37,31 @@ namespace neTiPx.WinUI.Services
             IniFile.Write(SectionName, ThemeKey, value, path);
         }
 
+        public ColorTheme? GetColorTheme()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ColorTheme;
+        }
+
+        public void SetColorTheme(ColorTheme colorTheme)
+        {
+            var settings = new UserSettingsStore.UserSettings
+            {
+                ColorTheme = colorTheme
+            };
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
         public string GetColorSchemeName()
         {
-            var path = ConfigFileHelper.GetConfigIniPath();
-            return IniFile.Read(SectionName, ColorSchemeKey, "Blau", path);
+            var colorTheme = GetColorTheme();
+            return colorTheme?.Name ?? "Blau";
         }
 
         public void SetColorSchemeName(string colorSchemeName)
         {
-            var path = ConfigFileHelper.GetConfigIniPath();
-            IniFile.Write(SectionName, ColorSchemeKey, colorSchemeName, path);
+            // Diese Methode wird jetzt nicht mehr verwendet,
+            // aber für Rückwärtskompatibilität erhalten wir sie
         }
     }
 }

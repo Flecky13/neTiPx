@@ -47,9 +47,14 @@ namespace neTiPx.WinUI.Views
             }
             ColorSchemeCombo.ItemsSource = colorSchemeItems;
 
-            var selectedColorName = _settingsService.GetColorSchemeName();
-            var selectedColor = colorSchemeItems.FirstOrDefault(item =>
-                string.Equals(item.DisplayName, selectedColorName, StringComparison.OrdinalIgnoreCase));
+            var savedColorTheme = _settingsService.GetColorTheme();
+            ColorSchemeItem? selectedColor = null;
+
+            if (savedColorTheme != null)
+            {
+                selectedColor = colorSchemeItems.FirstOrDefault(item =>
+                    string.Equals(item.DisplayName, savedColorTheme.Name, StringComparison.OrdinalIgnoreCase));
+            }
 
             if (selectedColor != null)
             {
@@ -65,7 +70,7 @@ namespace neTiPx.WinUI.Views
                 {
                     ColorSchemeCombo.SelectedItem = defaultBlue;
                     _colorThemeApplier.Apply(defaultBlue.Theme);
-                    _settingsService.SetColorSchemeName(defaultBlue.DisplayName);
+                    _settingsService.SetColorTheme(defaultBlue.Theme);
                 }
             }
         }
@@ -75,7 +80,7 @@ namespace neTiPx.WinUI.Views
             if (ColorSchemeCombo.SelectedItem is ColorSchemeItem item)
             {
                 _colorThemeApplier.Apply(item.Theme);
-                _settingsService.SetColorSchemeName(item.DisplayName);
+                _settingsService.SetColorTheme(item.Theme);
             }
         }
     }
