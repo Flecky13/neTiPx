@@ -5,8 +5,8 @@
 !define Publisher "Pedro Tepe"
 !define InstallBase "$PROGRAMFILES"
 !define WorkDir "${__FILEDIR__}.."
-!define SourcePath "${WorkDir}\neTiPx.WinUI\bin\Release\net8.0-windows"
-!define exe_to_read "${SourcePath}\${AppName}.WinUI.exe"
+!define SourcePath "${WorkDir}\neTiPx\bin\Release\net8.0-windows"
+!define exe_to_read "${SourcePath}\${AppName}.exe"
 
 ;--------------------------------
 ; Dateiversion auslesen

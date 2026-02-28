@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Class="neTiPx.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:neTiPx"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="using:neTiPx.ViewModels"
+    mc:Ignorable="d"
+    Background="{ThemeResource AppBackgroundBrush}">
+    <Page.DataContext>
+        <viewModels:ShellViewModel />
+    </Page.DataContext>
+    <Grid Background="{ThemeResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="AppTitleBar" Height="40" Padding="12,6">
+            <TextBlock Text="neTiPx" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </Grid>
+
+        <NavigationView
+            x:Name="RootNavView"
+            Grid.Row="1"
+            PaneDisplayMode="Left"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            OpenPaneLength="320"
+            CompactPaneLength="48"
+            Background="{ThemeResource AppBackgroundBrush}"
+            SelectionChanged="RootNavView_SelectionChanged"
+            PaneOpening="RootNavView_PaneOpening"
+            PaneClosing="RootNavView_PaneClosing">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Adapter Infos" Tag="Adapters">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7C3;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="IP Konfiguration" Tag="IpConfig">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE839;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Tools" Tag="Tools">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B8;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Info" Tag="Info">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Einstellungen" Tag="Settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.Content>
+                <Frame x:Name="ContentFrame" />
+            </NavigationView.Content>
+        </NavigationView>
+    </Grid>
+</Page>

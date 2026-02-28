@@ -1,6 +1,6 @@
 # neTiPx
 
-**neTiPx** ist ein modernes WinUI 3 Desktop-Tool für Windows zur Netzwerkverwaltung und -konfiguration.
+**neTiPx** ist ein modernes Desktop-Tool für Windows zur Netzwerkverwaltung und -konfiguration.
 
 ## Features
 
