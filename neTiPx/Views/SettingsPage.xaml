@@ -39,21 +39,10 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Oben Links: Farbe -->
-                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="0">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Farbschema" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Wählen Sie die Akzentfarbe" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-                        <ComboBox
-                            x:Name="ColorSchemeCombo"
-                            HorizontalAlignment="Stretch"
-                            DisplayMemberPath="DisplayName"
-                            SelectionChanged="ColorSchemeCombo_SelectionChanged" />
-                    </StackPanel>
-                </Border>
 
-                <!-- Oben Mitte: Adapter Auswahl -->
-                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="1">
+
+                <!-- Oben Links: Netzwerkadapter -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="0">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
                         <TextBlock Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
@@ -77,6 +66,14 @@
                                 PlaceholderText="Adapter wählen..."
                                 SelectionChanged="SecondaryAdapterCombo_SelectionChanged" />
                         </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Oben Mitte: Platzhalter -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="1">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
@@ -189,6 +186,19 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Unten Rechts: Farbschema -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="2">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Farbschema" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Wählen Sie die Akzentfarbe" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <ComboBox
+                            x:Name="ColorSchemeCombo"
+                            HorizontalAlignment="Stretch"
+                            DisplayMemberPath="DisplayName"
+                            SelectionChanged="ColorSchemeCombo_SelectionChanged" />
+                    </StackPanel>
+                </Border>
+
                 <!-- Unten Links: Platzhalter -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="0">
                     <StackPanel Spacing="12">
@@ -199,14 +209,6 @@
 
                 <!-- Unten Mitte: Platzhalter -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="1">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Unten Rechts: Platzhalter -->
-                <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="2">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
                         <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
