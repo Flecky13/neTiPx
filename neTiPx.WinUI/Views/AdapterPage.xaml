@@ -19,7 +19,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Adapter" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Waehle bis zu zwei Adapter fuer die Anzeige." />
+                        <TextBlock Text="Wähle bis zu zwei Adapter für die Anzeige." />
                     </StackPanel>
                     <Image
                         Grid.Column="1"

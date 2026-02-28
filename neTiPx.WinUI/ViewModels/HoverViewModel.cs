@@ -6,7 +6,7 @@ namespace neTiPx.WinUI.ViewModels
 {
     public sealed class HoverViewModel : ObservableObject
     {
-        private readonly ConfigStore _configStore = new ConfigStore();
+        private readonly AdapterStore _adapterStore = new AdapterStore();
         private readonly InternetService _internetService = new InternetService();
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
 
@@ -167,9 +167,9 @@ namespace neTiPx.WinUI.ViewModels
 
         public async Task RefreshAsync()
         {
-            var values = _configStore.ReadAll();
-            values.TryGetValue("Adapter1", out var adapter1);
-            values.TryGetValue("Adapter2", out var adapter2);
+            var adapterSettings = _adapterStore.ReadAdapters();
+            var adapter1 = adapterSettings.PrimaryAdapter;
+            var adapter2 = adapterSettings.SecondaryAdapter;
 
             PublicIp = await _internetService.LoadExternalIpAsync();
 

@@ -14,7 +14,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Einstellungen" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Konfigurieren das Tool nach ihren Wünschen" />
+                        <TextBlock Text="Konfiguriere dein Tool nach deinen Wünschen" />
                     </StackPanel>
                     <Image
                         Grid.Column="1"
