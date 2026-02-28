@@ -153,5 +153,18 @@ namespace neTiPx.Services
             _userSettingsStore.WriteUserSettings(settings);
         }
 
+        public bool GetCloseToTrayOnClose()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CloseToTrayOnClose;
+        }
+
+        public void SetCloseToTrayOnClose(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CloseToTrayOnClose = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
     }
 }

@@ -27,6 +27,7 @@ namespace neTiPx.Views
         private readonly SettingsService _settingsService;
         private readonly ColorThemeApplier _colorThemeApplier;
         private readonly AdapterStore _adapterStore;
+        private readonly AutostartService _autostartService;
         private List<ColorTheme> _colorThemes = new();
         private List<string> _adapterList = new();
         private bool _isLoading = true;
@@ -39,6 +40,7 @@ namespace neTiPx.Views
             _settingsService = new SettingsService();
             _colorThemeApplier = new ColorThemeApplier();
             _adapterStore = new AdapterStore();
+            _autostartService = new AutostartService();
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -134,6 +136,17 @@ namespace neTiPx.Views
             {
                 PingThresholdNormalTextBox.Text = _settingsService.GetPingThresholdNormal().ToString();
             }
+
+            if (AutostartCheckBox != null)
+            {
+                AutostartCheckBox.IsChecked = _autostartService.IsEnabled();
+            }
+
+            if (CloseToTrayCheckBox != null)
+            {
+                CloseToTrayCheckBox.IsChecked = _settingsService.GetCloseToTrayOnClose();
+            }
+
             _isLoading = false;
         }
 
@@ -291,6 +304,38 @@ namespace neTiPx.Views
                     _settingsService.SetPingThresholdNormal(value);
                 }
             }
+        }
+
+        private void AutostartCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading)
+                return;
+
+            _autostartService.SetEnabled(true);
+        }
+
+        private void AutostartCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading)
+                return;
+
+            _autostartService.SetEnabled(false);
+        }
+
+        private void CloseToTrayCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCloseToTrayOnClose(true);
+        }
+
+        private void CloseToTrayCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetCloseToTrayOnClose(false);
         }
 
     }

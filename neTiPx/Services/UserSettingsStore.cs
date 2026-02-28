@@ -18,6 +18,7 @@ namespace neTiPx.Services
             public bool CheckConnectionDns2 { get; set; } = true;
             public int PingThresholdFast { get; set; } = 20;
             public int PingThresholdNormal { get; set; } = 50;
+            public bool CloseToTrayOnClose { get; set; } = true;
         }
 
         public UserSettings ReadUserSettings()
@@ -113,7 +114,11 @@ namespace neTiPx.Services
                 new XAttribute("thresholdNormal", settings.PingThresholdNormal)
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement);
+            var appBehaviorElement = new XElement("appBehavior",
+                new XAttribute("closeToTrayOnClose", settings.CloseToTrayOnClose)
+            );
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -187,6 +192,15 @@ namespace neTiPx.Services
                     if (int.TryParse((string?)connectionStatusElement.Attribute("thresholdNormal"), out var thresholdNormal))
                     {
                         settings.PingThresholdNormal = thresholdNormal;
+                    }
+                }
+
+                var appBehaviorElement = root.Element("appBehavior");
+                if (appBehaviorElement != null)
+                {
+                    if (bool.TryParse((string?)appBehaviorElement.Attribute("closeToTrayOnClose"), out var closeToTrayOnClose))
+                    {
+                        settings.CloseToTrayOnClose = closeToTrayOnClose;
                     }
                 }
 

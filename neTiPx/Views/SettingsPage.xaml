@@ -210,8 +210,17 @@
                 <!-- Unten Mitte: Platzhalter -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="1">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="Autostart" Style="{StaticResource SectionTitle}" />
+                        <CheckBox
+                            x:Name="AutostartCheckBox"
+                            Content="mit Windows Starten"
+                            Checked="AutostartCheckBox_Checked"
+                            Unchecked="AutostartCheckBox_Unchecked" />
+                        <CheckBox
+                            x:Name="CloseToTrayCheckBox"
+                            Content="Beim Schließen in den Systray minimieren"
+                            Checked="CloseToTrayCheckBox_Checked"
+                            Unchecked="CloseToTrayCheckBox_Unchecked" />
                     </StackPanel>
                 </Border>
             </Grid>

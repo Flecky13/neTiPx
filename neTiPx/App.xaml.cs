@@ -107,11 +107,20 @@ namespace neTiPx
                 }
             };
 
-            // Prevent window close - minimize to tray instead
+            // Beim Schließen je nach Einstellung: in Tray minimieren oder vollständig beenden
             _appWindow.Closing += (sender, args) =>
             {
+                var closeToTray = settingsService.GetCloseToTrayOnClose();
+                if (closeToTray)
+                {
+                    args.Cancel = true;
+                    WindowHelper.Hide(MainWindow);
+                    return;
+                }
+
                 args.Cancel = true;
-                WindowHelper.Hide(MainWindow);
+                _trayService?.Dispose();
+                ExitApp();
             };
         }
 
