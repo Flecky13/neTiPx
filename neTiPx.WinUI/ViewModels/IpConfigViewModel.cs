@@ -95,17 +95,12 @@ namespace neTiPx.WinUI.ViewModels
             if (e.PropertyName == nameof(IpProfile.Mode))
             {
                 OnPropertyChanged(nameof(IsManual));
-                // Don't reload settings when mode is changed manually
-                // Only reload on profile change or adapter change
                 ValidateProfile();
             }
             else if (e.PropertyName == nameof(IpProfile.AdapterName))
             {
-                // Reload settings when adapter changes
-                if (!_isLoadingProfile)
-                {
-                    ReloadSelectedProfileSettingsAsync().ConfigureAwait(false);
-                }
+                // Don't reload on adapter change
+                ValidateProfile();
             }
             else
             {
@@ -124,35 +119,67 @@ namespace neTiPx.WinUI.ViewModels
             {
                 _isLoadingProfile = true;
 
-                // On profile change: Load from config if available
+                // Always load profile from INI first
                 var values = _configStore.ReadAll();
-                var hasConfigSettings = HasPersistedProfileSettings(values, SelectedProfile.Name);
+                var iniProfile = ReadProfile(values, SelectedProfile.Name);
 
-                if (hasConfigSettings)
+                // Copy mode and basic settings from INI
+                SelectedProfile.Mode = iniProfile.Mode;
+                SelectedProfile.AdapterName = iniProfile.AdapterName;
+
+                // If mode is DHCP, load remaining settings from NIC
+                if (string.Equals(iniProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Load mode from config first
-                    var configProfile = ReadProfile(values, SelectedProfile.Name);
-                    SelectedProfile.Mode = configProfile.Mode;
-
-                    // If config says DHCP, load settings from NIC (not config)
-                    if (string.Equals(configProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var nicLoaded = LoadProfileFromNic(SelectedProfile);
-                        ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
-                        HasValidationErrors = false;
-                        return Task.CompletedTask;
-                    }
-
-                    // If config says Manual, load all settings from config
-                    LoadProfileFromConfig(values, SelectedProfile);
-                    ValidationMessage = "Configuration gelesen";
+                    var nicLoaded = LoadProfileFromNic(SelectedProfile);
+                    ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
                     HasValidationErrors = false;
                     return Task.CompletedTask;
                 }
 
-                // If no config, load from NIC
-                var nicLoaded2 = LoadProfileFromNic(SelectedProfile);
-                ValidationMessage = nicLoaded2 ? "Settings gelesen" : "Keine Settings vorhanden";
+                // If mode is Manual, load remaining settings from INI
+                SelectedProfile.Gateway = iniProfile.Gateway;
+                SelectedProfile.Dns1 = iniProfile.Dns1;
+                SelectedProfile.Dns2 = iniProfile.Dns2;
+
+                SelectedProfile.IpAddresses.Clear();
+                foreach (var entry in iniProfile.IpAddresses)
+                {
+                    SelectedProfile.IpAddresses.Add(new IpAddressEntry
+                    {
+                        IpAddress = entry.IpAddress,
+                        SubnetMask = entry.SubnetMask
+                    });
+                }
+
+                if (SelectedProfile.IpAddresses.Count == 0)
+                {
+                    SelectedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+                }
+
+                ValidationMessage = "Configuration gelesen";
+                HasValidationErrors = false;
+                return Task.CompletedTask;
+            }
+            finally
+            {
+                _isLoadingProfile = false;
+            }
+        }
+
+        private Task ReloadProfileFromNicAsync()
+        {
+            if (SelectedProfile == null || string.IsNullOrWhiteSpace(SelectedProfile.AdapterName))
+            {
+                return Task.CompletedTask;
+            }
+
+            try
+            {
+                _isLoadingProfile = true;
+
+                // After apply: Load fresh settings from NIC
+                var nicLoaded = LoadProfileFromNic(SelectedProfile);
+                ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
                 HasValidationErrors = false;
                 return Task.CompletedTask;
             }
@@ -553,8 +580,9 @@ namespace neTiPx.WinUI.ViewModels
                 return;
             }
 
+            // After apply: load fresh settings from NIC and save to INI
+            ReloadProfileFromNicAsync().ConfigureAwait(false);
             SaveProfile();
-            ReloadSelectedProfileSettingsAsync();
             ValidationMessage = "Profil angewendet";
         }
 
