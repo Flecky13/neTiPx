@@ -49,6 +49,12 @@ namespace neTiPx.WinUI
             SetWindowIcon(MainWindow);
             SetWindowIcon(HoverWindow);
 
+            // Set minimum window size and enforce it
+            var appWindow = WindowHelper.GetAppWindow(MainWindow);
+            var minWidth = 1280;// Minimale Breite in Pixeln
+            var minHeight = 920; // Minimale Höhe in Pixeln
+            appWindow.ResizeClient(new Windows.Graphics.SizeInt32(minWidth, minHeight));
+
             ThemeService.ApplyTheme(rootFrame);
 
             _ = rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
@@ -57,8 +63,19 @@ namespace neTiPx.WinUI
 
             _trayService = new TrayService(HoverWindow);
 
+            // Enforce minimum size when user tries to resize
+            appWindow.Changed += (sender, args) =>
+            {
+                var size = appWindow.Size;
+                if (size.Width < minWidth || size.Height < minHeight)
+                {
+                    appWindow.ResizeClient(new Windows.Graphics.SizeInt32(
+                        Math.Max(size.Width, minWidth),
+                        Math.Max(size.Height, minHeight)));
+                }
+            };
+
             // Prevent window close - minimize to tray instead
-            var appWindow = WindowHelper.GetAppWindow(MainWindow);
             appWindow.Closing += (sender, args) =>
             {
                 args.Cancel = true;
