@@ -70,5 +70,26 @@ namespace neTiPx.WinUI.Helpers
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "IP-Profile.xml");
             }
         }
+
+        public static string GetAdaptersXmlPath()
+        {
+            try
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var dir = Path.Combine(appData, "neTiPx");
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                var target = Path.Combine(dir, "Adapter.xml");
+
+                return target;
+            }
+            catch
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Adapter.xml");
+            }
+        }
     }
 }

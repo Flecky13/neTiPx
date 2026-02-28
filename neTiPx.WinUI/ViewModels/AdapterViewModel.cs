@@ -10,7 +10,7 @@ namespace neTiPx.WinUI.ViewModels
 {
     public sealed class AdapterViewModel : ObservableObject
     {
-        private readonly ConfigStore _configStore = new ConfigStore();
+        private readonly AdapterStore _adapterStore = new AdapterStore();
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
         private string? _selectedAdapterPrimary;
         private string? _selectedAdapterSecondary;
@@ -190,14 +190,14 @@ namespace neTiPx.WinUI.ViewModels
             _isLoading = true;
             try
             {
-                var values = _configStore.ReadAll();
-                if (values.TryGetValue("Adapter1", out var a1))
+                var settings = _adapterStore.ReadAdapters();
+                if (!string.IsNullOrWhiteSpace(settings.PrimaryAdapter))
                 {
-                    SelectedAdapterPrimary = a1;
+                    SelectedAdapterPrimary = settings.PrimaryAdapter;
                 }
-                if (values.TryGetValue("Adapter2", out var a2))
+                if (!string.IsNullOrWhiteSpace(settings.SecondaryAdapter))
                 {
-                    SelectedAdapterSecondary = a2;
+                    SelectedAdapterSecondary = settings.SecondaryAdapter;
                 }
             }
             finally
@@ -213,10 +213,12 @@ namespace neTiPx.WinUI.ViewModels
                 return;
             }
 
-            var values = _configStore.ReadAll();
-            values["Adapter1"] = SelectedAdapterPrimary ?? string.Empty;
-            values["Adapter2"] = SelectedAdapterSecondary ?? string.Empty;
-            _configStore.WriteAll(values);
+            var settings = new AdapterStore.AdapterSettings
+            {
+                PrimaryAdapter = SelectedAdapterPrimary ?? string.Empty,
+                SecondaryAdapter = SelectedAdapterSecondary ?? string.Empty
+            };
+            _adapterStore.WriteAdapters(settings);
         }
 
         private void UpdatePrimaryAdapterInfo()
