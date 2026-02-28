@@ -113,6 +113,18 @@ namespace neTiPx.WinUI.Services
                 },
                 new ColorTheme
                 {
+                    Name = "Prinzessin",
+                    AppBackgroundColor = "#FFFFE4F1",              // sehr helles Rosa
+                    CardBackgroundColor = "#FFFFF0F7",             // fast weiß mit Rosastich
+                    CardBorderColor = "#FFFFB6D9",                 // Candy Pink Border
+                    AppTextColor = "#FF7A1E4D",                    // dunkles Himbeer-Rosa
+                    AppTextSecondaryColor = "#FFA64D79",           // weicher Rosaton
+                    NavigationViewItemForeground = "#FFEC407A",    // kräftiges Pink
+                    NavigationViewItemForegroundPointerOver = "#FFFF5C9C",
+                    NavigationViewItemForegroundSelected = "#FFE91E63"
+                },
+                new ColorTheme
+                {
                     Name = "Gelb",
                     AppBackgroundColor = "#FF2C2616",
                     CardBackgroundColor = "#FF38301C",
@@ -162,14 +174,14 @@ namespace neTiPx.WinUI.Services
                 new ColorTheme
                 {
                     Name = "Grau",
-                    AppBackgroundColor = "#FFF2F3F5",
-                    CardBackgroundColor = "#FFFFFFFF",
-                    CardBorderColor = "#FFD6D9DE",
-                    AppTextColor = "#FF1F2328",
-                    AppTextSecondaryColor = "#FF5A6270",
-                    NavigationViewItemForeground = "#FF3A3F45",
-                    NavigationViewItemForegroundPointerOver = "#FF111111",
-                    NavigationViewItemForegroundSelected = "#FF2563EB"
+                    AppBackgroundColor = "#FF121212",
+                    CardBackgroundColor = "#FF1E1E1E",
+                    CardBorderColor = "#FF2C2C2C",
+                    AppTextColor = "#FFF3F3F3",
+                    AppTextSecondaryColor = "#FFBDBDBD",
+                    NavigationViewItemForeground = "#FFCFCFCF",
+                    NavigationViewItemForegroundPointerOver = "#FFFFFFFF",
+                    NavigationViewItemForegroundSelected = "#FFE0E0E0"
                 },
                 new ColorTheme
                 {
@@ -182,18 +194,6 @@ namespace neTiPx.WinUI.Services
                     NavigationViewItemForeground = "#FF1F2328",
                     NavigationViewItemForegroundPointerOver = "#FF111111",
                     NavigationViewItemForegroundSelected = "#FF1D4ED8"
-                },
-                new ColorTheme
-                {
-                    Name = "Melisrosa",
-                    AppBackgroundColor = "#FF2A1E24",
-                    CardBackgroundColor = "#FF34242C",
-                    CardBorderColor = "#FF4A3340",
-                    AppTextColor = "#FFFFFFFF",
-                    AppTextSecondaryColor = "#FFE7D3DC",
-                    NavigationViewItemForeground = "#FFF48FB1",
-                    NavigationViewItemForegroundPointerOver = "#FFF8BBD0",
-                    NavigationViewItemForegroundSelected = "#FFF48FB1"
                 },
                 new ColorTheme
                 {
