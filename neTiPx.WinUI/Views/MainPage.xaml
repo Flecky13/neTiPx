@@ -28,8 +28,12 @@
             PaneDisplayMode="Left"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
+            OpenPaneLength="320"
+            CompactPaneLength="48"
             Background="{ThemeResource AppBackgroundBrush}"
-            SelectionChanged="RootNavView_SelectionChanged">
+            SelectionChanged="RootNavView_SelectionChanged"
+            PaneOpening="RootNavView_PaneOpening"
+            PaneClosing="RootNavView_PaneClosing">
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Adapter Auswahl" Tag="Adapters">
                     <NavigationViewItem.Icon>

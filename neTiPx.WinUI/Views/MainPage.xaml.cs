@@ -19,6 +19,9 @@ namespace neTiPx.WinUI.Views
             {
                 RootNavView.SelectedItem = RootNavView.MenuItems[0];
             }
+
+            // Set initial min width based on pane state
+            App.UpdateMinWidth(RootNavView.IsPaneOpen);
         }
 
         private void RootNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -52,6 +55,16 @@ namespace neTiPx.WinUI.Views
             {
                 App.ThemeService.SetThemeOption(item.Value);
             }
+        }
+
+        private void RootNavView_PaneOpening(NavigationView sender, object args)
+        {
+            App.UpdateMinWidth(true);
+        }
+
+        private void RootNavView_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args)
+        {
+            App.UpdateMinWidth(false);
         }
     }
 }
