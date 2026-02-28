@@ -157,31 +157,35 @@
                                     <TextBlock Grid.Column="2" Text="Aktion" FontWeight="SemiBold" FontSize="12" />
                                 </Grid>
 
-                                <ItemsRepeater ItemsSource="{Binding SelectedProfile.IpAddresses}">
-                                    <ItemsRepeater.ItemTemplate>
-                                        <DataTemplate x:DataType="models:IpAddressEntry">
-                                            <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8" ColumnSpacing="8">
-                                                <TextBox
-                                                    Text="{x:Bind IpAddress, Mode=TwoWay}"
-                                                    IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                                <TextBox
-                                                    Grid.Column="1"
-                                                    Text="{x:Bind SubnetMask, Mode=TwoWay}"
-                                                    PlaceholderText="255.255.255.0"
-                                                    IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                                <Button
-                                                    Grid.Column="2"
-                                                    Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
-                                                    CommandParameter="{Binding}"
-                                                    ToolTipService.ToolTip="IP entfernen"
-                                                    Padding="8"
-                                                    IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}">
-                                                    <FontIcon Glyph="&#xE74D;" FontSize="16" />
-                                                </Button>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsRepeater.ItemTemplate>
-                                </ItemsRepeater>
+                                <ScrollViewer
+                                    VerticalScrollBarVisibility="Auto"
+                                    MaxHeight="160">
+                                    <ItemsRepeater ItemsSource="{Binding SelectedProfile.IpAddresses}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate x:DataType="models:IpAddressEntry">
+                                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8" ColumnSpacing="8">
+                                                    <TextBox
+                                                        Text="{x:Bind IpAddress, Mode=TwoWay}"
+                                                        IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
+                                                    <TextBox
+                                                        Grid.Column="1"
+                                                        Text="{x:Bind SubnetMask, Mode=TwoWay}"
+                                                        PlaceholderText="255.255.255.0"
+                                                        IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
+                                                    <Button
+                                                        Grid.Column="2"
+                                                        Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTipService.ToolTip="IP entfernen"
+                                                        Padding="8"
+                                                        IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}">
+                                                        <FontIcon Glyph="&#xE74D;" FontSize="16" />
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </ScrollViewer>
 
                                 <Button
                                     Command="{Binding AddIpCommand}"
