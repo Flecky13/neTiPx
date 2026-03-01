@@ -3,8 +3,10 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [1.1.4.0]
+- Firste Release
 
-## [1.1.3.0] - 2026-03-01
+## [1.1.3.0]
 
 ### Added
 - Update-Prüfung gegen GitHub API
@@ -17,7 +19,7 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - NSIS Skript verwendet korrekten Publish-Pfad
 - Layout-Anpassung auf IpConfigPage
 
-## [1.1.2.0] - 2026-02-15
+## [1.1.2.0]
 
 ### Added
 - System Tray Integration
@@ -28,14 +30,14 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - XmlSerializer Exception-Handling
 
-## [1.1.1.0] - 2026-02-01
+## [1.1.1.0]
 
 ### Added
 - IP-Profilmanager
 - DHCP und Manual Mode Support
 - Validierung von Netzwerkeinstellungen
 
-## [1.1.0.0] - 2026-01-15
+## [1.1.0.0]
 
 ### Initial Release
 - Adapter-Verwaltung
