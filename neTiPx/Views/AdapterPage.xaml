@@ -31,33 +31,6 @@
                 </Grid>
             </Border>
 
-            <!-- Dropdown Menüs nebeneinander -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                <!-- Primaerer Adapter Text -->
-                <Border Style="{StaticResource CardBorder}" Grid.Column="0">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="NIC 1 - Primaerer Adapter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock
-                            Text="{Binding SelectedAdapterPrimary}"
-                            FontSize="14"
-                            Foreground="{ThemeResource AppTextColor}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Sekundaerer Adapter Text -->
-                <Border Style="{StaticResource CardBorder}" Grid.Column="1">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="NIC 2 - Sekundaerer Adapter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock
-                            Text="{Binding SelectedAdapterSecondary}"
-                            FontSize="14"
-                            Foreground="{ThemeResource AppTextColor}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-
             <!-- Informationen nebeneinander -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
                 <!-- Informationen Primaerer Adapter -->
@@ -65,8 +38,7 @@
                     <StackPanel Spacing="16">
                         <!-- Titel -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Netzwerkkarte:" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="{Binding SelectedAdapterPrimary}" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Netzwerkkarte 1" Style="{StaticResource SectionTitle}" FontSize="18" FontWeight="Bold" />
                         </StackPanel>
 
                         <!-- Name -->
@@ -164,8 +136,7 @@
                     <StackPanel Spacing="16">
                         <!-- Titel -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Netzwerkkarte:" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="{Binding SelectedAdapterSecondary}" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Netzwerkkarte 2" Style="{StaticResource SectionTitle}" FontSize="18" FontWeight="Bold" />
                         </StackPanel>
 
                         <!-- Name -->
