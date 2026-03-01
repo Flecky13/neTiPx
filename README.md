@@ -1,7 +1,7 @@
 # neTiPx
 
 <p align="center">
-  <img src="images/toolicon.png" alt="neTiPx Logo" width="120"/>
+  <img src="Bilder/toolicon.png" alt="neTiPx Logo" width="120"/>
 </p>
 
 **neTiPx** ist ein modernes Desktop-Tool für Windows zur komfortablen Verwaltung von Netzwerkadaptern und IP-Konfigurationen. Mit einer intuitiven Benutzeroberfläche bietet neTiPx schnellen Zugriff auf alle wichtigen Netzwerkeinstellungen und -informationen.
