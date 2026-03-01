@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -33,7 +34,31 @@ namespace neTiPx
         /// </summary>
         public App()
         {
+            // Setup exception handling for XmlSerializer loading issue
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                // Ignore missing XmlSerializers assembly (known .NET 8 issue)
+                if (args.Name.Contains("XmlSerializers"))
+                {
+                    return null; // Return null to let the runtime generate it dynamically
+                }
+                // For other assemblies, let the normal resolution process continue
+                return null;
+            };
+
             this.InitializeComponent();
+
+            // Handle unhandled exceptions
+            this.UnhandledException += (s, e) =>
+            {
+                // Ignore XmlSerializer loading exceptions (known .NET 8 issue)
+                if (e.Exception is FileNotFoundException &&
+                    e.Exception.Message.Contains("System.Private.CoreLib.XmlSerializers"))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            };
         }
 
         /// <summary>

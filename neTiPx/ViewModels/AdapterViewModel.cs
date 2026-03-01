@@ -17,7 +17,7 @@ namespace neTiPx.ViewModels
         private readonly AdapterStore _adapterStore = new AdapterStore();
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
         private readonly SettingsService _settingsService = new SettingsService();
-        private readonly TimersTimer _pingTimer;
+        private readonly TimersTimer? _pingTimer;
         private readonly SynchronizationContext? _uiContext;
         private string? _selectedAdapterPrimary;
         private string? _selectedAdapterSecondary;
@@ -66,12 +66,18 @@ namespace neTiPx.ViewModels
             LoadSelectionFromConfig();
 
             _uiContext = SynchronizationContext.Current;
-            _pingTimer = new TimersTimer(System.TimeSpan.FromSeconds(5))
+            try
             {
-                AutoReset = true
-            };
-            _pingTimer.Elapsed += async (_, _) => await UpdateStatusAsync();
-            _pingTimer.Start();
+                _pingTimer = new TimersTimer(System.TimeSpan.FromSeconds(5))
+                {
+                    AutoReset = true
+                };
+                _pingTimer.Elapsed += async (_, _) => await UpdateStatusAsync();
+            }
+            catch
+            {
+                // Fehler beim Erstellen des Timers
+            }
         }
 
         // Primary Adapter Collections
@@ -248,11 +254,35 @@ namespace neTiPx.ViewModels
         public bool ShowConnectionQualityIndicator =>
             ShowGatewayStatus || ShowDns1Status || ShowDns2Status;
 
-        public string PrimaryDns1Address =>
-            PrimaryAdapterDns4List.Count > 0 ? PrimaryAdapterDns4List[0] : string.Empty;
+        public string PrimaryDns1Address
+        {
+            get
+            {
+                try
+                {
+                    return PrimaryAdapterDns4List?.Count > 0 ? PrimaryAdapterDns4List[0] : string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
 
-        public string PrimaryDns2Address =>
-            PrimaryAdapterDns4List.Count > 1 ? PrimaryAdapterDns4List[1] : string.Empty;
+        public string PrimaryDns2Address
+        {
+            get
+            {
+                try
+                {
+                    return PrimaryAdapterDns4List?.Count > 1 ? PrimaryAdapterDns4List[1] : string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
 
         private void LoadSelectionFromConfig()
         {
@@ -320,6 +350,12 @@ namespace neTiPx.ViewModels
                 // Notify DNS properties changed
                 OnPropertyChanged(nameof(PrimaryDns1Address));
                 OnPropertyChanged(nameof(PrimaryDns2Address));
+
+                // Starte Timer
+                if (_pingTimer != null && !_pingTimer.Enabled)
+                {
+                    _pingTimer.Start();
+                }
 
                 // Add all IPv6 addresses
                 var ipv6Addresses = ipProperties.UnicastAddresses
@@ -497,52 +533,59 @@ namespace neTiPx.ViewModels
 
         private async Task UpdateStatusAsync()
         {
-            // Prüfe, ob ein Primary Adapter ausgewählt ist
-            if (string.IsNullOrEmpty(SelectedAdapterPrimary) || IsPrimaryAdapterSelected != Visibility.Visible)
+            try
             {
-                PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                return;
-            }
+                // Prüfe, ob ein Primary Adapter ausgewählt ist
+                if (string.IsNullOrEmpty(SelectedAdapterPrimary) || IsPrimaryAdapterSelected != Visibility.Visible)
+                {
+                    PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    return;
+                }
 
-            // Hole Gateway und DNS von Primary Adapter
-            var gateway = PrimaryAdapterGateway ?? string.Empty;
-            var dnsAddresses = PrimaryAdapterDns4List.ToList();
-            var dns1 = dnsAddresses.Count > 0 ? dnsAddresses[0] : string.Empty;
-            var dns2 = dnsAddresses.Count > 1 ? dnsAddresses[1] : string.Empty;
+                // Hole Gateway und DNS von Primary Adapter
+                var gateway = PrimaryAdapterGateway ?? string.Empty;
+                var dnsAddresses = PrimaryAdapterDns4List?.ToList() ?? new System.Collections.Generic.List<string>();
+                var dns1 = dnsAddresses.Count > 0 ? dnsAddresses[0] : string.Empty;
+                var dns2 = dnsAddresses.Count > 1 ? dnsAddresses[1] : string.Empty;
 
-            // Normalisieren
-            gateway = NormalizeHostAddress(gateway);
-            dns1 = NormalizeHostAddress(dns1);
-            dns2 = NormalizeHostAddress(dns2);
+                // Normalisieren
+                gateway = NormalizeHostAddress(gateway);
+                dns1 = NormalizeHostAddress(dns1);
+                dns2 = NormalizeHostAddress(dns2);
 
-            // Nur prüfen, wenn in den Settings aktiviert
-            if (_settingsService.GetCheckConnectionGateway())
-            {
-                await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
-            }
-            else
-            {
-                PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
-            }
+                // Nur prüfen, wenn in den Settings aktiviert
+                if (_settingsService.GetCheckConnectionGateway())
+                {
+                    await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+                }
+                else
+                {
+                    PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                }
 
-            if (_settingsService.GetCheckConnectionDns1())
-            {
-                await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
-            }
-            else
-            {
-                PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
-            }
+                if (_settingsService.GetCheckConnectionDns1())
+                {
+                    await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
+                }
+                else
+                {
+                    PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                }
 
-            if (_settingsService.GetCheckConnectionDns2())
-            {
-                await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+                if (_settingsService.GetCheckConnectionDns2())
+                {
+                    await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+                }
+                else
+                {
+                    PostDns2Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                }
             }
-            else
+            catch
             {
-                PostDns2Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                // Fehler beim Status Check - ignorieren
             }
         }
 

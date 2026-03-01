@@ -17,6 +17,9 @@ namespace neTiPx.Services
         {
             _settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "neTiPx");
             _themeFile = Path.Combine(_settingsPath, "ThemeSettings.xml");
+
+            // Note: XmlSerializer may throw FileNotFoundException internally when looking for pre-generated
+            // serialization assemblies (*.XmlSerializers.dll). This is expected and handled by the framework.
             _serializer = new XmlSerializer(typeof(List<ColorTheme>));
         }
 
