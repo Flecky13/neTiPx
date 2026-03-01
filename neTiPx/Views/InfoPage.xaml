@@ -106,6 +106,41 @@
                     </StackPanel>
                 </Grid>
             </Border>
+
+            <!-- Lizenz & Kontakt Section -->
+            <Border Style="{StaticResource CardBorder}" Padding="24">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Lizenz &amp; Kontakt" FontSize="18" FontWeight="SemiBold" />
+
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Text="Siehe LICENSE im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden."
+                            FontSize="13"
+                            Opacity="0.8"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                        <TextBlock Text="Kontakt:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
+                        <HyperlinkButton
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Content="https://github.com/Flecky13"
+                            NavigateUri="https://github.com/Flecky13"
+                            HorizontalAlignment="Left"
+                            Padding="0" />
+
+                        <TextBlock Text="Support:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
+                        <HyperlinkButton
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Content="https://buymeacoffee.com/pedrotepe"
+                            NavigateUri="https://buymeacoffee.com/pedrotepe"
+                            HorizontalAlignment="Left"
+                            Padding="0" />
+                    </Grid>
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>

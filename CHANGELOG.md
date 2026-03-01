@@ -3,8 +3,23 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [1.1.5.0]
+
+### Added
+- Lizenz & Kontakt Sektion auf Info Page
+- Support-Links (GitHub Profil, Buy Me a Coffee)
+
 ## [1.1.4.0]
-- Firste Release
+
+### Added
+- Erweiterte GitHub Release-Automation mit Changelog-Integration
+- Vorschau-System für Release Notes
+- Automatische Changelog-Extraktion
+
+### Changed
+- GitHub Release Batch-Skript mit verbesserter Fehlerbehandlung
+
 
 ## [1.1.3.0]
 
