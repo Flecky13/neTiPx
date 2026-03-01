@@ -103,6 +103,16 @@
                                 <TextBlock Text="Changelog / Release" />
                             </StackPanel>
                         </Button>
+
+                        <Button
+                            Command="{Binding ShowHelpCommand}"
+                            HorizontalAlignment="Stretch"
+                            MinWidth="200">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE897;" FontSize="16" />
+                                <TextBlock Text="Hilfe" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>

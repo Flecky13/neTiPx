@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using neTiPx.Helpers;
 using neTiPx.Models;
+using neTiPx.Services;
 
 namespace neTiPx.ViewModels
 {
@@ -18,13 +19,16 @@ namespace neTiPx.ViewModels
     {
         private const string ReleasesPageUrl = "https://github.com/Flecky13/neTiPx/releases";
         private const string LatestReleaseApiUrl = "https://api.github.com/repos/Flecky13/neTiPx/releases/latest";
+        private const string ReadmeUrl = "https://github.com/Flecky13/neTiPx/blob/master/README.md";
 
         private static readonly HttpClient HttpClient = CreateHttpClient();
 
         private readonly RelayCommand _checkForUpdateCommand;
         private readonly RelayCommand _installUpdateCommand;
+        private readonly SettingsService _settingsService = new SettingsService();
 
         private string _latestVersion = "Noch nicht geprüft";
+        private string _latestVersionRaw = string.Empty;
         private string _updateStatus = "Noch nicht geprüft";
         private bool _isUpdateAvailable;
         private GatewayStatusKind _updateStatusKind = GatewayStatusKind.Unknown;
@@ -42,8 +46,16 @@ namespace neTiPx.ViewModels
             CheckForUpdateCommand = _checkForUpdateCommand;
             InstallUpdateCommand = _installUpdateCommand;
             ShowChangelogCommand = new RelayCommand(ShowChangelog);
+            ShowHelpCommand = new RelayCommand(ShowHelp);
 
             ReleasesUrl = new Uri(ReleasesPageUrl);
+
+            _latestVersionRaw = _settingsService.GetLastCheckedLatestVersion() ?? string.Empty;
+            var lastCheckedAt = _settingsService.GetLastCheckedAtLocal();
+            if (!string.IsNullOrWhiteSpace(_latestVersionRaw))
+            {
+                LatestVersion = FormatLatestVersionDisplay(_latestVersionRaw, lastCheckedAt);
+            }
         }
 
         public string AppName => "neTiPx";
@@ -90,6 +102,7 @@ namespace neTiPx.ViewModels
         public ICommand CheckForUpdateCommand { get; }
         public ICommand InstallUpdateCommand { get; }
         public ICommand ShowChangelogCommand { get; }
+        public ICommand ShowHelpCommand { get; }
 
         private async void CheckForUpdate()
         {
@@ -107,9 +120,13 @@ namespace neTiPx.ViewModels
                     return;
                 }
 
-                LatestVersion = latestRelease.Version;
+                _latestVersionRaw = NormalizeVersionForDisplay(latestRelease.Version);
+                var checkedAtLocal = DateTime.Now;
+
+                LatestVersion = FormatLatestVersionDisplay(_latestVersionRaw, checkedAtLocal);
                 LatestReleaseUrl = latestRelease.ReleaseUri;
                 _setupDownloadUrl = latestRelease.SetupDownloadUrl;
+                _settingsService.SetLastUpdateCheck(_latestVersionRaw, checkedAtLocal);
 
                 var currentVersion = ParseVersion(AppVersion);
                 var latestVersion = ParseVersion(latestRelease.Version);
@@ -157,7 +174,8 @@ namespace neTiPx.ViewModels
 
                 // Download Setup.exe
                 var tempPath = Path.GetTempPath();
-                var setupFileName = $"neTiPx_Setup_{LatestVersion}.exe";
+                var versionForFileName = _latestVersionRaw.Replace("V", string.Empty, StringComparison.OrdinalIgnoreCase);
+                var setupFileName = $"neTiPx_Setup_{versionForFileName}.exe";
                 var setupFilePath = Path.Combine(tempPath, setupFileName);
 
                 using (var response = await HttpClient.GetAsync(_setupDownloadUrl))
@@ -197,6 +215,11 @@ namespace neTiPx.ViewModels
         private void ShowChangelog()
         {
             OpenUrl(ReleasesUrl);
+        }
+
+        private void ShowHelp()
+        {
+            OpenUrl(new Uri(ReadmeUrl));
         }
 
         private static async Task<GitHubRelease?> GetLatestReleaseAsync()
@@ -280,6 +303,42 @@ namespace neTiPx.ViewModels
             }
 
             return new Version(0, 0, 0, 0);
+        }
+
+        private static string NormalizeVersionForDisplay(string versionText)
+        {
+            var match = Regex.Match(versionText, @"\d+(?:\.\d+){0,3}");
+            if (!match.Success)
+            {
+                return versionText;
+            }
+
+            var rawVersion = match.Value;
+            var parts = rawVersion.Split('.');
+            if (parts.Length == 3)
+            {
+                rawVersion += ".0";
+            }
+            else if (parts.Length == 2)
+            {
+                rawVersion += ".0.0";
+            }
+            else if (parts.Length == 1)
+            {
+                rawVersion += ".0.0.0";
+            }
+
+            return $"V{rawVersion}";
+        }
+
+        private static string FormatLatestVersionDisplay(string versionText, DateTime? checkedAtLocal)
+        {
+            if (!checkedAtLocal.HasValue)
+            {
+                return versionText;
+            }
+
+            return $"{versionText} - zuletzt geprüft am {checkedAtLocal.Value:dd.MM.yyyy HH:mm}";
         }
 
         private static HttpClient CreateHttpClient()

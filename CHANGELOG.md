@@ -4,6 +4,16 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.6.1]
+
+### Added
+- Application-Icon in der EXE eingebettet (Taskleisten-Icon sichtbar)
+- Latest-Version-Anzeige mit Prüfzeitpunkt: Vx.x.x.x - zuletzt geprüft am DD.MM.YYYY HH:MM
+- Hilfe-Button auf Info-Seite (öffnet README.md auf GitHub)
+
+### Changed
+- Letzte erfolgreiche Update-Prüfung (Version + Zeitstempel) wird in User_Settings.xml gespeichert und beim Start geladen
+
 ## [1.1.6.0]
 
 ### Added

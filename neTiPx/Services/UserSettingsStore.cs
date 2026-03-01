@@ -19,6 +19,8 @@ namespace neTiPx.Services
             public int PingThresholdFast { get; set; } = 20;
             public int PingThresholdNormal { get; set; } = 50;
             public bool CloseToTrayOnClose { get; set; } = true;
+            public string? LastCheckedLatestVersion { get; set; }
+            public DateTime? LastCheckedAt { get; set; }
         }
 
         public UserSettings ReadUserSettings()
@@ -118,7 +120,17 @@ namespace neTiPx.Services
                 new XAttribute("closeToTrayOnClose", settings.CloseToTrayOnClose)
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement);
+            var updateCheckElement = new XElement("updateCheck");
+            if (!string.IsNullOrWhiteSpace(settings.LastCheckedLatestVersion))
+            {
+                updateCheckElement.SetAttributeValue("latestVersion", settings.LastCheckedLatestVersion);
+            }
+            if (settings.LastCheckedAt.HasValue)
+            {
+                updateCheckElement.SetAttributeValue("lastCheckedAt", settings.LastCheckedAt.Value.ToString("o"));
+            }
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -201,6 +213,18 @@ namespace neTiPx.Services
                     if (bool.TryParse((string?)appBehaviorElement.Attribute("closeToTrayOnClose"), out var closeToTrayOnClose))
                     {
                         settings.CloseToTrayOnClose = closeToTrayOnClose;
+                    }
+                }
+
+                var updateCheckElement = root.Element("updateCheck");
+                if (updateCheckElement != null)
+                {
+                    settings.LastCheckedLatestVersion = (string?)updateCheckElement.Attribute("latestVersion");
+
+                    var lastCheckedAtRaw = (string?)updateCheckElement.Attribute("lastCheckedAt");
+                    if (DateTime.TryParse(lastCheckedAtRaw, null, System.Globalization.DateTimeStyles.RoundtripKind, out var lastCheckedAt))
+                    {
+                        settings.LastCheckedAt = lastCheckedAt;
                     }
                 }
 

@@ -1,3 +1,4 @@
+using System;
 using neTiPx.Helpers;
 using neTiPx.Models;
 
@@ -163,6 +164,28 @@ namespace neTiPx.Services
         {
             var settings = _userSettingsStore.ReadUserSettings();
             settings.CloseToTrayOnClose = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public string? GetLastCheckedLatestVersion()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.LastCheckedLatestVersion;
+        }
+
+        public DateTime? GetLastCheckedAtLocal()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.LastCheckedAt?.ToLocalTime();
+        }
+
+        public void SetLastUpdateCheck(string latestVersion, DateTime lastCheckedLocal)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.LastCheckedLatestVersion = latestVersion;
+            settings.LastCheckedAt = lastCheckedLocal.Kind == DateTimeKind.Utc
+                ? lastCheckedLocal
+                : lastCheckedLocal.ToUniversalTime();
             _userSettingsStore.WriteUserSettings(settings);
         }
 

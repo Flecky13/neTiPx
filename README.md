@@ -18,8 +18,6 @@
 - [Funktionen im Detail](#-funktionen-im-detail)
 - [Systemanforderungen](#-systemanforderungen)
 - [Installation](#-installation)
-- [Konfiguration](#-konfiguration)
-- [Build](#-build)
 
 ---
 
@@ -33,6 +31,8 @@
 - 📍 **System Tray Integration**: Minimierung in die Taskleiste mit Hover-Fenster für schnelle Netzwerk-Infos
 - 🚀 **Autostart**: Optional beim Systemstart starten
 
+zurück zum
+[Inhaltsverzeichnis]#-Inhaltsverzeichnis
 ---
 
 ## 📸 Screenshots
@@ -50,6 +50,7 @@ Die Adapter-Seite zeigt detaillierte Informationen zu Ihren konfigurierten Netzw
 - Gateway-Adressen (IPv4 und IPv6)
 - DNS-Server (IPv4 und IPv6)
 - Übersichtliche Darstellung für bis zu zwei Adapter gleichzeitig
+
 
 ### IP-Konfiguration
 
@@ -95,6 +96,8 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - **Benutzerdefinierte Themes**: Erstellen und bearbeiten Sie eigene Farbthemen
 - **Theme-Editor**: Passen Sie Hintergrund-, Text- und Akzentfarben individuell an
 
+zurück zum
+[Inhaltsverzeichnis]#-Inhaltsverzeichnis
 ---
 
 ## 🔧 Funktionen im Detail
@@ -121,6 +124,8 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - **Vordefinierte Themes**: Mehrere professionelle Farbschemata zur Auswahl
 - **Echtzeit-Vorschau**: Sehen Sie Änderungen sofort in der Anwendung
 
+zurück zum
+[Inhaltsverzeichnis]#-Inhaltsverzeichnis
 ---
 
 ## 💻 Systemanforderungen
@@ -144,6 +149,8 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 
 **Hinweis**: Für Änderungen an Netzwerkeinstellungen sind Administrator-Rechte erforderlich.
 
+zurück zum
+[Inhaltsverzeichnis]#-Inhaltsverzeichnis
 ---
 
 ## 📄 Lizenz & Kontakt
@@ -151,3 +158,6 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 Siehe `LICENSE` im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden.
 
 https://buymeacoffee.com/pedrotepe
+
+zurück zum
+[Inhaltsverzeichnis]#-Inhaltsverzeichnis
