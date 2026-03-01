@@ -204,9 +204,9 @@
                 </Border>
 
                 <!-- Rechter Bereich: Buttons und Status -->
-                <StackPanel Grid.Column="2" Spacing="16">
+                <Grid Grid.Column="2" RowDefinitions="Auto,*" RowSpacing="16">
                     <!-- Aktions-Buttons -->
-                    <Border Style="{StaticResource CardBorder}" Padding="16">
+                    <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="16">
                         <StackPanel Spacing="12">
                             <TextBlock Text="Aktionen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
@@ -244,7 +244,7 @@
                     </Border>
 
                     <!-- Status-Bereich -->
-                    <Border Style="{StaticResource CardBorder}" Padding="16" Visibility="{Binding ShowConnectionQualityIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" VerticalAlignment="Stretch" Visibility="{Binding ShowConnectionQualityIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Spacing="16">
                             <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
@@ -324,7 +324,7 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
-                </StackPanel>
+                </Grid>
             </Grid>
         </StackPanel>
     </ScrollViewer>
