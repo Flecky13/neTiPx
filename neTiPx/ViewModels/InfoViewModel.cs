@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
@@ -27,11 +29,12 @@ namespace neTiPx.ViewModels
         private bool _isUpdateAvailable;
         private GatewayStatusKind _updateStatusKind = GatewayStatusKind.Unknown;
         private Uri _latestReleaseUrl = new Uri("https://github.com/Flecky13/neTiPx/releases/latest");
+        private string? _setupDownloadUrl;
 
         public InfoViewModel()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            AppVersion = version == null ? "Unknown" : version.ToString(3);
+            AppVersion = version == null ? "Unknown" : version.ToString(4);
 
             _checkForUpdateCommand = new RelayCommand(CheckForUpdate);
             _installUpdateCommand = new RelayCommand(InstallUpdate, CanInstallUpdate);
@@ -106,6 +109,7 @@ namespace neTiPx.ViewModels
 
                 LatestVersion = latestRelease.Version;
                 LatestReleaseUrl = latestRelease.ReleaseUri;
+                _setupDownloadUrl = latestRelease.SetupDownloadUrl;
 
                 var currentVersion = ParseVersion(AppVersion);
                 var latestVersion = ParseVersion(latestRelease.Version);
@@ -137,9 +141,57 @@ namespace neTiPx.ViewModels
             return IsUpdateAvailable;
         }
 
-        private void InstallUpdate()
+        private async void InstallUpdate()
         {
-            OpenUrl(LatestReleaseUrl);
+            if (string.IsNullOrWhiteSpace(_setupDownloadUrl))
+            {
+                // Fallback: Öffne Release-Seite
+                OpenUrl(LatestReleaseUrl);
+                return;
+            }
+
+            try
+            {
+                UpdateStatus = "Lade Update herunter...";
+                UpdateStatusKind = GatewayStatusKind.Warning;
+
+                // Download Setup.exe
+                var tempPath = Path.GetTempPath();
+                var setupFileName = $"neTiPx_Setup_{LatestVersion}.exe";
+                var setupFilePath = Path.Combine(tempPath, setupFileName);
+
+                using (var response = await HttpClient.GetAsync(_setupDownloadUrl))
+                {
+                    response.EnsureSuccessStatusCode();
+                    using (var fileStream = File.Create(setupFilePath))
+                    {
+                        await response.Content.CopyToAsync(fileStream);
+                    }
+                }
+
+                UpdateStatus = "Starte Installation...";
+
+                // Starte Setup.exe
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = setupFilePath,
+                    UseShellExecute = true
+                });
+
+                // Beende die Anwendung
+                await Task.Delay(500); // Kurze Verzögerung, damit Setup starten kann
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus = "Download fehlgeschlagen. Öffne Release-Seite...";
+                UpdateStatusKind = GatewayStatusKind.Bad;
+                Debug.WriteLine($"Failed to download/install update: {ex}");
+
+                // Fallback: Öffne Release-Seite
+                await Task.Delay(1500);
+                OpenUrl(LatestReleaseUrl);
+            }
         }
 
         private void ShowChangelog()
@@ -174,7 +226,29 @@ namespace neTiPx.ViewModels
                 ? parsedUri
                 : new Uri("https://github.com/Flecky13/neTiPx/releases/latest");
 
-            return new GitHubRelease(tagName, releaseUri);
+            // Suche Setup.exe in Assets
+            string? setupDownloadUrl = null;
+            if (root.TryGetProperty("assets", out var assetsElement) && assetsElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var asset in assetsElement.EnumerateArray())
+                {
+                    if (asset.TryGetProperty("name", out var nameElement))
+                    {
+                        var assetName = nameElement.GetString() ?? string.Empty;
+                        if (assetName.StartsWith("neTiPx_Setup_", StringComparison.OrdinalIgnoreCase) &&
+                            assetName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (asset.TryGetProperty("browser_download_url", out var downloadUrlElement))
+                            {
+                                setupDownloadUrl = downloadUrlElement.GetString();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new GitHubRelease(tagName, releaseUri, setupDownloadUrl);
         }
 
         private static Version ParseVersion(string versionText)
@@ -234,14 +308,16 @@ namespace neTiPx.ViewModels
 
         private sealed class GitHubRelease
         {
-            public GitHubRelease(string version, Uri releaseUri)
+            public GitHubRelease(string version, Uri releaseUri, string? setupDownloadUrl)
             {
                 Version = version;
                 ReleaseUri = releaseUri;
+                SetupDownloadUrl = setupDownloadUrl;
             }
 
             public string Version { get; }
             public Uri ReleaseUri { get; }
+            public string? SetupDownloadUrl { get; }
         }
     }
 }

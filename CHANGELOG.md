@@ -4,11 +4,24 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.6.0]
+
+### Added
+- Automatischer Download und Installation von Updates
+- Setup.exe wird von GitHub Release heruntergeladen und direkt installiert
+
+### Fixed
+- Vollständige Versionsanzeige auf der Info Page (x.x.x.x statt x.x.x)
+
 ## [1.1.5.0]
 
 ### Added
 - Lizenz & Kontakt Sektion auf Info Page
 - Support-Links (GitHub Profil, Buy Me a Coffee)
+
+### Fixed
+- XML-Parsing Fehler in InfoPage.xaml (&amp; Encoding)
+- Grid.Spacing durch ColumnSpacing/RowSpacing ersetzt
 
 ## [1.1.4.0]
 
