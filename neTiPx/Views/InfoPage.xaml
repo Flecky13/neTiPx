@@ -13,16 +13,16 @@
 
     <ScrollViewer>
         <StackPanel Spacing="16" Padding="24">
-            <!-- Header mit Image -->
+            <!-- Header mit Image (gleiche Höhe wie andere Pages) -->
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Info" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Anwendungsinformationen" />
+                        <TextBlock Text="Anwendungs Informationen, Hilfe, Update" />
                     </StackPanel>
                     <Image
                         Grid.Column="1"
-                        Source="ms-appx:///images/toolicon.png"
+                        Source="ms-appx:///Assets/toolicon.png"
                         Width="120"
                         Height="120"
                         VerticalAlignment="Center"
@@ -30,13 +30,81 @@
                 </Grid>
             </Border>
 
-            <!-- Inhaltsbereich -->
-            <Border Style="{StaticResource CardBorder}">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="{Binding AppName}" FontSize="18" FontWeight="SemiBold" />
-                    <TextBlock Text="Version" Opacity="0.7" />
-                    <TextBlock Text="{Binding AppVersion}" />
-                </StackPanel>
+            <!-- Versions-Info mit Update-Buttons -->
+            <Border Style="{StaticResource CardBorder}" Padding="24">
+                <Grid ColumnDefinitions="*,Auto">
+                    <!-- Linke Seite: Versions-Informationen -->
+                    <StackPanel Grid.Column="0" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding AppName}" FontSize="18" FontWeight="SemiBold" />
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
+                            <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
+                            <TextBlock Text="{Binding LatestVersion}" FontSize="16" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Ellipse
+                                Width="10"
+                                Height="10"
+                                Fill="{Binding UpdateStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
+                                VerticalAlignment="Center" />
+                            <TextBlock
+                                Text="Update-Status"
+                                FontSize="12"
+                                Opacity="0.7"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <TextBlock
+                            Text="{Binding UpdateStatus}"
+                            FontSize="12"
+                            Opacity="0.8"
+                            TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="2">
+                            <HyperlinkButton Content="GitHub Releases" NavigateUri="{Binding ReleasesUrl}" HorizontalAlignment="Left" Padding="0" />
+                            <HyperlinkButton Content="Latest Release" NavigateUri="{Binding LatestReleaseUrl}" HorizontalAlignment="Left" Padding="0" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Rechte Seite: Update-Buttons -->
+                    <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
+                        <Button
+                            Command="{Binding CheckForUpdateCommand}"
+                            HorizontalAlignment="Stretch"
+                            MinWidth="200">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE895;" FontSize="16" />
+                                <TextBlock Text="Auf Update Prüfen" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button
+                            Command="{Binding InstallUpdateCommand}"
+                            HorizontalAlignment="Stretch"
+                            MinWidth="200"
+                            Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE896;" FontSize="16" />
+                                <TextBlock Text="Update Installieren" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button
+                            Command="{Binding ShowChangelogCommand}"
+                            HorizontalAlignment="Stretch"
+                            MinWidth="200">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE8F3;" FontSize="16" />
+                                <TextBlock Text="Changelog / Release" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Border>
         </StackPanel>
     </ScrollViewer>
