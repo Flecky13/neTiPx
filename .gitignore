@@ -13,6 +13,7 @@ UpgradeLog*.htm
 ## bilder sammlung
 [Ii]mages/
 [Oo]utakes/
+build_setup.bat
 
 ## installer
 [Ii]nstallation/
