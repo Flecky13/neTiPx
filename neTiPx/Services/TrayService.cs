@@ -221,7 +221,7 @@ namespace neTiPx.Services
         private void ShowContextMenu()
         {
             var menu = CreatePopupMenu();
-            AppendMenu(menu, 0, MenuCommandOpen, "Oeffnen");
+            AppendMenu(menu, 0, MenuCommandOpen, "Öffnen");
             AppendMenu(menu, 0x800, 0, null);
             AppendMenu(menu, 0, MenuCommandExit, "Beenden");
 
