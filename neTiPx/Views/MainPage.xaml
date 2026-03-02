@@ -62,6 +62,16 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
+            <NavigationView.PaneFooter>
+                <TextBlock
+                    x:Name="CopyrightText"
+                    Text="© neTiPx by Pedro"
+                    Margin="16,8"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    VerticalAlignment="Bottom" />
+            </NavigationView.PaneFooter>
+
             <NavigationView.Content>
                 <Frame x:Name="ContentFrame" />
             </NavigationView.Content>

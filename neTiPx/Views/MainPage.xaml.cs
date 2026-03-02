@@ -22,6 +22,9 @@ namespace neTiPx.Views
 
             // Set initial min width based on pane state
             App.UpdateMinWidth(RootNavView.IsPaneOpen);
+            
+            // Set initial copyright text visibility
+            CopyrightText.Visibility = RootNavView.IsPaneOpen ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void RootNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -55,11 +58,13 @@ namespace neTiPx.Views
         private void RootNavView_PaneOpening(NavigationView sender, object args)
         {
             App.UpdateMinWidth(true);
+            CopyrightText.Visibility = Visibility.Visible;
         }
 
         private void RootNavView_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args)
         {
             App.UpdateMinWidth(false);
+            CopyrightText.Visibility = Visibility.Collapsed;
         }
     }
 }
