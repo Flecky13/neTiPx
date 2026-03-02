@@ -4,6 +4,13 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.6.3]
+
+### Fixed
+- NSIS Installer: Umlaute (ö, ä, ü) werden jetzt korrekt dargestellt (UTF-8 mit BOM)
+- NSIS Installer: AppVersion werden jetzt korrekt dargestellt
+- Tray-Kontextmenü: Umlaute werden korrekt angezeigt
+
 ## [1.1.6.2]
 
 ### Added
