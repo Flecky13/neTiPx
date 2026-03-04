@@ -23,7 +23,7 @@ namespace neTiPx
 
         private TrayService? _trayService;
         private static int MIN_WIDTH = 1280;
-        private const int MIN_HEIGHT = 940;
+        private const int MIN_HEIGHT = 950;
         private const int MIN_WIDTH_PANE_OPEN = 1280;
         private const int MIN_WIDTH_PANE_CLOSED = 1008;
         private static AppWindow? _appWindow;

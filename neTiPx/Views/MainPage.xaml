@@ -45,7 +45,7 @@
                         <FontIcon Glyph="&#xE839;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Tools" Tag="Tools" Visibility="Collapsed">
+                <NavigationViewItem Content="Tools" Tag="Tools">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8B8;" />
                     </NavigationViewItem.Icon>
