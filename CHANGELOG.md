@@ -1,10 +1,10 @@
-# Changelog neTiPx
+﻿# Changelog neTiPx
 
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.1.6.4]
 
 ### Added
 - IP-Profile können direkt aus dem Systray-Untermenü angewendet werden (ein Klick)
