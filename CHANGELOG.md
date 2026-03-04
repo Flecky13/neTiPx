@@ -7,7 +7,11 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- Neues Untermenü "IP-Profil" im Tray-Kontextmenü mit Schnellzugriff auf alle gespeicherten Profile
+- IP-Profile können direkt aus dem Systray-Untermenü angewendet werden (ein Klick)
+- Tooltips für Aktionen in der IP-Konfiguration:
+
+### Changed
+- Subnetz-Hinweis von Placeholder auf Tooltip umgestellt (Beispiel: 255.255.255.0, /24 oder 24)
 
 ## [1.1.6.3]
 

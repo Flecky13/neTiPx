@@ -131,7 +131,8 @@
                                 <TextBlock Text="Gateway" FontWeight="SemiBold" />
                                 <TextBox
                                     Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
-                                    PlaceholderText="192.168.1.1"
+                                    PlaceholderText="Gateway (z.B. 192.168.1.1)"
+                                    ToolTipService.ToolTip="Beispiel: 192.168.1.1"
                                     IsEnabled="{Binding IsManual}" />
                             </StackPanel>
 
@@ -141,17 +142,20 @@
                                 <TextBox
                                     Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
                                     PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
+                                    ToolTipService.ToolTip="Beispiel: 8.8.8.8"
                                     Margin="0,0,0,8"
                                     IsEnabled="{Binding IsManual}" />
                                 <TextBox
                                     Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
                                     PlaceholderText="DNS 2 (z.B. 8.8.4.4)"
+                                    ToolTipService.ToolTip="Beispiel: 8.8.4.4"
                                     IsEnabled="{Binding IsManual}" />
                             </StackPanel>
 
                             <!-- IP Adressen -->
                             <StackPanel Spacing="12">
-                                <TextBlock Text="IP Adressen" FontWeight="SemiBold" />
+                                <TextBlock
+                                    Text="IP Adressen" FontWeight="SemiBold"/>
 
                                 <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
                                     <TextBlock Text="IP Adresse" FontWeight="SemiBold" FontSize="12" />
@@ -168,11 +172,14 @@
                                                 <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8" ColumnSpacing="8">
                                                     <TextBox
                                                         Text="{x:Bind IpAddress, Mode=TwoWay}"
+                                                        PlaceholderText="z.B. 192.168.1.10"
+                                                        ToolTipService.ToolTip="Beispiel: 192.168.1.10"
                                                         IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
                                                     <TextBox
                                                         Grid.Column="1"
                                                         Text="{x:Bind SubnetMask, Mode=TwoWay}"
-                                                        PlaceholderText="255.255.255.0"
+                                                        PlaceholderText="255.255.255.0 , /24"
+                                                        ToolTipService.ToolTip="Beispiel: 255.255.255.0, /24 oder 24"
                                                         IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
                                                     <Button
                                                         Grid.Column="2"
@@ -212,6 +219,7 @@
 
                             <Button
                                 Command="{Binding ApplyCommand}"
+                                ToolTipService.ToolTip="{Binding SelectedProfile.Name, Converter={StaticResource StringFormatConverter}, ConverterParameter='Das Profil {0} wird angewendet'}"
                                 HorizontalAlignment="Stretch"
                                 Style="{StaticResource AccentButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -222,6 +230,7 @@
 
                             <Button
                                 Command="{Binding SaveCommand}"
+                                ToolTipService.ToolTip="Speichert die Einstellungen"
                                 HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE74E;" FontSize="16" />
