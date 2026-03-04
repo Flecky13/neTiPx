@@ -70,7 +70,95 @@
                         <!-- PING Unterseite -->
                         <StackPanel x:Name="PingPanel" Spacing="16" Padding="24" Visibility="Collapsed">
                             <TextBlock Text="PING Tool" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
-                            <!-- Hier kommt später der Ping-Inhalt -->
+
+                            <!-- Konfiguration -->
+                            <Border Style="{StaticResource CardBorder}" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Konfiguration" FontWeight="SemiBold" />
+
+                                    <Grid ColumnDefinitions="*,120,Auto" ColumnSpacing="8">
+                                        <TextBox
+                                            x:Name="NewPingTargetTextBox"
+                                            Grid.Column="0"
+                                            Header="Zieladresse"
+                                            PlaceholderText="IP-Adresse oder Hostname (z.B. 8.8.8.8, google.com)"
+                                            VerticalAlignment="Center" />
+                                        <NumberBox
+                                            x:Name="PingIntervalNumberBox"
+                                            Grid.Column="1"
+                                            Header="Sekunden"
+                                            Value="5"
+                                            Minimum="1"
+                                            Maximum="60"
+                                            SpinButtonPlacementMode="Compact"
+                                            VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Hinzufügen"
+                                            Click="AddPingTarget_Click"
+                                            Style="{StaticResource AccentButtonStyle}"
+                                            VerticalAlignment="Bottom" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Ping-Ziele Liste -->
+                            <Border Style="{StaticResource CardBorder}" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Ping-Ziele" FontWeight="SemiBold" />
+
+                                    <ItemsControl x:Name="PingTargetsItemsControl" ItemsSource="{Binding PingTargets}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="12"
+                                                    Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,120,40,Auto" ColumnSpacing="12">
+                                                        <!-- Adresse/IP -->
+                                                        <TextBox
+                                                            Grid.Column="0"
+                                                            Text="{Binding Target, Mode=OneWay}"
+                                                            IsReadOnly="True"
+                                                            VerticalAlignment="Center" />
+
+                                                        <!-- Antwortzeit -->
+                                                        <TextBox
+                                                            Grid.Column="1"
+                                                            Text="{Binding ResponseTime, Mode=OneWay}"
+                                                            IsReadOnly="True"
+                                                            PlaceholderText="-- ms"
+                                                            VerticalAlignment="Center" />
+
+                                                        <!-- Ampel (Qualität) -->
+                                                        <Ellipse
+                                                            Grid.Column="2"
+                                                            Width="24"
+                                                            Height="24"
+                                                            Fill="{Binding StatusColor}"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Center" />
+
+                                                        <!-- Löschen Button -->
+                                                        <Button
+                                                            Grid.Column="3"
+                                                            Click="DeletePingTarget_Click"
+                                                            Tag="{Binding}"
+                                                            ToolTipService.ToolTip="Ziel löschen"
+                                                            VerticalAlignment="Center"
+                                                            Padding="8"
+                                                            MinWidth="0">
+                                                            <FontIcon Glyph="&#xE74D;" FontSize="16" />
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
 
                         <!-- WLAN Unterseite -->
