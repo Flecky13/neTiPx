@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Timers;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace neTiPx.Services
         private const int CallbackMessageId = 0x400 + 1;
         private const int MenuCommandOpen = 1001;
         private const int MenuCommandExit = 1002;
+        private const int MenuCommandProfileStart = 2000; // Basis-ID für Profile
 
         private const int NifMessage = 0x00000001;
         private const int NifIcon = 0x00000002;
@@ -28,6 +30,8 @@ namespace neTiPx.Services
 
         private const uint TpmRightButton = 0x0002;
         private const uint TpmRetCmd = 0x0100;
+        private const uint MftString = 0x00000000;
+        private const uint MftPopup = 0x00000010;  // Richtig: 0x10, nicht 0x400!
 
         private const int GwlpWndproc = -4;
 
@@ -41,6 +45,7 @@ namespace neTiPx.Services
         private IntPtr _windowHandle = IntPtr.Zero;
         private IntPtr _oldWndProc = IntPtr.Zero;
         private WndProcDelegate? _newWndProc;
+        private Dictionary<int, string> _profileMenuIdMap = new(); // Zuordnung: MenuID -> ProfilName
 
         public TrayService(HoverWindow hoverWindow)
         {
@@ -222,7 +227,35 @@ namespace neTiPx.Services
         {
             var menu = CreatePopupMenu();
             AppendMenu(menu, 0, MenuCommandOpen, "Öffnen");
-            AppendMenu(menu, 0x800, 0, null);
+            AppendMenu(menu, 0x800, 0, null); // Separator
+
+            // IP-Profile laden und Untermenü erstellen
+            var profileStore = new IpProfileStore();
+            var profiles = profileStore.ReadAllProfiles();
+
+            System.Diagnostics.Debug.WriteLine($"[TrayService] Profile geladen: {profiles.Count}");
+
+            if (profiles.Count > 0)
+            {
+                var profileSubmenu = CreatePopupMenu();
+                System.Diagnostics.Debug.WriteLine($"[TrayService] Submenü Handle: {profileSubmenu}");
+                _profileMenuIdMap.Clear();
+
+                for (int i = 0; i < profiles.Count; i++)
+                {
+                    int menuId = MenuCommandProfileStart + i;
+                    _profileMenuIdMap[menuId] = profiles[i].Name;
+                    System.Diagnostics.Debug.WriteLine($"[TrayService] Profil hinzugefügt: ID={menuId}, Name={profiles[i].Name}");
+                    AppendMenu(profileSubmenu, 0, (uint)menuId, profiles[i].Name);
+                }
+
+                // Popup-Untermenü hinzufügen
+                System.Diagnostics.Debug.WriteLine($"[TrayService] Untermenü wird an Hauptmenü angehängt");
+                bool result = AppendSubMenu(menu, profileSubmenu, "IP-Profil");
+                System.Diagnostics.Debug.WriteLine($"[TrayService] AppendSubMenu Ergebnis: {result}");
+            }
+
+            AppendMenu(menu, 0x800, 0, null); // Separator
             AppendMenu(menu, 0, MenuCommandExit, "Beenden");
 
             var cursor = GetCursorPosition();
@@ -238,8 +271,46 @@ namespace neTiPx.Services
                 Dispose();
                 App.ExitApp();
             }
+            else if (cmd >= MenuCommandProfileStart)
+            {
+                // Profil anwenden
+                if (_profileMenuIdMap.TryGetValue((int)cmd, out var profileName))
+                {
+                    ApplyProfileFromTray(profileName);
+                }
+            }
 
             DestroyMenu(menu);
+        }
+
+        private static bool AppendSubMenu(IntPtr hMenu, IntPtr hSubMenu, string lpNewItem)
+        {
+            // Nutze die UIntPtr-Überladung für Submenüs
+            UIntPtr submenuId = new UIntPtr((ulong)hSubMenu.ToInt64());
+            return AppendMenuUIntPtr(hMenu, MftPopup, submenuId, lpNewItem);
+        }
+
+        private void ApplyProfileFromTray(string profileName)
+        {
+            try
+            {
+                var profileStore = new IpProfileStore();
+                if (profileStore.TryGetProfile(profileName, out var profile))
+                {
+                    var networkConfigService = new NetworkConfigService();
+                    var (success, error) = networkConfigService.ApplyProfile(profile);
+
+                    if (!success)
+                    {
+                        // Optional: Fehlerbehandlung, z.B. Toast-Notification
+                        System.Diagnostics.Debug.WriteLine($"Fehler beim Anwenden des Profils: {error}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Fehler beim Anwenden des Profils: {ex.Message}");
+            }
         }
 
         private static IntPtr LoadTrayIcon()
@@ -323,6 +394,9 @@ namespace neTiPx.Services
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern bool AppendMenu(IntPtr hMenu, uint uFlags, uint uIDNewItem, string? lpNewItem);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, EntryPoint = "AppendMenuW")]
+        private static extern bool AppendMenuUIntPtr(IntPtr hMenu, uint uFlags, UIntPtr uIDNewItem, string? lpNewItem);
 
         [DllImport("user32.dll")]
         private static extern bool DestroyMenu(IntPtr hMenu);
