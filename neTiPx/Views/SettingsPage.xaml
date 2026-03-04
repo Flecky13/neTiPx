@@ -54,6 +54,7 @@
                                 x:Name="PrimaryAdapterCombo"
                                 HorizontalAlignment="Stretch"
                                 PlaceholderText="Adapter wählen..."
+                                ToolTipService.ToolTip="Legt den primären Netzwerkadapter (NIC 1) fest"
                                 SelectionChanged="PrimaryAdapterCombo_SelectionChanged" />
                         </StackPanel>
 
@@ -64,6 +65,7 @@
                                 x:Name="SecondaryAdapterCombo"
                                 HorizontalAlignment="Stretch"
                                 PlaceholderText="Adapter wählen..."
+                                ToolTipService.ToolTip="Legt den sekundären Netzwerkadapter (NIC 2) fest"
                                 SelectionChanged="SecondaryAdapterCombo_SelectionChanged" />
                         </StackPanel>
                     </StackPanel>
@@ -92,6 +94,7 @@
                                     x:Name="HoverWindowStateCombo"
                                     HorizontalAlignment="Stretch"
                                     SelectionChanged="HoverWindowStateCombo_SelectionChanged"
+                                    ToolTipService.ToolTip="Aktiviert oder deaktiviert das Hover-Infofenster"
                                     PlaceholderText="Wählen...">
                                     <ComboBoxItem>Aktiv</ComboBoxItem>
                                     <ComboBoxItem>Inaktiv</ComboBoxItem>
@@ -105,6 +108,7 @@
                                     x:Name="HoverWindowDelayCombo"
                                     HorizontalAlignment="Stretch"
                                     SelectionChanged="HoverWindowDelayCombo_SelectionChanged"
+                                    ToolTipService.ToolTip="Bestimmt die Verzögerung bis zur Anzeige des Hover-Fensters"
                                     PlaceholderText="Wählen...">
                                     <ComboBoxItem>1 Sek.</ComboBoxItem>
                                     <ComboBoxItem>2 Sek.</ComboBoxItem>
@@ -140,6 +144,7 @@
                                     InputScope="Number"
                                     MaxLength="3"
                                     Width="60"
+                                    ToolTipService.ToolTip="Grenzwert in ms für schnelle Verbindungen"
                                     TextChanged="PingThresholdFastTextBox_TextChanged" />
 
                                 <!-- Operator < -->
@@ -157,15 +162,16 @@
                                     InputScope="Number"
                                     MaxLength="3"
                                     Width="60"
+                                    ToolTipService.ToolTip="Grenzwert in ms für normale Verbindungen"
                                     TextChanged="PingThresholdNormalTextBox_TextChanged" />
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Drei Checkboxen für Gateway/DNS -->
                         <StackPanel Spacing="6">
-                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" Checked="CheckGatewayCheckBox_Checked" Unchecked="CheckGatewayCheckBox_Unchecked" />
-                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
-                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" ToolTipService.ToolTip="Überwacht den Gateway-Status" Checked="CheckGatewayCheckBox_Checked" Unchecked="CheckGatewayCheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" ToolTipService.ToolTip="Überwacht den DNS 1-Status" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" ToolTipService.ToolTip="Überwacht den DNS 2-Status" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -195,6 +201,7 @@
                             x:Name="ColorSchemeCombo"
                             HorizontalAlignment="Stretch"
                             DisplayMemberPath="DisplayName"
+                            ToolTipService.ToolTip="Wählt das Farbthema der Anwendung"
                             SelectionChanged="ColorSchemeCombo_SelectionChanged" />
                     </StackPanel>
                 </Border>
@@ -214,11 +221,13 @@
                         <CheckBox
                             x:Name="AutostartCheckBox"
                             Content="mit Windows Starten"
+                            ToolTipService.ToolTip="Startet neTiPx automatisch mit Windows"
                             Checked="AutostartCheckBox_Checked"
                             Unchecked="AutostartCheckBox_Unchecked" />
                         <CheckBox
                             x:Name="CloseToTrayCheckBox"
                             Content="Beim Schließen in den Systray minimieren"
+                            ToolTipService.ToolTip="Minimiert beim Schließen in den Systray statt zu beenden"
                             Checked="CloseToTrayCheckBox_Checked"
                             Unchecked="CloseToTrayCheckBox_Unchecked" />
                     </StackPanel>
