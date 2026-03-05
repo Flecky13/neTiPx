@@ -105,7 +105,15 @@
                             <!-- Ping-Ziele Liste -->
                             <Border Style="{StaticResource CardBorder}" Padding="16">
                                 <StackPanel Spacing="12">
-                                    <TextBlock Text="Ping-Ziele" FontWeight="SemiBold" />
+                                    <!-- Überschrift mit Spalten-Labels -->
+                                    <Grid ColumnDefinitions="*,100,30,100,30,Auto" ColumnSpacing="12">
+                                        <TextBlock Text="Ping-Ziele" FontWeight="SemiBold" Grid.Column="0" />
+                                        <TextBlock Text="IPv4" FontWeight="SemiBold" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="" Grid.Column="2" />
+                                        <TextBlock Text="IPv6" FontWeight="SemiBold" Grid.Column="3" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                        <TextBlock Text="" Grid.Column="4" />
+                                        <TextBlock Text="" Grid.Column="5" />
+                                    </Grid>
 
                                     <ItemsControl x:Name="PingTargetsItemsControl" ItemsSource="{Binding PingTargets}">
                                         <ItemsControl.ItemTemplate>
@@ -116,7 +124,7 @@
                                                     CornerRadius="4"
                                                     Padding="12"
                                                     Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,120,40,Auto" ColumnSpacing="12">
+                                                    <Grid ColumnDefinitions="*,100,30,100,30,Auto" ColumnSpacing="12">
                                                         <!-- Adresse/IP -->
                                                         <TextBox
                                                             Grid.Column="0"
@@ -124,26 +132,49 @@
                                                             IsReadOnly="True"
                                                             VerticalAlignment="Center" />
 
-                                                        <!-- Antwortzeit -->
+                                                        <!-- Antwortzeit IPv4 -->
                                                         <TextBox
                                                             Grid.Column="1"
-                                                            Text="{Binding ResponseTime, Mode=OneWay}"
+                                                            Text="{Binding ResponseTimeIpv4, Mode=OneWay}"
                                                             IsReadOnly="True"
                                                             PlaceholderText="-- ms"
-                                                            VerticalAlignment="Center" />
+                                                            VerticalAlignment="Center"
+                                                            Visibility="{Binding ShowIPv4}" />
 
-                                                        <!-- Ampel (Qualität) -->
+                                                        <!-- Ampel IPv4 -->
                                                         <Ellipse
                                                             Grid.Column="2"
-                                                            Width="24"
-                                                            Height="24"
-                                                            Fill="{Binding StatusColor}"
+                                                            Width="12"
+                                                            Height="12"
+                                                            Fill="{Binding StatusColorIpv4}"
                                                             VerticalAlignment="Center"
-                                                            HorizontalAlignment="Center" />
+                                                            HorizontalAlignment="Center"
+                                                            ToolTipService.ToolTip="IPv4 Status"
+                                                            Visibility="{Binding ShowIPv4}" />
+
+                                                        <!-- Antwortzeit IPv6 -->
+                                                        <TextBox
+                                                            Grid.Column="3"
+                                                            Text="{Binding ResponseTimeIpv6, Mode=OneWay}"
+                                                            IsReadOnly="True"
+                                                            PlaceholderText="-- ms"
+                                                            VerticalAlignment="Center"
+                                                            Visibility="{Binding ShowIPv6}" />
+
+                                                        <!-- Ampel IPv6 -->
+                                                        <Ellipse
+                                                            Grid.Column="4"
+                                                            Width="12"
+                                                            Height="12"
+                                                            Fill="{Binding StatusColorIpv6}"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Center"
+                                                            ToolTipService.ToolTip="IPv6 Status"
+                                                            Visibility="{Binding ShowIPv6}" />
 
                                                         <!-- Löschen Button -->
                                                         <Button
-                                                            Grid.Column="3"
+                                                            Grid.Column="5"
                                                             Click="DeletePingTarget_Click"
                                                             Tag="{Binding}"
                                                             ToolTipService.ToolTip="Ziel löschen"

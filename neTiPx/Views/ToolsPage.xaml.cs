@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -83,9 +85,14 @@ namespace neTiPx.Views
                     {
                         Target = ip,
                         IntervalSeconds = intervalSeconds,
-                        ResponseTime = string.Empty,
-                        StatusColor = new SolidColorBrush(Colors.Gray)
+                        ResponseTimeIpv4 = string.Empty,
+                        ResponseTimeIpv6 = string.Empty,
+                        StatusColorIpv4 = new SolidColorBrush(Colors.Gray),
+                        StatusColorIpv6 = new SolidColorBrush(Colors.Gray)
                     };
+
+                    // Bestimme Adresstyp
+                    DetermineAddressType(pingTarget);
 
                     PingTargets.Add(pingTarget);
                     StartPingingAsync(pingTarget);
@@ -112,9 +119,14 @@ namespace neTiPx.Views
             {
                 Target = target,
                 IntervalSeconds = intervalSeconds,
-                ResponseTime = string.Empty,
-                StatusColor = new SolidColorBrush(Colors.Gray)
+                ResponseTimeIpv4 = string.Empty,
+                ResponseTimeIpv6 = string.Empty,
+                StatusColorIpv4 = new SolidColorBrush(Colors.Gray),
+                StatusColorIpv6 = new SolidColorBrush(Colors.Gray)
             };
+
+            // Bestimme Adresstyp
+            DetermineAddressType(pingTarget);
 
             PingTargets.Add(pingTarget);
             SavePingTargets();
@@ -162,43 +174,144 @@ namespace neTiPx.Views
         {
             try
             {
-                using var ping = new Ping();
-                var reply = await ping.SendPingAsync(target.Target, 3000);
+                // IPv4 Ping
+                var ipv4Task = PingAsync(target.Target, AddressFamily.InterNetwork);
+                // IPv6 Ping
+                var ipv6Task = PingAsync(target.Target, AddressFamily.InterNetworkV6);
+
+                await Task.WhenAll(ipv4Task, ipv6Task);
+
+                var ipv4Result = await ipv4Task;
+                var ipv6Result = await ipv6Task;
 
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    if (reply.Status == IPStatus.Success)
-                    {
-                        target.ResponseTime = $"{reply.RoundtripTime} ms";
-
-                        // Ampel-Farbe basierend auf Antwortzeit
-                        if (reply.RoundtripTime < 50)
-                        {
-                            target.StatusColor = new SolidColorBrush(Colors.Green); // Grün
-                        }
-                        else if (reply.RoundtripTime < 150)
-                        {
-                            target.StatusColor = new SolidColorBrush(Colors.Yellow); // Gelb
-                        }
-                        else
-                        {
-                            target.StatusColor = new SolidColorBrush(Colors.Orange); // Orange
-                        }
-                    }
-                    else
-                    {
-                        target.ResponseTime = "Timeout";
-                        target.StatusColor = new SolidColorBrush(Colors.Red); // Rot
-                    }
+                    UpdatePingResult(target, ipv4Result, ResponseType.IPv4);
+                    UpdatePingResult(target, ipv6Result, ResponseType.IPv6);
                 });
             }
             catch
             {
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    target.ResponseTime = "Fehler";
-                    target.StatusColor = new SolidColorBrush(Colors.Red); // Rot
+                    target.ResponseTimeIpv4 = "Fehler";
+                    target.StatusColorIpv4 = new SolidColorBrush(Colors.Red);
+                    target.ResponseTimeIpv6 = "Fehler";
+                    target.StatusColorIpv6 = new SolidColorBrush(Colors.Red);
                 });
+            }
+        }
+
+        private void DetermineAddressType(PingTarget target)
+        {
+            if (IPAddress.TryParse(target.Target, out var ipAddress))
+            {
+                // Eindeutige IP-Adresse erkannt
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    // IPv4-Adresse
+                    target.ShowIPv4 = Visibility.Visible;
+                    target.ShowIPv6 = Visibility.Collapsed;
+                }
+                else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    // IPv6-Adresse
+                    target.ShowIPv4 = Visibility.Collapsed;
+                    target.ShowIPv6 = Visibility.Visible;
+                }
+            }
+            else
+            {
+                // Hostname - beide anzeigen
+                target.ShowIPv4 = Visibility.Visible;
+                target.ShowIPv6 = Visibility.Visible;
+            }
+        }
+
+        private async Task<PingReply?> PingAsync(string target, AddressFamily addressFamily)
+        {
+            try
+            {
+                using var ping = new Ping();
+
+                // Versuche direkt zu parsen, ob es eine IP-Adresse ist
+                if (IPAddress.TryParse(target, out var ipAddress))
+                {
+                    // Direkte IP-Adresse - prüfe ob sie dem gewünschten AddressFamily entspricht
+                    if (ipAddress.AddressFamily == addressFamily)
+                    {
+                        return await ping.SendPingAsync(ipAddress, 3000);
+                    }
+                    return null; // Adresse entspricht nicht dem gewünschten AddressFamily
+                }
+
+                // Versuche Hostname aufzulösen
+                var hostEntry = await Dns.GetHostEntryAsync(target);
+                if (hostEntry?.AddressList == null || hostEntry.AddressList.Length == 0)
+                {
+                    return null;
+                }
+
+                // Finde eine Adresse mit dem gewünschten AddressFamily
+                var address = hostEntry.AddressList.FirstOrDefault(a => a.AddressFamily == addressFamily);
+                if (address == null)
+                {
+                    return null;
+                }
+
+                return await ping.SendPingAsync(address, 3000);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private enum ResponseType
+        {
+            IPv4,
+            IPv6
+        }
+
+        private void UpdatePingResult(PingTarget target, PingReply? reply, ResponseType type)
+        {
+            if (reply != null && reply.Status == IPStatus.Success)
+            {
+                var responseTimeStr = $"{reply.RoundtripTime} ms";
+
+                // Ampel-Farbe basierend auf Antwortzeit
+                var statusColor = reply.RoundtripTime switch
+                {
+                    < 50 => new SolidColorBrush(Colors.Green),    // Grün
+                    < 150 => new SolidColorBrush(Colors.Yellow),  // Gelb
+                    _ => new SolidColorBrush(Colors.Orange)       // Orange
+                };
+
+                if (type == ResponseType.IPv4)
+                {
+                    target.ResponseTimeIpv4 = responseTimeStr;
+                    target.StatusColorIpv4 = statusColor;
+                }
+                else
+                {
+                    target.ResponseTimeIpv6 = responseTimeStr;
+                    target.StatusColorIpv6 = statusColor;
+                }
+            }
+            else
+            {
+                var statusColor = new SolidColorBrush(Colors.Red); // Rot für Fehler/Timeout
+
+                if (type == ResponseType.IPv4)
+                {
+                    target.ResponseTimeIpv4 = "Timeout";
+                    target.StatusColorIpv4 = statusColor;
+                }
+                else
+                {
+                    target.ResponseTimeIpv6 = "Timeout";
+                    target.StatusColorIpv6 = statusColor;
+                }
             }
         }
 
