@@ -291,11 +291,15 @@ namespace neTiPx.Views
                 {
                     target.ResponseTimeIpv4 = responseTimeStr;
                     target.StatusColorIpv4 = statusColor;
+                    target.PingCountIpv4++;
+                    target.AddResponseTimeIpv4(reply.RoundtripTime);
                 }
                 else
                 {
                     target.ResponseTimeIpv6 = responseTimeStr;
                     target.StatusColorIpv6 = statusColor;
+                    target.PingCountIpv6++;
+                    target.AddResponseTimeIpv6(reply.RoundtripTime);
                 }
             }
             else
@@ -306,11 +310,15 @@ namespace neTiPx.Views
                 {
                     target.ResponseTimeIpv4 = "Timeout";
                     target.StatusColorIpv4 = statusColor;
+                    target.PingCountIpv4++;
+                    target.TimeoutCountIpv4++;
                 }
                 else
                 {
                     target.ResponseTimeIpv6 = "Timeout";
                     target.StatusColorIpv6 = statusColor;
+                    target.PingCountIpv6++;
+                    target.TimeoutCountIpv6++;
                 }
             }
         }

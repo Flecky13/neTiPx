@@ -124,9 +124,12 @@
                                                     CornerRadius="4"
                                                     Padding="12"
                                                     Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,100,30,100,30,Auto" ColumnSpacing="12">
+                                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,100,30,100,30,Auto" ColumnSpacing="12" RowSpacing="8">
+                                                        <!-- Zeile 1: Aktuelle Daten -->
+
                                                         <!-- Adresse/IP -->
                                                         <TextBox
+                                                            Grid.Row="0"
                                                             Grid.Column="0"
                                                             Text="{Binding Target, Mode=OneWay}"
                                                             IsReadOnly="True"
@@ -134,6 +137,7 @@
 
                                                         <!-- Antwortzeit IPv4 -->
                                                         <TextBox
+                                                            Grid.Row="0"
                                                             Grid.Column="1"
                                                             Text="{Binding ResponseTimeIpv4, Mode=OneWay}"
                                                             IsReadOnly="True"
@@ -143,6 +147,7 @@
 
                                                         <!-- Ampel IPv4 -->
                                                         <Ellipse
+                                                            Grid.Row="0"
                                                             Grid.Column="2"
                                                             Width="12"
                                                             Height="12"
@@ -154,6 +159,7 @@
 
                                                         <!-- Antwortzeit IPv6 -->
                                                         <TextBox
+                                                            Grid.Row="0"
                                                             Grid.Column="3"
                                                             Text="{Binding ResponseTimeIpv6, Mode=OneWay}"
                                                             IsReadOnly="True"
@@ -163,6 +169,7 @@
 
                                                         <!-- Ampel IPv6 -->
                                                         <Ellipse
+                                                            Grid.Row="0"
                                                             Grid.Column="4"
                                                             Width="12"
                                                             Height="12"
@@ -174,6 +181,7 @@
 
                                                         <!-- Löschen Button -->
                                                         <Button
+                                                            Grid.Row="0"
                                                             Grid.Column="5"
                                                             Click="DeletePingTarget_Click"
                                                             Tag="{Binding}"
@@ -183,6 +191,30 @@
                                                             MinWidth="0">
                                                             <FontIcon Glyph="&#xE74D;" FontSize="16" />
                                                         </Button>
+
+                                                        <!-- Zeile 2: Statistiken -->
+
+                                                        <!-- Statistiken gesamt wenn beide sichtbar, sonst nur eine -->
+                                                        <StackPanel
+                                                            Grid.Row="1"
+                                                            Grid.Column="0"
+                                                            Grid.ColumnSpan="6"
+                                                            Orientation="Horizontal"
+                                                            Spacing="24"
+                                                            Margin="8,0,0,0">
+                                                            <TextBlock
+                                                                Text="{Binding StatisticsIpv4}"
+                                                                FontSize="13"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                VerticalAlignment="Center"
+                                                                Visibility="{Binding ShowIPv4}" />
+                                                            <TextBlock
+                                                                Text="{Binding StatisticsIpv6}"
+                                                                FontSize="13"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                VerticalAlignment="Center"
+                                                                Visibility="{Binding ShowIPv6}" />
+                                                        </StackPanel>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
