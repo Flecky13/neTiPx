@@ -4,6 +4,17 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0.1]
+
+### Added
+- Aufgelöste IP-Adressen werden in der Ping-Statistik angezeigt (unterhalb jeder Zeile für Hostnamen)
+- Aufgelöste IP-Adressen werden ins Ping-Log geschrieben
+
+### Changed
+- Ping-Ziele werden jetzt in XML-Datei (PingTargets.xml) statt config.ini gespeichert
+- Ping-Log-Format optimiert: `Protokoll: Zeit;DN;IP;Antwortzeit`
+- Nicht verfügbare Werte (DN/IP) werden als "nicht bekannt" ins Log geschrieben
+
 ## [1.2.0.0]
 
 ### Added
