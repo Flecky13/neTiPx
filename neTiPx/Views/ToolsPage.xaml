@@ -302,10 +302,10 @@
                                     Grid.Row="0"
                                     Style="{StaticResource CardBorder}"
                                     Padding="16">
-                                    <StackPanel Spacing="12">
-                                        <TextBlock Text="WLAN-Netzwerke scannen" FontWeight="SemiBold" />
-                                        <Button Content="Scan starten" Command="{Binding ScanWifiCommand}" Style="{StaticResource AccentButtonStyle}" />
-                                    </StackPanel>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                        <TextBlock Text="WLAN-Netzwerke scannen" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Content="Scan starten" Command="{Binding ScanWifiCommand}" Style="{StaticResource AccentButtonStyle}" />
+                                    </Grid>
                                 </Border>
 
                                 <!-- Mitte: Netzwerk-Liste -->
