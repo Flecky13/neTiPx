@@ -86,7 +86,7 @@
                                         <NumberBox
                                             x:Name="PingIntervalNumberBox"
                                             Grid.Column="1"
-                                            Header="Sekunden"
+                                            Header="Intervall (Sek.)"
                                             Value="5"
                                             Minimum="1"
                                             Maximum="60"
