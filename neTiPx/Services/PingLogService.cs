@@ -85,6 +85,61 @@ namespace neTiPx.Services
             Process.Start(psi);
         }
 
+        public bool LogFileExists(string target)
+        {
+            var filePath = GetLogFilePath(target);
+            return File.Exists(filePath);
+        }
+
+        public bool TryDeleteLogFile(string target)
+        {
+            try
+            {
+                var filePath = GetLogFilePath(target);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool TryExportAndDeleteLogFile(string target, string destinationPath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(destinationPath))
+                {
+                    return false;
+                }
+
+                var sourcePath = GetLogFilePath(target);
+                if (!File.Exists(sourcePath))
+                {
+                    return false;
+                }
+
+                var destinationDirectory = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrWhiteSpace(destinationDirectory))
+                {
+                    Directory.CreateDirectory(destinationDirectory);
+                }
+
+                File.Copy(sourcePath, destinationPath, true);
+                File.Delete(sourcePath);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static string BuildSafeTargetName(string target)
         {
             var source = string.IsNullOrWhiteSpace(target) ? "target" : target.Trim();

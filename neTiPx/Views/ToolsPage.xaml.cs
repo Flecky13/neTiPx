@@ -7,12 +7,15 @@ using neTiPx.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace neTiPx.Views
 {
@@ -151,10 +154,16 @@ namespace neTiPx.Views
             NewPingTargetTextBox.Text = string.Empty;
         }
 
-        private void DeletePingTarget_Click(object sender, RoutedEventArgs e)
+        private async void DeletePingTarget_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is PingTarget target)
             {
+                var deleteConfirmed = await ConfirmLogDeleteActionAsync(target);
+                if (!deleteConfirmed)
+                {
+                    return;
+                }
+
                 // Timer stoppen
                 if (_pingTimers.TryGetValue(target, out var cts))
                 {
@@ -167,6 +176,67 @@ namespace neTiPx.Views
                 PingTargets.Remove(target);
                 SavePingTargets();
             }
+        }
+
+        private async Task<bool> ConfirmLogDeleteActionAsync(PingTarget target)
+        {
+            if (!_pingLogService.LogFileExists(target.Target))
+            {
+                return true;
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = "Log-Datei beim Löschen",
+                Content = "Soll die zugehörige Log-Datei ebenfalls gelöscht werden?",
+                PrimaryButtonText = "Ja",
+                SecondaryButtonText = "Nein",
+                CloseButtonText = "Abbrechen",
+                DefaultButton = ContentDialogButton.Secondary,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                _pingLogService.TryDeleteLogFile(target.Target);
+                return true;
+            }
+
+            if (result == ContentDialogResult.Secondary)
+            {
+                await SaveLogFileAsAndDeleteSourceAsync(target.Target);
+                return true;
+            }
+
+            return false;
+        }
+
+        private async Task SaveLogFileAsAndDeleteSourceAsync(string target)
+        {
+            if (!_pingLogService.LogFileExists(target))
+            {
+                return;
+            }
+
+            var sourceLogPath = _pingLogService.GetLogFilePath(target);
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = Path.GetFileName(sourceLogPath)
+            };
+            picker.FileTypeChoices.Add("Log-Datei", new List<string> { ".log" });
+
+            var hwnd = Helpers.WindowHelper.GetWindowHandle(App.MainWindow);
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            var saveFile = await picker.PickSaveFileAsync();
+            if (saveFile == null)
+            {
+                return;
+            }
+
+            _pingLogService.TryExportAndDeleteLogFile(target, saveFile.Path);
         }
 
         private void PingTargetTextBox_LostFocus(object sender, RoutedEventArgs e)
