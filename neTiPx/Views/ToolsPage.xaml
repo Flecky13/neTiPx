@@ -104,19 +104,24 @@
 
                             <!-- Ping-Ziele Liste -->
                             <Border Style="{StaticResource CardBorder}" Padding="16">
-                                <StackPanel Spacing="12">
-                                    <!-- Überschrift mit Spalten-Labels -->
-                                    <Grid ColumnDefinitions="*,120,100,30,100,30,Auto,Auto,80" ColumnSpacing="12">
-                                        <TextBlock Text="Adresse" FontWeight="SemiBold" Grid.Column="0" />
-                                        <TextBlock Text="Intervall" FontWeight="SemiBold" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="IPv4" FontWeight="SemiBold" Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="" Grid.Column="3" />
-                                        <TextBlock Text="IPv6" FontWeight="SemiBold" Grid.Column="4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="" Grid.Column="5" />
-                                        <TextBlock Text="" Grid.Column="6" />
-                                        <TextBlock Text="Log" FontWeight="SemiBold" Grid.Column="7" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="Aktiv" FontWeight="SemiBold" Grid.Column="8" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
-                                    </Grid>
+                                <StackPanel Spacing="8">
+                                    <!-- Header-Zeile im selben Layout wie Datenzeilen -->
+                                    <Border
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="12">
+                                        <Grid ColumnDefinitions="*,80,84,20,84,20,Auto,Auto,44" ColumnSpacing="8">
+                                            <TextBlock Text="Adresse" FontWeight="SemiBold" Grid.Column="0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                            <TextBlock Text="Intervall" FontWeight="SemiBold" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                            <TextBlock Text="IPv4" FontWeight="SemiBold" Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                            <TextBlock Text="" Grid.Column="3" />
+                                            <TextBlock Text="IPv6" FontWeight="SemiBold" Grid.Column="4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                            <TextBlock Text="" Grid.Column="5" />
+                                            <TextBlock Text="Löschen" FontWeight="SemiBold" Grid.Column="6" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Log" FontWeight="SemiBold" Grid.Column="7" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Aktiv" FontWeight="SemiBold" Grid.Column="8" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
 
                                     <ItemsControl x:Name="PingTargetsItemsControl" ItemsSource="{Binding PingTargets}">
                                         <ItemsControl.ItemTemplate>
@@ -127,7 +132,7 @@
                                                     CornerRadius="4"
                                                     Padding="12"
                                                     Margin="0,0,0,8">
-                                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,120,100,30,100,30,Auto,Auto,80" ColumnSpacing="12" RowSpacing="8">
+                                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,80,84,20,84,20,Auto,Auto,44" ColumnSpacing="8" RowSpacing="8">
                                                         <!-- Zeile 1: Aktuelle Daten -->
 
                                                         <!-- Adresse/IP -->
@@ -150,6 +155,8 @@
                                                             SpinButtonPlacementMode="Compact"
                                                             Tag="{Binding}"
                                                             ValueChanged="PingIntervalNumberBox_ValueChanged"
+                                                            MinWidth="80"
+                                                            MaxWidth="80"
                                                             VerticalAlignment="Center" />
 
                                                         <!-- Antwortzeit IPv4 -->
@@ -159,6 +166,8 @@
                                                             Text="{Binding ResponseTimeIpv4, Mode=OneWay}"
                                                             IsReadOnly="True"
                                                             PlaceholderText="-- ms"
+                                                            MinWidth="84"
+                                                            MaxWidth="84"
                                                             VerticalAlignment="Center"
                                                             Visibility="{Binding ShowIPv4}" />
 
@@ -181,6 +190,8 @@
                                                             Text="{Binding ResponseTimeIpv6, Mode=OneWay}"
                                                             IsReadOnly="True"
                                                             PlaceholderText="-- ms"
+                                                            MinWidth="84"
+                                                            MaxWidth="84"
                                                             VerticalAlignment="Center"
                                                             Visibility="{Binding ShowIPv6}" />
 
