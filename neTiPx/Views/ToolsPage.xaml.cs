@@ -30,6 +30,8 @@ namespace neTiPx.Views
         private const int WifiListBaseHeight = 240;
         private const int MainWindowMinHeight = 950;
         private AppWindow? _mainAppWindow;
+        private string _wifiSortColumn = string.Empty;
+        private bool _wifiSortAscending = true;
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
         private readonly Dictionary<PingTarget, CancellationTokenSource> _pingTimers = new Dictionary<PingTarget, CancellationTokenSource>();
         private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
@@ -67,6 +69,8 @@ namespace neTiPx.Views
                 _mainAppWindow.Changed += MainAppWindow_Changed;
                 UpdateWifiListHeight();
             }
+
+            UpdateWifiHeaderLabels();
 
             // Wenn WLAN-Panel sichtbar ist, initialen Scan durchführen
             if (WlanPanel != null && WlanPanel.Visibility == Visibility.Visible && DataContext is ToolsViewModel vm)
@@ -690,6 +694,95 @@ namespace neTiPx.Views
             int networkListHeight = WifiListBaseHeight + deltaHeight;
 
             WifiNetworksListBox.MaxHeight = networkListHeight;
+        }
+
+        private void WifiHeader_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not ToolsViewModel vm || sender is not Button button || button.Tag is not string column)
+            {
+                return;
+            }
+
+            if (string.Equals(_wifiSortColumn, column, StringComparison.OrdinalIgnoreCase))
+            {
+                _wifiSortAscending = !_wifiSortAscending;
+            }
+            else
+            {
+                _wifiSortColumn = column;
+                _wifiSortAscending = true;
+            }
+
+            ApplyWifiSorting(vm);
+            UpdateWifiHeaderLabels();
+        }
+
+        private void UpdateWifiHeaderLabels()
+        {
+            if (WifiHeaderStrength == null || WifiHeaderSsid == null || WifiHeaderSignal == null || WifiHeaderBssid == null)
+            {
+                return;
+            }
+
+            WifiHeaderStrength.Content = GetWifiHeaderLabel("Stärke", "strength");
+            WifiHeaderSsid.Content = GetWifiHeaderLabel("SSID", "ssid");
+            WifiHeaderSignal.Content = GetWifiHeaderLabel("Signal", "signal");
+            WifiHeaderBssid.Content = GetWifiHeaderLabel("BSSID", "bssid");
+        }
+
+        private string GetWifiHeaderLabel(string label, string column)
+        {
+            if (!string.Equals(_wifiSortColumn, column, StringComparison.OrdinalIgnoreCase))
+            {
+                return label;
+            }
+
+            return _wifiSortAscending ? $"{label} ▲" : $"{label} ▼";
+        }
+
+        private void ApplyWifiSorting(ToolsViewModel vm)
+        {
+            if (vm.WifiNetworks.Count <= 1)
+            {
+                return;
+            }
+
+            IEnumerable<WifiNetwork> ordered = _wifiSortColumn switch
+            {
+                "strength" => _wifiSortAscending
+                    ? vm.WifiNetworks.OrderBy(n => n.SignalStrengthPercent)
+                    : vm.WifiNetworks.OrderByDescending(n => n.SignalStrengthPercent),
+                "signal" => _wifiSortAscending
+                    ? vm.WifiNetworks.OrderBy(n => n.SignalStrengthPercent)
+                    : vm.WifiNetworks.OrderByDescending(n => n.SignalStrengthPercent),
+                "bssid" => _wifiSortAscending
+                    ? vm.WifiNetworks.OrderBy(n => n.BSSID)
+                    : vm.WifiNetworks.OrderByDescending(n => n.BSSID),
+                _ => _wifiSortAscending
+                    ? vm.WifiNetworks.OrderBy(n => n.SSID)
+                    : vm.WifiNetworks.OrderByDescending(n => n.SSID)
+            };
+
+            var selected = WifiNetworksListBox?.SelectedItem as WifiNetwork;
+            var sorted = ordered.ToList();
+
+            vm.WifiNetworks.Clear();
+            foreach (var network in sorted)
+            {
+                vm.WifiNetworks.Add(network);
+            }
+
+            if (selected != null)
+            {
+                var selectedAfterSort = vm.WifiNetworks.FirstOrDefault(n =>
+                    string.Equals(n.BSSID, selected.BSSID, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(n.SSID, selected.SSID, StringComparison.OrdinalIgnoreCase));
+
+                if (selectedAfterSort != null && WifiNetworksListBox != null)
+                {
+                    WifiNetworksListBox.SelectedItem = selectedAfterSort;
+                }
+            }
         }
 
         private void WifiNetworksListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -317,10 +317,10 @@
                                         <!-- Tabellen-Header -->
                                         <Border Grid.Row="0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="2,4">
                                             <Grid ColumnDefinitions="50,200,120,120" ColumnSpacing="4">
-                                                <TextBlock Grid.Column="0" Text=" " FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <TextBlock Grid.Column="1" Text="SSID" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <TextBlock Grid.Column="2" Text="Signal" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" />
-                                                <TextBlock Grid.Column="3" Text="BSSID" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Right" />
+                                                <Button x:Name="WifiHeaderStrength" Grid.Column="0" Content="Stärke" Click="WifiHeader_Click" Tag="strength" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" Padding="0" MinHeight="0" MinWidth="0" />
+                                                <Button x:Name="WifiHeaderSsid" Grid.Column="1" Content="SSID" Click="WifiHeader_Click" Tag="ssid" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Left" Padding="0" MinHeight="0" MinWidth="0" />
+                                                <Button x:Name="WifiHeaderSignal" Grid.Column="2" Content="Signal" Click="WifiHeader_Click" Tag="signal" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" Padding="0" MinHeight="0" MinWidth="0" />
+                                                <Button x:Name="WifiHeaderBssid" Grid.Column="3" Content="BSSID" Click="WifiHeader_Click" Tag="bssid" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Right" Padding="0" MinHeight="0" MinWidth="0" />
                                             </Grid>
                                         </Border>
 
