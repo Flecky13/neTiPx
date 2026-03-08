@@ -27,7 +27,7 @@ namespace neTiPx.Views
         private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private readonly PingLogService _pingLogService = new PingLogService();
         private readonly SettingsService _settingsService = new SettingsService();
-        private const int WifiListBaseHeight = 200;
+        private const int WifiListBaseHeight = 240;
         private const int MainWindowMinHeight = 950;
         private AppWindow? _mainAppWindow;
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
