@@ -371,6 +371,7 @@ namespace neTiPx.Views
 
             if (isEnabled)
             {
+                DetermineAddressType(target);
                 StartPingingAsync(target);
             }
             else
@@ -489,12 +490,16 @@ namespace neTiPx.Views
                     // IPv4-Adresse
                     target.ShowIPv4 = Visibility.Visible;
                     target.ShowIPv6 = Visibility.Collapsed;
+                    target.ResponseTimeIpv6 = "ungültig";
+                    target.StatusColorIpv6 = new SolidColorBrush(Colors.Gray);
                 }
                 else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
                     // IPv6-Adresse
                     target.ShowIPv4 = Visibility.Collapsed;
                     target.ShowIPv6 = Visibility.Visible;
+                    target.ResponseTimeIpv4 = "ungültig";
+                    target.StatusColorIpv4 = new SolidColorBrush(Colors.Gray);
                 }
             }
             else

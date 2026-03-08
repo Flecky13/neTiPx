@@ -175,8 +175,7 @@
                                                             PlaceholderText="-- ms"
                                                             MinWidth="84"
                                                             MaxWidth="84"
-                                                            VerticalAlignment="Center"
-                                                            Visibility="{Binding ShowIPv4}" />
+                                                            VerticalAlignment="Center" />
 
                                                         <!-- Ampel IPv4 -->
                                                         <Ellipse
@@ -187,8 +186,7 @@
                                                             Fill="{Binding StatusColorIpv4}"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center"
-                                                            ToolTipService.ToolTip="IPv4 Status"
-                                                            Visibility="{Binding ShowIPv4}" />
+                                                            ToolTipService.ToolTip="IPv4 Status" />
 
                                                         <!-- Antwortzeit IPv6 -->
                                                         <TextBox
@@ -199,8 +197,7 @@
                                                             PlaceholderText="-- ms"
                                                             MinWidth="84"
                                                             MaxWidth="84"
-                                                            VerticalAlignment="Center"
-                                                            Visibility="{Binding ShowIPv6}" />
+                                                            VerticalAlignment="Center" />
 
                                                         <!-- Ampel IPv6 -->
                                                         <Ellipse
@@ -211,8 +208,7 @@
                                                             Fill="{Binding StatusColorIpv6}"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center"
-                                                            ToolTipService.ToolTip="IPv6 Status"
-                                                            Visibility="{Binding ShowIPv6}" />
+                                                            ToolTipService.ToolTip="IPv6 Status" />
 
                                                         <!-- Löschen Button -->
                                                         <Button
