@@ -327,15 +327,21 @@ namespace neTiPx.Views
             }
             catch
             {
-                _pingLogService.AppendPingResult(target.Target, "IPv4", "Fehler");
-                _pingLogService.AppendPingResult(target.Target, "IPv6", "Fehler");
-
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    target.ResponseTimeIpv4 = "Fehler";
-                    target.StatusColorIpv4 = new SolidColorBrush(Colors.Red);
-                    target.ResponseTimeIpv6 = "Fehler";
-                    target.StatusColorIpv6 = new SolidColorBrush(Colors.Red);
+                    if (target.ShowIPv4 == Visibility.Visible)
+                    {
+                        target.ResponseTimeIpv4 = "Fehler";
+                        target.StatusColorIpv4 = new SolidColorBrush(Colors.Red);
+                        _pingLogService.AppendPingResult(target.Target, "IPv4", "Fehler");
+                    }
+
+                    if (target.ShowIPv6 == Visibility.Visible)
+                    {
+                        target.ResponseTimeIpv6 = "Fehler";
+                        target.StatusColorIpv6 = new SolidColorBrush(Colors.Red);
+                        _pingLogService.AppendPingResult(target.Target, "IPv6", "Fehler");
+                    }
                 });
             }
         }
@@ -413,6 +419,11 @@ namespace neTiPx.Views
 
         private void UpdatePingResult(PingTarget target, PingReply? reply, ResponseType type)
         {
+            if (!ShouldHandleResponseType(target, type))
+            {
+                return;
+            }
+
             if (reply != null && reply.Status == IPStatus.Success)
             {
                 var responseTimeStr = $"{reply.RoundtripTime} ms";
@@ -463,6 +474,16 @@ namespace neTiPx.Views
                     _pingLogService.AppendPingResult(target.Target, "IPv6", "Timeout");
                 }
             }
+        }
+
+        private static bool ShouldHandleResponseType(PingTarget target, ResponseType type)
+        {
+            return type switch
+            {
+                ResponseType.IPv4 => target.ShowIPv4 == Visibility.Visible,
+                ResponseType.IPv6 => target.ShowIPv6 == Visibility.Visible,
+                _ => true
+            };
         }
 
         private void SavePingTargets()
