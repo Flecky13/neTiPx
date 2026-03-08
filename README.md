@@ -14,8 +14,11 @@
 - [Screenshots](#-screenshots)
   - [Adapter-Übersicht](#adapter-übersicht)
   - [IP-Konfiguration](#ip-konfiguration)
+  - [Ping Tool](#ping-tool)
   - [Einstellungen](#einstellungen)
 - [Funktionen im Detail](#-funktionen-im-detail)
+  - [PING Tool](#ping-tool-1)
+  - [Ping-Logging](#ping-logging)
 - [Systemanforderungen](#-systemanforderungen)
 - [Installation](#-installation)
 
@@ -30,6 +33,9 @@
 - 🎨 **Theme-Support**: Anpassbare Farbthemen (Hell/Dunkel/System) mit mehreren vordefinierten Farbschemata
 - 📍 **System Tray Integration**: Minimierung in die Taskleiste mit Hover-Fenster für schnelle Netzwerk-Infos
 - 🚀 **Autostart**: Optional beim Systemstart starten
+- 🛰️ **PING Tool**: Mehrere Ziele parallel überwachen (IPv4/IPv6), pro Ziel aktivierbar/deaktivierbar
+- 📝 **Ping-Logging**: Automatische Log-Dateien pro Ziel inklusive Öffnen, Exportieren und Löschen
+- 🧭 **Hintergrundbetrieb**: Pings laufen optional weiter, wenn die Ping-Seite nicht aktiv ist
 
 zurück zum
 [Inhaltsverzeichnis]#-Inhaltsverzeichnis
@@ -69,6 +75,20 @@ Verwalten Sie mehrere IP-Profile und wechseln Sie schnell zwischen verschiedenen
   - 🔴 Rot: Nicht erreichbar
 - **Ping-Anzeige**: Zeigt aktuelle Ping-Zeiten für Gateway und DNS-Server
 
+### Ping Tool
+
+Das Ping Tool ermöglicht die Überwachung mehrerer Ziele mit eigener Taktung und Protokollanzeige:
+
+![Ping Tool](Bilder/Tool_Page.png)
+
+**Funktionen:**
+- **Mehrere Ziele**: IPs oder Hostnamen hinzufügen und parallel überwachen
+- **Intervall pro Ziel**: Eigene Ping-Frequenz je Eintrag
+- **IPv4/IPv6 Anzeige**: Antwortzeit und Status-Ampel pro Protokoll
+- **Aktiv-Status pro Zeile**: Einzelne Ziele unabhängig ein- und ausschalten
+- **Hintergrund-Option**: Pings laufen optional weiter, auch wenn die Ping-Seite nicht im Fokus ist
+- **Status für nicht genutzte Protokolle**: Anzeige `inaktiv` mit grauer Ampel
+
 ### Einstellungen
 
 Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
@@ -89,6 +109,11 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - **Bei Windows-Start**: Startet die Anwendung automatisch beim Systemstart
 - **Minimiert starten**: Startet die Anwendung minimiert im System Tray
 
+#### 📝 Ping-Logging
+- **Log-Ordner wählen**: Eigener Speicherort für Ping-Logs auswählbar
+- **Standard-Ordner**: Schnell auf den Standardpfad zurücksetzen
+- **Pfadanzeige**: Dynamisch angepasste Ein-Zeilen-Anzeige mit Tooltip für den vollständigen Pfad
+
 #### 🎨 Farbthemen
 - **Theme-Auswahl**: Wählen Sie aus mehreren vordefinierten Farbthemen
   - Hell/Dunkel/System
@@ -101,6 +126,27 @@ zurück zum
 ---
 
 ## 🔧 Funktionen im Detail
+
+### PING Tool
+
+- **Paralleles Monitoring**: Mehrere Ziele werden gleichzeitig überwacht
+- **Zieltypen**: Unterstützt IPv4, IPv6 und Hostnamen
+- **Sichtbares Protokollverhalten**:
+  - Nicht verwendetes Protokoll zeigt `inaktiv` und eine graue Ampel
+  - Deaktiviertes Ziel zeigt `Deaktiviert` für beide Protokolle
+- **Flexible Aktivierung**:
+  - Pro Ziel über die Zeilen-Checkbox
+  - Global für Hintergrundbetrieb über `im Hintergrund weiter aktiv`
+
+### Ping-Logging
+
+- **Pro Ziel eigene Log-Datei**: Eindeutige Dateinamen, auch bei Sonderzeichen im Zielnamen
+- **CSV-Format mit Zeitstempel**: `Zeit;Ziel;Protokoll;Antwortzeit`
+- **Direkte Aktionen in der Liste**:
+  - Log-Datei öffnen
+  - Beim Löschen wahlweise mitlöschen
+  - Vor dem Löschen optional per `Speichern unter` exportieren
+- **Protokollspezifisches Logging**: Nur relevante IPv4/IPv6-Einträge werden geschrieben
 
 ### IP-Profilverwaltung
 
