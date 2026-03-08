@@ -1,11 +1,14 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace neTiPx.Views
 {
@@ -28,6 +31,7 @@ namespace neTiPx.Views
         private readonly ColorThemeApplier _colorThemeApplier;
         private readonly AdapterStore _adapterStore;
         private readonly AutostartService _autostartService;
+        private readonly PingLogService _pingLogService;
         private List<ColorTheme> _colorThemes = new();
         private List<string> _adapterList = new();
         private bool _isLoading = true;
@@ -41,6 +45,7 @@ namespace neTiPx.Views
             _colorThemeApplier = new ColorThemeApplier();
             _adapterStore = new AdapterStore();
             _autostartService = new AutostartService();
+            _pingLogService = new PingLogService();
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -147,7 +152,42 @@ namespace neTiPx.Views
                 CloseToTrayCheckBox.IsChecked = _settingsService.GetCloseToTrayOnClose();
             }
 
+            if (PingLogFolderTextBox != null)
+            {
+                PingLogFolderTextBox.Text = _pingLogService.GetLogFolderPath();
+            }
+
             _isLoading = false;
+        }
+
+        private async void SelectPingLogFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FolderPicker();
+            picker.FileTypeFilter.Add("*");
+
+            var hwnd = WindowHelper.GetWindowHandle(App.MainWindow);
+            InitializeWithWindow.Initialize(picker, hwnd);
+
+            var selectedFolder = await picker.PickSingleFolderAsync();
+            if (selectedFolder == null)
+            {
+                return;
+            }
+
+            _settingsService.SetPingLogFolderPath(selectedFolder.Path);
+            if (PingLogFolderTextBox != null)
+            {
+                PingLogFolderTextBox.Text = selectedFolder.Path;
+            }
+        }
+
+        private void ResetPingLogFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            _settingsService.SetPingLogFolderPath(string.Empty);
+            if (PingLogFolderTextBox != null)
+            {
+                PingLogFolderTextBox.Text = _pingLogService.GetLogFolderPath();
+            }
         }
 
         private void ColorSchemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -19,8 +19,10 @@ namespace neTiPx.Views
     public partial class ToolsPage : Page
     {
         private readonly ConfigStore _configStore = new ConfigStore();
+        private readonly PingLogService _pingLogService = new PingLogService();
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
         private readonly Dictionary<PingTarget, CancellationTokenSource> _pingTimers = new Dictionary<PingTarget, CancellationTokenSource>();
+        private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
 
         public ToolsPage()
         {
@@ -85,17 +87,28 @@ namespace neTiPx.Views
                     {
                         Target = ip,
                         IntervalSeconds = intervalSeconds,
+                        IsPingEnabled = true,
                         ResponseTimeIpv4 = string.Empty,
                         ResponseTimeIpv6 = string.Empty,
                         StatusColorIpv4 = new SolidColorBrush(Colors.Gray),
                         StatusColorIpv6 = new SolidColorBrush(Colors.Gray)
                     };
 
+                    if (values.TryGetValue($"Tools.Ping{i}.Enabled", out var enabledStr) && bool.TryParse(enabledStr, out var enabled))
+                    {
+                        pingTarget.IsPingEnabled = enabled;
+                    }
+
+                    _lastValidTargets[pingTarget] = pingTarget.Target;
+
                     // Bestimme Adresstyp
                     DetermineAddressType(pingTarget);
 
                     PingTargets.Add(pingTarget);
-                    StartPingingAsync(pingTarget);
+                    if (pingTarget.IsPingEnabled)
+                    {
+                        StartPingingAsync(pingTarget);
+                    }
                 }
             }
         }
@@ -119,11 +132,14 @@ namespace neTiPx.Views
             {
                 Target = target,
                 IntervalSeconds = intervalSeconds,
+                IsPingEnabled = true,
                 ResponseTimeIpv4 = string.Empty,
                 ResponseTimeIpv6 = string.Empty,
                 StatusColorIpv4 = new SolidColorBrush(Colors.Gray),
                 StatusColorIpv6 = new SolidColorBrush(Colors.Gray)
             };
+
+            _lastValidTargets[pingTarget] = pingTarget.Target;
 
             // Bestimme Adresstyp
             DetermineAddressType(pingTarget);
@@ -146,13 +162,79 @@ namespace neTiPx.Views
                     _pingTimers.Remove(target);
                 }
 
+                _lastValidTargets.Remove(target);
+
                 PingTargets.Remove(target);
                 SavePingTargets();
             }
         }
 
+        private void PingTargetTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox textBox || textBox.Tag is not PingTarget target)
+            {
+                return;
+            }
+
+            var newValue = textBox.Text.Trim();
+            _lastValidTargets.TryGetValue(target, out var lastValidValue);
+
+            if (string.IsNullOrWhiteSpace(newValue))
+            {
+                target.Target = lastValidValue ?? string.Empty;
+                return;
+            }
+
+            var duplicateExists = PingTargets.Any(p => !ReferenceEquals(p, target) && p.Target.Equals(newValue, StringComparison.OrdinalIgnoreCase));
+            if (duplicateExists)
+            {
+                target.Target = lastValidValue ?? string.Empty;
+                return;
+            }
+
+            if (!string.Equals(target.Target, newValue, StringComparison.Ordinal))
+            {
+                target.Target = newValue;
+            }
+
+            _lastValidTargets[target] = target.Target;
+            DetermineAddressType(target);
+            SavePingTargets();
+        }
+
+        private void PingIntervalNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (sender.Tag is not PingTarget target)
+            {
+                return;
+            }
+
+            if (double.IsNaN(sender.Value) || double.IsInfinity(sender.Value))
+            {
+                sender.Value = target.IntervalSeconds;
+                return;
+            }
+
+            var clamped = Math.Clamp((int)Math.Round(sender.Value), 1, 3600);
+            if (target.IntervalSeconds != clamped)
+            {
+                target.IntervalSeconds = clamped;
+                SavePingTargets();
+            }
+
+            if (Math.Abs(sender.Value - clamped) > double.Epsilon)
+            {
+                sender.Value = clamped;
+            }
+        }
+
         private async void StartPingingAsync(PingTarget target)
         {
+            if (_pingTimers.ContainsKey(target))
+            {
+                return;
+            }
+
             var cts = new CancellationTokenSource();
             _pingTimers[target] = cts;
 
@@ -167,6 +249,59 @@ namespace neTiPx.Views
             catch (TaskCanceledException)
             {
                 // Timer wurde gestoppt
+            }
+        }
+
+        private void StopPinging(PingTarget target)
+        {
+            if (_pingTimers.TryGetValue(target, out var cts))
+            {
+                cts.Cancel();
+                _pingTimers.Remove(target);
+            }
+
+            target.ResponseTimeIpv4 = "Deaktiviert";
+            target.StatusColorIpv4 = new SolidColorBrush(Colors.Gray);
+            target.ResponseTimeIpv6 = "Deaktiviert";
+            target.StatusColorIpv6 = new SolidColorBrush(Colors.Gray);
+        }
+
+        private void PingEnabledCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not CheckBox checkBox || checkBox.Tag is not PingTarget target)
+            {
+                return;
+            }
+
+            var isEnabled = checkBox.IsChecked == true;
+            target.IsPingEnabled = isEnabled;
+
+            if (isEnabled)
+            {
+                StartPingingAsync(target);
+            }
+            else
+            {
+                StopPinging(target);
+            }
+
+            SavePingTargets();
+        }
+
+        private void OpenPingLogButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag is not PingTarget target)
+            {
+                return;
+            }
+
+            try
+            {
+                _pingLogService.OpenLogFile(target.Target);
+            }
+            catch
+            {
+                // Datei konnte nicht geöffnet werden.
             }
         }
 
@@ -192,6 +327,9 @@ namespace neTiPx.Views
             }
             catch
             {
+                _pingLogService.AppendPingResult(target.Target, "IPv4", "Fehler");
+                _pingLogService.AppendPingResult(target.Target, "IPv6", "Fehler");
+
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     target.ResponseTimeIpv4 = "Fehler";
@@ -293,6 +431,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv4 = statusColor;
                     target.PingCountIpv4++;
                     target.AddResponseTimeIpv4(reply.RoundtripTime);
+                    _pingLogService.AppendPingResult(target.Target, "IPv4", responseTimeStr);
                 }
                 else
                 {
@@ -300,6 +439,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv6 = statusColor;
                     target.PingCountIpv6++;
                     target.AddResponseTimeIpv6(reply.RoundtripTime);
+                    _pingLogService.AppendPingResult(target.Target, "IPv6", responseTimeStr);
                 }
             }
             else
@@ -312,6 +452,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv4 = statusColor;
                     target.PingCountIpv4++;
                     target.TimeoutCountIpv4++;
+                    _pingLogService.AppendPingResult(target.Target, "IPv4", "Timeout");
                 }
                 else
                 {
@@ -319,6 +460,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv6 = statusColor;
                     target.PingCountIpv6++;
                     target.TimeoutCountIpv6++;
+                    _pingLogService.AppendPingResult(target.Target, "IPv6", "Timeout");
                 }
             }
         }
@@ -340,6 +482,7 @@ namespace neTiPx.Views
             {
                 values[$"Tools.Ping{i}.IP"] = PingTargets[i].Target;
                 values[$"Tools.Ping{i}.Interval"] = PingTargets[i].IntervalSeconds.ToString();
+                values[$"Tools.Ping{i}.Enabled"] = PingTargets[i].IsPingEnabled.ToString();
             }
 
             _configStore.WriteAll(values);

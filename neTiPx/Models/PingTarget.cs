@@ -17,6 +17,7 @@ namespace neTiPx.Models
         private int _intervalSeconds = 5;
         private Visibility _showIPv4 = Visibility.Visible;
         private Visibility _showIPv6 = Visibility.Visible;
+        private bool _isPingEnabled = true;
 
         // Statistiken IPv4
         private int _pingCountIpv4 = 0;
@@ -74,6 +75,12 @@ namespace neTiPx.Models
         {
             get => _showIPv6;
             set => SetProperty(ref _showIPv6, value);
+        }
+
+        public bool IsPingEnabled
+        {
+            get => _isPingEnabled;
+            set => SetProperty(ref _isPingEnabled, value);
         }
 
         // Statistiken IPv4

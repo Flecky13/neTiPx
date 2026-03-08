@@ -189,5 +189,18 @@ namespace neTiPx.Services
             _userSettingsStore.WriteUserSettings(settings);
         }
 
+        public string GetPingLogFolderPath()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.PingLogFolderPath ?? string.Empty;
+        }
+
+        public void SetPingLogFolderPath(string folderPath)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.PingLogFolderPath = folderPath ?? string.Empty;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
     }
 }

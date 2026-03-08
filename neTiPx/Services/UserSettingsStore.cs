@@ -21,6 +21,7 @@ namespace neTiPx.Services
             public bool CloseToTrayOnClose { get; set; } = true;
             public string? LastCheckedLatestVersion { get; set; }
             public DateTime? LastCheckedAt { get; set; }
+            public string PingLogFolderPath { get; set; } = string.Empty;
         }
 
         public UserSettings ReadUserSettings()
@@ -130,7 +131,11 @@ namespace neTiPx.Services
                 updateCheckElement.SetAttributeValue("lastCheckedAt", settings.LastCheckedAt.Value.ToString("o"));
             }
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement);
+            var pingLoggingElement = new XElement("pingLogging",
+                new XAttribute("folderPath", settings.PingLogFolderPath ?? string.Empty)
+            );
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -226,6 +231,12 @@ namespace neTiPx.Services
                     {
                         settings.LastCheckedAt = lastCheckedAt;
                     }
+                }
+
+                var pingLoggingElement = root.Element("pingLogging");
+                if (pingLoggingElement != null)
+                {
+                    settings.PingLogFolderPath = (string?)pingLoggingElement.Attribute("folderPath") ?? string.Empty;
                 }
 
                 return settings;
