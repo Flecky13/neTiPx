@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using neTiPx.Helpers;
@@ -13,6 +14,9 @@ namespace neTiPx.Services
     {
         private readonly SettingsService _settingsService = new SettingsService();
         private const string DefaultLogFolderName = "PingLogs";
+        private const string LegacyLogHeader = "Zeit;Ziel;Protokoll;Antwortzeit";
+        private const string PreviousLogHeader = "Zeit;Ziel;Protokoll;Antwortzeit;ResolvedIP";
+        private const string LogHeader = "Protokoll: Zeit;DN;IP;Antwortzeit";
 
         public string GetLogFolderPath()
         {
@@ -34,7 +38,7 @@ namespace neTiPx.Services
             return Path.Combine(GetLogFolderPath(), fileName);
         }
 
-        public void AppendPingResult(string target, string protocol, string response)
+        public void AppendPingResult(string target, string protocol, string response, string resolvedIp = "")
         {
             try
             {
@@ -46,14 +50,12 @@ namespace neTiPx.Services
                 }
 
                 Directory.CreateDirectory(directory);
-
-                if (!File.Exists(filePath))
-                {
-                    File.AppendAllLines(filePath, new[] { "Zeit;Ziel;Protokoll;Antwortzeit" });
-                }
+                EnsureLogHeader(filePath);
 
                 var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-                var line = $"{timestamp};{target};{protocol};{response}";
+                var domainName = GetDomainNameForLog(target);
+                var ipForLog = GetIpForLog(target, resolvedIp);
+                var line = $"{protocol}: {timestamp};{domainName};{ipForLog};{response}";
                 File.AppendAllLines(filePath, new[] { line });
             }
             catch
@@ -71,10 +73,7 @@ namespace neTiPx.Services
                 Directory.CreateDirectory(directory);
             }
 
-            if (!File.Exists(filePath))
-            {
-                File.AppendAllLines(filePath, new[] { "Zeit;Ziel;Protokoll;Antwortzeit" });
-            }
+            EnsureLogHeader(filePath);
 
             var psi = new ProcessStartInfo
             {
@@ -153,6 +152,51 @@ namespace neTiPx.Services
             using var sha256 = SHA256.Create();
             var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(value ?? string.Empty));
             return Convert.ToHexString(bytes.AsSpan(0, 4));
+        }
+
+        private static void EnsureLogHeader(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                File.AppendAllLines(filePath, new[] { LogHeader });
+                return;
+            }
+
+            var lines = File.ReadAllLines(filePath);
+            if (lines.Length == 0)
+            {
+                File.AppendAllLines(filePath, new[] { LogHeader });
+                return;
+            }
+
+            if (string.Equals(lines[0], LegacyLogHeader, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(lines[0], PreviousLogHeader, StringComparison.OrdinalIgnoreCase))
+            {
+                lines[0] = LogHeader;
+                File.WriteAllLines(filePath, lines);
+            }
+        }
+
+        private static string GetDomainNameForLog(string target)
+        {
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                return "nicht bekannt";
+            }
+
+            return IPAddress.TryParse(target, out _)
+                ? "nicht bekannt"
+                : target;
+        }
+
+        private static string GetIpForLog(string target, string resolvedIp)
+        {
+            if (!string.IsNullOrWhiteSpace(resolvedIp))
+            {
+                return resolvedIp;
+            }
+
+            return IPAddress.TryParse(target, out _) ? target : "nicht bekannt";
         }
     }
 }
