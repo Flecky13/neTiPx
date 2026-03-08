@@ -294,14 +294,12 @@
                         <StackPanel x:Name="WlanPanel" Spacing="16" Padding="24" Visibility="Collapsed">
                             <TextBlock Text="WLAN Scanner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
 
-                            <!-- WLAN Layout: Oben volle Breite, darunter zwei Spalten -->
-                            <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*" RowSpacing="16" ColumnSpacing="16">
+                            <!-- WLAN Layout: Oben Scan-Button, Mitte Netzwerk-Liste, unten Details -->
+                            <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*" RowSpacing="16">
 
-                                <!-- Oben: Volle Breite -->
+                                <!-- Oben: Volle Breite Scan-Button -->
                                 <Border
                                     Grid.Row="0"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="2"
                                     Style="{StaticResource CardBorder}"
                                     Padding="16">
                                     <StackPanel Spacing="12">
@@ -310,27 +308,47 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- Unten links: Netzwerk-Liste -->
+                                <!-- Mitte: Netzwerk-Liste -->
                                 <Border
                                     Grid.Row="1"
-                                    Grid.Column="0"
                                     Style="{StaticResource CardBorder}"
                                     Padding="16">
-                                    <StackPanel Spacing="8">
-                                        <TextBlock Text="Verfügbare Netzwerke" FontWeight="SemiBold" />
-                                        <ListBox x:Name="WifiNetworksListBox" ItemsSource="{Binding WifiNetworks}" MinHeight="200" SelectionChanged="WifiNetworksListBox_SelectionChanged" />
-                                    </StackPanel>
+                                    <Grid RowDefinitions="Auto,Auto,*" RowSpacing="0">
+                                        <!-- Tabellen-Header -->
+                                        <Border Grid.Row="0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="2,4">
+                                            <Grid ColumnDefinitions="50,200,120,120" ColumnSpacing="4">
+                                                <TextBlock Grid.Column="0" Text=" " FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Grid.Column="1" Text="SSID" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Grid.Column="2" Text="Signal" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" />
+                                                <TextBlock Grid.Column="3" Text="BSSID" FontWeight="SemiBold" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Right" />
+                                            </Grid>
+                                        </Border>
+
+                                        <ListBox Grid.Row="1" x:Name="WifiNetworksListBox" ItemsSource="{Binding WifiNetworks}" SelectionChanged="WifiNetworksListBox_SelectionChanged">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid ColumnDefinitions="50,200,120,120" ColumnSpacing="4" Padding="2,0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                                        <TextBlock Grid.Column="0" Text="{Binding SignalSymbol}" VerticalAlignment="Center" FontSize="12" TextAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding SSID}" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="12" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding SignalStrengthDisplay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextAlignment="Center" />
+                                                        <TextBlock Grid.Column="3" Text="{Binding BSSID}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextAlignment="Right" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Grid>
                                 </Border>
 
-                                <!-- Unten rechts: Details/Info -->
+                                <!-- Unten: Details/Info -->
                                 <Border
-                                    Grid.Row="1"
-                                    Grid.Column="1"
+                                    Grid.Row="2"
                                     Style="{StaticResource CardBorder}"
                                     Padding="16">
-                                    <StackPanel Spacing="8">
+                                    <StackPanel Spacing="8" Height="140">
                                         <TextBlock Text="Netzwerk-Details" FontWeight="SemiBold" />
-                                        <TextBlock x:Name="WifiDetailsTextBlock" Text="Wählen Sie ein Netzwerk aus..." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <TextBlock x:Name="WifiDetailsTextBlock" Text="Wählen Sie ein Netzwerk aus..." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                        </ScrollViewer>
                                     </StackPanel>
                                 </Border>
 

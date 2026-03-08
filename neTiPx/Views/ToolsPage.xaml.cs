@@ -1,7 +1,9 @@
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
 using neTiPx.ViewModels;
@@ -25,6 +27,9 @@ namespace neTiPx.Views
         private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private readonly PingLogService _pingLogService = new PingLogService();
         private readonly SettingsService _settingsService = new SettingsService();
+        private const int WifiListBaseHeight = 200;
+        private const int MainWindowMinHeight = 950;
+        private AppWindow? _mainAppWindow;
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
         private readonly Dictionary<PingTarget, CancellationTokenSource> _pingTimers = new Dictionary<PingTarget, CancellationTokenSource>();
         private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
@@ -56,6 +61,13 @@ namespace neTiPx.Views
             }
             UpdatePingingState();
 
+            _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);
+            if (_mainAppWindow != null)
+            {
+                _mainAppWindow.Changed += MainAppWindow_Changed;
+                UpdateWifiListHeight();
+            }
+
             // Wenn WLAN-Panel sichtbar ist, initialen Scan durchführen
             if (WlanPanel != null && WlanPanel.Visibility == Visibility.Visible && DataContext is ToolsViewModel vm)
             {
@@ -65,6 +77,11 @@ namespace neTiPx.Views
 
         private void ToolsPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            if (_mainAppWindow != null)
+            {
+                _mainAppWindow.Changed -= MainAppWindow_Changed;
+            }
+
             _isPingPageVisible = false;
             UpdatePingingState();
         }
@@ -654,6 +671,27 @@ namespace neTiPx.Views
             }));
         }
 
+        private void MainAppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+        {
+            if (args.DidSizeChange)
+            {
+                DispatcherQueue.TryEnqueue(UpdateWifiListHeight);
+            }
+        }
+
+        private void UpdateWifiListHeight()
+        {
+            if (WifiNetworksListBox == null || _mainAppWindow == null)
+            {
+                return;
+            }
+
+            int deltaHeight = Math.Max(0, _mainAppWindow.Size.Height - MainWindowMinHeight);
+            int networkListHeight = WifiListBaseHeight + deltaHeight;
+
+            WifiNetworksListBox.MaxHeight = networkListHeight;
+        }
+
         private void WifiNetworksListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (WifiDetailsTextBlock == null)
@@ -661,9 +699,33 @@ namespace neTiPx.Views
                 return;
             }
 
-            if (WifiNetworksListBox?.SelectedItem is string selectedNetwork && !string.IsNullOrWhiteSpace(selectedNetwork))
+            if (WifiNetworksListBox?.SelectedItem is WifiNetwork selectedNetwork)
             {
-                WifiDetailsTextBlock.Text = $"Netzwerk: {selectedNetwork}\n\nDetails werden in Kürze implementiert.";
+                // Formatiere die Netzwerk-Details
+                string band = "";
+                if (selectedNetwork.Frequency >= 2412 && selectedNetwork.Frequency <= 2484)
+                    band = " (2.4 GHz)";
+                else if (selectedNetwork.Frequency >= 5160 && selectedNetwork.Frequency <= 5885)
+                    band = " (5 GHz)";
+                else if (selectedNetwork.Frequency >= 5955 && selectedNetwork.Frequency <= 7115)
+                    band = " (6 GHz - Wi-Fi 6E)";
+
+                string securityIcon = selectedNetwork.IsSecured ? "🔒" : "🔓";
+
+                var details = $"{selectedNetwork.SignalSymbol} {selectedNetwork.SSID}\n" +
+                    $"\n" +
+                    $"BSSID: {selectedNetwork.BSSID}\n" +
+                    $"Signal: {selectedNetwork.SignalStrengthPercent}% ({selectedNetwork.SignalStrengthDbm} dBm)\n" +
+                    $"Qualität: {selectedNetwork.LinkQuality}%\n" +
+                    $"\n" +
+                    $"Kanal: {selectedNetwork.Channel}\n" +
+                    $"Frequenz: {selectedNetwork.Frequency} MHz{band}\n" +
+                    $"Sicherheit: {securityIcon} {(selectedNetwork.IsSecured ? "Gesichert" : "Offen")}\n" +
+                    $"\n" +
+                    $"Typ: {selectedNetwork.PhyType}\n" +
+                    $"Netzwerk: {selectedNetwork.NetworkType}";
+
+                WifiDetailsTextBlock.Text = details;
             }
             else
             {

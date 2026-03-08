@@ -1,6 +1,9 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.UI.Dispatching;
 using neTiPx.Helpers;
 using neTiPx.Services;
 
@@ -10,22 +13,26 @@ namespace neTiPx.ViewModels
     {
         private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private string _pingInfo = "Ping-Eintraege aus PingTargets.xml";
-        private string _wifiInfo = "Wifi-Scan via netsh.";
+        private string _wifiInfo = "Wifi-Scan via Native WiFi API";
+        private DispatcherQueue _dispatcherQueue;
 
         public ToolsViewModel()
         {
             PingEntries = new ObservableCollection<string>();
-            WifiNetworks = new ObservableCollection<string>();
+            WifiNetworks = new ObservableCollection<WifiNetwork>();
 
             RefreshPingCommand = new RelayCommand(LoadPingEntries);
-            ScanWifiCommand = new RelayCommand(ScanWifiNetworks);
+            ScanWifiCommand = new RelayCommand(ScanWifiNetworksAsync);
+
+            // Capture the current dispatcher queue
+            _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             LoadPingEntries();
         }
 
         public ObservableCollection<string> PingEntries { get; }
 
-        public ObservableCollection<string> WifiNetworks { get; }
+        public ObservableCollection<WifiNetwork> WifiNetworks { get; }
 
         public string PingInfo
         {
@@ -61,53 +68,71 @@ namespace neTiPx.ViewModels
             }
         }
 
-        private void ScanWifiNetworks()
+        private void ScanWifiNetworksAsync()
         {
-            WifiNetworks.Clear();
-            try
+            // Show loading state
+            WifiInfo = "Scanning...";
+
+            Task.Run(() =>
             {
-                var psi = new ProcessStartInfo
+                try
                 {
-                    FileName = "netsh",
-                    Arguments = "wlan show networks mode=bssid",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
+                    Debug.WriteLine("[ToolsViewModel] WiFi scan starting...");
+                    var networks = WifiScanner.ScanWifiNetworks();
 
-                using var process = Process.Start(psi);
-                if (process == null)
-                {
-                    WifiNetworks.Add("Scan fehlgeschlagen.");
-                    return;
-                }
+                    Debug.WriteLine($"[ToolsViewModel] Scan returned {networks?.Count ?? 0} networks");
 
-                var output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-
-                var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var line in lines)
-                {
-                    if (line.TrimStart().StartsWith("SSID", StringComparison.OrdinalIgnoreCase) && line.Contains(":"))
+                    // Update UI on dispatcher queue
+                    if (_dispatcherQueue != null)
                     {
-                        var name = line.Split(new[] { ':' }, 2)[1].Trim();
-                        if (!string.IsNullOrWhiteSpace(name) && !WifiNetworks.Contains(name))
+                        _dispatcherQueue.TryEnqueue(() =>
                         {
-                            WifiNetworks.Add(name);
-                        }
+                            try
+                            {
+                                WifiNetworks.Clear();
+
+                                if (networks == null || networks.Count == 0)
+                                {
+                                    WifiInfo = "Keine Netzwerke gefunden.";
+                                    Debug.WriteLine("[ToolsViewModel] No networks found or scan returned null");
+                                    return;
+                                }
+
+                                foreach (var network in networks)
+                                {
+                                    WifiNetworks.Add(network);
+                                    Debug.WriteLine($"[ToolsViewModel] Added: {network.SSID} ({network.SignalStrengthPercent}%)");
+                                }
+
+                                WifiInfo = $"Scan complete: {WifiNetworks.Count} networks found";
+                                Debug.WriteLine($"[ToolsViewModel] WiFi scan complete: {WifiNetworks.Count} networks");
+                            }
+                            catch (Exception ex)
+                            {
+                                WifiInfo = $"UI Update Error: {ex.Message}";
+                                Debug.WriteLine($"[ToolsViewModel] Error updating UI: {ex}");
+                            }
+                        });
+                    }
+                    else
+                    {
+                        WifiInfo = "Dispatcher not available";
+                        Debug.WriteLine("[ToolsViewModel] Dispatcher queue is null");
                     }
                 }
-
-                if (WifiNetworks.Count == 0)
+                catch (Exception ex)
                 {
-                    WifiNetworks.Add("Keine Netzwerke gefunden.");
+                    Debug.WriteLine($"[ToolsViewModel] WiFi scan error: {ex}");
+
+                    if (_dispatcherQueue != null)
+                    {
+                        _dispatcherQueue.TryEnqueue(() =>
+                        {
+                            WifiInfo = $"Scan error: {ex.Message}";
+                        });
+                    }
                 }
-            }
-            catch
-            {
-                WifiNetworks.Add("Scan fehlgeschlagen.");
-            }
+            });
         }
     }
 }
