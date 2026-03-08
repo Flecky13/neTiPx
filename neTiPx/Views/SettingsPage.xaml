@@ -77,11 +77,21 @@
                         <TextBlock Text="Ping-Logging" Style="{StaticResource SectionTitle}" />
                         <TextBlock Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
-                        <TextBox
-                            x:Name="PingLogFolderTextBox"
-                            Header="Log-Ordner"
-                            IsReadOnly="True"
-                            TextWrapping="Wrap" />
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Log-Ordner" FontWeight="SemiBold" FontSize="12" />
+                            <Border
+                                x:Name="PingLogFolderPathContainer"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10,8"
+                                SizeChanged="PingLogFolderPathContainer_SizeChanged">
+                                <TextBlock
+                                    x:Name="PingLogFolderPathTextBlock"
+                                    TextWrapping="NoWrap"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button

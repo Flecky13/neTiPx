@@ -5,6 +5,7 @@ using neTiPx.Models;
 using neTiPx.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using Windows.Storage.Pickers;
@@ -34,6 +35,7 @@ namespace neTiPx.Views
         private readonly PingLogService _pingLogService;
         private List<ColorTheme> _colorThemes = new();
         private List<string> _adapterList = new();
+        private string _pingLogFolderPath = string.Empty;
         private bool _isLoading = true;
 
         public SettingsPage()
@@ -152,10 +154,8 @@ namespace neTiPx.Views
                 CloseToTrayCheckBox.IsChecked = _settingsService.GetCloseToTrayOnClose();
             }
 
-            if (PingLogFolderTextBox != null)
-            {
-                PingLogFolderTextBox.Text = _pingLogService.GetLogFolderPath();
-            }
+            _pingLogFolderPath = _pingLogService.GetLogFolderPath();
+            UpdatePingLogFolderPathDisplay();
 
             _isLoading = false;
         }
@@ -175,19 +175,57 @@ namespace neTiPx.Views
             }
 
             _settingsService.SetPingLogFolderPath(selectedFolder.Path);
-            if (PingLogFolderTextBox != null)
-            {
-                PingLogFolderTextBox.Text = selectedFolder.Path;
-            }
+            _pingLogFolderPath = selectedFolder.Path;
+            UpdatePingLogFolderPathDisplay();
         }
 
         private void ResetPingLogFolderButton_Click(object sender, RoutedEventArgs e)
         {
             _settingsService.SetPingLogFolderPath(string.Empty);
-            if (PingLogFolderTextBox != null)
+            _pingLogFolderPath = _pingLogService.GetLogFolderPath();
+            UpdatePingLogFolderPathDisplay();
+        }
+
+        private void PingLogFolderPathContainer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdatePingLogFolderPathDisplay();
+        }
+
+        private void UpdatePingLogFolderPathDisplay()
+        {
+            if (PingLogFolderPathTextBlock == null)
             {
-                PingLogFolderTextBox.Text = _pingLogService.GetLogFolderPath();
+                return;
             }
+
+            var fullPath = string.IsNullOrWhiteSpace(_pingLogFolderPath)
+                ? _pingLogService.GetLogFolderPath()
+                : _pingLogFolderPath;
+
+            if (string.IsNullOrWhiteSpace(fullPath))
+            {
+                PingLogFolderPathTextBlock.Text = string.Empty;
+                ToolTipService.SetToolTip(PingLogFolderPathTextBlock, null);
+                return;
+            }
+
+            const int baseLength = 32;
+            var containerWidth = PingLogFolderPathContainer?.ActualWidth ?? 0;
+
+            // Dynamischer Anteil: mit wachsender Breite werden mehr Zeichen angezeigt.
+            // 254px gilt als Basisbreite (minimale Fensterbreite), danach +1 Zeichen je 8px.
+            var dynamicPart = containerWidth > 254
+                ? (int)Math.Floor((containerWidth - 254) / 8.0)
+                : 0;
+
+            var maxLength = Math.Max(baseLength, baseLength + dynamicPart);
+
+            Debug.WriteLine($"[PingLogPath] containerWidth={containerWidth:F1}, baseLength={baseLength}, dynamicPart={dynamicPart}, maxLength={maxLength}, fullPathLength={fullPath.Length}");
+
+            PingLogFolderPathTextBlock.Text = fullPath.Length <= maxLength
+                ? fullPath
+                : fullPath.Substring(fullPath.Length - maxLength, maxLength);
+            ToolTipService.SetToolTip(PingLogFolderPathTextBlock, fullPath);
         }
 
         private void ColorSchemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
