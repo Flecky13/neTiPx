@@ -4,6 +4,17 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0.1]
+
+### Added
+- **WLAN Scanner**: Neues Tool zum Scannen verfügbarer WLAN-Netzwerke
+
+### Changed
+- Tools-Seite um WLAN-Scanner erweitert (neben PING Tool)
+
+### Fixed
+- COM-Exceptions beim WLAN-Scan durch korrekte Dispatcher-Verwendung behoben
+
 ## [1.2.0.1]
 
 ### Added

@@ -36,6 +36,7 @@
 - 🛰️ **PING Tool**: Mehrere Ziele parallel überwachen (IPv4/IPv6), pro Ziel aktivierbar/deaktivierbar
 - 📝 **Ping-Logging**: Automatische Log-Dateien pro Ziel inklusive Öffnen, Exportieren und Löschen
 - 🧭 **Hintergrundbetrieb**: Pings laufen optional weiter, wenn die Ping-Seite nicht aktiv ist
+- 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
 
 zurück zum
 [Inhaltsverzeichnis]#-Inhaltsverzeichnis
@@ -88,6 +89,28 @@ Das Ping Tool ermöglicht die Überwachung mehrerer Ziele mit eigener Taktung un
 - **Aktiv-Status pro Zeile**: Einzelne Ziele unabhängig ein- und ausschalten
 - **Hintergrund-Option**: Pings laufen optional weiter, auch wenn die Ping-Seite nicht im Fokus ist
 - **Status für nicht genutzte Protokolle**: Anzeige `inaktiv` mit grauer Ampel
+
+### WLAN Scanner
+
+Der WLAN Scanner nutzt die native Windows WLAN API für detaillierte Netzwerkinformationen:
+
+**Funktionen:**
+- **Native API**: Direkter Zugriff auf Windows WLAN-Schnittstelle
+- **Sortierbare Tabelle**: Klicken Sie auf Spaltenüberschriften zum Sortieren
+  - 📶 Signal-Symbol (Stärke-Visualisierung)
+  - SSID (Netzwerkname)
+  - Signal (Prozent)
+  - BSSID (MAC-Adresse des Access Points)
+- **Detaillierte Informationen** in drei Bereichen:
+  - **Signal**: Stärke (%), Qualität (%), RSSI (dBm)
+  - **Frequenz**: Band (2.4G/5G/6G), Kanal, Frequenz (MHz)
+  - **Sicherheit & Standard**: Verschlüsselung (🔓 gesichert / 🔒 offen), PHY-Typ (802.11a/b/g/n/ac/ax), Netzwerk-Typ
+- **Band-Erkennung**: Automatische Erkennung von 2.4 GHz, 5 GHz und 6 GHz (Wi-Fi 6E)
+- **Signal-Symbole**:
+  - 📶 Stark (≥75%)
+  - 📳 Mittel (50-74%)
+  - 📴 Schwach (25-49%)
+  - ❌ Sehr schwach (<25%)
 
 ### Einstellungen
 
@@ -147,6 +170,21 @@ zurück zum
   - Beim Löschen wahlweise mitlöschen
   - Vor dem Löschen optional per `Speichern unter` exportieren
 - **Protokollspezifisches Logging**: Nur relevante IPv4/IPv6-Einträge werden geschrieben
+
+### WLAN Scanner - Technische Details
+
+- **Native Windows WLAN API**: Direkter P/Invoke-Zugriff auf wlanapi.dll
+  - WlanOpenHandle: Initialisierung der WLAN-Schnittstelle
+  - WlanEnumInterfaces: Auflistung verfügbarer WLAN-Adapter
+  - WlanGetNetworkBssList: Abruf detaillierter BSS-Informationen
+- **Thread-sichere UI-Updates**: DispatcherQueue für sichere Updates aus Background-Threads
+- **Umfassende Netzwerkinformationen**:
+  - Signal: dBm, Prozent, Link-Qualität
+  - Frequenz: MHz, Kanal, Band (2.4/5/6 GHz)
+  - Sicherheit: Privacy Bit, Verschlüsselungsstatus
+  - Standard: PHY-Typ (802.11-Varianten), Netzwerk-Typ (Infrastructure/Ad-Hoc)
+  - Hardware: BSSID, Beacon-Intervall
+- **Robustheit**: Automatischer Fallback auf netsh-Kommandozeile bei API-Problemen
 
 ### IP-Profilverwaltung
 
