@@ -27,7 +27,7 @@ namespace neTiPx.Views
         private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private readonly PingLogService _pingLogService = new PingLogService();
         private readonly SettingsService _settingsService = new SettingsService();
-        private const int WifiListBaseHeight = 240;
+        private const int WifiListBaseHeight = 260;
         private const int MainWindowMinHeight = 950;
         private AppWindow? _mainAppWindow;
         private string _wifiSortColumn = string.Empty;
@@ -724,7 +724,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            WifiHeaderStrength.Content = GetWifiHeaderLabel("Stärke", "strength");
+            WifiHeaderStrength.Content = GetWifiHeaderLabel("📶", "strength");
             WifiHeaderSsid.Content = GetWifiHeaderLabel("SSID", "ssid");
             WifiHeaderSignal.Content = GetWifiHeaderLabel("Signal", "signal");
             WifiHeaderBssid.Content = GetWifiHeaderLabel("BSSID", "bssid");
@@ -787,7 +787,9 @@ namespace neTiPx.Views
 
         private void WifiNetworksListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (WifiDetailsTextBlock == null)
+            if (WifiDetailSignalStrength == null || WifiDetailQuality == null || WifiDetailRssi == null ||
+                WifiDetailBand == null || WifiDetailChannel == null || WifiDetailFrequency == null ||
+                WifiDetailSecurity == null || WifiDetailPhyType == null || WifiDetailNetworkType == null)
             {
                 return;
             }
@@ -803,26 +805,35 @@ namespace neTiPx.Views
                 else if (selectedNetwork.Frequency >= 5955 && selectedNetwork.Frequency <= 7115)
                     band = " (6 GHz - Wi-Fi 6E)";
 
-                string securityIcon = selectedNetwork.IsSecured ? "🔒" : "🔓";
+                string securityIcon = selectedNetwork.IsSecured ? "�" : "🔒";
 
-                var details = $"{selectedNetwork.SignalSymbol} {selectedNetwork.SSID}\n" +
-                    $"\n" +
-                    $"BSSID: {selectedNetwork.BSSID}\n" +
-                    $"Signal: {selectedNetwork.SignalStrengthPercent}% ({selectedNetwork.SignalStrengthDbm} dBm)\n" +
-                    $"Qualität: {selectedNetwork.LinkQuality}%\n" +
-                    $"\n" +
-                    $"Kanal: {selectedNetwork.Channel}\n" +
-                    $"Frequenz: {selectedNetwork.Frequency} MHz{band}\n" +
-                    $"Sicherheit: {securityIcon} {(selectedNetwork.IsSecured ? "Gesichert" : "Offen")}\n" +
-                    $"\n" +
-                    $"Typ: {selectedNetwork.PhyType}\n" +
-                    $"Netzwerk: {selectedNetwork.NetworkType}";
+                // Spalte 1: Signal
+                WifiDetailSignalStrength.Text = $"{selectedNetwork.SignalSymbol} {selectedNetwork.SignalStrengthPercent}%";
+                WifiDetailQuality.Text = $"Qualität: {selectedNetwork.LinkQuality}%";
+                WifiDetailRssi.Text = $"RSSI: {selectedNetwork.SignalStrengthDbm} dBm";
 
-                WifiDetailsTextBlock.Text = details;
+                // Spalte 2: Frequenz
+                WifiDetailBand.Text = $"Band: {selectedNetwork.Band}{band}";
+                WifiDetailChannel.Text = $"Kanal: {selectedNetwork.Channel}";
+                WifiDetailFrequency.Text = $"{selectedNetwork.Frequency} MHz";
+
+                // Spalte 3: Sicherheit & Standard
+                WifiDetailSecurity.Text = $"{securityIcon} {selectedNetwork.SecurityType}";
+                WifiDetailPhyType.Text = $"PHY: {selectedNetwork.PhyType}";
+                WifiDetailNetworkType.Text = $"{selectedNetwork.NetworkType}";
             }
             else
             {
-                WifiDetailsTextBlock.Text = "Wählen Sie ein Netzwerk aus...";
+                // Felder zurücksetzen
+                WifiDetailSignalStrength.Text = "Stärke: --";
+                WifiDetailQuality.Text = "Qualität: --";
+                WifiDetailRssi.Text = "RSSI: -- dBm";
+                WifiDetailBand.Text = "Band: --";
+                WifiDetailChannel.Text = "Kanal: --";
+                WifiDetailFrequency.Text = "Frequenz: --";
+                WifiDetailSecurity.Text = "Verschlüsselung: --";
+                WifiDetailPhyType.Text = "PHY-Typ: --";
+                WifiDetailNetworkType.Text = "Netzwerk: --";
             }
         }
     }

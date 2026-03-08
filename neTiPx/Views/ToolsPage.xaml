@@ -317,7 +317,7 @@
                                         <!-- Tabellen-Header -->
                                         <Border Grid.Row="0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="2,4">
                                             <Grid ColumnDefinitions="50,200,120,120" ColumnSpacing="4">
-                                                <Button x:Name="WifiHeaderStrength" Grid.Column="0" Content="Stärke" Click="WifiHeader_Click" Tag="strength" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" Padding="0" MinHeight="0" MinWidth="0" />
+                                                <Button x:Name="WifiHeaderStrength" Grid.Column="0" Content="📶" Click="WifiHeader_Click" Tag="strength" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" Padding="0" MinHeight="0" MinWidth="0" />
                                                 <Button x:Name="WifiHeaderSsid" Grid.Column="1" Content="SSID" Click="WifiHeader_Click" Tag="ssid" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Left" Padding="0" MinHeight="0" MinWidth="0" />
                                                 <Button x:Name="WifiHeaderSignal" Grid.Column="2" Content="Signal" Click="WifiHeader_Click" Tag="signal" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" Padding="0" MinHeight="0" MinWidth="0" />
                                                 <Button x:Name="WifiHeaderBssid" Grid.Column="3" Content="BSSID" Click="WifiHeader_Click" Tag="bssid" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Right" Padding="0" MinHeight="0" MinWidth="0" />
@@ -344,12 +344,28 @@
                                     Grid.Row="2"
                                     Style="{StaticResource CardBorder}"
                                     Padding="16">
-                                    <StackPanel Spacing="8" Height="140">
-                                        <TextBlock Text="Netzwerk-Details" FontWeight="SemiBold" />
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                            <TextBlock x:Name="WifiDetailsTextBlock" Text="Wählen Sie ein Netzwerk aus..." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                        </ScrollViewer>
-                                    </StackPanel>
+                                    <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                                        <TextBlock Grid.Row="0" Text="Netzwerk-Details" FontWeight="SemiBold" />
+                                        <Grid Grid.Row="1" x:Name="WifiDetailsGrid" ColumnDefinitions="*,*,*" ColumnSpacing="24" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+                                            <!-- Spalte 1: Signal -->
+                                            <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="SemiBold" Text="Signal" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Grid.Column="0" Grid.Row="1" x:Name="WifiDetailSignalStrength" Text="Stärke: --" FontSize="12" />
+                                            <TextBlock Grid.Column="0" Grid.Row="2" x:Name="WifiDetailQuality" Text="Qualität: --" FontSize="12" />
+                                            <TextBlock Grid.Column="0" Grid.Row="3" x:Name="WifiDetailRssi" Text="RSSI: -- dBm" FontSize="12" />
+
+                                            <!-- Spalte 2: Frequenz -->
+                                            <TextBlock Grid.Column="1" Grid.Row="0" FontWeight="SemiBold" Text="Frequenz" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" x:Name="WifiDetailBand" Text="Band: --" FontSize="12" />
+                                            <TextBlock Grid.Column="1" Grid.Row="2" x:Name="WifiDetailChannel" Text="Kanal: --" FontSize="12" />
+                                            <TextBlock Grid.Column="1" Grid.Row="3" x:Name="WifiDetailFrequency" Text="Frequenz: --" FontSize="12" />
+
+                                            <!-- Spalte 3: Sicherheit & Standard -->
+                                            <TextBlock Grid.Column="2" Grid.Row="0" FontWeight="SemiBold" Text="Sicherheit &amp; Standard" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                            <TextBlock Grid.Column="2" Grid.Row="1" x:Name="WifiDetailSecurity" Text="Verschlüsselung: --" FontSize="12" />
+                                            <TextBlock Grid.Column="2" Grid.Row="2" x:Name="WifiDetailPhyType" Text="PHY-Typ: --" FontSize="12" />
+                                            <TextBlock Grid.Column="2" Grid.Row="3" x:Name="WifiDetailNetworkType" Text="Netzwerk: --" FontSize="12" />
+                                        </Grid>
+                                    </Grid>
                                 </Border>
 
                             </Grid>

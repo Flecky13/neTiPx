@@ -43,6 +43,22 @@ namespace neTiPx
             get => $"{SignalStrengthPercent}% Signal";
         }
 
+        public string Band
+        {
+            get
+            {
+                if (Frequency >= 5900) return "6G";
+                if (Frequency >= 5000) return "5G";
+                if (Frequency >= 2400) return "2.4G";
+                return "---";
+            }
+        }
+
+        public string SecurityType
+        {
+            get => IsSecured ? "Open" : "Secured";
+        }
+
         public WifiNetwork(string ssid, string bssid, int signalDbm)
         {
             SSID = ssid;
