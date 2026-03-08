@@ -22,6 +22,7 @@ namespace neTiPx.Services
             public string? LastCheckedLatestVersion { get; set; }
             public DateTime? LastCheckedAt { get; set; }
             public string PingLogFolderPath { get; set; } = string.Empty;
+            public bool PingBackgroundActive { get; set; } = false;
         }
 
         public UserSettings ReadUserSettings()
@@ -132,7 +133,8 @@ namespace neTiPx.Services
             }
 
             var pingLoggingElement = new XElement("pingLogging",
-                new XAttribute("folderPath", settings.PingLogFolderPath ?? string.Empty)
+                new XAttribute("folderPath", settings.PingLogFolderPath ?? string.Empty),
+                new XAttribute("backgroundActive", settings.PingBackgroundActive)
             );
 
             var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement);
@@ -237,6 +239,10 @@ namespace neTiPx.Services
                 if (pingLoggingElement != null)
                 {
                     settings.PingLogFolderPath = (string?)pingLoggingElement.Attribute("folderPath") ?? string.Empty;
+                    if (bool.TryParse((string?)pingLoggingElement.Attribute("backgroundActive"), out var backgroundActive))
+                    {
+                        settings.PingBackgroundActive = backgroundActive;
+                    }
                 }
 
                 return settings;

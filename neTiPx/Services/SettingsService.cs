@@ -202,5 +202,18 @@ namespace neTiPx.Services
             _userSettingsStore.WriteUserSettings(settings);
         }
 
+        public bool GetPingBackgroundActive()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.PingBackgroundActive;
+        }
+
+        public void SetPingBackgroundActive(bool active)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.PingBackgroundActive = active;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
     }
 }

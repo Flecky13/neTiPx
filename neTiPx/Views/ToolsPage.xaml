@@ -79,7 +79,7 @@
                                         <TextBlock Text="Konfiguration" FontWeight="SemiBold" VerticalAlignment="Center" />
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                             <TextBlock Text="im Hintergrund weiter aktiv" VerticalAlignment="Center" />
-                                            <CheckBox x:Name="BackgroundActiveCheckBox" />
+                                            <CheckBox x:Name="BackgroundActiveCheckBox" Click="BackgroundActiveCheckBox_Click" />
                                         </StackPanel>
                                     </Grid>
 

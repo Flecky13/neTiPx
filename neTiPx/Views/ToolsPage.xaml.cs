@@ -23,14 +23,19 @@ namespace neTiPx.Views
     {
         private readonly ConfigStore _configStore = new ConfigStore();
         private readonly PingLogService _pingLogService = new PingLogService();
+        private readonly SettingsService _settingsService = new SettingsService();
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
         private readonly Dictionary<PingTarget, CancellationTokenSource> _pingTimers = new Dictionary<PingTarget, CancellationTokenSource>();
         private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
+        private bool _isPingPageVisible = true;
 
         public ToolsPage()
         {
             InitializeComponent();
             DataContext = this;
+
+            Loaded += ToolsPage_Loaded;
+            Unloaded += ToolsPage_Unloaded;
 
             // Ping-Ziele aus Config laden
             LoadPingTargets();
@@ -40,6 +45,22 @@ namespace neTiPx.Views
             {
                 ToolsNavView.SelectedItem = ToolsNavView.MenuItems[0];
             }
+        }
+
+        private void ToolsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Checkbox mit gespeichertem Wert initialisieren
+            if (BackgroundActiveCheckBox != null)
+            {
+                BackgroundActiveCheckBox.IsChecked = _settingsService.GetPingBackgroundActive();
+            }
+            UpdatePingingState();
+        }
+
+        private void ToolsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _isPingPageVisible = false;
+            UpdatePingingState();
         }
 
         private void ToolsNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -56,14 +77,19 @@ namespace neTiPx.Views
                 {
                     case "Ping":
                         PingPanel.Visibility = Visibility.Visible;
+                        _isPingPageVisible = true;
                         break;
                     case "Wlan":
                         WlanPanel.Visibility = Visibility.Visible;
+                        _isPingPageVisible = false;
                         break;
                     case "Placeholder":
                         PlaceholderPanel.Visibility = Visibility.Visible;
+                        _isPingPageVisible = false;
                         break;
                 }
+
+                UpdatePingingState();
             }
         }
 
@@ -108,10 +134,7 @@ namespace neTiPx.Views
                     DetermineAddressType(pingTarget);
 
                     PingTargets.Add(pingTarget);
-                    if (pingTarget.IsPingEnabled)
-                    {
-                        StartPingingAsync(pingTarget);
-                    }
+                    // Pinging wird durch UpdatePingingState() im Loaded-Event gestartet
                 }
             }
         }
@@ -149,7 +172,7 @@ namespace neTiPx.Views
 
             PingTargets.Add(pingTarget);
             SavePingTargets();
-            StartPingingAsync(pingTarget);
+            UpdatePingingState();
 
             NewPingTargetTextBox.Text = string.Empty;
         }
@@ -356,6 +379,46 @@ namespace neTiPx.Views
             }
 
             SavePingTargets();
+        }
+
+        private void BackgroundActiveCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not CheckBox checkBox)
+            {
+                return;
+            }
+
+            var isActive = checkBox.IsChecked == true;
+            _settingsService.SetPingBackgroundActive(isActive);
+            UpdatePingingState();
+        }
+
+        private void UpdatePingingState()
+        {
+            // Pingen soll aktiv sein wenn: Ping-Seite sichtbar ODER Checkbox aktiv
+            var shouldPingBeActive = _isPingPageVisible || (BackgroundActiveCheckBox?.IsChecked == true);
+
+            foreach (var target in PingTargets)
+            {
+                if (!target.IsPingEnabled)
+                {
+                    // Target ist manuell deaktiviert - respektiere das
+                    continue;
+                }
+
+                var isCurrentlyPinging = _pingTimers.ContainsKey(target);
+
+                if (shouldPingBeActive && !isCurrentlyPinging)
+                {
+                    // Starte Pingen
+                    StartPingingAsync(target);
+                }
+                else if (!shouldPingBeActive && isCurrentlyPinging)
+                {
+                    // Stoppe Pingen
+                    StopPinging(target);
+                }
+            }
         }
 
         private void OpenPingLogButton_Click(object sender, RoutedEventArgs e)
