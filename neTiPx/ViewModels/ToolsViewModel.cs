@@ -8,8 +8,8 @@ namespace neTiPx.ViewModels
 {
     public sealed class ToolsViewModel : ObservableObject
     {
-        private readonly ConfigStore _configStore = new ConfigStore();
-        private string _pingInfo = "Ping-Eintraege aus config.ini";
+        private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
+        private string _pingInfo = "Ping-Eintraege aus PingTargets.xml";
         private string _wifiInfo = "Wifi-Scan via netsh.";
 
         public ToolsViewModel()
@@ -46,18 +46,12 @@ namespace neTiPx.ViewModels
         private void LoadPingEntries()
         {
             PingEntries.Clear();
-            var values = _configStore.ReadAll();
-
-            if (!values.TryGetValue("Tools.PingCount", out var countValue) || !int.TryParse(countValue, out var count))
+            var targets = _pingTargetsStore.ReadAll();
+            foreach (var target in targets)
             {
-                count = 0;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                if (values.TryGetValue($"Tools.Ping{i}.IP", out var ip) && !string.IsNullOrWhiteSpace(ip))
+                if (!string.IsNullOrWhiteSpace(target.Target))
                 {
-                    PingEntries.Add(ip);
+                    PingEntries.Add(target.Target);
                 }
             }
 

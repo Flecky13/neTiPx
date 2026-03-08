@@ -21,7 +21,7 @@ namespace neTiPx.Views
 {
     public partial class ToolsPage : Page
     {
-        private readonly ConfigStore _configStore = new ConfigStore();
+        private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private readonly PingLogService _pingLogService = new PingLogService();
         private readonly SettingsService _settingsService = new SettingsService();
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
@@ -95,38 +95,23 @@ namespace neTiPx.Views
 
         private void LoadPingTargets()
         {
-            var values = _configStore.ReadAll();
+            var savedTargets = _pingTargetsStore.ReadAll();
 
-            if (!values.TryGetValue("Tools.PingCount", out var countValue) || !int.TryParse(countValue, out var count))
+            foreach (var savedTarget in savedTargets)
             {
-                return;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                if (values.TryGetValue($"Tools.Ping{i}.IP", out var ip) && !string.IsNullOrWhiteSpace(ip))
+                if (!string.IsNullOrWhiteSpace(savedTarget.Target))
                 {
-                    var intervalSeconds = 5;
-                    if (values.TryGetValue($"Tools.Ping{i}.Interval", out var intervalStr) && int.TryParse(intervalStr, out var interval))
-                    {
-                        intervalSeconds = interval;
-                    }
-
                     var pingTarget = new PingTarget
                     {
-                        Target = ip,
-                        IntervalSeconds = intervalSeconds,
-                        IsPingEnabled = true,
+                        Target = savedTarget.Target,
+                        IntervalSeconds = Math.Clamp(savedTarget.IntervalSeconds, 1, 3600),
+                        IsPingEnabled = savedTarget.IsEnabled,
+                        Source = savedTarget.Source,
                         ResponseTimeIpv4 = string.Empty,
                         ResponseTimeIpv6 = string.Empty,
                         StatusColorIpv4 = new SolidColorBrush(Colors.Gray),
                         StatusColorIpv6 = new SolidColorBrush(Colors.Gray)
                     };
-
-                    if (values.TryGetValue($"Tools.Ping{i}.Enabled", out var enabledStr) && bool.TryParse(enabledStr, out var enabled))
-                    {
-                        pingTarget.IsPingEnabled = enabled;
-                    }
 
                     _lastValidTargets[pingTarget] = pingTarget.Target;
 
@@ -159,6 +144,7 @@ namespace neTiPx.Views
                 Target = target,
                 IntervalSeconds = intervalSeconds,
                 IsPingEnabled = true,
+                Source = string.Empty,
                 ResponseTimeIpv4 = string.Empty,
                 ResponseTimeIpv6 = string.Empty,
                 StatusColorIpv4 = new SolidColorBrush(Colors.Gray),
@@ -510,7 +496,7 @@ namespace neTiPx.Views
             }
         }
 
-        private async Task<PingReply?> PingAsync(string target, AddressFamily addressFamily)
+        private async Task<PingResult> PingAsync(string target, AddressFamily addressFamily)
         {
             try
             {
@@ -522,31 +508,44 @@ namespace neTiPx.Views
                     // Direkte IP-Adresse - prüfe ob sie dem gewünschten AddressFamily entspricht
                     if (ipAddress.AddressFamily == addressFamily)
                     {
-                        return await ping.SendPingAsync(ipAddress, 3000);
+                        return new PingResult(await ping.SendPingAsync(ipAddress, 3000), ipAddress.ToString());
                     }
-                    return null; // Adresse entspricht nicht dem gewünschten AddressFamily
+                    return new PingResult(null, string.Empty); // Adresse entspricht nicht dem gewünschten AddressFamily
                 }
 
                 // Versuche Hostname aufzulösen
                 var hostEntry = await Dns.GetHostEntryAsync(target);
                 if (hostEntry?.AddressList == null || hostEntry.AddressList.Length == 0)
                 {
-                    return null;
+                    return new PingResult(null, string.Empty);
                 }
 
                 // Finde eine Adresse mit dem gewünschten AddressFamily
                 var address = hostEntry.AddressList.FirstOrDefault(a => a.AddressFamily == addressFamily);
                 if (address == null)
                 {
-                    return null;
+                    return new PingResult(null, string.Empty);
                 }
 
-                return await ping.SendPingAsync(address, 3000);
+                return new PingResult(await ping.SendPingAsync(address, 3000), address.ToString());
             }
             catch
             {
-                return null;
+                return new PingResult(null, string.Empty);
             }
+        }
+
+        private sealed class PingResult
+        {
+            public PingResult(PingReply? reply, string resolvedAddress)
+            {
+                Reply = reply;
+                ResolvedAddress = resolvedAddress;
+            }
+
+            public PingReply? Reply { get; }
+
+            public string ResolvedAddress { get; }
         }
 
         private enum ResponseType
@@ -555,19 +554,28 @@ namespace neTiPx.Views
             IPv6
         }
 
-        private void UpdatePingResult(PingTarget target, PingReply? reply, ResponseType type)
+        private void UpdatePingResult(PingTarget target, PingResult result, ResponseType type)
         {
             if (!ShouldHandleResponseType(target, type))
             {
                 return;
             }
 
-            if (reply != null && reply.Status == IPStatus.Success)
+            if (type == ResponseType.IPv4)
             {
-                var responseTimeStr = $"{reply.RoundtripTime} ms";
+                target.ResolvedAddressIpv4 = result.ResolvedAddress;
+            }
+            else
+            {
+                target.ResolvedAddressIpv6 = result.ResolvedAddress;
+            }
+
+            if (result.Reply != null && result.Reply.Status == IPStatus.Success)
+            {
+                var responseTimeStr = $"{result.Reply.RoundtripTime} ms";
 
                 // Ampel-Farbe basierend auf Antwortzeit
-                var statusColor = reply.RoundtripTime switch
+                var statusColor = result.Reply.RoundtripTime switch
                 {
                     < 50 => new SolidColorBrush(Colors.Green),    // Grün
                     < 150 => new SolidColorBrush(Colors.Yellow),  // Gelb
@@ -579,7 +587,7 @@ namespace neTiPx.Views
                     target.ResponseTimeIpv4 = responseTimeStr;
                     target.StatusColorIpv4 = statusColor;
                     target.PingCountIpv4++;
-                    target.AddResponseTimeIpv4(reply.RoundtripTime);
+                    target.AddResponseTimeIpv4(result.Reply.RoundtripTime);
                     _pingLogService.AppendPingResult(target.Target, "IPv4", responseTimeStr);
                 }
                 else
@@ -587,7 +595,7 @@ namespace neTiPx.Views
                     target.ResponseTimeIpv6 = responseTimeStr;
                     target.StatusColorIpv6 = statusColor;
                     target.PingCountIpv6++;
-                    target.AddResponseTimeIpv6(reply.RoundtripTime);
+                    target.AddResponseTimeIpv6(result.Reply.RoundtripTime);
                     _pingLogService.AppendPingResult(target.Target, "IPv6", responseTimeStr);
                 }
             }
@@ -626,25 +634,13 @@ namespace neTiPx.Views
 
         private void SavePingTargets()
         {
-            var values = _configStore.ReadAll();
-
-            // Alte Ping-Einträge entfernen
-            var oldKeys = values.Keys.Where(k => k.StartsWith("Tools.Ping", StringComparison.OrdinalIgnoreCase)).ToList();
-            foreach (var key in oldKeys)
+            _pingTargetsStore.WriteAll(PingTargets.Select(target => new PingTargetsStore.PingTargetSettings
             {
-                values.Remove(key);
-            }
-
-            // Neue Einträge speichern
-            values["Tools.PingCount"] = PingTargets.Count.ToString();
-            for (int i = 0; i < PingTargets.Count; i++)
-            {
-                values[$"Tools.Ping{i}.IP"] = PingTargets[i].Target;
-                values[$"Tools.Ping{i}.Interval"] = PingTargets[i].IntervalSeconds.ToString();
-                values[$"Tools.Ping{i}.Enabled"] = PingTargets[i].IsPingEnabled.ToString();
-            }
-
-            _configStore.WriteAll(values);
+                Target = target.Target,
+                IntervalSeconds = target.IntervalSeconds,
+                IsEnabled = target.IsPingEnabled,
+                Source = target.Source
+            }));
         }
     }
 }

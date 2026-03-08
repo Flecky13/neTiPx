@@ -112,5 +112,24 @@ namespace neTiPx.Helpers
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "User_Settings.xml");
             }
         }
+
+        public static string GetPingTargetsXmlPath()
+        {
+            try
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var dir = Path.Combine(appData, "neTiPx");
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                return Path.Combine(dir, "PingTargets.xml");
+            }
+            catch
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PingTargets.xml");
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
+using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +19,9 @@ namespace neTiPx.Models
         private Visibility _showIPv4 = Visibility.Visible;
         private Visibility _showIPv6 = Visibility.Visible;
         private bool _isPingEnabled = true;
+        private string _source = string.Empty;
+        private string _resolvedAddressIpv4 = string.Empty;
+        private string _resolvedAddressIpv6 = string.Empty;
 
         // Statistiken IPv4
         private int _pingCountIpv4 = 0;
@@ -83,6 +87,37 @@ namespace neTiPx.Models
             set => SetProperty(ref _isPingEnabled, value);
         }
 
+        public string Source
+        {
+            get => _source;
+            set
+            {
+                SetProperty(ref _source, value);
+                OnPropertyChanged(nameof(StatisticsIpv4));
+                OnPropertyChanged(nameof(StatisticsIpv6));
+            }
+        }
+
+        public string ResolvedAddressIpv4
+        {
+            get => _resolvedAddressIpv4;
+            set
+            {
+                SetProperty(ref _resolvedAddressIpv4, value);
+                OnPropertyChanged(nameof(StatisticsIpv4));
+            }
+        }
+
+        public string ResolvedAddressIpv6
+        {
+            get => _resolvedAddressIpv6;
+            set
+            {
+                SetProperty(ref _resolvedAddressIpv6, value);
+                OnPropertyChanged(nameof(StatisticsIpv6));
+            }
+        }
+
         // Statistiken IPv4
         public int PingCountIpv4
         {
@@ -142,11 +177,19 @@ namespace neTiPx.Models
         {
             get
             {
-                if (_pingCountIpv4 == 0) return "IPv4: 0";
+                var resolvedIpInfo = GetResolvedIpInfo(_resolvedAddressIpv4);
+                if (_pingCountIpv4 == 0)
+                {
+                    return string.IsNullOrEmpty(resolvedIpInfo)
+                        ? "IPv4: 0"
+                        : $"IPv4: 0 | {resolvedIpInfo}";
+                }
 
                 var avg = _responseTimesIpv4.Count > 0 ? _responseTimesIpv4.Average() : 0;
                 var max = _responseTimesIpv4.Count > 0 ? _responseTimesIpv4.Max() : 0;
-                return $"IPv4: {_pingCountIpv4} | Ø: {avg:F1}ms | Max: {max}ms | Timeouts: {_timeoutCountIpv4}";
+                return string.IsNullOrEmpty(resolvedIpInfo)
+                    ? $"IPv4: {_pingCountIpv4} | Ø: {avg:F1}ms | Max: {max}ms | Timeouts: {_timeoutCountIpv4}"
+                    : $"IPv4: {_pingCountIpv4} | {resolvedIpInfo} | Ø: {avg:F1}ms | Max: {max}ms | Timeouts: {_timeoutCountIpv4}";
             }
         }
 
@@ -154,12 +197,30 @@ namespace neTiPx.Models
         {
             get
             {
-                if (_pingCountIpv6 == 0) return "IPv6: 0";
+                var resolvedIpInfo = GetResolvedIpInfo(_resolvedAddressIpv6);
+                if (_pingCountIpv6 == 0)
+                {
+                    return string.IsNullOrEmpty(resolvedIpInfo)
+                        ? "IPv6: 0"
+                        : $"IPv6: 0 | {resolvedIpInfo}";
+                }
 
                 var avg = _responseTimesIpv6.Count > 0 ? _responseTimesIpv6.Average() : 0;
                 var max = _responseTimesIpv6.Count > 0 ? _responseTimesIpv6.Max() : 0;
-                return $"IPv6: {_pingCountIpv6} | Ø: {avg:F1}ms | Max: {max}ms | Timeouts: {_timeoutCountIpv6}";
+                return string.IsNullOrEmpty(resolvedIpInfo)
+                    ? $"IPv6: {_pingCountIpv6} | Ø: {avg:F1}ms | Max: {max}ms | Timeouts: {_timeoutCountIpv6}"
+                    : $"IPv6: {_pingCountIpv6} | {resolvedIpInfo} | Ø: {avg:F1}ms | Max: {max}ms | Timeouts: {_timeoutCountIpv6}";
             }
+        }
+
+        private string GetResolvedIpInfo(string resolvedIp)
+        {
+            var isDnsSource = !string.IsNullOrWhiteSpace(_source) && _source.Trim().StartsWith("DN", System.StringComparison.OrdinalIgnoreCase);
+            var isHostnameTarget = !IPAddress.TryParse(_target, out _);
+
+            return (isDnsSource || isHostnameTarget) && !string.IsNullOrWhiteSpace(resolvedIp)
+                ? $"IP: {resolvedIp}"
+                : string.Empty;
         }
 
         // Legacy Eigenschaft für Rückwärtskompatibilität
