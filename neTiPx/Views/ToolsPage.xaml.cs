@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using neTiPx.Models;
 using neTiPx.Services;
+using neTiPx.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +33,6 @@ namespace neTiPx.Views
         public ToolsPage()
         {
             InitializeComponent();
-            DataContext = this;
 
             Loaded += ToolsPage_Loaded;
             Unloaded += ToolsPage_Unloaded;
@@ -41,7 +41,7 @@ namespace neTiPx.Views
             LoadPingTargets();
 
             // Standardmäßig PING-Panel anzeigen
-            if (ToolsNavView.MenuItems.Count > 0)
+            if (ToolsNavView != null && ToolsNavView.MenuItems.Count > 0)
             {
                 ToolsNavView.SelectedItem = ToolsNavView.MenuItems[0];
             }
@@ -55,6 +55,12 @@ namespace neTiPx.Views
                 BackgroundActiveCheckBox.IsChecked = _settingsService.GetPingBackgroundActive();
             }
             UpdatePingingState();
+
+            // Wenn WLAN-Panel sichtbar ist, initialen Scan durchführen
+            if (WlanPanel != null && WlanPanel.Visibility == Visibility.Visible && DataContext is ToolsViewModel vm)
+            {
+                vm.ScanWifiCommand.Execute(null);
+            }
         }
 
         private void ToolsPage_Unloaded(object sender, RoutedEventArgs e)
@@ -68,23 +74,28 @@ namespace neTiPx.Views
             if (args.SelectedItem is NavigationViewItem item && item.Tag is string tag)
             {
                 // Alle Panels ausblenden
-                PingPanel.Visibility = Visibility.Collapsed;
-                WlanPanel.Visibility = Visibility.Collapsed;
-                PlaceholderPanel.Visibility = Visibility.Collapsed;
+                if (PingPanel != null) PingPanel.Visibility = Visibility.Collapsed;
+                if (WlanPanel != null) WlanPanel.Visibility = Visibility.Collapsed;
+                if (PlaceholderPanel != null) PlaceholderPanel.Visibility = Visibility.Collapsed;
 
                 // Ausgewähltes Panel anzeigen
                 switch (tag)
                 {
                     case "Ping":
-                        PingPanel.Visibility = Visibility.Visible;
+                        if (PingPanel != null) PingPanel.Visibility = Visibility.Visible;
                         _isPingPageVisible = true;
                         break;
                     case "Wlan":
-                        WlanPanel.Visibility = Visibility.Visible;
+                        if (WlanPanel != null) WlanPanel.Visibility = Visibility.Visible;
                         _isPingPageVisible = false;
+                        // Automatischen WLAN-Scan triggern
+                        if (DataContext is ToolsViewModel vm)
+                        {
+                            vm.ScanWifiCommand.Execute(null);
+                        }
                         break;
                     case "Placeholder":
-                        PlaceholderPanel.Visibility = Visibility.Visible;
+                        if (PlaceholderPanel != null) PlaceholderPanel.Visibility = Visibility.Visible;
                         _isPingPageVisible = false;
                         break;
                 }
@@ -641,6 +652,23 @@ namespace neTiPx.Views
                 IsEnabled = target.IsPingEnabled,
                 Source = target.Source
             }));
+        }
+
+        private void WifiNetworksListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (WifiDetailsTextBlock == null)
+            {
+                return;
+            }
+
+            if (WifiNetworksListBox?.SelectedItem is string selectedNetwork && !string.IsNullOrWhiteSpace(selectedNetwork))
+            {
+                WifiDetailsTextBlock.Text = $"Netzwerk: {selectedNetwork}\n\nDetails werden in Kürze implementiert.";
+            }
+            else
+            {
+                WifiDetailsTextBlock.Text = "Wählen Sie ein Netzwerk aus...";
+            }
         }
     }
 }
