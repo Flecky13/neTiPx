@@ -4,6 +4,11 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0.2]
+
+### Added
+- **WLAN Scanner**: Neue sortierbare "Band"-Spalte in der WLAN-Tabelle (zeigt 2.4G, 5G oder 6G)
+
 ## [1.3.0.1]
 
 ### Added

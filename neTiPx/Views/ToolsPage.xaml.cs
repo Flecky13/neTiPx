@@ -719,7 +719,7 @@ namespace neTiPx.Views
 
         private void UpdateWifiHeaderLabels()
         {
-            if (WifiHeaderStrength == null || WifiHeaderSsid == null || WifiHeaderSignal == null || WifiHeaderBssid == null)
+            if (WifiHeaderStrength == null || WifiHeaderSsid == null || WifiHeaderSignal == null || WifiHeaderBand == null || WifiHeaderBssid == null)
             {
                 return;
             }
@@ -727,6 +727,7 @@ namespace neTiPx.Views
             WifiHeaderStrength.Content = GetWifiHeaderLabel("📶", "strength");
             WifiHeaderSsid.Content = GetWifiHeaderLabel("SSID", "ssid");
             WifiHeaderSignal.Content = GetWifiHeaderLabel("Signal", "signal");
+            WifiHeaderBand.Content = GetWifiHeaderLabel("Band", "band");
             WifiHeaderBssid.Content = GetWifiHeaderLabel("BSSID", "bssid");
         }
 
@@ -755,6 +756,9 @@ namespace neTiPx.Views
                 "signal" => _wifiSortAscending
                     ? vm.WifiNetworks.OrderBy(n => n.SignalStrengthPercent)
                     : vm.WifiNetworks.OrderByDescending(n => n.SignalStrengthPercent),
+                "band" => _wifiSortAscending
+                    ? vm.WifiNetworks.OrderBy(n => n.Band)
+                    : vm.WifiNetworks.OrderByDescending(n => n.Band),
                 "bssid" => _wifiSortAscending
                     ? vm.WifiNetworks.OrderBy(n => n.BSSID)
                     : vm.WifiNetworks.OrderByDescending(n => n.BSSID),
