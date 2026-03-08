@@ -56,11 +56,13 @@
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE701;" />
                     </NavigationViewItem.Icon>
+                    <NavigationViewItem.Visibility>Collapsed</NavigationViewItem.Visibility>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Platzhalter" Tag="Placeholder">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8B8;" />
                     </NavigationViewItem.Icon>
+                    <NavigationViewItem.Visibility>Collapsed</NavigationViewItem.Visibility>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 

@@ -4,7 +4,24 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.2.0.0]
+
+### Added
+- Ping-Logging pro Ziel mit eigener Log-Datei
+- Konfigurierbarer Ping-Log-Ordner in den Einstellungen (inkl. Ordnerauswahl und Reset auf Standard)
+- Log-Aktionen pro Ping-Ziel: Log öffnen, beim Löschen mitlöschen oder vorher speichern
+- Option "im Hintergrund weiter aktiv" auf der Ping-Seite
+
+### Changed
+- Ping-Konfiguration erweitert: Checkbox in der Kopfzeile für Hintergrundbetrieb
+- Dynamische Pfadanzeige für den Ping-Log-Ordner auf eine Zeile optimiert (aggressiver Ausbau mit Fensterbreite)
+- Anzeigeverhalten für nicht genutzte Protokolle vereinheitlicht: Antwortfeld zeigt "inaktiv" bei grauer Ampel
+
+### Fixed
+- Protokollspezifische Ping-Auswertung und Logging für IPv4/IPv6 (nur relevante Protokolle werden verarbeitet)
+- Reaktivieren eines deaktivierten Ping-Ziels setzt den Protokollstatus korrekt zurück (z. B. "inaktiv" statt "Deaktiviert")
+
+## [1.1.6.5]
 
 ### Changed
 - Tools Page eingeblendet
