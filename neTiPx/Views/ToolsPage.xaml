@@ -599,10 +599,10 @@
 
                                         <!-- Header-Zeile -->
                                         <Border Grid.Row="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-                                            <Grid ColumnDefinitions="2*,2*,*" ColumnSpacing="12">
-                                                <TextBlock Grid.Column="0" Text="IP-Adresse" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <TextBlock Grid.Column="1" Text="MAC-Adresse" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <TextBlock Grid.Column="2" Text="Open Ports" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <Grid ColumnDefinitions="100,120,80" ColumnSpacing="12">
+                                                <Button x:Name="NetworkScanHeaderIp" Grid.Column="0" Content="IP-Adresse" Click="NetworkScanHeader_Click" Tag="ip" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Left" Padding="0" MinHeight="0" MinWidth="0" />
+                                                <Button x:Name="NetworkScanHeaderMac" Grid.Column="1" Content="MAC-Adresse" Click="NetworkScanHeader_Click" Tag="mac" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Left" Padding="0" MinHeight="0" MinWidth="0" />
+                                                <Button x:Name="NetworkScanHeaderPorts" Grid.Column="2" Content="Open Ports" Click="NetworkScanHeader_Click" Tag="ports" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Left" Padding="0" MinHeight="0" MinWidth="0" />
                                             </Grid>
                                         </Border>
 
@@ -614,7 +614,7 @@
                                                   SelectionChanged="NetworkScanResultsListView_SelectionChanged">
                                             <ListView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid ColumnDefinitions="2*,2*,*" ColumnSpacing="12" Padding="4,2">
+                                                    <Grid ColumnDefinitions="100,140,30" ColumnSpacing="12" Padding="4,2">
                                                         <TextBlock Grid.Column="0" Text="{Binding IpAddress}" FontSize="13" VerticalAlignment="Center" />
                                                         <TextBlock Grid.Column="1" Text="{Binding MacAddress}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                                         <TextBlock Grid.Column="2" Text="{Binding OpenPorts.Count}" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />

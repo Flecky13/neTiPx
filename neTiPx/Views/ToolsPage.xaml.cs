@@ -36,6 +36,8 @@ namespace neTiPx.Views
         private AppWindow? _mainAppWindow;
         private string _wifiSortColumn = string.Empty;
         private bool _wifiSortAscending = true;
+        private string _networkScanSortColumn = string.Empty;
+        private bool _networkScanSortAscending = true;
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
         private readonly Dictionary<PingTarget, CancellationTokenSource> _pingTimers = new Dictionary<PingTarget, CancellationTokenSource>();
         private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
@@ -79,6 +81,7 @@ namespace neTiPx.Views
             }
 
             UpdateWifiHeaderLabels();
+            UpdateNetworkScanHeaderLabels();
 
             PrefillNetworkScanRangesFromNic1();
 
@@ -1649,6 +1652,12 @@ namespace neTiPx.Views
 
             DispatcherQueue.TryEnqueue(() =>
             {
+                // Apply sorting if a sort column is selected
+                if (!string.IsNullOrEmpty(_networkScanSortColumn))
+                {
+                    ApplyNetworkScanSorting();
+                }
+
                 NetworkScanCountTextBlock.Text = $"{NetworkDevices.Count} Gerät(e)";
                 NetworkScanStatusTextBlock.Text = NetworkDevices.Count > 0
                     ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden"
@@ -2029,6 +2038,94 @@ namespace neTiPx.Views
             NetworkScanErrorBar.Title = "Fehler";
             NetworkScanErrorBar.Message = message;
             NetworkScanErrorBar.IsOpen = true;
+        }
+
+        // Network Scanner Sorting Methods
+        private void NetworkScanHeader_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag is not string column)
+            {
+                return;
+            }
+
+            if (string.Equals(_networkScanSortColumn, column, StringComparison.OrdinalIgnoreCase))
+            {
+                _networkScanSortAscending = !_networkScanSortAscending;
+            }
+            else
+            {
+                _networkScanSortColumn = column;
+                _networkScanSortAscending = true;
+            }
+
+            ApplyNetworkScanSorting();
+            UpdateNetworkScanHeaderLabels();
+        }
+
+        private void UpdateNetworkScanHeaderLabels()
+        {
+            if (NetworkScanHeaderIp == null || NetworkScanHeaderMac == null || NetworkScanHeaderPorts == null)
+            {
+                return;
+            }
+
+            NetworkScanHeaderIp.Content = GetNetworkScanHeaderLabel("IP-Adresse", "ip");
+            NetworkScanHeaderMac.Content = GetNetworkScanHeaderLabel("MAC-Adresse", "mac");
+            NetworkScanHeaderPorts.Content = GetNetworkScanHeaderLabel("Open Ports", "ports");
+        }
+
+        private string GetNetworkScanHeaderLabel(string label, string column)
+        {
+            if (!string.Equals(_networkScanSortColumn, column, StringComparison.OrdinalIgnoreCase))
+            {
+                return label;
+            }
+
+            return _networkScanSortAscending ? $"{label} ▲" : $"{label} ▼";
+        }
+
+        private void ApplyNetworkScanSorting()
+        {
+            if (NetworkDevices.Count <= 1)
+            {
+                return;
+            }
+
+            IEnumerable<NetworkDevice> ordered = _networkScanSortColumn switch
+            {
+                "ip" => _networkScanSortAscending
+                    ? NetworkDevices.OrderBy(d => IPAddress.TryParse(d.IpAddress, out var ip) ? IpToUint(ip) : 0u)
+                    : NetworkDevices.OrderByDescending(d => IPAddress.TryParse(d.IpAddress, out var ip) ? IpToUint(ip) : 0u),
+                "mac" => _networkScanSortAscending
+                    ? NetworkDevices.OrderBy(d => d.MacAddress)
+                    : NetworkDevices.OrderByDescending(d => d.MacAddress),
+                "ports" => _networkScanSortAscending
+                    ? NetworkDevices.OrderBy(d => d.OpenPorts?.Count ?? 0)
+                    : NetworkDevices.OrderByDescending(d => d.OpenPorts?.Count ?? 0),
+                _ => _networkScanSortAscending
+                    ? NetworkDevices.OrderBy(d => IPAddress.TryParse(d.IpAddress, out var ip) ? IpToUint(ip) : 0u)
+                    : NetworkDevices.OrderByDescending(d => IPAddress.TryParse(d.IpAddress, out var ip) ? IpToUint(ip) : 0u)
+            };
+
+            var selected = NetworkScanResultsListView?.SelectedItem as NetworkDevice;
+            var sorted = ordered.ToList();
+
+            NetworkDevices.Clear();
+            foreach (var device in sorted)
+            {
+                NetworkDevices.Add(device);
+            }
+
+            if (selected != null)
+            {
+                var selectedAfterSort = NetworkDevices.FirstOrDefault(d =>
+                    string.Equals(d.IpAddress, selected.IpAddress, StringComparison.OrdinalIgnoreCase));
+
+                if (selectedAfterSort != null && NetworkScanResultsListView != null)
+                {
+                    NetworkScanResultsListView.SelectedItem = selectedAfterSort;
+                }
+            }
         }
     }
 }
