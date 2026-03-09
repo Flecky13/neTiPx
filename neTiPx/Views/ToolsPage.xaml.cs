@@ -10,6 +10,7 @@ using neTiPx.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -39,6 +40,8 @@ namespace neTiPx.Views
         private bool _isPingPageVisible = true;
         private bool _isSyncingNetworkCalcInputs;
         private bool _isIpv6Mode = false;
+        public ObservableCollection<NetworkDevice> NetworkDevices { get; } = new ObservableCollection<NetworkDevice>();
+        private CancellationTokenSource? _networkScanCts;
 
         public ToolsPage()
         {
@@ -101,6 +104,7 @@ namespace neTiPx.Views
                 if (PingPanel != null) PingPanel.Visibility = Visibility.Collapsed;
                 if (WlanPanel != null) WlanPanel.Visibility = Visibility.Collapsed;
                 if (NetworkCalculatorPanel != null) NetworkCalculatorPanel.Visibility = Visibility.Collapsed;
+                if (NetworkScannerPanel != null) NetworkScannerPanel.Visibility = Visibility.Collapsed;
 
                 // Ausgewähltes Panel anzeigen
                 switch (tag)
@@ -120,6 +124,10 @@ namespace neTiPx.Views
                         break;
                     case "NetworkCalculator":
                         if (NetworkCalculatorPanel != null) NetworkCalculatorPanel.Visibility = Visibility.Visible;
+                        _isPingPageVisible = false;
+                        break;
+                    case "NetworkScanner":
+                        if (NetworkScannerPanel != null) NetworkScannerPanel.Visibility = Visibility.Visible;
                         _isPingPageVisible = false;
                         break;
                 }
@@ -1572,6 +1580,211 @@ namespace neTiPx.Views
             NetworkCalcErrorBar.IsOpen = true;
             NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
             NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
+        }
+
+        // Network Scanner Methoden
+        private async void NetworkScanStartButton_Click(object sender, RoutedEventArgs e)
+        {
+            var startIp = NetworkScanStartIpTextBox.Text.Trim();
+            var endIp = NetworkScanEndIpTextBox.Text.Trim();
+
+            NetworkScanErrorBar.IsOpen = false;
+
+            if (string.IsNullOrWhiteSpace(startIp) || string.IsNullOrWhiteSpace(endIp))
+            {
+                ShowScanError("Bitte geben Sie Start- und End-IP-Adresse ein.");
+                return;
+            }
+
+            if (!IPAddress.TryParse(startIp, out var startAddress) || startAddress.AddressFamily != AddressFamily.InterNetwork)
+            {
+                ShowScanError("Ungültige Start-IP-Adresse.");
+                return;
+            }
+
+            if (!IPAddress.TryParse(endIp, out var endAddress) || endAddress.AddressFamily != AddressFamily.InterNetwork)
+            {
+                ShowScanError("Ungültige End-IP-Adresse.");
+                return;
+            }
+
+            uint startIpUint = IpToUint(startAddress);
+            uint endIpUint = IpToUint(endAddress);
+
+            if (startIpUint > endIpUint)
+            {
+                ShowScanError("Start-IP muss kleiner oder gleich End-IP sein.");
+                return;
+            }
+
+            uint range = endIpUint - startIpUint + 1;
+            if (range > 1024)
+            {
+                ShowScanError("IP-Bereich zu groß. Maximal 1024 Adressen.");
+                return;
+            }
+
+            // Cancel previous scan
+            _networkScanCts?.Cancel();
+            _networkScanCts = new CancellationTokenSource();
+
+            NetworkDevices.Clear();
+            NetworkScanResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkScanStartButton.IsEnabled = false;
+            NetworkScanProgressRing.IsActive = true;
+            NetworkScanStatusTextBlock.Text = $"Scanne {range} Adressen...";
+
+            try
+            {
+                await ScanNetworkRangeAsync(startIpUint, endIpUint, _networkScanCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                NetworkScanStatusTextBlock.Text = "Scan abgebrochen";
+            }
+            catch (Exception ex)
+            {
+                ShowScanError($"Fehler beim Scannen: {ex.Message}");
+            }
+            finally
+            {
+                NetworkScanStartButton.IsEnabled = true;
+                NetworkScanProgressRing.IsActive = false;
+            }
+        }
+
+        private async Task ScanNetworkRangeAsync(uint startIp, uint endIp, CancellationToken cancellationToken)
+        {
+            var tasks = new List<Task>();
+            var semaphore = new SemaphoreSlim(50); // Limit parallel operations
+
+            for (uint ipUint = startIp; ipUint <= endIp; ipUint++)
+            {
+                var currentIp = UintToIp(ipUint);
+                tasks.Add(ScanSingleDeviceAsync(currentIp, semaphore, cancellationToken));
+            }
+
+            await Task.WhenAll(tasks);
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                NetworkScanCountTextBlock.Text = $"{NetworkDevices.Count} Gerät(e)";
+                NetworkScanResultsBorder.Visibility = NetworkDevices.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                NetworkScanStatusTextBlock.Text = NetworkDevices.Count > 0
+                    ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden"
+                    : "Scan abgeschlossen - Keine Geräte gefunden";
+            });
+        }
+
+        private async Task ScanSingleDeviceAsync(IPAddress ipAddress, SemaphoreSlim semaphore, CancellationToken cancellationToken)
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(ipAddress, 500);
+
+                if (reply.Status == IPStatus.Success)
+                {
+                    var device = new NetworkDevice
+                    {
+                        IpAddress = ipAddress.ToString(),
+                        MacAddress = "-",
+                        Hostname = "-"
+                    };
+
+                    // Try to get MAC address and hostname in parallel
+                    var macTask = Task.Run(() => GetMacAddressAsync(ipAddress.ToString()), cancellationToken);
+                    var hostnameTask = Task.Run(() => GetHostnameAsync(ipAddress), cancellationToken);
+
+                    await Task.WhenAll(macTask, hostnameTask);
+
+                    device.MacAddress = macTask.Result;
+                    device.Hostname = hostnameTask.Result;
+
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        NetworkDevices.Add(device);
+                    });
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // Ignore individual failures
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }
+
+        private async Task<string> GetMacAddressAsync(string ipAddress)
+        {
+            try
+            {
+                var processStartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "arp",
+                    Arguments = $"-a {ipAddress}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = System.Diagnostics.Process.Start(processStartInfo);
+                if (process == null) return "-";
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                // Parse ARP output for MAC address
+                var lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
+                {
+                    if (line.Contains(ipAddress))
+                    {
+                        // Extract MAC address (format: xx-xx-xx-xx-xx-xx)
+                        var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var part in parts)
+                        {
+                            if (part.Length == 17 && part.Count(c => c == '-') == 5)
+                            {
+                                return part.ToUpper();
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore
+            }
+
+            return "-";
+        }
+
+        private async Task<string> GetHostnameAsync(IPAddress ipAddress)
+        {
+            try
+            {
+                var hostEntry = await Dns.GetHostEntryAsync(ipAddress);
+                return hostEntry.HostName ?? "-";
+            }
+            catch
+            {
+                return "-";
+            }
+        }
+
+        private void ShowScanError(string message)
+        {
+            NetworkScanErrorBar.Title = "Fehler";
+            NetworkScanErrorBar.Message = message;
+            NetworkScanErrorBar.IsOpen = true;
         }
     }
 }

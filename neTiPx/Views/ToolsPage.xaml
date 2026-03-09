@@ -63,6 +63,11 @@
                         <FontIcon Glyph="&#xE8BD;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Netzwerkscanner" Tag="NetworkScanner">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE774;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.Content>
@@ -541,6 +546,88 @@
 
                             <!-- Fehlerbehandlung -->
                             <InfoBar x:Name="NetworkCalcErrorBar" Severity="Error" IsOpen="False" IsClosable="True" Margin="0,8,0,0" />
+                        </StackPanel>
+
+                        <!-- Netzwerkscanner Unterseite -->
+                        <StackPanel x:Name="NetworkScannerPanel" Spacing="16" Padding="24" Visibility="Collapsed">
+                            <TextBlock Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+
+                            <!-- Scan-Konfiguration -->
+                            <Border Style="{StaticResource CardBorder}" Padding="16">
+                                <StackPanel Spacing="12">
+                                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="16">
+                                        <StackPanel Grid.Column="0" Spacing="8">
+                                            <TextBlock Text="Start IP-Adresse" FontWeight="SemiBold" />
+                                            <TextBox x:Name="NetworkScanStartIpTextBox"
+                                                     PlaceholderText="z.B. 192.168.1.1" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="8">
+                                            <TextBlock Text="End IP-Adresse" FontWeight="SemiBold" />
+                                            <TextBox x:Name="NetworkScanEndIpTextBox"
+                                                     PlaceholderText="z.B. 192.168.1.254" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2"
+                                                x:Name="NetworkScanStartButton"
+                                                Content="Scan starten"
+                                                Click="NetworkScanStartButton_Click"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                VerticalAlignment="Bottom"
+                                                MinWidth="120" />
+                                    </Grid>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="16">
+                                        <TextBlock x:Name="NetworkScanStatusTextBlock"
+                                                   Text="Bereit zum Scannen"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   VerticalAlignment="Center" />
+                                        <ProgressRing x:Name="NetworkScanProgressRing"
+                                                      IsActive="False"
+                                                      Width="20"
+                                                      Height="20" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Scan-Ergebnisse -->
+                            <Border x:Name="NetworkScanResultsBorder" Style="{StaticResource CardBorder}" Padding="16" Visibility="Collapsed">
+                                <StackPanel Spacing="12">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Grid.Column="0" Text="Gefundene Geräte" FontWeight="SemiBold" FontSize="14" />
+                                        <TextBlock Grid.Column="1" x:Name="NetworkScanCountTextBlock" Text="0 Geräte" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Grid>
+
+                                    <!-- Header-Zeile -->
+                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="12,4">
+                                        <Grid ColumnDefinitions="200,180,*" ColumnSpacing="16">
+                                            <TextBlock Grid.Column="0" Text="IP-Adresse" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Column="1" Text="MAC-Adresse" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Column="2" Text="Hostname" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Geräte-Liste -->
+                                    <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl x:Name="NetworkScanResultsItemsControl" ItemsSource="{Binding NetworkDevices, ElementName=ToolsPageRoot}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                            BorderThickness="0,0,0,1"
+                                                            Padding="12,8">
+                                                        <Grid ColumnDefinitions="200,180,*" ColumnSpacing="16">
+                                                            <TextBlock Grid.Column="0" Text="{Binding IpAddress}" FontSize="13" VerticalAlignment="Center" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding MacAddress}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                            <TextBlock Grid.Column="2" Text="{Binding Hostname}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Fehlerbehandlung -->
+                            <InfoBar x:Name="NetworkScanErrorBar" Severity="Error" IsOpen="False" IsClosable="True" Margin="0,8,0,0" />
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
