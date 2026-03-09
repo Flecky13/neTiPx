@@ -587,47 +587,57 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Scan-Ergebnisse -->
-                            <Border x:Name="NetworkScanResultsBorder" Style="{StaticResource CardBorder}" Padding="16" Visibility="Collapsed">
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                                    <!-- Geräteliste (links) -->
-                                    <StackPanel Grid.Column="0" Spacing="12">
-                                        <Grid ColumnDefinitions="*,Auto">
+                            <!-- Scan-Ergebnisse: Grid mit 2 separaten Bereichen -->
+                            <Grid ColumnDefinitions="*,250" ColumnSpacing="16">
+                                <!-- Linker Bereich: Geräteliste -->
+                                <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
+                                    <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
+                                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                                             <TextBlock Grid.Column="0" Text="Gefundene Geräte" FontWeight="SemiBold" FontSize="14" />
                                             <TextBlock Grid.Column="1" x:Name="NetworkScanCountTextBlock" Text="0 Geräte" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </Grid>
 
                                         <!-- Header-Zeile -->
-                                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="12,4">
-                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                                        <Border Grid.Row="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+                                            <Grid ColumnDefinitions="2*,2*,*" ColumnSpacing="12">
                                                 <TextBlock Grid.Column="0" Text="IP-Adresse" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock Grid.Column="1" Text="MAC-Adresse" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Grid.Column="2" Text="Open Ports" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </Grid>
                                         </Border>
 
-                                        <!-- Geräte-Liste -->
-                                        <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
-                                            <ListView x:Name="NetworkScanResultsListView"
-                                                      ItemsSource="{Binding NetworkDevices, ElementName=ToolsPageRoot}"
-                                                      SelectionMode="Single"
-                                                      SelectionChanged="NetworkScanResultsListView_SelectionChanged">
-                                                <ListView.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Padding="8,4">
-                                                            <TextBlock Grid.Column="0" Text="{Binding IpAddress}" FontSize="13" VerticalAlignment="Center" />
-                                                            <TextBlock Grid.Column="1" Text="{Binding MacAddress}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </ListView.ItemTemplate>
-                                            </ListView>
-                                        </ScrollViewer>
-                                    </StackPanel>
+                                        <!-- Geräte-Liste mit Scrollbar -->
+                                        <ListView Grid.Row="2"
+                                                  x:Name="NetworkScanResultsListView"
+                                                  ItemsSource="{Binding NetworkDevices, ElementName=ToolsPageRoot}"
+                                                  SelectionMode="Single"
+                                                  SelectionChanged="NetworkScanResultsListView_SelectionChanged">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid ColumnDefinitions="2*,2*,*" ColumnSpacing="12" Padding="4,2">
+                                                        <TextBlock Grid.Column="0" Text="{Binding IpAddress}" FontSize="13" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding MacAddress}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding OpenPorts.Count}" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Grid>
+                                </Border>
 
-                                    <!-- Details-Panel (rechts) -->
-                                    <StackPanel x:Name="NetworkScanDetailsPanel" Grid.Column="1" Spacing="12" Visibility="Collapsed">
-                                        <TextBlock Text="Geräte-Details" FontWeight="SemiBold" FontSize="14" />
+                                <!-- Rechter Bereich: Details -->
+                                <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="16">
+                                    <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                                        <TextBlock Grid.Row="0" Text="Geräte-Details" FontWeight="SemiBold" FontSize="14" />
 
-                                        <StackPanel Spacing="8">
+                                        <TextBlock x:Name="NetworkScanDetailsPlaceholderText"
+                                                   Grid.Row="1"
+                                                   Text="Wählen Sie links ein Gerät aus."
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   VerticalAlignment="Top"
+                                                   TextWrapping="Wrap" />
+
+                                        <StackPanel x:Name="NetworkScanDetailsPanel" Grid.Row="1" Spacing="8" Visibility="Collapsed">
                                             <StackPanel Spacing="4">
                                                 <TextBlock Text="IP-Adresse:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <TextBlock x:Name="DeviceDetailsIpTextBlock" FontSize="13" />
@@ -654,9 +664,9 @@
                                                 </ItemsControl>
                                             </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                                    </Grid>
+                                </Border>
+                            </Grid>
 
                             <!-- Fehlerbehandlung -->
                             <InfoBar x:Name="NetworkScanErrorBar" Severity="Error" IsOpen="False" IsClosable="True" Margin="0,8,0,0" />

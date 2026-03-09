@@ -1610,8 +1610,8 @@ namespace neTiPx.Views
             _networkScanCts = new CancellationTokenSource();
 
             NetworkDevices.Clear();
-            NetworkScanResultsBorder.Visibility = Visibility.Collapsed;
             NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
+            NetworkScanDetailsPlaceholderText.Visibility = Visibility.Visible;
             NetworkScanStartButton.IsEnabled = false;
             NetworkScanProgressRing.IsActive = true;
             NetworkScanStatusTextBlock.Text = $"Scanne {ipList.Count} Adressen...";
@@ -1650,7 +1650,6 @@ namespace neTiPx.Views
             DispatcherQueue.TryEnqueue(() =>
             {
                 NetworkScanCountTextBlock.Text = $"{NetworkDevices.Count} Gerät(e)";
-                NetworkScanResultsBorder.Visibility = NetworkDevices.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
                 NetworkScanStatusTextBlock.Text = NetworkDevices.Count > 0
                     ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden"
                     : "Scan abgeschlossen - Keine Geräte gefunden";
@@ -2000,6 +1999,7 @@ namespace neTiPx.Views
             {
                 // Details anzeigen
                 NetworkScanDetailsPanel.Visibility = Visibility.Visible;
+                NetworkScanDetailsPlaceholderText.Visibility = Visibility.Collapsed;
                 DeviceDetailsIpTextBlock.Text = selectedDevice.IpAddress;
                 DeviceDetailsMacTextBlock.Text = selectedDevice.MacAddress;
                 DeviceDetailsHostnameTextBlock.Text = selectedDevice.Hostname;
@@ -2020,6 +2020,7 @@ namespace neTiPx.Views
             {
                 // Kein Gerät ausgewählt - Details ausblenden
                 NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
+                NetworkScanDetailsPlaceholderText.Visibility = Visibility.Visible;
             }
         }
 
