@@ -4,11 +4,11 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.3.2.0]
 
 ### Added
-- **Netzwerk-Rechner**: Netzwerk rechner mit IP-Bereichserkennung (Privat, Public, Loopback, Zeroconf, Multicast, CGNAT, Dokumentation, Reserviert)
-
+- **Netzwerk-Rechner**: Neues Tool für IPv4- und IPv6-Subnetz-Berechnungen
+- **Netzwerk-Rechner**: IPv4-Bereichserkennung (Privat, Public, Loopback, Zeroconf/Link-Local, Multicast, Broadcast, CGNAT, Dokumentation, Reserviert, Unspecified)
 
 ## [1.3.0.2]
 
