@@ -654,11 +654,11 @@
                                             </StackPanel>
 
                                             <StackPanel x:Name="DeviceDetailsPortsPanel" Spacing="4" Visibility="Collapsed">
-                                                <TextBlock Text="Offene Ports (Klick zum Öffnen):" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="Offene Ports (Doppelklick zum Öffnen):" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                 <ListView x:Name="DeviceDetailsPortsListView"
-                                                          SelectionMode="None"
-                                                          IsItemClickEnabled="True"
-                                                          ItemClick="DeviceDetailsPortsListView_ItemClick">
+                                                          SelectionMode="Single"
+                                                          IsItemClickEnabled="False"
+                                                          DoubleTapped="DeviceDetailsPortsListView_DoubleTapped">
                                                     <ListView.ItemTemplate>
                                                         <DataTemplate>
                                                             <TextBlock Text="{Binding}" FontSize="13" Margin="0,2" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextDecorations="Underline" />

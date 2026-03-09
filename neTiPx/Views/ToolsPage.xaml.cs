@@ -2040,9 +2040,17 @@ namespace neTiPx.Views
             NetworkScanErrorBar.IsOpen = true;
         }
 
-        private void DeviceDetailsPortsListView_ItemClick(object sender, ItemClickEventArgs e)
+        private void DeviceDetailsPortsListView_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
         {
-            if (e.ClickedItem is not string portInfo)
+            if (sender is not ListView portsListView)
+            {
+                return;
+            }
+
+            var portInfo = (e.OriginalSource as FrameworkElement)?.DataContext as string
+                ?? portsListView.SelectedItem as string;
+
+            if (string.IsNullOrWhiteSpace(portInfo))
             {
                 return;
             }
@@ -2058,58 +2066,75 @@ namespace neTiPx.Views
 
         private void OpenPortConnection(string ipAddress, string portInfo)
         {
-            // Port-Info parsen (Format: "80 (http)" oder "3389 (rdp)" oder nur "80")
-            var parts = portInfo.Split(new[] { ' ', '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0 || !int.TryParse(parts[0], out var port))
-            {
-                return;
-            }
-
-            var protocol = parts.Length > 1 ? parts[1].ToLowerInvariant() : string.Empty;
+            var normalized = portInfo.Trim().ToUpperInvariant();
 
             try
             {
-                // HTTP/HTTPS - Webbrowser öffnen
-                if (port == 80 || port == 8000 || port == 8080 || protocol == "http")
+                // Falls doch eine Portnummer im String steckt (z.B. "80" oder "80 (HTTP)")
+                var numberText = new string(portInfo.TakeWhile(char.IsDigit).ToArray());
+                if (!string.IsNullOrWhiteSpace(numberText) && int.TryParse(numberText, out var numericPort))
                 {
-                    var url = $"http://{ipAddress}:{port}";
-                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                    if (numericPort == 80 || numericPort == 8080 || numericPort == 8000)
+                    {
+                        Process.Start(new ProcessStartInfo($"http://{ipAddress}:{numericPort}") { UseShellExecute = true });
+                        return;
+                    }
+
+                    if (numericPort == 443 || numericPort == 8443)
+                    {
+                        Process.Start(new ProcessStartInfo($"https://{ipAddress}:{numericPort}") { UseShellExecute = true });
+                        return;
+                    }
+
+                    if (numericPort == 3389)
+                    {
+                        Process.Start("mstsc.exe", $"/v:{ipAddress}:{numericPort}");
+                        return;
+                    }
                 }
-                else if (port == 443 || port == 8443 || protocol == "https")
+
+                if (normalized.StartsWith("HTTP"))
                 {
-                    var url = $"https://{ipAddress}:{port}";
-                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                    Process.Start(new ProcessStartInfo($"http://{ipAddress}") { UseShellExecute = true });
                 }
-                // RDP - Remote Desktop
-                else if (port == 3389 || protocol == "rdp" || protocol == "ms-wbt-server")
+                else if (normalized.StartsWith("HTTPS"))
                 {
-                    var rdpArgs = $"/v:{ipAddress}:{port}";
-                    Process.Start("mstsc.exe", rdpArgs);
+                    Process.Start(new ProcessStartInfo($"https://{ipAddress}") { UseShellExecute = true });
                 }
-                // SSH
-                else if (port == 22 || protocol == "ssh")
+                else if (normalized.StartsWith("RDP"))
                 {
-                    // Versuche Windows Terminal mit SSH zu öffnen
+                    Process.Start("mstsc.exe", $"/v:{ipAddress}");
+                }
+                else if (normalized.StartsWith("FTP"))
+                {
+                    Process.Start(new ProcessStartInfo($"ftp://{ipAddress}") { UseShellExecute = true });
+                }
+                else if (normalized.StartsWith("SSH"))
+                {
                     try
                     {
-                        Process.Start(new ProcessStartInfo($"ssh://{ipAddress}:{port}") { UseShellExecute = true });
+                        Process.Start(new ProcessStartInfo($"ssh://{ipAddress}") { UseShellExecute = true });
                     }
                     catch
                     {
-                        // Fallback: Info anzeigen
-                        ShowScanError($"SSH-Verbindung: ssh {ipAddress} -p {port}");
+                        ShowScanError($"SSH-Verbindung: ssh {ipAddress}");
                     }
                 }
-                // FTP
-                else if (port == 21 || protocol == "ftp")
+                else if (normalized.StartsWith("SMB"))
                 {
-                    var url = $"ftp://{ipAddress}:{port}";
-                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                    Process.Start(new ProcessStartInfo($"\\\\{ipAddress}") { UseShellExecute = true });
+                }
+                else if (normalized.StartsWith("CUSTOM"))
+                {
+                    var customPortText = new string(portInfo.Where(char.IsDigit).ToArray());
+                    if (!string.IsNullOrWhiteSpace(customPortText) && int.TryParse(customPortText, out var customPort))
+                    {
+                        ShowScanError($"Custom-Port offen: {ipAddress}:{customPort}");
+                    }
                 }
                 else
                 {
-                    // Für andere Ports: Info-Hinweis
-                    ShowScanError($"Port {port} ist offen, aber keine Aktion definiert.\nIP: {ipAddress}:{port}");
+                    ShowScanError($"Keine Startaktion definiert für: {portInfo}");
                 }
             }
             catch (Exception ex)
