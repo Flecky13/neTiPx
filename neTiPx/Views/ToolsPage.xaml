@@ -654,14 +654,17 @@
                                             </StackPanel>
 
                                             <StackPanel x:Name="DeviceDetailsPortsPanel" Spacing="4" Visibility="Collapsed">
-                                                <TextBlock Text="Offene Ports:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                                <ItemsControl x:Name="DeviceDetailsPortsItemsControl">
-                                                    <ItemsControl.ItemTemplate>
+                                                <TextBlock Text="Offene Ports (Klick zum Öffnen):" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <ListView x:Name="DeviceDetailsPortsListView"
+                                                          SelectionMode="None"
+                                                          IsItemClickEnabled="True"
+                                                          ItemClick="DeviceDetailsPortsListView_ItemClick">
+                                                    <ListView.ItemTemplate>
                                                         <DataTemplate>
-                                                            <TextBlock Text="{Binding}" FontSize="13" Margin="0,2" />
+                                                            <TextBlock Text="{Binding}" FontSize="13" Margin="0,2" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" TextDecorations="Underline" />
                                                         </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
+                                                    </ListView.ItemTemplate>
+                                                </ListView>
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>

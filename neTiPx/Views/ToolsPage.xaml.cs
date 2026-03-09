@@ -2017,12 +2017,12 @@ namespace neTiPx.Views
                 if (selectedDevice.OpenPorts != null && selectedDevice.OpenPorts.Count > 0)
                 {
                     DeviceDetailsPortsPanel.Visibility = Visibility.Visible;
-                    DeviceDetailsPortsItemsControl.ItemsSource = selectedDevice.OpenPorts;
+                    DeviceDetailsPortsListView.ItemsSource = selectedDevice.OpenPorts;
                 }
                 else
                 {
                     DeviceDetailsPortsPanel.Visibility = Visibility.Collapsed;
-                    DeviceDetailsPortsItemsControl.ItemsSource = null;
+                    DeviceDetailsPortsListView.ItemsSource = null;
                 }
             }
             else
@@ -2038,6 +2038,84 @@ namespace neTiPx.Views
             NetworkScanErrorBar.Title = "Fehler";
             NetworkScanErrorBar.Message = message;
             NetworkScanErrorBar.IsOpen = true;
+        }
+
+        private void DeviceDetailsPortsListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is not string portInfo)
+            {
+                return;
+            }
+
+            var selectedDevice = NetworkScanResultsListView?.SelectedItem as NetworkDevice;
+            if (selectedDevice == null || string.IsNullOrWhiteSpace(selectedDevice.IpAddress))
+            {
+                return;
+            }
+
+            OpenPortConnection(selectedDevice.IpAddress, portInfo);
+        }
+
+        private void OpenPortConnection(string ipAddress, string portInfo)
+        {
+            // Port-Info parsen (Format: "80 (http)" oder "3389 (rdp)" oder nur "80")
+            var parts = portInfo.Split(new[] { ' ', '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0 || !int.TryParse(parts[0], out var port))
+            {
+                return;
+            }
+
+            var protocol = parts.Length > 1 ? parts[1].ToLowerInvariant() : string.Empty;
+
+            try
+            {
+                // HTTP/HTTPS - Webbrowser öffnen
+                if (port == 80 || port == 8000 || port == 8080 || protocol == "http")
+                {
+                    var url = $"http://{ipAddress}:{port}";
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                else if (port == 443 || port == 8443 || protocol == "https")
+                {
+                    var url = $"https://{ipAddress}:{port}";
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                // RDP - Remote Desktop
+                else if (port == 3389 || protocol == "rdp" || protocol == "ms-wbt-server")
+                {
+                    var rdpArgs = $"/v:{ipAddress}:{port}";
+                    Process.Start("mstsc.exe", rdpArgs);
+                }
+                // SSH
+                else if (port == 22 || protocol == "ssh")
+                {
+                    // Versuche Windows Terminal mit SSH zu öffnen
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo($"ssh://{ipAddress}:{port}") { UseShellExecute = true });
+                    }
+                    catch
+                    {
+                        // Fallback: Info anzeigen
+                        ShowScanError($"SSH-Verbindung: ssh {ipAddress} -p {port}");
+                    }
+                }
+                // FTP
+                else if (port == 21 || protocol == "ftp")
+                {
+                    var url = $"ftp://{ipAddress}:{port}";
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                else
+                {
+                    // Für andere Ports: Info-Hinweis
+                    ShowScanError($"Port {port} ist offen, aber keine Aktion definiert.\nIP: {ipAddress}:{port}");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowScanError($"Fehler beim Öffnen der Verbindung: {ex.Message}");
+            }
         }
 
         // Network Scanner Sorting Methods
