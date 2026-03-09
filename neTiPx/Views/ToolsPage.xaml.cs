@@ -15,6 +15,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage.Pickers;
@@ -37,6 +38,7 @@ namespace neTiPx.Views
         private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
         private bool _isPingPageVisible = true;
         private bool _isSyncingNetworkCalcInputs;
+        private bool _isIpv6Mode = false;
 
         public ToolsPage()
         {
@@ -843,10 +845,50 @@ namespace neTiPx.Views
         }
 
         // Network Calculator Methoden
+        private void NetworkCalcIpVersionRadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (NetworkCalcIpv4RadioButton == null || NetworkCalcIpv6RadioButton == null)
+            {
+                return;
+            }
+
+            _isIpv6Mode = NetworkCalcIpv6RadioButton.IsChecked == true;
+
+            // Toggle visibility
+            NetworkCalcIpv4InputBorder.Visibility = _isIpv6Mode ? Visibility.Collapsed : Visibility.Visible;
+            NetworkCalcIpv6InputBorder.Visibility = _isIpv6Mode ? Visibility.Visible : Visibility.Collapsed;
+            NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
+
+            // Clear error
+            NetworkCalcErrorBar.IsOpen = false;
+
+            // Trigger calculation for the active mode
+            if (_isIpv6Mode)
+            {
+                TryCalculateIpv6NetworkAuto();
+            }
+            else
+            {
+                TryCalculateNetworkAuto();
+            }
+        }
+
         private void NetworkCalcIpAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             UpdateIpScopeIndicator();
             TryCalculateNetworkAuto();
+        }
+
+        private void NetworkCalcIpv6AddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            UpdateIpv6ScopeIndicator();
+            TryCalculateIpv6NetworkAuto();
+        }
+
+        private void NetworkCalcIpv6PrefixTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TryCalculateIpv6NetworkAuto();
         }
 
         private void NetworkCalcSubnetTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -1038,7 +1080,7 @@ namespace neTiPx.Views
 
             if (!IPAddress.TryParse(NetworkCalcIpAddressTextBox.Text.Trim(), out var ip) || ip.AddressFamily != AddressFamily.InterNetwork)
             {
-                NetworkCalcResultsBorder.Visibility = Visibility.Collapsed;
+                NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
                 return;
             }
 
@@ -1057,7 +1099,172 @@ namespace neTiPx.Views
                 return;
             }
 
-            NetworkCalcResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
+        }
+
+        private void TryCalculateIpv6NetworkAuto()
+        {
+            NetworkCalcErrorBar.IsOpen = false;
+
+            var addressInput = NetworkCalcIpv6AddressTextBox.Text.Trim();
+            var prefixInput = NetworkCalcIpv6PrefixTextBox.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(addressInput) || string.IsNullOrWhiteSpace(prefixInput))
+            {
+                NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            if (!IPAddress.TryParse(addressInput, out var ipv6Address) || ipv6Address.AddressFamily != AddressFamily.InterNetworkV6)
+            {
+                NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            if (!int.TryParse(prefixInput, out var prefixLength) || prefixLength < 0 || prefixLength > 128)
+            {
+                NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            try
+            {
+                CalculateIpv6Network(ipv6Address, prefixLength);
+            }
+            catch
+            {
+                NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void UpdateIpv6ScopeIndicator()
+        {
+            var input = NetworkCalcIpv6AddressTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                NetworkCalcIpv6ScopeTextBlock.Text = "IP-Bereich: -";
+                return;
+            }
+
+            if (!IPAddress.TryParse(input, out var ip) || ip.AddressFamily != AddressFamily.InterNetworkV6)
+            {
+                NetworkCalcIpv6ScopeTextBlock.Text = "IP-Bereich: ungültige IPv6-Adresse";
+                return;
+            }
+
+            NetworkCalcIpv6ScopeTextBlock.Text = $"IP-Bereich: {GetIpv6ScopeLabel(ip)}";
+        }
+
+        private void CalculateIpv6Network(IPAddress ipv6Address, int prefixLength)
+        {
+            var addressBytes = ipv6Address.GetAddressBytes();
+            var networkBytes = new byte[16];
+            var lastBytes = new byte[16];
+
+            // Calculate network address
+            int fullBytes = prefixLength / 8;
+            int remainingBits = prefixLength % 8;
+
+            for (int i = 0; i < 16; i++)
+            {
+                if (i < fullBytes)
+                {
+                    networkBytes[i] = addressBytes[i];
+                    lastBytes[i] = addressBytes[i];
+                }
+                else if (i == fullBytes && remainingBits > 0)
+                {
+                    byte mask = (byte)(0xFF << (8 - remainingBits));
+                    networkBytes[i] = (byte)(addressBytes[i] & mask);
+                    lastBytes[i] = (byte)(addressBytes[i] | ~mask);
+                }
+                else
+                {
+                    networkBytes[i] = 0;
+                    lastBytes[i] = 0xFF;
+                }
+            }
+
+            var networkAddress = new IPAddress(networkBytes);
+            var firstAddress = new IPAddress(networkBytes);
+            var lastAddress = new IPAddress(lastBytes);
+
+            // Calculate address count
+            var hostBits = 128 - prefixLength;
+            string addressCount;
+            if (hostBits > 63)
+            {
+                addressCount = $"2^{hostBits} (sehr groß)";
+            }
+            else
+            {
+                var count = System.Numerics.BigInteger.Pow(2, hostBits);
+                addressCount = count.ToString("N0");
+            }
+
+            // Display results
+            NetworkAddressIpv6.Text = networkAddress.ToString();
+            PrefixLengthIpv6.Text = $"/{prefixLength}";
+            FirstAddressIpv6.Text = firstAddress.ToString();
+            LastAddressIpv6.Text = lastAddress.ToString();
+            AddressCountIpv6.Text = addressCount;
+
+            NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Visible;
+        }
+
+        private string GetIpv6ScopeLabel(IPAddress ipAddress)
+        {
+            var bytes = ipAddress.GetAddressBytes();
+
+            // Unspecified address (::)
+            if (bytes.All(b => b == 0))
+            {
+                return "Unspecified";
+            }
+
+            // Loopback (::1)
+            if (bytes.Take(15).All(b => b == 0) && bytes[15] == 1)
+            {
+                return "Loopback";
+            }
+
+            // Link-local (fe80::/10)
+            if (bytes[0] == 0xFE && (bytes[1] & 0xC0) == 0x80)
+            {
+                return "Link-Local";
+            }
+
+            // Unique local (fc00::/7)
+            if ((bytes[0] & 0xFE) == 0xFC)
+            {
+                return "Unique Local (ULA)";
+            }
+
+            // Multicast (ff00::/8)
+            if (bytes[0] == 0xFF)
+            {
+                return "Multicast";
+            }
+
+            // IPv4-mapped (::ffff:0:0/96)
+            if (bytes.Take(10).All(b => b == 0) && bytes[10] == 0xFF && bytes[11] == 0xFF)
+            {
+                return "IPv4-mapped";
+            }
+
+            // Documentation (2001:db8::/32)
+            if (bytes[0] == 0x20 && bytes[1] == 0x01 && bytes[2] == 0x0D && bytes[3] == 0xB8)
+            {
+                return "Dokumentationsbereich";
+            }
+
+            // Global unicast
+            if ((bytes[0] & 0xE0) == 0x20)
+            {
+                return "Global Unicast";
+            }
+
+            return "Reserviert";
         }
 
         private void UpdateIpScopeIndicator()
@@ -1144,7 +1351,7 @@ namespace neTiPx.Views
         private void CalculateNetwork_Click(object sender, RoutedEventArgs e)
         {
             NetworkCalcErrorBar.IsOpen = false;
-            NetworkCalcResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
 
             try
             {
@@ -1246,7 +1453,7 @@ namespace neTiPx.Views
             HostCount.Text = hostCount.ToString("N0");
             WildcardMask.Text = wildcard.ToString();
 
-            NetworkCalcResultsBorder.Visibility = Visibility.Visible;
+            NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Visible;
         }
 
         private uint IpToUint(IPAddress address)
@@ -1363,7 +1570,8 @@ namespace neTiPx.Views
             NetworkCalcErrorBar.Title = "Fehler";
             NetworkCalcErrorBar.Message = message;
             NetworkCalcErrorBar.IsOpen = true;
-            NetworkCalcResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkCalcIpv6ResultsBorder.Visibility = Visibility.Collapsed;
         }
     }
 }

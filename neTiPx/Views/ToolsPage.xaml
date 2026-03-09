@@ -374,10 +374,17 @@
 
                         <!-- Netzwerk-Rechner Unterseite -->
                         <StackPanel x:Name="NetworkCalculatorPanel" Spacing="16" Padding="24" Visibility="Collapsed">
-                            <TextBlock Text="Netzwerk-Rechner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+                            <!-- Header mit RadioButtons -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                                <TextBlock Grid.Column="0" Text="Netzwerk-Rechner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                                    <RadioButton x:Name="NetworkCalcIpv4RadioButton" Content="IPv4" IsChecked="True" Checked="NetworkCalcIpVersionRadioButton_Checked" />
+                                    <RadioButton x:Name="NetworkCalcIpv6RadioButton" Content="IPv6" Checked="NetworkCalcIpVersionRadioButton_Checked" />
+                                </StackPanel>
+                            </Grid>
 
-                            <!-- Eingabefelder -->
-                            <Border Style="{StaticResource CardBorder}" Padding="16">
+                            <!-- IPv4 Eingabefelder -->
+                            <Border x:Name="NetworkCalcIpv4InputBorder" Style="{StaticResource CardBorder}" Padding="16">
                                 <StackPanel Spacing="12">
                                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
                                         <StackPanel Grid.Column="0" Spacing="8">
@@ -424,8 +431,32 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Ergebnisse -->
-                            <Border Style="{StaticResource CardBorder}" Padding="16" x:Name="NetworkCalcResultsBorder" Visibility="Collapsed">
+                            <!-- IPv6 Eingabefelder -->
+                            <Border x:Name="NetworkCalcIpv6InputBorder" Style="{StaticResource CardBorder}" Padding="16" Visibility="Collapsed">
+                                <StackPanel Spacing="12">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                        <StackPanel Grid.Column="0" Spacing="8">
+                                            <TextBlock Text="IPv6-Adresse" FontWeight="SemiBold" />
+                                            <TextBox x:Name="NetworkCalcIpv6AddressTextBox"
+                                                     TextChanged="NetworkCalcIpv6AddressTextBox_TextChanged"
+                                                     PlaceholderText="z.B. 2001:db8::" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="8" MinWidth="150">
+                                            <TextBlock Text="Präfixlänge" FontWeight="SemiBold" />
+                                            <TextBox x:Name="NetworkCalcIpv6PrefixTextBox"
+                                                     TextChanged="NetworkCalcIpv6PrefixTextBox_TextChanged"
+                                                     PlaceholderText="z.B. 64" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TextBlock x:Name="NetworkCalcIpv6ScopeTextBlock"
+                                               Text="IP-Bereich: -"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- IPv4 Ergebnisse -->
+                            <Border x:Name="NetworkCalcIpv4ResultsBorder" Style="{StaticResource CardBorder}" Padding="16" Visibility="Collapsed">
                                 <StackPanel Spacing="12">
                                     <TextBlock Text="Berechnungsergebnisse" FontWeight="SemiBold" FontSize="14" />
 
@@ -468,6 +499,41 @@
                                         <StackPanel Grid.Column="1" Grid.Row="3" Spacing="4">
                                             <TextBlock Text="Wildcard-Maske:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                             <TextBlock x:Name="WildcardMask" Text="-" FontWeight="SemiBold" FontSize="14" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- IPv6 Ergebnisse -->
+                            <Border x:Name="NetworkCalcIpv6ResultsBorder" Style="{StaticResource CardBorder}" Padding="16" Visibility="Collapsed">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Berechnungsergebnisse" FontWeight="SemiBold" FontSize="14" />
+
+                                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="12">
+                                        <!-- Zeile 1 -->
+                                        <StackPanel Grid.Column="0" Grid.Row="0" Spacing="4">
+                                            <TextBlock Text="Netzwerkadresse:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            <TextBlock x:Name="NetworkAddressIpv6" Text="-" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4">
+                                            <TextBlock Text="Präfixlänge:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            <TextBlock x:Name="PrefixLengthIpv6" Text="-" FontWeight="SemiBold" FontSize="14" />
+                                        </StackPanel>
+
+                                        <!-- Zeile 2 -->
+                                        <StackPanel Grid.Column="0" Grid.Row="1" Spacing="4">
+                                            <TextBlock Text="Erste Adresse:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            <TextBlock x:Name="FirstAddressIpv6" Text="-" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Grid.Row="1" Spacing="4">
+                                            <TextBlock Text="Letzte Adresse:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            <TextBlock x:Name="LastAddressIpv6" Text="-" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+                                        </StackPanel>
+
+                                        <!-- Zeile 3 -->
+                                        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Spacing="4">
+                                            <TextBlock Text="Anzahl Adressen:" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                            <TextBlock x:Name="AddressCountIpv6" Text="-" FontWeight="SemiBold" FontSize="14" />
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
