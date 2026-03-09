@@ -37,6 +37,7 @@
 - 📝 **Ping-Logging**: Automatische Log-Dateien pro Ziel inklusive Öffnen, Exportieren und Löschen
 - 🧭 **Hintergrundbetrieb**: Pings laufen optional weiter, wenn die Ping-Seite nicht aktiv ist
 - 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
+- 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
 
 zurück zum
 [Inhaltsverzeichnis]#-Inhaltsverzeichnis
@@ -111,6 +112,34 @@ Der WLAN Scanner nutzt die native Windows WLAN API für detaillierte Netzwerkinf
   - 📳 Mittel (50-74%)
   - 📴 Schwach (25-49%)
   - ❌ Sehr schwach (<25%)
+
+### Netzwerk-Rechner
+
+Der Netzwerk-Rechner bietet intelligente IP-Subnetz-Berechnungen mit automatischer Synchronisierung:
+
+**Funktionen:**
+- **Intelligente Eingabe**: IP-Adresse, Subnetzmaske oder CIDR-Sufix - alle Felder aktualisieren sich automatisch
+- **Bidirektionale Synchronisierung**:
+  - Änderung der Subnetzmaske → automatische Berechnung von CIDR-Sufix und Max. Hosts
+  - Änderung des CIDR-Sufix → automatische Berechnung von Subnetzmaske und Max. Hosts
+  - Änderung von Max. Hosts → automatische Berechnung von Subnetzmaske und CIDR-Sufix
+- **Plus/Minus-Steuerung**: Schnelles Umschalten zwischen gültigen Host-Anzahlen (z.B. 254 → 510 → 1022)
+- **Automatische Berechnung**: Ergebnisse werden sofort bei gültigen Eingaben angezeigt
+- **IP-Bereichserkennung**: Automatische Klassifizierung der eingegebenen IP:
+  - Privater Bereich (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
+  - Public Bereich
+  - Loopback (127.x.x.x)
+  - Zeroconf/Link-Local (169.254.x.x)
+  - Multicast (224.x.x.x - 239.x.x.x)
+  - Shared Address Space/CGNAT (100.64.x.x)
+  - Dokumentationsbereich
+  - Broadcast, Unspecified, Reserviert
+- **Detaillierte Ergebnisse**:
+  - Netzwerkadresse und Broadcast-Adresse
+  - Erste und letzte verwendbare IP
+  - Subnetzmaske und CIDR-Sufix
+  - Anzahl verfügbarer Hosts
+  - Wildcard-Maske
 
 ### Einstellungen
 
