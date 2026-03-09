@@ -157,6 +157,44 @@ namespace neTiPx.Views
             _pingLogFolderPath = _pingLogService.GetLogFolderPath();
             UpdatePingLogFolderPathDisplay();
 
+            // Netzwerkscanner-Einstellungen laden
+            if (ScanPortHttpCheckBox != null)
+            {
+                ScanPortHttpCheckBox.IsChecked = _settingsService.GetScanPortHttp();
+            }
+            if (ScanPortHttpsCheckBox != null)
+            {
+                ScanPortHttpsCheckBox.IsChecked = _settingsService.GetScanPortHttps();
+            }
+            if (ScanPortFtpCheckBox != null)
+            {
+                ScanPortFtpCheckBox.IsChecked = _settingsService.GetScanPortFtp();
+            }
+            if (ScanPortSshCheckBox != null)
+            {
+                ScanPortSshCheckBox.IsChecked = _settingsService.GetScanPortSsh();
+            }
+            if (ScanPortSmbCheckBox != null)
+            {
+                ScanPortSmbCheckBox.IsChecked = _settingsService.GetScanPortSmb();
+            }
+            if (ScanPortRdpCheckBox != null)
+            {
+                ScanPortRdpCheckBox.IsChecked = _settingsService.GetScanPortRdp();
+            }
+            if (CustomPort1NumberBox != null)
+            {
+                CustomPort1NumberBox.Value = _settingsService.GetCustomPort1();
+            }
+            if (CustomPort2NumberBox != null)
+            {
+                CustomPort2NumberBox.Value = _settingsService.GetCustomPort2();
+            }
+            if (CustomPort3NumberBox != null)
+            {
+                CustomPort3NumberBox.Value = _settingsService.GetCustomPort3();
+            }
+
             _isLoading = false;
         }
 
@@ -414,6 +452,136 @@ namespace neTiPx.Views
                 return;
 
             _settingsService.SetCloseToTrayOnClose(false);
+        }
+
+        // Netzwerkscanner Port-Scanning Event-Handler
+        private void ScanPortHttpCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortHttp(true);
+        }
+
+        private void ScanPortHttpCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortHttp(false);
+        }
+
+        private void ScanPortHttpsCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortHttps(true);
+        }
+
+        private void ScanPortHttpsCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortHttps(false);
+        }
+
+        private void ScanPortFtpCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortFtp(true);
+        }
+
+        private void ScanPortFtpCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortFtp(false);
+        }
+
+        private void ScanPortSshCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortSsh(true);
+        }
+
+        private void ScanPortSshCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortSsh(false);
+        }
+
+        private void ScanPortSmbCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortSmb(true);
+        }
+
+        private void ScanPortSmbCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortSmb(false);
+        }
+
+        private void ScanPortRdpCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortRdp(true);
+        }
+
+        private void ScanPortRdpCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            _settingsService.SetScanPortRdp(false);
+        }
+
+        private void CustomPort1NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            if (!double.IsNaN(args.NewValue))
+            {
+                _settingsService.SetCustomPort1((int)args.NewValue);
+            }
+        }
+
+        private void CustomPort2NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            if (!double.IsNaN(args.NewValue))
+            {
+                _settingsService.SetCustomPort2((int)args.NewValue);
+            }
+        }
+
+        private void CustomPort3NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (_isLoading || _settingsService == null)
+                return;
+
+            if (!double.IsNaN(args.NewValue))
+            {
+                _settingsService.SetCustomPort3((int)args.NewValue);
+            }
         }
 
     }

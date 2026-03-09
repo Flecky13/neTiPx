@@ -23,6 +23,17 @@ namespace neTiPx.Services
             public DateTime? LastCheckedAt { get; set; }
             public string PingLogFolderPath { get; set; } = string.Empty;
             public bool PingBackgroundActive { get; set; } = false;
+
+            // Network Scanner Port Settings
+            public bool ScanPortHttp { get; set; } = true;
+            public bool ScanPortHttps { get; set; } = true;
+            public bool ScanPortFtp { get; set; } = false;
+            public bool ScanPortSsh { get; set; } = false;
+            public bool ScanPortSmb { get; set; } = true;
+            public bool ScanPortRdp { get; set; } = true;
+            public int CustomPort1 { get; set; } = 0;
+            public int CustomPort2 { get; set; } = 0;
+            public int CustomPort3 { get; set; } = 0;
         }
 
         public UserSettings ReadUserSettings()
@@ -137,7 +148,19 @@ namespace neTiPx.Services
                 new XAttribute("backgroundActive", settings.PingBackgroundActive)
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement);
+            var networkScannerElement = new XElement("networkScanner",
+                new XAttribute("scanPortHttp", settings.ScanPortHttp),
+                new XAttribute("scanPortHttps", settings.ScanPortHttps),
+                new XAttribute("scanPortFtp", settings.ScanPortFtp),
+                new XAttribute("scanPortSsh", settings.ScanPortSsh),
+                new XAttribute("scanPortSmb", settings.ScanPortSmb),
+                new XAttribute("scanPortRdp", settings.ScanPortRdp),
+                new XAttribute("customPort1", settings.CustomPort1),
+                new XAttribute("customPort2", settings.CustomPort2),
+                new XAttribute("customPort3", settings.CustomPort3)
+            );
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement, networkScannerElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -243,6 +266,29 @@ namespace neTiPx.Services
                     {
                         settings.PingBackgroundActive = backgroundActive;
                     }
+                }
+
+                var networkScannerElement = root.Element("networkScanner");
+                if (networkScannerElement != null)
+                {
+                    if (bool.TryParse((string?)networkScannerElement.Attribute("scanPortHttp"), out var scanPortHttp))
+                        settings.ScanPortHttp = scanPortHttp;
+                    if (bool.TryParse((string?)networkScannerElement.Attribute("scanPortHttps"), out var scanPortHttps))
+                        settings.ScanPortHttps = scanPortHttps;
+                    if (bool.TryParse((string?)networkScannerElement.Attribute("scanPortFtp"), out var scanPortFtp))
+                        settings.ScanPortFtp = scanPortFtp;
+                    if (bool.TryParse((string?)networkScannerElement.Attribute("scanPortSsh"), out var scanPortSsh))
+                        settings.ScanPortSsh = scanPortSsh;
+                    if (bool.TryParse((string?)networkScannerElement.Attribute("scanPortSmb"), out var scanPortSmb))
+                        settings.ScanPortSmb = scanPortSmb;
+                    if (bool.TryParse((string?)networkScannerElement.Attribute("scanPortRdp"), out var scanPortRdp))
+                        settings.ScanPortRdp = scanPortRdp;
+                    if (int.TryParse((string?)networkScannerElement.Attribute("customPort1"), out var customPort1))
+                        settings.CustomPort1 = customPort1;
+                    if (int.TryParse((string?)networkScannerElement.Attribute("customPort2"), out var customPort2))
+                        settings.CustomPort2 = customPort2;
+                    if (int.TryParse((string?)networkScannerElement.Attribute("customPort3"), out var customPort3))
+                        settings.CustomPort3 = customPort3;
                 }
 
                 return settings;

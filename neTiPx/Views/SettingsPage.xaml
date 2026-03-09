@@ -202,11 +202,73 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Mitte Mitte: Platzhalter -->
+                <!-- Mitte Mitte: Netzwerkscanner -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="1">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Port-Scanning Einstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <!-- 3x3 Grid für Protokolle und Ports -->
+                        <Grid RowSpacing="8" ColumnSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Zeile 1: HTTP, HTTPS, FTP -->
+                            <CheckBox x:Name="ScanPortHttpCheckBox" Grid.Row="0" Grid.Column="0"
+                                      Content="HTTP (80)" FontSize="10"
+                                      Checked="ScanPortHttpCheckBox_Checked"
+                                      Unchecked="ScanPortHttpCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortHttpsCheckBox" Grid.Row="0" Grid.Column="1"
+                                      Content="HTTPS (443)" FontSize="10"
+                                      Checked="ScanPortHttpsCheckBox_Checked"
+                                      Unchecked="ScanPortHttpsCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortFtpCheckBox" Grid.Row="0" Grid.Column="2"
+                                      Content="FTP (21)" FontSize="10"
+                                      Checked="ScanPortFtpCheckBox_Checked"
+                                      Unchecked="ScanPortFtpCheckBox_Unchecked" />
+
+                            <!-- Zeile 2: SSH, SMB, RDP -->
+                            <CheckBox x:Name="ScanPortSshCheckBox" Grid.Row="1" Grid.Column="0"
+                                      Content="SSH (22)" FontSize="10"
+                                      Checked="ScanPortSshCheckBox_Checked"
+                                      Unchecked="ScanPortSshCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortSmbCheckBox" Grid.Row="1" Grid.Column="1"
+                                      Content="SMB (445)" FontSize="10"
+                                      Checked="ScanPortSmbCheckBox_Checked"
+                                      Unchecked="ScanPortSmbCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortRdpCheckBox" Grid.Row="1" Grid.Column="2"
+                                      Content="RDP (3389)" FontSize="10"
+                                      Checked="ScanPortRdpCheckBox_Checked"
+                                      Unchecked="ScanPortRdpCheckBox_Unchecked" />
+
+                            <!-- Zeile 3: Benutzerdefinierte Ports -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Port 1:" FontWeight="SemiBold" FontSize="11" />
+                                <NumberBox x:Name="CustomPort1NumberBox"
+                                           Minimum="0" Maximum="65535"
+                                           ValueChanged="CustomPort1NumberBox_ValueChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Port 2:" FontWeight="SemiBold" FontSize="11" />
+                                <NumberBox x:Name="CustomPort2NumberBox"
+                                           Minimum="0" Maximum="65535"
+                                           ValueChanged="CustomPort2NumberBox_ValueChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="2" Spacing="4">
+                                <TextBlock Text="Port 3:" FontWeight="SemiBold" FontSize="11" />
+                                <NumberBox x:Name="CustomPort3NumberBox"
+                                           Minimum="0" Maximum="65535"
+                                           ValueChanged="CustomPort3NumberBox_ValueChanged" />
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
 

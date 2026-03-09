@@ -1,4 +1,6 @@
 using neTiPx.Helpers;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace neTiPx.Models
 {
@@ -25,5 +27,7 @@ namespace neTiPx.Models
             get => _hostname;
             set => SetProperty(ref _hostname, value);
         }
+
+        public ObservableCollection<string> OpenPorts { get; } = new ObservableCollection<string>();
     }
 }

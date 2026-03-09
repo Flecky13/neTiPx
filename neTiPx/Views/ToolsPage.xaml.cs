@@ -29,6 +29,8 @@ namespace neTiPx.Views
         private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private readonly PingLogService _pingLogService = new PingLogService();
         private readonly SettingsService _settingsService = new SettingsService();
+        private readonly AdapterStore _adapterStore = new AdapterStore();
+        private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
         private const int WifiListBaseHeight = 260;
         private const int MainWindowMinHeight = 950;
         private AppWindow? _mainAppWindow;
@@ -77,6 +79,8 @@ namespace neTiPx.Views
             }
 
             UpdateWifiHeaderLabels();
+
+            PrefillNetworkScanRangesFromNic1();
 
             // Wenn WLAN-Panel sichtbar ist, initialen Scan durchführen
             if (WlanPanel != null && WlanPanel.Visibility == Visibility.Visible && DataContext is ToolsViewModel vm)
@@ -1585,42 +1589,19 @@ namespace neTiPx.Views
         // Network Scanner Methoden
         private async void NetworkScanStartButton_Click(object sender, RoutedEventArgs e)
         {
-            var startIp = NetworkScanStartIpTextBox.Text.Trim();
-            var endIp = NetworkScanEndIpTextBox.Text.Trim();
+            var rangeInput = NetworkScanRangesTextBox.Text.Trim();
 
             NetworkScanErrorBar.IsOpen = false;
 
-            if (string.IsNullOrWhiteSpace(startIp) || string.IsNullOrWhiteSpace(endIp))
+            if (string.IsNullOrWhiteSpace(rangeInput))
             {
-                ShowScanError("Bitte geben Sie Start- und End-IP-Adresse ein.");
+                ShowScanError("Bitte geben Sie mindestens einen IP-Bereich ein.");
                 return;
             }
 
-            if (!IPAddress.TryParse(startIp, out var startAddress) || startAddress.AddressFamily != AddressFamily.InterNetwork)
+            if (!TryParseNetworkScanRanges(rangeInput, out var ipList, out var parseError))
             {
-                ShowScanError("Ungültige Start-IP-Adresse.");
-                return;
-            }
-
-            if (!IPAddress.TryParse(endIp, out var endAddress) || endAddress.AddressFamily != AddressFamily.InterNetwork)
-            {
-                ShowScanError("Ungültige End-IP-Adresse.");
-                return;
-            }
-
-            uint startIpUint = IpToUint(startAddress);
-            uint endIpUint = IpToUint(endAddress);
-
-            if (startIpUint > endIpUint)
-            {
-                ShowScanError("Start-IP muss kleiner oder gleich End-IP sein.");
-                return;
-            }
-
-            uint range = endIpUint - startIpUint + 1;
-            if (range > 1024)
-            {
-                ShowScanError("IP-Bereich zu groß. Maximal 1024 Adressen.");
+                ShowScanError(parseError ?? "Ungültiger IP-Bereich.");
                 return;
             }
 
@@ -1630,13 +1611,14 @@ namespace neTiPx.Views
 
             NetworkDevices.Clear();
             NetworkScanResultsBorder.Visibility = Visibility.Collapsed;
+            NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
             NetworkScanStartButton.IsEnabled = false;
             NetworkScanProgressRing.IsActive = true;
-            NetworkScanStatusTextBlock.Text = $"Scanne {range} Adressen...";
+            NetworkScanStatusTextBlock.Text = $"Scanne {ipList.Count} Adressen...";
 
             try
             {
-                await ScanNetworkRangeAsync(startIpUint, endIpUint, _networkScanCts.Token);
+                await ScanNetworkRangeAsync(ipList, _networkScanCts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1653,14 +1635,13 @@ namespace neTiPx.Views
             }
         }
 
-        private async Task ScanNetworkRangeAsync(uint startIp, uint endIp, CancellationToken cancellationToken)
+        private async Task ScanNetworkRangeAsync(IReadOnlyList<IPAddress> ipAddresses, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
             var semaphore = new SemaphoreSlim(50); // Limit parallel operations
 
-            for (uint ipUint = startIp; ipUint <= endIp; ipUint++)
+            foreach (var currentIp in ipAddresses)
             {
-                var currentIp = UintToIp(ipUint);
                 tasks.Add(ScanSingleDeviceAsync(currentIp, semaphore, cancellationToken));
             }
 
@@ -1674,6 +1655,178 @@ namespace neTiPx.Views
                     ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden"
                     : "Scan abgeschlossen - Keine Geräte gefunden";
             });
+        }
+
+        private void PrefillNetworkScanRangesFromNic1()
+        {
+            if (NetworkScanRangesTextBox == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(NetworkScanRangesTextBox.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                var adapterSettings = _adapterStore.ReadAdapters();
+                if (string.IsNullOrWhiteSpace(adapterSettings.PrimaryAdapter))
+                {
+                    return;
+                }
+
+                var ipv4Config = _networkInfoService.GetIpv4Config(adapterSettings.PrimaryAdapter);
+                var nicIp = ipv4Config?.IpAddresses.FirstOrDefault().IpAddress;
+                if (string.IsNullOrWhiteSpace(nicIp) || !IPAddress.TryParse(nicIp, out var ip) || ip.AddressFamily != AddressFamily.InterNetwork)
+                {
+                    return;
+                }
+
+                var bytes = ip.GetAddressBytes();
+                NetworkScanRangesTextBox.Text = $"{bytes[0]}.{bytes[1]}.{bytes[2]}.1-254";
+            }
+            catch
+            {
+                // Ignore prefill errors; manual input remains available.
+            }
+        }
+
+        private bool TryParseNetworkScanRanges(string input, out List<IPAddress> ipAddresses, out string? errorMessage)
+        {
+            ipAddresses = new List<IPAddress>();
+            errorMessage = null;
+
+            var uniqueIps = new HashSet<uint>();
+            var ranges = input.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (ranges.Length == 0)
+            {
+                errorMessage = "Bitte geben Sie mindestens einen gültigen Bereich ein.";
+                return false;
+            }
+
+            foreach (var rangeText in ranges)
+            {
+                if (!TryParseSingleNetworkRange(rangeText, out var startIp, out var endIp, out var rangeError))
+                {
+                    errorMessage = rangeError;
+                    return false;
+                }
+
+                for (uint ipUint = startIp; ipUint <= endIp; ipUint++)
+                {
+                    uniqueIps.Add(ipUint);
+                }
+            }
+
+            if (uniqueIps.Count == 0)
+            {
+                errorMessage = "Es wurden keine IP-Adressen aus der Eingabe erkannt.";
+                return false;
+            }
+
+            if (uniqueIps.Count > 1024)
+            {
+                errorMessage = "IP-Bereich zu groß. Maximal 1024 Adressen.";
+                return false;
+            }
+
+            ipAddresses = uniqueIps
+                .OrderBy(v => v)
+                .Select(UintToIp)
+                .ToList();
+
+            return true;
+        }
+
+        private bool TryParseSingleNetworkRange(string rangeText, out uint startIp, out uint endIp, out string? errorMessage)
+        {
+            startIp = 0;
+            endIp = 0;
+            errorMessage = null;
+
+            if (string.IsNullOrWhiteSpace(rangeText))
+            {
+                errorMessage = "Leerer Bereich in der Eingabe gefunden.";
+                return false;
+            }
+
+            var normalized = rangeText.Trim();
+            if (!normalized.Contains('-'))
+            {
+                if (TryParseIpv4ToUint(normalized, out var singleIp))
+                {
+                    startIp = singleIp;
+                    endIp = singleIp;
+                    return true;
+                }
+
+                errorMessage = $"Ungültige IP-Adresse: {rangeText}";
+                return false;
+            }
+
+            var parts = normalized.Split('-', 2, StringSplitOptions.TrimEntries);
+            if (parts.Length != 2)
+            {
+                errorMessage = $"Ungültiger Bereich: {rangeText}";
+                return false;
+            }
+
+            if (!TryParseIpv4ToUint(parts[0], out var parsedStartIp))
+            {
+                errorMessage = $"Ungültige Start-IP: {parts[0]}";
+                return false;
+            }
+
+            uint parsedEndIp;
+            if (parts[1].Contains('.'))
+            {
+                if (!TryParseIpv4ToUint(parts[1], out parsedEndIp))
+                {
+                    errorMessage = $"Ungültige End-IP: {parts[1]}";
+                    return false;
+                }
+            }
+            else
+            {
+                var firstIpBytes = UintToIp(parsedStartIp).GetAddressBytes();
+                if (!byte.TryParse(parts[1], out var lastOctet))
+                {
+                    errorMessage = $"Ungültiger Endbereich: {parts[1]}";
+                    return false;
+                }
+
+                parsedEndIp = IpToUint(new IPAddress(new byte[]
+                {
+                    firstIpBytes[0],
+                    firstIpBytes[1],
+                    firstIpBytes[2],
+                    lastOctet
+                }));
+            }
+
+            if (parsedStartIp > parsedEndIp)
+            {
+                errorMessage = $"Start-IP muss kleiner oder gleich End-IP sein: {rangeText}";
+                return false;
+            }
+
+            startIp = parsedStartIp;
+            endIp = parsedEndIp;
+            return true;
+        }
+
+        private bool TryParseIpv4ToUint(string input, out uint ipUint)
+        {
+            ipUint = 0;
+            if (!IPAddress.TryParse(input, out var ip) || ip.AddressFamily != AddressFamily.InterNetwork)
+            {
+                return false;
+            }
+
+            ipUint = IpToUint(ip);
+            return true;
         }
 
         private async Task ScanSingleDeviceAsync(IPAddress ipAddress, SemaphoreSlim semaphore, CancellationToken cancellationToken)
@@ -1693,17 +1846,23 @@ namespace neTiPx.Views
                         Hostname = "-"
                     };
 
-                    // Try to get MAC address and hostname in parallel
+                    // Try to get MAC address, hostname, and scan ports in parallel
                     var macTask = Task.Run(() => GetMacAddressAsync(ipAddress.ToString()), cancellationToken);
                     var hostnameTask = Task.Run(() => GetHostnameAsync(ipAddress), cancellationToken);
+                    var portsTask = Task.Run(() => ScanPortsAsync(ipAddress, cancellationToken), cancellationToken);
 
-                    await Task.WhenAll(macTask, hostnameTask);
+                    await Task.WhenAll(macTask, hostnameTask, portsTask);
 
                     device.MacAddress = macTask.Result;
                     device.Hostname = hostnameTask.Result;
 
+                    var openPorts = portsTask.Result;
                     DispatcherQueue.TryEnqueue(() =>
                     {
+                        foreach (var port in openPorts)
+                        {
+                            device.OpenPorts.Add(port);
+                        }
                         NetworkDevices.Add(device);
                     });
                 }
@@ -1777,6 +1936,90 @@ namespace neTiPx.Views
             catch
             {
                 return "-";
+            }
+        }
+
+        private async Task<List<string>> ScanPortsAsync(IPAddress ipAddress, CancellationToken cancellationToken)
+        {
+            var openPorts = new List<string>();
+            var portsToScan = new Dictionary<int, string>();
+
+            // Standard ports
+            if (_settingsService.GetScanPortHttp()) portsToScan[80] = "HTTP";
+            if (_settingsService.GetScanPortHttps()) portsToScan[443] = "HTTPS";
+            if (_settingsService.GetScanPortFtp()) portsToScan[21] = "FTP";
+            if (_settingsService.GetScanPortSsh()) portsToScan[22] = "SSH";
+            if (_settingsService.GetScanPortSmb()) portsToScan[445] = "SMB";
+            if (_settingsService.GetScanPortRdp()) portsToScan[3389] = "RDP";
+
+            // Custom ports
+            var custom1 = _settingsService.GetCustomPort1();
+            if (custom1 > 0 && custom1 <= 65535) portsToScan[custom1] = $"Custom ({custom1})";
+
+            var custom2 = _settingsService.GetCustomPort2();
+            if (custom2 > 0 && custom2 <= 65535) portsToScan[custom2] = $"Custom ({custom2})";
+
+            var custom3 = _settingsService.GetCustomPort3();
+            if (custom3 > 0 && custom3 <= 65535) portsToScan[custom3] = $"Custom ({custom3})";
+
+            var tasks = portsToScan.Select(kvp => CheckPortAsync(ipAddress, kvp.Key, kvp.Value, cancellationToken)).ToList();
+            var results = await Task.WhenAll(tasks);
+
+            foreach (var result in results.Where(r => r != null))
+            {
+                openPorts.Add(result!);
+            }
+
+            return openPorts;
+        }
+
+        private async Task<string?> CheckPortAsync(IPAddress ipAddress, int port, string portName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var tcpClient = new System.Net.Sockets.TcpClient();
+                var connectTask = tcpClient.ConnectAsync(ipAddress, port);
+                var timeoutTask = Task.Delay(1000, cancellationToken);
+
+                if (await Task.WhenAny(connectTask, timeoutTask) == connectTask && tcpClient.Connected)
+                {
+                    return portName;
+                }
+            }
+            catch
+            {
+                // Port closed or unreachable
+            }
+
+            return null;
+        }
+
+        private void NetworkScanResultsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (NetworkScanResultsListView.SelectedItem is NetworkDevice selectedDevice)
+            {
+                // Details anzeigen
+                NetworkScanDetailsPanel.Visibility = Visibility.Visible;
+                DeviceDetailsIpTextBlock.Text = selectedDevice.IpAddress;
+                DeviceDetailsMacTextBlock.Text = selectedDevice.MacAddress;
+                DeviceDetailsHostnameTextBlock.Text = selectedDevice.Hostname;
+
+                // Ports anzeigen wenn vorhanden
+                if (selectedDevice.OpenPorts != null && selectedDevice.OpenPorts.Count > 0)
+                {
+                    DeviceDetailsPortsPanel.Visibility = Visibility.Visible;
+                    DeviceDetailsPortsItemsControl.ItemsSource = selectedDevice.OpenPorts;
+                }
+                else
+                {
+                    DeviceDetailsPortsPanel.Visibility = Visibility.Collapsed;
+                    DeviceDetailsPortsItemsControl.ItemsSource = null;
+                }
+            }
+            else
+            {
+                // Kein Gerät ausgewählt - Details ausblenden
+                NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
             }
         }
 

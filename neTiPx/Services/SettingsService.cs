@@ -215,5 +215,123 @@ namespace neTiPx.Services
             _userSettingsStore.WriteUserSettings(settings);
         }
 
+        // Network Scanner Port Settings
+        public bool GetScanPortHttp()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ScanPortHttp;
+        }
+
+        public void SetScanPortHttp(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ScanPortHttp = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetScanPortHttps()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ScanPortHttps;
+        }
+
+        public void SetScanPortHttps(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ScanPortHttps = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetScanPortFtp()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ScanPortFtp;
+        }
+
+        public void SetScanPortFtp(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ScanPortFtp = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetScanPortSsh()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ScanPortSsh;
+        }
+
+        public void SetScanPortSsh(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ScanPortSsh = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetScanPortSmb()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ScanPortSmb;
+        }
+
+        public void SetScanPortSmb(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ScanPortSmb = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public bool GetScanPortRdp()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.ScanPortRdp;
+        }
+
+        public void SetScanPortRdp(bool enabled)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.ScanPortRdp = enabled;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetCustomPort1()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CustomPort1;
+        }
+
+        public void SetCustomPort1(int port)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CustomPort1 = port;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetCustomPort2()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CustomPort2;
+        }
+
+        public void SetCustomPort2(int port)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CustomPort2 = port;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetCustomPort3()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.CustomPort3;
+        }
+
+        public void SetCustomPort3(int port)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.CustomPort3 = port;
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
     }
 }
