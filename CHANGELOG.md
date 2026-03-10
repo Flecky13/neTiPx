@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [1.3.3.1]
+
+### Fixed
+- **Netzwerkscanner**: Geräte liste scrollbarverhalten verbessert
 
 ## [1.3.3.0]
 
