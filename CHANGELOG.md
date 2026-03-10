@@ -4,6 +4,19 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.2.0]
+
+### Added
+- **Hover-Fenster**: Position am rechten Bildschirmrand ist jetzt in den Einstellungen konfigurierbar (`oben` oder `unten`, Abstand von rechts, Abstand von oben/unten).
+- **Einstellungen**: Die Mausover-Konfiguration wird in `%APPDATA%\neTiPx\User_Settings.xml` über zusätzliche `hoverWindow`-Attribute gespeichert.
+
+### Changed
+- **Einstellungen**: Im Bereich `Maus Over Info Fenster` stehen `Anzeige` und `Verzögert` jetzt nebeneinander; darunter folgen Ausrichtung und Pixelabstände.
+- **Hover-Fenster**: Die Position richtet sich nicht mehr nach der Maus, sondern nach einer festen Kante des aktuellen Bildschirms.
+
+### Fixed
+- **Hover-Fenster**: Die eingeblendete Schließen-Schaltfläche (`X`) beim Überfahren des Fensters wurde entfernt.
+
 ## [1.4.1.0]
 
 ### Added
