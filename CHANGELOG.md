@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [1.4.0.0]
+
+### Changed
+- **Tools-Seite**: Der Bereich Netzwerkscanner wurde in eine eigene Unterseite (`NetworkScannerPage`) ausgelagert.
+
 ## [1.3.3.1]
 
 ### Fixed
