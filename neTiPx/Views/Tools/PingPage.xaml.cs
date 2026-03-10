@@ -1,7 +1,9 @@
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
 using System;
@@ -27,7 +29,11 @@ namespace neTiPx.Views
 
         private readonly Dictionary<PingTarget, CancellationTokenSource> _pingTimers = new Dictionary<PingTarget, CancellationTokenSource>();
         private readonly Dictionary<PingTarget, string> _lastValidTargets = new Dictionary<PingTarget, string>();
-        private bool _isPingPageVisible = true;
+        private bool _isPingPageVisible;
+        private bool _isPageLoaded;
+        private bool _isWindowActive;
+        private AppWindow? _mainAppWindow;
+        private readonly long _visibilityChangedToken;
 
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
 
@@ -36,6 +42,7 @@ namespace neTiPx.Views
             InitializeComponent();
             Loaded += PingPage_Loaded;
             Unloaded += PingPage_Unloaded;
+            _visibilityChangedToken = RegisterPropertyChangedCallback(VisibilityProperty, PingPage_VisibilityChanged);
             LoadPingTargets();
         }
 
@@ -46,14 +53,51 @@ namespace neTiPx.Views
                 BackgroundActiveCheckBox.IsChecked = _settingsService.GetPingBackgroundActive();
             }
 
-            _isPingPageVisible = true;
+            _isPageLoaded = true;
+            _isPingPageVisible = Visibility == Visibility.Visible;
+            _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);
+            if (_mainAppWindow != null)
+            {
+                _mainAppWindow.Changed += MainAppWindow_Changed;
+            }
+
+            App.MainWindow.Activated += MainWindow_Activated;
+            _isWindowActive = _mainAppWindow?.IsVisible == true;
             UpdatePingingState();
         }
 
         private void PingPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            _isPageLoaded = false;
             _isPingPageVisible = false;
+
+            App.MainWindow.Activated -= MainWindow_Activated;
+            if (_mainAppWindow != null)
+            {
+                _mainAppWindow.Changed -= MainAppWindow_Changed;
+            }
+
             UpdatePingingState();
+        }
+
+        private void PingPage_VisibilityChanged(DependencyObject sender, DependencyProperty dependencyProperty)
+        {
+            _isPingPageVisible = Visibility == Visibility.Visible;
+            UpdatePingingState();
+        }
+
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            _isWindowActive = args.WindowActivationState != WindowActivationState.Deactivated;
+            UpdatePingingState();
+        }
+
+        private void MainAppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+        {
+            if (args.DidVisibilityChange)
+            {
+                UpdatePingingState();
+            }
         }
 
         private void LoadPingTargets()
@@ -333,7 +377,10 @@ namespace neTiPx.Views
 
         private void UpdatePingingState()
         {
-            var shouldPingBeActive = _isPingPageVisible || (BackgroundActiveCheckBox?.IsChecked == true);
+            var isWindowVisible = _mainAppWindow?.IsVisible ?? false;
+            var isBackgroundActive = BackgroundActiveCheckBox?.IsChecked == true;
+            var shouldPingByFocus = _isPageLoaded && _isPingPageVisible && _isWindowActive && isWindowVisible;
+            var shouldPingBeActive = isBackgroundActive || shouldPingByFocus;
 
             foreach (var target in PingTargets)
             {
