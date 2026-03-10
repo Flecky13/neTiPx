@@ -21,9 +21,13 @@ namespace neTiPx.Views
             // Load and apply pages visibility
             ApplyMainPagesVisibility();
 
-            if (RootNavView.MenuItems.Count > 0)
+            var firstVisible = RootNavView.MenuItems
+                .OfType<NavigationViewItem>()
+                .FirstOrDefault(item => item.Visibility == Visibility.Visible);
+
+            if (firstVisible != null)
             {
-                RootNavView.SelectedItem = RootNavView.MenuItems[0];
+                RootNavView.SelectedItem = firstVisible;
             }
 
             // Set initial min width based on pane state
@@ -48,6 +52,12 @@ namespace neTiPx.Views
                 var tag = menuItem.Tag as string;
                 if (string.IsNullOrWhiteSpace(tag))
                 {
+                    continue;
+                }
+
+                if (string.Equals(tag, "Adapters", StringComparison.OrdinalIgnoreCase))
+                {
+                    menuItem.Visibility = Visibility.Visible;
                     continue;
                 }
 

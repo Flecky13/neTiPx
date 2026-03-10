@@ -33,6 +33,7 @@ namespace neTiPx.Views
         private readonly AdapterStore _adapterStore;
         private readonly AutostartService _autostartService;
         private readonly PingLogService _pingLogService;
+        private readonly PagesVisibilityService _pagesVisibilityService = new PagesVisibilityService();
         private List<ColorTheme> _colorThemes = new();
         private List<string> _adapterList = new();
         private string _pingLogFolderPath = string.Empty;
@@ -53,6 +54,9 @@ namespace neTiPx.Views
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
             _isLoading = true;
+
+            // Apply settings sections visibility based on page visibility
+            ApplySettingsSectionsVisibility();
 
             // Color Themes laden
             _colorThemes = _themeService.LoadThemes();
@@ -581,6 +585,41 @@ namespace neTiPx.Views
             if (!double.IsNaN(args.NewValue))
             {
                 _settingsService.SetCustomPort3((int)args.NewValue);
+            }
+        }
+
+        private void ApplySettingsSectionsVisibility()
+        {
+            _pagesVisibilityService.EnsureConfigExists();
+            var visibility = _pagesVisibilityService.ReadPagesVisibility();
+
+            // Control visibility of settings content and unavailable messages
+            if (AdaptersSettingsContent != null && AdaptersSettingsUnavailable != null)
+            {
+                var isVisible = visibility.ContainsKey("Adapters") && visibility["Adapters"];
+                AdaptersSettingsContent.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+                AdaptersSettingsUnavailable.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            if (ConnectionStatusSettingsContent != null && ConnectionStatusSettingsUnavailable != null)
+            {
+                var isVisible = visibility.ContainsKey("Adapters") && visibility["Adapters"];
+                ConnectionStatusSettingsContent.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+                ConnectionStatusSettingsUnavailable.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            if (PingSettingsContent != null && PingSettingsUnavailable != null)
+            {
+                var isVisible = visibility.ContainsKey("Ping") && visibility["Ping"];
+                PingSettingsContent.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+                PingSettingsUnavailable.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            if (NetworkScannerSettingsContent != null && NetworkScannerSettingsUnavailable != null)
+            {
+                var isVisible = visibility.ContainsKey("NetworkScanner") && visibility["NetworkScanner"];
+                NetworkScannerSettingsContent.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+                NetworkScannerSettingsUnavailable.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
             }
         }
 

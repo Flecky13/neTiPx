@@ -25,6 +25,20 @@ namespace neTiPx.Services
             "NetworkScanner"
         };
 
+        private static readonly string[] _xmlManagedPages = new[]
+        {
+            // Main pages (Adapters intentionally excluded)
+            "IpConfig",
+            "Tools",
+            "Info",
+            "Settings",
+            // Tools sub-pages
+            "Ping",
+            "Wlan",
+            "NetworkCalculator",
+            "NetworkScanner"
+        };
+
         private static string GetPagesVisibilityXmlPath()
         {
             try
@@ -59,7 +73,7 @@ namespace neTiPx.Services
         private void CreateNewConfigFile()
         {
             var root = new XElement("pagesVisibility");
-            foreach (var pageName in _defaultPages)
+            foreach (var pageName in _xmlManagedPages)
             {
                 root.Add(new XElement("page", new XAttribute("name", pageName), new XAttribute("visible", "true")));
             }
@@ -88,7 +102,7 @@ namespace neTiPx.Services
                 );
 
                 bool hasChanges = false;
-                foreach (var pageName in _defaultPages)
+                foreach (var pageName in _xmlManagedPages)
                 {
                     if (!existingPages.Contains(pageName))
                     {
@@ -139,6 +153,9 @@ namespace neTiPx.Services
                         visibility[nameAttr] = isVisible;
                     }
                 }
+
+                // Adapters page is always visible and cannot be hidden via XML.
+                visibility["Adapters"] = true;
             }
             catch
             {
@@ -151,6 +168,11 @@ namespace neTiPx.Services
         {
             try
             {
+                if (string.Equals(pageName, "Adapters", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
                 if (!File.Exists(_configPath))
                 {
                     EnsureConfigExists();

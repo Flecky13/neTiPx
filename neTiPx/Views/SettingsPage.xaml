@@ -45,6 +45,7 @@
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="0">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="AdaptersSettingsContent" Spacing="12">
                         <TextBlock Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <!-- Primärer Adapter -->
@@ -68,6 +69,8 @@
                                 ToolTipService.ToolTip="Legt den sekundären Netzwerkadapter (NIC 2) fest"
                                 SelectionChanged="SecondaryAdapterCombo_SelectionChanged" />
                         </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="AdaptersSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
                     </StackPanel>
                 </Border>
 
@@ -75,6 +78,7 @@
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="1">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Ping-Logging" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="PingSettingsContent" Spacing="12">
                         <TextBlock Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
@@ -102,6 +106,8 @@
                                 Click="ResetPingLogFolderButton_Click"
                                 ToolTipService.ToolTip="Setzt den Standardordner zurück" />
                         </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="PingSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
                     </StackPanel>
                 </Border>
 
@@ -150,6 +156,7 @@
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="0">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="ConnectionStatusSettingsContent" Spacing="12">
 
                         <!-- Ping-Schwellenwerte: zweizeilig -->
                         <StackPanel Spacing="8">
@@ -199,6 +206,8 @@
                             <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" ToolTipService.ToolTip="Überwacht den DNS 1-Status" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
                             <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" ToolTipService.ToolTip="Überwacht den DNS 2-Status" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
                         </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="ConnectionStatusSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
                     </StackPanel>
                 </Border>
 
@@ -206,6 +215,7 @@
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="1">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="NetworkScannerSettingsContent" Spacing="12">
                         <TextBlock Text="Port-Scanning Einstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <!-- 3x3 Grid für Protokolle und Ports -->
@@ -269,6 +279,8 @@
                                            ValueChanged="CustomPort3NumberBox_ValueChanged" />
                             </StackPanel>
                         </Grid>
+                        </StackPanel>
+                        <TextBlock x:Name="NetworkScannerSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
                     </StackPanel>
                 </Border>
 

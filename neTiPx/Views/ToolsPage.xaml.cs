@@ -21,10 +21,17 @@ namespace neTiPx.Views
             // Zuerst die Config laden und apply
             ApplyPagesVisibility();
 
-            // Standardmäßig PING-Panel anzeigen (falls sichtbar)
-            if (ToolsNavView != null && ToolsNavView.MenuItems.Count > 0)
+            // Standardmäßig die erste sichtbare Tool-Seite anzeigen
+            if (ToolsNavView != null)
             {
-                ToolsNavView.SelectedItem = ToolsNavView.MenuItems[0];
+                var firstVisible = ToolsNavView.MenuItems
+                    .OfType<NavigationViewItem>()
+                    .FirstOrDefault(item => item.Visibility == Visibility.Visible);
+
+                if (firstVisible != null)
+                {
+                    ToolsNavView.SelectedItem = firstVisible;
+                }
             }
         }
 
