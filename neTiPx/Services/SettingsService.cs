@@ -89,6 +89,52 @@ namespace neTiPx.Services
             _userSettingsStore.WriteUserSettings(settings);
         }
 
+        public string GetHoverWindowVerticalAnchor()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return NormalizeHoverWindowVerticalAnchor(settings.HoverWindowVerticalAnchor);
+        }
+
+        public void SetHoverWindowVerticalAnchor(string verticalAnchor)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.HoverWindowVerticalAnchor = NormalizeHoverWindowVerticalAnchor(verticalAnchor);
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetHoverWindowRightOffsetPixels()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return Math.Max(0, settings.HoverWindowRightOffsetPixels);
+        }
+
+        public void SetHoverWindowRightOffsetPixels(int pixels)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.HoverWindowRightOffsetPixels = Math.Max(0, pixels);
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        public int GetHoverWindowVerticalOffsetPixels()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return Math.Max(0, settings.HoverWindowVerticalOffsetPixels);
+        }
+
+        public void SetHoverWindowVerticalOffsetPixels(int pixels)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.HoverWindowVerticalOffsetPixels = Math.Max(0, pixels);
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
+        private static string NormalizeHoverWindowVerticalAnchor(string? verticalAnchor)
+        {
+            return string.Equals(verticalAnchor, "Top", StringComparison.OrdinalIgnoreCase)
+                ? "Top"
+                : "Bottom";
+        }
+
         public bool GetCheckConnectionGateway()
         {
             var settings = _userSettingsStore.ReadUserSettings();

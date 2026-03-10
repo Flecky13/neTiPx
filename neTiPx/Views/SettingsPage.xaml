@@ -121,38 +121,84 @@
                     <StackPanel Spacing="12">
                         <TextBlock Text="Maus Over Info Fenster" Style="{StaticResource SectionTitle}" />
 
-                        <!-- Vertikales Layout für die zwei Dropdowns untereinander -->
                         <StackPanel Spacing="8">
 
-                            <!-- Aktiv/Inaktiv Dropdown mit Label -->
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock Text="Anzeige" FontWeight="SemiBold" FontSize="12" />
+                                    <ComboBox
+                                        x:Name="HoverWindowStateCombo"
+                                        HorizontalAlignment="Stretch"
+                                        SelectionChanged="HoverWindowStateCombo_SelectionChanged"
+                                        ToolTipService.ToolTip="Aktiviert oder deaktiviert das Hover-Infofenster"
+                                        PlaceholderText="Wählen...">
+                                        <ComboBoxItem>Aktiv</ComboBoxItem>
+                                        <ComboBoxItem>Inaktiv</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock Text="Verzögert" FontWeight="SemiBold" FontSize="12" />
+                                    <ComboBox
+                                        x:Name="HoverWindowDelayCombo"
+                                        HorizontalAlignment="Stretch"
+                                        SelectionChanged="HoverWindowDelayCombo_SelectionChanged"
+                                        ToolTipService.ToolTip="Bestimmt die Verzögerung bis zur Anzeige des Hover-Fensters"
+                                        PlaceholderText="Wählen...">
+                                        <ComboBoxItem>1 Sek.</ComboBoxItem>
+                                        <ComboBoxItem>2 Sek.</ComboBoxItem>
+                                        <ComboBoxItem>3 Sek.</ComboBoxItem>
+                                        <ComboBoxItem>4 Sek.</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Anzeige" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock Text="Position" FontWeight="SemiBold" FontSize="12" />
                                 <ComboBox
-                                    x:Name="HoverWindowStateCombo"
+                                    x:Name="HoverWindowVerticalAnchorCombo"
                                     HorizontalAlignment="Stretch"
-                                    SelectionChanged="HoverWindowStateCombo_SelectionChanged"
-                                    ToolTipService.ToolTip="Aktiviert oder deaktiviert das Hover-Infofenster"
+                                    SelectionChanged="HoverWindowVerticalAnchorCombo_SelectionChanged"
+                                    ToolTipService.ToolTip="Legt fest, ob das Hover-Fenster am oberen oder unteren Bildschirmrand ausgerichtet wird"
                                     PlaceholderText="Wählen...">
-                                    <ComboBoxItem>Aktiv</ComboBoxItem>
-                                    <ComboBoxItem>Inaktiv</ComboBoxItem>
+                                    <ComboBoxItem>Oben</ComboBoxItem>
+                                    <ComboBoxItem>Unten</ComboBoxItem>
                                 </ComboBox>
                             </StackPanel>
 
-                            <!-- Verzögerung Dropdown mit Label -->
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="Verzögert" FontWeight="SemiBold" FontSize="12" />
-                                <ComboBox
-                                    x:Name="HoverWindowDelayCombo"
-                                    HorizontalAlignment="Stretch"
-                                    SelectionChanged="HoverWindowDelayCombo_SelectionChanged"
-                                    ToolTipService.ToolTip="Bestimmt die Verzögerung bis zur Anzeige des Hover-Fensters"
-                                    PlaceholderText="Wählen...">
-                                    <ComboBoxItem>1 Sek.</ComboBoxItem>
-                                    <ComboBoxItem>2 Sek.</ComboBoxItem>
-                                    <ComboBoxItem>3 Sek.</ComboBoxItem>
-                                    <ComboBoxItem>4 Sek.</ComboBoxItem>
-                                </ComboBox>
-                            </StackPanel>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock Text="Abstand rechts (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <NumberBox
+                                        x:Name="HoverWindowRightOffsetNumberBox"
+                                        Minimum="0"
+                                        Maximum="5000"
+                                        SmallChange="1"
+                                        SpinButtonPlacementMode="Compact"
+                                        ValueChanged="HoverWindowRightOffsetNumberBox_ValueChanged" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock x:Name="HoverWindowVerticalOffsetLabel" Text="Abstand unten (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <NumberBox
+                                        x:Name="HoverWindowVerticalOffsetNumberBox"
+                                        Minimum="0"
+                                        Maximum="5000"
+                                        SmallChange="1"
+                                        SpinButtonPlacementMode="Compact"
+                                        ValueChanged="HoverWindowVerticalOffsetNumberBox_ValueChanged" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </StackPanel>
                 </Border>

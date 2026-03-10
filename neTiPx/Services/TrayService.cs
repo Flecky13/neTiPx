@@ -208,7 +208,11 @@ namespace neTiPx.Services
                 {
                     await _hoverWindow.RefreshAsync();
                     WindowHelper.Show(_hoverWindow);
-                    WindowHelper.PositionHoverWindow(_hoverWindow, 20, 10);
+                    WindowHelper.PositionHoverWindow(
+                        _hoverWindow,
+                        settingsService.GetHoverWindowVerticalAnchor(),
+                        settingsService.GetHoverWindowRightOffsetPixels(),
+                        settingsService.GetHoverWindowVerticalOffsetPixels());
                 }
             });
         }

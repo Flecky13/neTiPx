@@ -13,6 +13,9 @@ namespace neTiPx.Services
             public ColorTheme? ColorTheme { get; set; }
             public bool HoverWindowEnabled { get; set; } = true;
             public int HoverWindowDelaySeconds { get; set; } = 1;
+            public string HoverWindowVerticalAnchor { get; set; } = "Bottom";
+            public int HoverWindowRightOffsetPixels { get; set; } = 10;
+            public int HoverWindowVerticalOffsetPixels { get; set; } = 10;
             public bool CheckConnectionGateway { get; set; } = true;
             public bool CheckConnectionDns1 { get; set; } = true;
             public bool CheckConnectionDns2 { get; set; } = true;
@@ -118,7 +121,10 @@ namespace neTiPx.Services
 
             var hoverWindowElement = new XElement("hoverWindow",
                 new XAttribute("enabled", settings.HoverWindowEnabled),
-                new XAttribute("delaySeconds", settings.HoverWindowDelaySeconds)
+                new XAttribute("delaySeconds", settings.HoverWindowDelaySeconds),
+                new XAttribute("verticalAnchor", settings.HoverWindowVerticalAnchor ?? "Bottom"),
+                new XAttribute("rightOffsetPixels", Math.Max(0, settings.HoverWindowRightOffsetPixels)),
+                new XAttribute("verticalOffsetPixels", Math.Max(0, settings.HoverWindowVerticalOffsetPixels))
             );
 
             var connectionStatusElement = new XElement("connectionStatus",
@@ -209,6 +215,21 @@ namespace neTiPx.Services
                     if (int.TryParse((string?)hoverWindowElement.Attribute("delaySeconds"), out var delay))
                     {
                         settings.HoverWindowDelaySeconds = delay;
+                    }
+                    var verticalAnchor = (string?)hoverWindowElement.Attribute("verticalAnchor");
+                    if (!string.IsNullOrWhiteSpace(verticalAnchor))
+                    {
+                        settings.HoverWindowVerticalAnchor = string.Equals(verticalAnchor, "Top", StringComparison.OrdinalIgnoreCase)
+                            ? "Top"
+                            : "Bottom";
+                    }
+                    if (int.TryParse((string?)hoverWindowElement.Attribute("rightOffsetPixels"), out var rightOffsetPixels))
+                    {
+                        settings.HoverWindowRightOffsetPixels = Math.Max(0, rightOffsetPixels);
+                    }
+                    if (int.TryParse((string?)hoverWindowElement.Attribute("verticalOffsetPixels"), out var verticalOffsetPixels))
+                    {
+                        settings.HoverWindowVerticalOffsetPixels = Math.Max(0, verticalOffsetPixels);
                     }
                 }
 

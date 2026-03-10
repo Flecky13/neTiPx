@@ -238,20 +238,13 @@ namespace neTiPx.Views
         {
             var appWindow = WindowHelper.GetAppWindow(this);
 
-            if (appWindow.TitleBar != null)
-            {
-                appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-                appWindow.TitleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
-                appWindow.TitleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
-                appWindow.TitleBar.ButtonForegroundColor = Microsoft.UI.Colors.Transparent;
-            }
-
             // Set initial size (will be adjusted based on content)
             appWindow.Resize(new Windows.Graphics.SizeInt32(320, 100));
 
             appWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
             if (appWindow.Presenter is OverlappedPresenter presenter)
             {
+                presenter.SetBorderAndTitleBar(false, false);
                 presenter.IsResizable = false;
                 presenter.IsMaximizable = false;
                 presenter.IsMinimizable = false;

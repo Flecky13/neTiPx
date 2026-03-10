@@ -69,7 +69,7 @@ namespace neTiPx.Helpers
             return new PointInt32(pt.X, pt.Y);
         }
 
-        public static void PositionHoverWindow(Window window, int offsetY, int rightPadding)
+        public static void PositionHoverWindow(Window window, string verticalAnchor, int rightPadding, int verticalOffset)
         {
             var appWindow = GetAppWindow(window);
             var cursor = GetCursorPoint();
@@ -79,11 +79,18 @@ namespace neTiPx.Helpers
             var width = appWindow.Size.Width;
             var height = appWindow.Size.Height;
 
-            int left = workArea.X + workArea.Width - width - rightPadding;
-            int top = cursor.Y - height - offsetY;
+            int left = workArea.X + workArea.Width - width - Math.Max(0, rightPadding);
+            int top = string.Equals(verticalAnchor, "Top", StringComparison.OrdinalIgnoreCase)
+                ? workArea.Y + Math.Max(0, verticalOffset)
+                : workArea.Y + workArea.Height - height - Math.Max(0, verticalOffset);
 
-            int minTop = workArea.Y + 10;
-            int maxTop = workArea.Y + workArea.Height - height - 10;
+            int minLeft = workArea.X;
+            int maxLeft = workArea.X + workArea.Width - width;
+            int minTop = workArea.Y;
+            int maxTop = workArea.Y + workArea.Height - height;
+
+            if (left < minLeft) left = minLeft;
+            if (left > maxLeft) left = maxLeft;
             if (top < minTop) top = minTop;
             if (top > maxTop) top = maxTop;
 

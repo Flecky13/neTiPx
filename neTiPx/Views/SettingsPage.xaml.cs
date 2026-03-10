@@ -111,10 +111,17 @@ namespace neTiPx.Views
             }
 
             // Hover Window Einstellungen laden
-            if (HoverWindowStateCombo != null && HoverWindowDelayCombo != null)
+            if (HoverWindowStateCombo != null
+                && HoverWindowDelayCombo != null
+                && HoverWindowVerticalAnchorCombo != null
+                && HoverWindowRightOffsetNumberBox != null
+                && HoverWindowVerticalOffsetNumberBox != null)
             {
                 bool hoverEnabled = _settingsService.GetHoverWindowEnabled();
                 int hoverDelay = _settingsService.GetHoverWindowDelaySeconds();
+                string hoverVerticalAnchor = _settingsService.GetHoverWindowVerticalAnchor();
+                int hoverRightOffset = _settingsService.GetHoverWindowRightOffsetPixels();
+                int hoverVerticalOffset = _settingsService.GetHoverWindowVerticalOffsetPixels();
 
                 HoverWindowStateCombo.SelectedIndex = hoverEnabled ? 0 : 1;
 
@@ -128,8 +135,12 @@ namespace neTiPx.Views
                     _ => 0
                 };
 
-                // Verzögerung ComboBox aktivieren/deaktivieren basierend auf Hover-Status
-                HoverWindowDelayCombo.IsEnabled = hoverEnabled;
+                HoverWindowVerticalAnchorCombo.SelectedIndex = string.Equals(hoverVerticalAnchor, "Top", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+                HoverWindowRightOffsetNumberBox.Value = hoverRightOffset;
+                HoverWindowVerticalOffsetNumberBox.Value = hoverVerticalOffset;
+
+                UpdateHoverWindowVerticalOffsetLabel();
+                UpdateHoverWindowControlsEnabled(hoverEnabled);
             }
 
             // Verbindungsstatus-Einstellungen laden
@@ -531,7 +542,10 @@ namespace neTiPx.Views
             if (_isLoading || _settingsService == null)
                 return;
 
-            if (HoverWindowDelayCombo == null)
+            if (HoverWindowDelayCombo == null
+                || HoverWindowVerticalAnchorCombo == null
+                || HoverWindowRightOffsetNumberBox == null
+                || HoverWindowVerticalOffsetNumberBox == null)
                 return;
 
             bool isActive = HoverWindowStateCombo.SelectedIndex == 0;
@@ -539,8 +553,7 @@ namespace neTiPx.Views
             // Hover Window aktivieren/deaktivieren
             _settingsService.SetHoverWindowEnabled(isActive);
 
-            // Verzögerung ComboBox aktivieren/deaktivieren
-            HoverWindowDelayCombo.IsEnabled = isActive;
+            UpdateHoverWindowControlsEnabled(isActive);
         }
 
         private void HoverWindowDelayCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -558,6 +571,51 @@ namespace neTiPx.Views
             };
 
             _settingsService.SetHoverWindowDelaySeconds(delaySeconds);
+        }
+
+        private void HoverWindowVerticalAnchorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoading || _settingsService == null || HoverWindowVerticalAnchorCombo == null)
+                return;
+
+            _settingsService.SetHoverWindowVerticalAnchor(HoverWindowVerticalAnchorCombo.SelectedIndex == 0 ? "Top" : "Bottom");
+            UpdateHoverWindowVerticalOffsetLabel();
+        }
+
+        private void HoverWindowRightOffsetNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (_isLoading || _settingsService == null || double.IsNaN(sender.Value))
+                return;
+
+            _settingsService.SetHoverWindowRightOffsetPixels((int)Math.Round(sender.Value));
+        }
+
+        private void HoverWindowVerticalOffsetNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (_isLoading || _settingsService == null || double.IsNaN(sender.Value))
+                return;
+
+            _settingsService.SetHoverWindowVerticalOffsetPixels((int)Math.Round(sender.Value));
+        }
+
+        private void UpdateHoverWindowControlsEnabled(bool isEnabled)
+        {
+            HoverWindowDelayCombo.IsEnabled = isEnabled;
+            HoverWindowVerticalAnchorCombo.IsEnabled = isEnabled;
+            HoverWindowRightOffsetNumberBox.IsEnabled = isEnabled;
+            HoverWindowVerticalOffsetNumberBox.IsEnabled = isEnabled;
+        }
+
+        private void UpdateHoverWindowVerticalOffsetLabel()
+        {
+            if (HoverWindowVerticalOffsetLabel == null || HoverWindowVerticalAnchorCombo == null)
+            {
+                return;
+            }
+
+            HoverWindowVerticalOffsetLabel.Text = HoverWindowVerticalAnchorCombo.SelectedIndex == 0
+                ? "Abstand oben (px)"
+                : "Abstand unten (px)";
         }
 
         private void CheckGatewayCheckBox_Checked(object sender, RoutedEventArgs e)
