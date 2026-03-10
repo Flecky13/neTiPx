@@ -15,10 +15,15 @@
   - [Adapter-Übersicht](#adapter-übersicht)
   - [IP-Konfiguration](#ip-konfiguration)
   - [Ping Tool](#ping-tool)
+  - [WLAN Scanner](#wlan-scanner)
+  - [Netzwerk-Rechner](#netzwerk-rechner)
+  - [Netzwerkscanner](#netzwerkscanner)
   - [Einstellungen](#einstellungen)
 - [Funktionen im Detail](#-funktionen-im-detail)
   - [PING Tool](#ping-tool-1)
   - [Ping-Logging](#ping-logging)
+  - [WLAN Scanner - Technische Details](#wlan-scanner---technische-details)
+  - [Netzwerkscanner - Technische Details](#netzwerkscanner---technische-details)
 - [Systemanforderungen](#-systemanforderungen)
 - [Installation](#-installation)
 
@@ -38,9 +43,11 @@
 - 🧭 **Hintergrundbetrieb**: Pings laufen optional weiter, wenn die Ping-Seite nicht aktiv ist
 - 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
 - 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
+- 🔎 **Netzwerkscanner**: Scan von IP-Bereichen mit Port-Prüfung und Detailansicht gefundener Geräte
+- 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner und Netzwerkscanner als eigene Unterseiten mit Lazy-Loading
 
 zurück zum
-[Inhaltsverzeichnis]#-Inhaltsverzeichnis
+[Inhaltsverzeichnis](#-inhaltsverzeichnis)
 ---
 
 ## 📸 Screenshots
@@ -141,6 +148,16 @@ Der Netzwerk-Rechner bietet intelligente IP-Subnetz-Berechnungen mit automatisch
   - Anzahl verfügbarer Hosts
   - Wildcard-Maske
 
+### Netzwerkscanner
+
+Der Netzwerkscanner durchsucht lokale IP-Bereiche und zeigt erkannte Geräte inkl. Port-Status an.
+
+**Funktionen:**
+- **Scan von IP-Bereichen**: Einzelne Bereiche oder mehrere Bereiche in einer Anfrage
+- **Port-Prüfung**: Frei konfigurierbare Portliste für Erreichbarkeits- und Dienstprüfung
+- **Geräteliste mit Details**: Übersicht erkannter Hosts mit Detailbereich zur schnellen Auswertung
+- **Direktaktionen**: Offene Ports können per Doppelklick mit der Standardanwendung geöffnet werden
+
 ### Einstellungen
 
 Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
@@ -174,7 +191,7 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - **Theme-Editor**: Passen Sie Hintergrund-, Text- und Akzentfarben individuell an
 
 zurück zum
-[Inhaltsverzeichnis]#-Inhaltsverzeichnis
+[Inhaltsverzeichnis](#-inhaltsverzeichnis)
 ---
 
 ## 🔧 Funktionen im Detail
@@ -215,6 +232,13 @@ zurück zum
   - Hardware: BSSID, Beacon-Intervall
 - **Robustheit**: Automatischer Fallback auf netsh-Kommandozeile bei API-Problemen
 
+### Netzwerkscanner - Technische Details
+
+- **Asynchrones Scannen**: Nicht-blockierende Host- und Port-Prüfungen für flüssige Bedienung
+- **Abbruchfähig**: Laufende Scans können kontrolliert gestoppt werden
+- **Sortierbare Ergebnisliste**: Geräte können nach relevanten Spalten geordnet werden
+- **Detailansicht je Gerät**: Zusammengefasste Host-Informationen und erkannte offene Ports
+
 ### IP-Profilverwaltung
 
 - **Mehrere Profile**: Speichern Sie unterschiedliche Netzwerkkonfigurationen für verschiedene Standorte (Büro, Home Office, Extern)
@@ -238,7 +262,7 @@ zurück zum
 - **Echtzeit-Vorschau**: Sehen Sie Änderungen sofort in der Anwendung
 
 zurück zum
-[Inhaltsverzeichnis]#-Inhaltsverzeichnis
+[Inhaltsverzeichnis](#-inhaltsverzeichnis)
 ---
 
 ## 💻 Systemanforderungen
@@ -274,7 +298,7 @@ Laden Sie das Windows App SDK herunter und installieren Sie es von:
 - Wenn beim Start eine Fehlermeldung bezüglich des Windows App SDK angezeigt wird, siehe [Systemanforderungen](#windows-app-sdk).
 
 zurück zum
-[Inhaltsverzeichnis]#-Inhaltsverzeichnis
+[Inhaltsverzeichnis](#-inhaltsverzeichnis)
 ---
 
 ## 📄 Lizenz & Kontakt
@@ -284,4 +308,4 @@ Siehe `LICENSE` im Repository. Für Fragen zum Code bitte Issues/PRs im Repo ver
 https://buymeacoffee.com/pedrotepe
 
 zurück zum
-[Inhaltsverzeichnis]#-Inhaltsverzeichnis
+[Inhaltsverzeichnis](#-inhaltsverzeichnis)
