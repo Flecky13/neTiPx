@@ -229,30 +229,38 @@ namespace neTiPx.Services
             AppendMenu(menu, 0, MenuCommandOpen, "Öffnen");
             AppendMenu(menu, 0x800, 0, null); // Separator
 
-            // IP-Profile laden und Untermenü erstellen
-            var profileStore = new IpProfileStore();
-            var profiles = profileStore.ReadAllProfiles();
-
-            System.Diagnostics.Debug.WriteLine($"[TrayService] Profile geladen: {profiles.Count}");
-
-            if (profiles.Count > 0)
+            var ipProfilesVisibleInTray = IsIpProfilesVisibleInTray();
+            if (ipProfilesVisibleInTray)
             {
-                var profileSubmenu = CreatePopupMenu();
-                System.Diagnostics.Debug.WriteLine($"[TrayService] Submenü Handle: {profileSubmenu}");
-                _profileMenuIdMap.Clear();
+                // IP-Profile laden und Untermenü erstellen
+                var profileStore = new IpProfileStore();
+                var profiles = profileStore.ReadAllProfiles();
 
-                for (int i = 0; i < profiles.Count; i++)
+                System.Diagnostics.Debug.WriteLine($"[TrayService] Profile geladen: {profiles.Count}");
+
+                if (profiles.Count > 0)
                 {
-                    int menuId = MenuCommandProfileStart + i;
-                    _profileMenuIdMap[menuId] = profiles[i].Name;
-                    System.Diagnostics.Debug.WriteLine($"[TrayService] Profil hinzugefügt: ID={menuId}, Name={profiles[i].Name}");
-                    AppendMenu(profileSubmenu, 0, (uint)menuId, profiles[i].Name);
-                }
+                    var profileSubmenu = CreatePopupMenu();
+                    System.Diagnostics.Debug.WriteLine($"[TrayService] Submenü Handle: {profileSubmenu}");
+                    _profileMenuIdMap.Clear();
 
-                // Popup-Untermenü hinzufügen
-                System.Diagnostics.Debug.WriteLine($"[TrayService] Untermenü wird an Hauptmenü angehängt");
-                bool result = AppendSubMenu(menu, profileSubmenu, "IP-Profil");
-                System.Diagnostics.Debug.WriteLine($"[TrayService] AppendSubMenu Ergebnis: {result}");
+                    for (int i = 0; i < profiles.Count; i++)
+                    {
+                        int menuId = MenuCommandProfileStart + i;
+                        _profileMenuIdMap[menuId] = profiles[i].Name;
+                        System.Diagnostics.Debug.WriteLine($"[TrayService] Profil hinzugefügt: ID={menuId}, Name={profiles[i].Name}");
+                        AppendMenu(profileSubmenu, 0, (uint)menuId, profiles[i].Name);
+                    }
+
+                    // Popup-Untermenü hinzufügen
+                    System.Diagnostics.Debug.WriteLine($"[TrayService] Untermenü wird an Hauptmenü angehängt");
+                    bool result = AppendSubMenu(menu, profileSubmenu, "IP-Profil");
+                    System.Diagnostics.Debug.WriteLine($"[TrayService] AppendSubMenu Ergebnis: {result}");
+                }
+            }
+            else
+            {
+                _profileMenuIdMap.Clear();
             }
 
             AppendMenu(menu, 0x800, 0, null); // Separator
@@ -281,6 +289,22 @@ namespace neTiPx.Services
             }
 
             DestroyMenu(menu);
+        }
+
+        private static bool IsIpProfilesVisibleInTray()
+        {
+            try
+            {
+                var pagesVisibilityService = new PagesVisibilityService();
+                pagesVisibilityService.EnsureConfigExists();
+                var visibility = pagesVisibilityService.ReadPagesVisibility();
+
+                return visibility.TryGetValue("IpConfig", out var isVisible) && isVisible;
+            }
+            catch
+            {
+                return true;
+            }
         }
 
         private static bool AppendSubMenu(IntPtr hMenu, IntPtr hSubMenu, string lpNewItem)
