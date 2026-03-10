@@ -20,6 +20,7 @@ namespace neTiPx.Views
         private readonly SettingsService _settingsService = new SettingsService();
         private readonly AdapterStore _adapterStore = new AdapterStore();
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
+        private readonly NetworkScanStore _networkScanStore = new NetworkScanStore();
 
         private string _networkScanSortColumn = string.Empty;
         private bool _networkScanSortAscending = true;
@@ -37,7 +38,7 @@ namespace neTiPx.Views
         private void NetworkScannerPage_Loaded(object sender, RoutedEventArgs e)
         {
             UpdateNetworkScanHeaderLabels();
-            PrefillNetworkScanRangesFromNic1();
+            LoadLastScanRanges();
         }
 
         private void NetworkScannerPage_Unloaded(object sender, RoutedEventArgs e)
@@ -62,6 +63,9 @@ namespace neTiPx.Views
                 ShowScanError(parseError ?? "Ungültiger IP-Bereich.");
                 return;
             }
+
+            // Bereiche speichern
+            _networkScanStore.WriteLastScanRanges(rangeInput);
 
             _networkScanCts?.Cancel();
             _networkScanCts = new CancellationTokenSource();
@@ -116,6 +120,35 @@ namespace neTiPx.Views
                     ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden"
                     : "Scan abgeschlossen - Keine Geräte gefunden";
             });
+        }
+
+        private void LoadLastScanRanges()
+        {
+            if (NetworkScanRangesTextBox == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(NetworkScanRangesTextBox.Text))
+            {
+                return;
+            }
+
+            try
+            {
+                var savedRanges = _networkScanStore.ReadLastScanRanges();
+                if (!string.IsNullOrWhiteSpace(savedRanges))
+                {
+                    NetworkScanRangesTextBox.Text = savedRanges;
+                    return;
+                }
+            }
+            catch
+            {
+            }
+
+            // Fallback: NIC1-basiertes Prefill
+            PrefillNetworkScanRangesFromNic1();
         }
 
         private void PrefillNetworkScanRangesFromNic1()
