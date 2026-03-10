@@ -13,13 +13,23 @@ namespace neTiPx.Views
         {
             InitializeComponent();
             Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
         private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             if (DataContext is IpConfigViewModel viewModel)
             {
+                viewModel.StartConnectionMonitoring();
                 ProfileListView.SelectedItem = viewModel.SelectedProfile;
+            }
+        }
+
+        private void OnUnloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (DataContext is IpConfigViewModel viewModel)
+            {
+                viewModel.StopConnectionMonitoring();
             }
         }
 

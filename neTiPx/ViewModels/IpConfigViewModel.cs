@@ -62,7 +62,6 @@ namespace neTiPx.ViewModels
                 AutoReset = true
             };
             _pingTimer.Elapsed += async (_, _) => await UpdateStatusAsync();
-            _pingTimer.Start();
         }
 
         public ObservableCollection<string> AdapterList { get; }
@@ -1179,6 +1178,23 @@ namespace neTiPx.ViewModels
                 Dns2PingText = pingText;
                 Dns2StatusKind = statusKind;
             }, null);
+        }
+
+        public void StartConnectionMonitoring()
+        {
+            if (!_pingTimer.Enabled)
+            {
+                _pingTimer.Start();
+                UpdateStatusAsync().ConfigureAwait(false);
+            }
+        }
+
+        public void StopConnectionMonitoring()
+        {
+            if (_pingTimer.Enabled)
+            {
+                _pingTimer.Stop();
+            }
         }
     }
 }

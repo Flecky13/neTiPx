@@ -351,12 +351,6 @@ namespace neTiPx.ViewModels
                 OnPropertyChanged(nameof(PrimaryDns1Address));
                 OnPropertyChanged(nameof(PrimaryDns2Address));
 
-                // Starte Timer
-                if (_pingTimer != null && !_pingTimer.Enabled)
-                {
-                    _pingTimer.Start();
-                }
-
                 // Add all IPv6 addresses
                 var ipv6Addresses = ipProperties.UnicastAddresses
                     .Where(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
@@ -707,5 +701,22 @@ namespace neTiPx.ViewModels
                 Dns2StatusKind = statusKind;
             }, null);
         }
+
+            public void StartConnectionMonitoring()
+            {
+                if (_pingTimer != null && !_pingTimer.Enabled)
+                {
+                    _pingTimer.Start();
+                    UpdateStatusAsync().ConfigureAwait(false);
+                }
+            }
+
+            public void StopConnectionMonitoring()
+            {
+                if (_pingTimer != null && _pingTimer.Enabled)
+                {
+                    _pingTimer.Stop();
+                }
+            }
     }
 }
