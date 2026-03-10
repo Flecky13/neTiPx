@@ -1,11 +1,14 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using neTiPx.Services;
 
 namespace neTiPx.Views
 {
     public partial class ToolsPage : Page
     {
+        private readonly PagesVisibilityService _pagesVisibilityService = new PagesVisibilityService();
+
         public ToolsPage()
         {
             InitializeComponent();
@@ -15,10 +18,36 @@ namespace neTiPx.Views
                 PingPanel.Navigated += PingPanel_Navigated;
             }
 
-            // Standardmäßig PING-Panel anzeigen
+            // Zuerst die Config laden und apply
+            ApplyPagesVisibility();
+
+            // Standardmäßig PING-Panel anzeigen (falls sichtbar)
             if (ToolsNavView != null && ToolsNavView.MenuItems.Count > 0)
             {
                 ToolsNavView.SelectedItem = ToolsNavView.MenuItems[0];
+            }
+        }
+
+        private void ApplyPagesVisibility()
+        {
+            _pagesVisibilityService.EnsureConfigExists();
+            var visibility = _pagesVisibilityService.ReadPagesVisibility();
+
+            if (ToolsNavView?.MenuItems == null)
+            {
+                return;
+            }
+
+            foreach (var menuItem in ToolsNavView.MenuItems.OfType<NavigationViewItem>())
+            {
+                var tag = menuItem.Tag as string;
+                if (string.IsNullOrWhiteSpace(tag))
+                {
+                    continue;
+                }
+
+                var isVisible = visibility.ContainsKey(tag) && visibility[tag];
+                menuItem.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 

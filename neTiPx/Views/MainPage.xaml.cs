@@ -1,10 +1,13 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.Services;
 
 namespace neTiPx.Views
 {
     public partial class MainPage : Page
     {
+        private readonly PagesVisibilityService _pagesVisibilityService = new PagesVisibilityService();
+
         public MainPage()
         {
             InitializeComponent();
@@ -15,6 +18,9 @@ namespace neTiPx.Views
         {
             App.MainWindow.SetTitleBar(AppTitleBar);
 
+            // Load and apply pages visibility
+            ApplyMainPagesVisibility();
+
             if (RootNavView.MenuItems.Count > 0)
             {
                 RootNavView.SelectedItem = RootNavView.MenuItems[0];
@@ -22,9 +28,32 @@ namespace neTiPx.Views
 
             // Set initial min width based on pane state
             App.UpdateMinWidth(RootNavView.IsPaneOpen);
-            
+
             // Set initial copyright text visibility
             CopyrightText.Visibility = RootNavView.IsPaneOpen ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ApplyMainPagesVisibility()
+        {
+            _pagesVisibilityService.EnsureConfigExists();
+            var visibility = _pagesVisibilityService.ReadPagesVisibility();
+
+            if (RootNavView?.MenuItems == null)
+            {
+                return;
+            }
+
+            foreach (var menuItem in RootNavView.MenuItems.OfType<NavigationViewItem>())
+            {
+                var tag = menuItem.Tag as string;
+                if (string.IsNullOrWhiteSpace(tag))
+                {
+                    continue;
+                }
+
+                var isVisible = visibility.ContainsKey(tag) && visibility[tag];
+                menuItem.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private void RootNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
