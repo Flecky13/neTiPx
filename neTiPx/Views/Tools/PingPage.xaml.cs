@@ -32,6 +32,7 @@ namespace neTiPx.Views
         private bool _isPingPageVisible;
         private bool _isPageLoaded;
         private bool _isWindowActive;
+        private bool _isHostPingTabActive = true;
         private AppWindow? _mainAppWindow;
         private readonly long _visibilityChangedToken;
 
@@ -98,6 +99,12 @@ namespace neTiPx.Views
             {
                 UpdatePingingState();
             }
+        }
+
+        public void SetHostPingTabActive(bool isActive)
+        {
+            _isHostPingTabActive = isActive;
+            UpdatePingingState();
         }
 
         private void LoadPingTargets()
@@ -379,7 +386,7 @@ namespace neTiPx.Views
         {
             var isWindowVisible = _mainAppWindow?.IsVisible ?? false;
             var isBackgroundActive = BackgroundActiveCheckBox?.IsChecked == true;
-            var shouldPingByFocus = _isPageLoaded && _isPingPageVisible && _isWindowActive && isWindowVisible;
+            var shouldPingByFocus = _isPageLoaded && _isHostPingTabActive && _isPingPageVisible && _isWindowActive && isWindowVisible;
             var shouldPingBeActive = isBackgroundActive || shouldPingByFocus;
 
             foreach (var target in PingTargets)

@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 namespace neTiPx.Views
 {
@@ -8,6 +9,11 @@ namespace neTiPx.Views
         public ToolsPage()
         {
             InitializeComponent();
+
+            if (PingPanel != null)
+            {
+                PingPanel.Navigated += PingPanel_Navigated;
+            }
 
             // Standardmäßig PING-Panel anzeigen
             if (ToolsNavView != null && ToolsNavView.MenuItems.Count > 0)
@@ -38,6 +44,7 @@ namespace neTiPx.Views
                                 PingPanel.Navigate(typeof(PingPage));
                             }
                         }
+                        SetPingPageHostActiveState(true);
                         break;
                     case "Wlan":
                         if (WlanPanel != null)
@@ -48,6 +55,7 @@ namespace neTiPx.Views
                                 WlanPanel.Navigate(typeof(WlanPage));
                             }
                         }
+                        SetPingPageHostActiveState(false);
                         break;
                     case "NetworkCalculator":
                         if (NetworkCalculatorPanel != null)
@@ -58,6 +66,7 @@ namespace neTiPx.Views
                                 NetworkCalculatorPanel.Navigate(typeof(NetworkCalculatorPage));
                             }
                         }
+                        SetPingPageHostActiveState(false);
                         break;
                     case "NetworkScanner":
                         if (NetworkScannerPanel != null)
@@ -68,8 +77,25 @@ namespace neTiPx.Views
                                 NetworkScannerPanel.Navigate(typeof(NetworkScannerPage));
                             }
                         }
+                        SetPingPageHostActiveState(false);
                         break;
                 }
+            }
+        }
+
+        private void PingPanel_Navigated(object sender, NavigationEventArgs e)
+        {
+            if (e.Content is PingPage pingPage)
+            {
+                pingPage.SetHostPingTabActive(PingPanel?.Visibility == Visibility.Visible);
+            }
+        }
+
+        private void SetPingPageHostActiveState(bool isActive)
+        {
+            if (PingPanel?.Content is PingPage pingPage)
+            {
+                pingPage.SetHostPingTabActive(isActive);
             }
         }
     }
