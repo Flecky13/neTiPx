@@ -35,6 +35,31 @@ namespace neTiPx.Views
             }
         }
 
+        public void RefreshVisibilityConfiguration()
+        {
+            ApplyPagesVisibility();
+
+            if (ToolsNavView == null)
+            {
+                return;
+            }
+
+            if (ToolsNavView.SelectedItem is NavigationViewItem selectedItem
+                && selectedItem.Visibility == Visibility.Visible)
+            {
+                return;
+            }
+
+            var firstVisible = ToolsNavView.MenuItems
+                .OfType<NavigationViewItem>()
+                .FirstOrDefault(item => item.Visibility == Visibility.Visible);
+
+            if (firstVisible != null)
+            {
+                ToolsNavView.SelectedItem = firstVisible;
+            }
+        }
+
         private void ApplyPagesVisibility()
         {
             _pagesVisibilityService.EnsureConfigExists();

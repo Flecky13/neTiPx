@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
@@ -219,6 +220,77 @@ namespace neTiPx.Views
             _settingsService.SetPingLogFolderPath(selectedFolder.Path);
             _pingLogFolderPath = selectedFolder.Path;
             UpdatePingLogFolderPathDisplay();
+        }
+
+        private async void OpenPagesVisibilityConfigText_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            _pagesVisibilityService.EnsureConfigExists();
+            var entries = _pagesVisibilityService.ReadXmlManagedEntries();
+
+            var editorsPanel = new StackPanel { Spacing = 8 };
+            var checkBoxes = new Dictionary<string, CheckBox>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entry in entries.OrderBy(e2 => e2.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                var checkBox = new CheckBox
+                {
+                    Content = GetPageVisibilityDisplayLabel(entry.Key),
+                    IsChecked = entry.Value,
+                    Tag = entry.Key
+                };
+
+                checkBoxes[entry.Key] = checkBox;
+                editorsPanel.Children.Add(checkBox);
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = "Seiten-Sichtbarkeit",
+                Content = new ScrollViewer
+                {
+                    Content = editorsPanel,
+                    MaxHeight = 420
+                },
+                PrimaryButtonText = "Schließen",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = XamlRoot
+            };
+
+            await dialog.ShowAsync();
+
+            var updatedEntries = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pair in checkBoxes)
+            {
+                updatedEntries[pair.Key] = pair.Value.IsChecked == true;
+            }
+
+            _pagesVisibilityService.SaveXmlManagedEntries(updatedEntries);
+            ApplySettingsSectionsVisibility();
+            RefreshAppVisibilityConfiguration();
+        }
+
+        private static string GetPageVisibilityDisplayLabel(string pageKey)
+        {
+            return pageKey switch
+            {
+                "IpConfig" => "IP-Konfiguration",
+                "Tools" => "Tools (Hauptseite)",
+                "Info" => "Info",
+                "Settings" => "Einstellungen",
+                "Ping" => "Tool: Ping",
+                "Wlan" => "Tool: WLAN",
+                "NetworkCalculator" => "Tool: Netzwerk-Rechner",
+                "NetworkScanner" => "Tool: Netzwerkscanner",
+                _ => pageKey
+            };
+        }
+
+        private static void RefreshAppVisibilityConfiguration()
+        {
+            if (App.MainWindow?.Content is MainPage mainPage)
+            {
+                mainPage.RefreshVisibilityConfiguration();
+            }
         }
 
         private void ResetPingLogFolderButton_Click(object sender, RoutedEventArgs e)

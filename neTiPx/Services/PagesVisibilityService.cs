@@ -164,6 +164,82 @@ namespace neTiPx.Services
             return visibility;
         }
 
+        public Dictionary<string, bool> ReadXmlManagedEntries()
+        {
+            var entries = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pageName in _xmlManagedPages)
+            {
+                entries[pageName] = true;
+            }
+
+            try
+            {
+                EnsureConfigExists();
+
+                var doc = XDocument.Load(_configPath);
+                var root = doc.Root;
+                if (root == null)
+                {
+                    return entries;
+                }
+
+                foreach (var pageElement in root.Elements("page"))
+                {
+                    var name = pageElement.Attribute("name")?.Value;
+                    var visible = pageElement.Attribute("visible")?.Value;
+
+                    if (!string.IsNullOrWhiteSpace(name) && bool.TryParse(visible, out var isVisible))
+                    {
+                        entries[name] = isVisible;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return entries;
+        }
+
+        public void SaveXmlManagedEntries(Dictionary<string, bool> entries)
+        {
+            try
+            {
+                EnsureConfigExists();
+
+                var doc = XDocument.Load(_configPath);
+                var root = doc.Root;
+                if (root == null)
+                {
+                    return;
+                }
+
+                foreach (var pageName in _xmlManagedPages)
+                {
+                    var pageElement = root.Elements("page")
+                        .FirstOrDefault(p => string.Equals(p.Attribute("name")?.Value, pageName, StringComparison.OrdinalIgnoreCase));
+
+                    var newValue = entries.TryGetValue(pageName, out var isVisible) ? isVisible : true;
+
+                    if (pageElement == null)
+                    {
+                        root.Add(new XElement("page",
+                            new XAttribute("name", pageName),
+                            new XAttribute("visible", newValue.ToString().ToLowerInvariant())));
+                    }
+                    else
+                    {
+                        pageElement.SetAttributeValue("visible", newValue.ToString().ToLowerInvariant());
+                    }
+                }
+
+                doc.Save(_configPath);
+            }
+            catch
+            {
+            }
+        }
+
         public void UpdatePageVisibility(string pageName, bool visible)
         {
             try

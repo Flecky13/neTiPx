@@ -14,7 +14,12 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Einstellungen" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Konfiguriere dein Tool nach deinen Wünschen" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Konfiguriere dein Tool nach deinen" VerticalAlignment="Center" />
+                            <TextBlock Text="Wünschen"
+                                       VerticalAlignment="Center"
+                                       Tapped="OpenPagesVisibilityConfigText_Tapped" />
+                        </StackPanel>
                     </StackPanel>
                     <Image
                         Grid.Column="1"

@@ -105,5 +105,30 @@ namespace neTiPx.Views
             App.UpdateMinWidth(false);
             CopyrightText.Visibility = Visibility.Collapsed;
         }
+
+        public void RefreshVisibilityConfiguration()
+        {
+            ApplyMainPagesVisibility();
+
+            if (ContentFrame?.Content is ToolsPage toolsPage)
+            {
+                toolsPage.RefreshVisibilityConfiguration();
+            }
+
+            if (RootNavView.SelectedItem is NavigationViewItem selectedItem
+                && selectedItem.Visibility == Visibility.Visible)
+            {
+                return;
+            }
+
+            var firstVisible = RootNavView.MenuItems
+                .OfType<NavigationViewItem>()
+                .FirstOrDefault(item => item.Visibility == Visibility.Visible);
+
+            if (firstVisible != null)
+            {
+                RootNavView.SelectedItem = firstVisible;
+            }
+        }
     }
 }
