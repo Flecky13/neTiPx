@@ -4,11 +4,12 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.4.0.1]
+## [1.4.0.2]
 
 ### Changed
 - **Tools-Seite**: Der Bereich Netzwerkscanner wurde in eine eigene Unterseite (`NetworkScannerPage`) ausgelagert.
 - **Tools-Seite**: Der Bereich WLAN wurde in eine eigene Unterseite (`WlanPage`) ausgelagert und zusammen mit dem Netzwerkscanner nach `Views/Tools` verschoben.
+- **Tools-Seite**: Der Bereich Netzwerk-Rechner wurde in eine eigene Unterseite (`NetworkCalculatorPage`) ausgelagert und unter `Views/Tools` strukturiert.
 
 ## [1.3.3.1]
 
