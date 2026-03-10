@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +26,9 @@ namespace neTiPx.Views
         private string _networkScanSortColumn = string.Empty;
         private bool _networkScanSortAscending = true;
         private CancellationTokenSource? _networkScanCts;
+        private CancellationTokenSource? _detailsLoadCts;
+        private readonly HashSet<string> _detailsLoadedIps = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _detailsLoadingIps = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public ObservableCollection<NetworkDevice> NetworkDevices { get; } = new ObservableCollection<NetworkDevice>();
 
@@ -44,6 +48,7 @@ namespace neTiPx.Views
         private void NetworkScannerPage_Unloaded(object sender, RoutedEventArgs e)
         {
             _networkScanCts?.Cancel();
+            _detailsLoadCts?.Cancel();
         }
 
         private async void NetworkScanStartButton_Click(object sender, RoutedEventArgs e)
@@ -69,6 +74,9 @@ namespace neTiPx.Views
 
             _networkScanCts?.Cancel();
             _networkScanCts = new CancellationTokenSource();
+            _detailsLoadCts?.Cancel();
+            _detailsLoadedIps.Clear();
+            _detailsLoadingIps.Clear();
 
             NetworkDevices.Clear();
             NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
@@ -117,7 +125,7 @@ namespace neTiPx.Views
 
                 NetworkScanCountTextBlock.Text = $"{NetworkDevices.Count} Gerät(e)";
                 NetworkScanStatusTextBlock.Text = NetworkDevices.Count > 0
-                    ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden"
+                    ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden (IP, MAC, Ports). Zusatzinfos beim Auswählen."
                     : "Scan abgeschlossen - Keine Geräte gefunden";
             });
         }
@@ -336,15 +344,13 @@ namespace neTiPx.Views
                     };
 
                     var macTask = Task.Run(() => GetMacAddressAsync(ipAddress.ToString()), cancellationToken);
-                    var hostnameTask = Task.Run(() => GetHostnameAsync(ipAddress), cancellationToken);
                     var portsTask = Task.Run(() => ScanPortsAsync(ipAddress, cancellationToken), cancellationToken);
 
-                    await Task.WhenAll(macTask, hostnameTask, portsTask);
+                    await Task.WhenAll(macTask, portsTask);
 
                     device.MacAddress = macTask.Result;
-                    device.Hostname = hostnameTask.Result;
-
                     var openPorts = portsTask.Result;
+
                     DispatcherQueue.TryEnqueue(() =>
                     {
                         foreach (var port in openPorts)
@@ -414,19 +420,6 @@ namespace neTiPx.Views
             return "Anderes Subnetz";
         }
 
-        private async Task<string> GetHostnameAsync(IPAddress ipAddress)
-        {
-            try
-            {
-                var hostEntry = await Dns.GetHostEntryAsync(ipAddress);
-                return hostEntry.HostName ?? "-";
-            }
-            catch
-            {
-                return "-";
-            }
-        }
-
         private async Task<List<string>> ScanPortsAsync(IPAddress ipAddress, CancellationToken cancellationToken)
         {
             var openPorts = new List<string>();
@@ -463,14 +456,39 @@ namespace neTiPx.Views
         {
             try
             {
-                using var tcpClient = new TcpClient();
-                var connectTask = tcpClient.ConnectAsync(ipAddress, port);
-                var timeoutTask = Task.Delay(1000, cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
 
-                if (await Task.WhenAny(connectTask, timeoutTask) == connectTask && tcpClient.Connected)
+                using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                using var connectArgs = new SocketAsyncEventArgs
+                {
+                    RemoteEndPoint = new IPEndPoint(ipAddress, port)
+                };
+
+                var completion = new TaskCompletionSource<SocketError>(TaskCreationOptions.RunContinuationsAsynchronously);
+                connectArgs.Completed += (_, args) => completion.TrySetResult(args.SocketError);
+
+                if (!socket.ConnectAsync(connectArgs))
+                {
+                    completion.TrySetResult(connectArgs.SocketError);
+                }
+
+                var completedTask = await Task.WhenAny(completion.Task, Task.Delay(1000, cancellationToken));
+                if (completedTask != completion.Task)
+                {
+                    return null;
+                }
+
+                if (await completion.Task == SocketError.Success)
                 {
                     return portName;
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // User requested cancellation.
             }
             catch
             {
@@ -485,26 +503,180 @@ namespace neTiPx.Views
             {
                 NetworkScanDetailsPanel.Visibility = Visibility.Visible;
                 NetworkScanDetailsPlaceholderText.Visibility = Visibility.Collapsed;
-                DeviceDetailsIpTextBlock.Text = selectedDevice.IpAddress;
-                DeviceDetailsMacTextBlock.Text = selectedDevice.MacAddress;
-                DeviceDetailsHostnameTextBlock.Text = selectedDevice.Hostname;
-
-                if (selectedDevice.OpenPorts != null && selectedDevice.OpenPorts.Count > 0)
-                {
-                    DeviceDetailsPortsPanel.Visibility = Visibility.Visible;
-                    DeviceDetailsPortsListView.ItemsSource = selectedDevice.OpenPorts;
-                }
-                else
-                {
-                    DeviceDetailsPortsPanel.Visibility = Visibility.Collapsed;
-                    DeviceDetailsPortsListView.ItemsSource = null;
-                }
+                ApplyDeviceDetailsToPanel(selectedDevice);
+                _ = LoadDeviceDetailsForSelectionAsync(selectedDevice);
             }
             else
             {
+                _detailsLoadCts?.Cancel();
                 NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
                 NetworkScanDetailsPlaceholderText.Visibility = Visibility.Visible;
             }
+        }
+
+        private void ApplyDeviceDetailsToPanel(NetworkDevice device)
+        {
+            DeviceDetailsIpTextBlock.Text = device.IpAddress;
+
+            var detailsLoaded = _detailsLoadedIps.Contains(device.IpAddress);
+            DeviceDetailsMacTextBlock.Text = device.MacAddress;
+            DeviceDetailsHostnameTextBlock.Text = detailsLoaded ? device.Hostname : "Lade...";
+
+            if (device.OpenPorts != null && device.OpenPorts.Count > 0)
+            {
+                DeviceDetailsPortsPanel.Visibility = Visibility.Visible;
+                DeviceDetailsPortsListView.ItemsSource = device.OpenPorts;
+            }
+            else
+            {
+                DeviceDetailsPortsPanel.Visibility = Visibility.Collapsed;
+                DeviceDetailsPortsListView.ItemsSource = null;
+            }
+        }
+
+        private async Task LoadDeviceDetailsForSelectionAsync(NetworkDevice selectedDevice)
+        {
+            if (string.IsNullOrWhiteSpace(selectedDevice.IpAddress))
+            {
+                return;
+            }
+
+            if (_detailsLoadedIps.Contains(selectedDevice.IpAddress) || _detailsLoadingIps.Contains(selectedDevice.IpAddress))
+            {
+                return;
+            }
+
+            if (!IPAddress.TryParse(selectedDevice.IpAddress, out var ipAddress) || ipAddress.AddressFamily != AddressFamily.InterNetwork)
+            {
+                return;
+            }
+
+            _detailsLoadCts?.Cancel();
+            _detailsLoadCts = new CancellationTokenSource();
+            var cancellationToken = _detailsLoadCts.Token;
+
+            _detailsLoadingIps.Add(selectedDevice.IpAddress);
+
+            try
+            {
+                var hostnameTask = GetHostnameAsync(ipAddress, cancellationToken);
+                await hostnameTask;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var loadedHostname = hostnameTask.Result;
+
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    selectedDevice.Hostname = loadedHostname;
+
+                    _detailsLoadedIps.Add(selectedDevice.IpAddress);
+
+                    if (NetworkScanResultsListView.SelectedItem is NetworkDevice currentSelection
+                        && string.Equals(currentSelection.IpAddress, selectedDevice.IpAddress, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ApplyDeviceDetailsToPanel(selectedDevice);
+                    }
+                });
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch
+            {
+            }
+            finally
+            {
+                _detailsLoadingIps.Remove(selectedDevice.IpAddress);
+            }
+        }
+
+        private async Task<string> GetHostnameAsync(IPAddress ipAddress, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var lookupTask = Dns.GetHostEntryAsync(ipAddress);
+                var completedTask = await Task.WhenAny(lookupTask, Task.Delay(4000, cancellationToken));
+                if (completedTask != lookupTask)
+                {
+                    return await GetHostnameViaNslookupAsync(ipAddress, cancellationToken);
+                }
+
+                var hostEntry = await lookupTask;
+                var hostName = string.IsNullOrWhiteSpace(hostEntry.HostName) ? "-" : hostEntry.HostName.TrimEnd('.');
+                if (!string.Equals(hostName, "-", StringComparison.Ordinal))
+                {
+                    return hostName;
+                }
+
+                return await GetHostnameViaNslookupAsync(ipAddress, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return "-";
+            }
+            catch
+            {
+                return await GetHostnameViaNslookupAsync(ipAddress, cancellationToken);
+            }
+        }
+
+        private async Task<string> GetHostnameViaNslookupAsync(IPAddress ipAddress, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "nslookup",
+                    Arguments = ipAddress.ToString(),
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                });
+
+                if (process == null)
+                {
+                    return "-";
+                }
+
+                var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                var waitTask = process.WaitForExitAsync(cancellationToken);
+                await Task.WhenAll(outputTask, waitTask);
+
+                var output = outputTask.Result;
+                if (string.IsNullOrWhiteSpace(output))
+                {
+                    return "-";
+                }
+
+                foreach (var rawLine in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var line = rawLine.Trim();
+                    if (line.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var colonMatch = Regex.Match(line, "^name\\s*:\\s*(.+)$", RegexOptions.IgnoreCase);
+                    if (colonMatch.Success)
+                    {
+                        return colonMatch.Groups[1].Value.Trim().TrimEnd('.');
+                    }
+
+                    var equalsMatch = Regex.Match(line, "\\bname\\s*=\\s*(.+)$", RegexOptions.IgnoreCase);
+                    if (equalsMatch.Success)
+                    {
+                        return equalsMatch.Groups[1].Value.Trim().TrimEnd('.');
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return "-";
         }
 
         private void ShowScanError(string message)
