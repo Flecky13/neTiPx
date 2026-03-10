@@ -4,6 +4,23 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.1.0]
+
+### Added
+- **Seiten-Sichtbarkeit**: Neue Konfiguration über `%APPDATA%\neTiPx\PagesVisibility.xml` für Hauptseiten und Tool-Unterseiten.
+- **Einstellungen**: Versteckter Trigger auf der Settings-Seite (Wort `Wünschen`) öffnet einen Dialog zur Pflege der `PagesVisibility.xml`.
+- **Einstellungen**: Dialog mit gruppierten Checkboxen (`Hauptseiten`, `Tools`) und Abhängigkeit zwischen `Tools (Hauptseite)` und Tool-Unterseiten.
+
+### Changed
+- **Navigation Hauptmenü**: Beim Start und nach Aktualisierung wird immer die erste sichtbare Seite fokussiert.
+- **Navigation Tools**: Beim Öffnen von Tools wird immer die erste sichtbare Tool-Seite fokussiert.
+- **Sichtbarkeitsregeln**: `Adapters`, `Info` und `Einstellungen` sind immer sichtbar und von der XML-Steuerung ausgeschlossen.
+- **Einstellungen**: Bei ausgeblendeten Bereichen bleibt die Überschrift sichtbar; darunter wird `Keine Settings vorhanden` angezeigt.
+
+### Fixed
+- **Systray**: IP-Profil-Untermenü wird ausgeblendet, wenn `IP-Konfiguration` deaktiviert ist.
+- **Netzwerkscanner**: Exception-Flut im Debug-Output reduziert (robuster Port-Check, detailbezogene Nachladung pro ausgewähltem Gerät).
+
 ## [1.4.0.3]
 
 ### Changed

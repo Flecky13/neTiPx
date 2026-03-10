@@ -45,6 +45,8 @@
 - 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
 - 🔎 **Netzwerkscanner**: Scan von IP-Bereichen mit Port-Prüfung und Detailansicht gefundener Geräte
 - 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner und Netzwerkscanner als eigene Unterseiten mit Lazy-Loading
+- 🗂️ **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
+- 🛠️ **Versteckte Admin-Konfiguration**: Auf der Settings-Seite öffnet das Wort `Wünschen` einen Dialog zur Pflege der Seiten-Sichtbarkeit
 
 zurück zum
 [Inhaltsverzeichnis](#-inhaltsverzeichnis)
@@ -182,6 +184,17 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - **Log-Ordner wählen**: Eigener Speicherort für Ping-Logs auswählbar
 - **Standard-Ordner**: Schnell auf den Standardpfad zurücksetzen
 - **Pfadanzeige**: Dynamisch angepasste Ein-Zeilen-Anzeige mit Tooltip für den vollständigen Pfad
+
+#### 🗂️ Seiten-Sichtbarkeit
+- **Konfigurationsdatei**: `%APPDATA%\\neTiPx\\PagesVisibility.xml`
+- **Versteckter Dialog**: In den Einstellungen auf das Wort `Wünschen` klicken
+- **Gruppierte Steuerung**: Separate Bereiche für `Hauptseiten` und `Tools`
+- **Abhängigkeit Tools**:
+  - `Tools (Hauptseite)` aus => alle Tool-Unterseiten aus
+  - Eine Tool-Unterseite an => `Tools (Hauptseite)` automatisch an
+  - Alle Tool-Unterseiten aus => `Tools (Hauptseite)` automatisch aus
+- **Immer sichtbar**: `Adapter Infos`, `Info` und `Einstellungen` sind fest sichtbar und nicht per XML ausblendbar
+- **Live-Aktualisierung**: Beim Schließen des Dialogs werden XML-Werte gespeichert und die Navigation sofort aktualisiert
 
 #### 🎨 Farbthemen
 - **Theme-Auswahl**: Wählen Sie aus mehreren vordefinierten Farbthemen
