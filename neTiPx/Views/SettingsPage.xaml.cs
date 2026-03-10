@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Text;
 using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
@@ -230,7 +231,16 @@ namespace neTiPx.Views
             var editorsPanel = new StackPanel { Spacing = 8 };
             var checkBoxes = new Dictionary<string, CheckBox>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var entry in entries.OrderBy(e2 => e2.Key, StringComparer.OrdinalIgnoreCase))
+            var mainPageKeys = new[] { "IpConfig", "Tools" };
+            var toolPageKeys = new[] { "Ping", "Wlan", "NetworkCalculator", "NetworkScanner" };
+
+            AddVisibilityGroup(editorsPanel, "Hauptseiten", mainPageKeys, entries, checkBoxes);
+            AddVisibilityGroup(editorsPanel, "Tools", toolPageKeys, entries, checkBoxes);
+
+            foreach (var entry in entries
+                .Where(e2 => !mainPageKeys.Contains(e2.Key, StringComparer.OrdinalIgnoreCase)
+                             && !toolPageKeys.Contains(e2.Key, StringComparer.OrdinalIgnoreCase))
+                .OrderBy(e2 => e2.Key, StringComparer.OrdinalIgnoreCase))
             {
                 var checkBox = new CheckBox
                 {
@@ -269,6 +279,43 @@ namespace neTiPx.Views
             RefreshAppVisibilityConfiguration();
         }
 
+        private static void AddVisibilityGroup(
+            StackPanel parent,
+            string title,
+            IEnumerable<string> keys,
+            Dictionary<string, bool> source,
+            Dictionary<string, CheckBox> target)
+        {
+            var availableKeys = keys
+                .Where(k => source.ContainsKey(k))
+                .ToList();
+
+            if (availableKeys.Count == 0)
+            {
+                return;
+            }
+
+            parent.Children.Add(new TextBlock
+            {
+                Text = title,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 6, 0, 0)
+            });
+
+            foreach (var key in availableKeys)
+            {
+                var checkBox = new CheckBox
+                {
+                    Content = GetPageVisibilityDisplayLabel(key),
+                    IsChecked = source[key],
+                    Tag = key
+                };
+
+                target[key] = checkBox;
+                parent.Children.Add(checkBox);
+            }
+        }
+
         private static string GetPageVisibilityDisplayLabel(string pageKey)
         {
             return pageKey switch
@@ -287,7 +334,8 @@ namespace neTiPx.Views
 
         private static void RefreshAppVisibilityConfiguration()
         {
-            if (App.MainWindow?.Content is MainPage mainPage)
+            if (App.MainWindow?.Content is Frame rootFrame
+                && rootFrame.Content is MainPage mainPage)
             {
                 mainPage.RefreshVisibilityConfiguration();
             }

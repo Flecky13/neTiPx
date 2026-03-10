@@ -27,16 +27,21 @@ namespace neTiPx.Services
 
         private static readonly string[] _xmlManagedPages = new[]
         {
-            // Main pages (Adapters intentionally excluded)
+            // Main pages (always-visible pages intentionally excluded)
             "IpConfig",
             "Tools",
-            "Info",
-            "Settings",
             // Tools sub-pages
             "Ping",
             "Wlan",
             "NetworkCalculator",
             "NetworkScanner"
+        };
+
+        private static readonly string[] _alwaysVisiblePages = new[]
+        {
+            "Adapters",
+            "Info",
+            "Settings"
         };
 
         private static string GetPagesVisibilityXmlPath()
@@ -97,6 +102,7 @@ namespace neTiPx.Services
                 var existingPages = new HashSet<string>(
                     root.Elements("page")
                         .Select(p => p.Attribute("name")?.Value)
+                        .OfType<string>()
                         .Where(name => !string.IsNullOrWhiteSpace(name)),
                     StringComparer.OrdinalIgnoreCase
                 );
@@ -107,6 +113,22 @@ namespace neTiPx.Services
                     if (!existingPages.Contains(pageName))
                     {
                         root.Add(new XElement("page", new XAttribute("name", pageName), new XAttribute("visible", "true")));
+                        hasChanges = true;
+                    }
+                }
+
+                // Remove legacy entries for always-visible pages.
+                foreach (var pageElement in root.Elements("page").ToList())
+                {
+                    var pageName = pageElement.Attribute("name")?.Value;
+                    if (string.IsNullOrWhiteSpace(pageName))
+                    {
+                        continue;
+                    }
+
+                    if (_alwaysVisiblePages.Any(p => string.Equals(p, pageName, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        pageElement.Remove();
                         hasChanges = true;
                     }
                 }
@@ -154,8 +176,11 @@ namespace neTiPx.Services
                     }
                 }
 
-                // Adapters page is always visible and cannot be hidden via XML.
-                visibility["Adapters"] = true;
+                // Always-visible pages cannot be hidden via XML.
+                foreach (var pageName in _alwaysVisiblePages)
+                {
+                    visibility[pageName] = true;
+                }
             }
             catch
             {
@@ -188,7 +213,13 @@ namespace neTiPx.Services
                     var name = pageElement.Attribute("name")?.Value;
                     var visible = pageElement.Attribute("visible")?.Value;
 
-                    if (!string.IsNullOrWhiteSpace(name) && bool.TryParse(visible, out var isVisible))
+                    if (string.IsNullOrWhiteSpace(name)
+                        || !_xmlManagedPages.Any(p => string.Equals(p, name, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
+                    if (bool.TryParse(visible, out var isVisible))
                     {
                         entries[name] = isVisible;
                     }
@@ -244,7 +275,7 @@ namespace neTiPx.Services
         {
             try
             {
-                if (string.Equals(pageName, "Adapters", StringComparison.OrdinalIgnoreCase))
+                if (_alwaysVisiblePages.Any(p => string.Equals(p, pageName, StringComparison.OrdinalIgnoreCase)))
                 {
                     return;
                 }

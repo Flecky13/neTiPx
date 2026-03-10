@@ -55,7 +55,9 @@ namespace neTiPx.Views
                     continue;
                 }
 
-                if (string.Equals(tag, "Adapters", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(tag, "Adapters", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(tag, "Info", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(tag, "Settings", StringComparison.OrdinalIgnoreCase))
                 {
                     menuItem.Visibility = Visibility.Visible;
                     continue;
