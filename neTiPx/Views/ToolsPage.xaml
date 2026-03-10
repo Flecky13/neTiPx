@@ -588,7 +588,7 @@
                             </Border>
 
                             <!-- Scan-Ergebnisse: Grid mit 2 separaten Bereichen -->
-                            <Grid ColumnDefinitions="*,250" ColumnSpacing="16">
+                            <Grid ColumnDefinitions="*,250" ColumnSpacing="16" Height="380">
                                 <!-- Linker Bereich: Geräteliste -->
                                 <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
                                     <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
