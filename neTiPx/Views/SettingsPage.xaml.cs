@@ -253,6 +253,8 @@ namespace neTiPx.Views
                 editorsPanel.Children.Add(checkBox);
             }
 
+            ApplyToolsDependency(checkBoxes, toolPageKeys);
+
             var dialog = new ContentDialog
             {
                 Title = "Seiten-Sichtbarkeit",
@@ -277,6 +279,94 @@ namespace neTiPx.Views
             _pagesVisibilityService.SaveXmlManagedEntries(updatedEntries);
             ApplySettingsSectionsVisibility();
             RefreshAppVisibilityConfiguration();
+        }
+
+        private static void ApplyToolsDependency(Dictionary<string, CheckBox> checkBoxes, IEnumerable<string> toolPageKeys)
+        {
+            if (!checkBoxes.TryGetValue("Tools", out var toolsMainCheckBox))
+            {
+                return;
+            }
+
+            var toolKeys = toolPageKeys.Where(k => checkBoxes.ContainsKey(k)).ToList();
+            var isUpdating = false;
+
+            void SyncFromToolsMain(bool isChecked)
+            {
+                foreach (var toolKey in toolKeys)
+                {
+                    checkBoxes[toolKey].IsChecked = isChecked;
+                }
+            }
+
+            toolsMainCheckBox.Checked += (_, _) =>
+            {
+                if (isUpdating)
+                {
+                    return;
+                }
+
+                isUpdating = true;
+                SyncFromToolsMain(true);
+                isUpdating = false;
+            };
+
+            toolsMainCheckBox.Unchecked += (_, _) =>
+            {
+                if (isUpdating)
+                {
+                    return;
+                }
+
+                isUpdating = true;
+                SyncFromToolsMain(false);
+                isUpdating = false;
+            };
+
+            foreach (var toolKey in toolKeys)
+            {
+                var toolCheckBox = checkBoxes[toolKey];
+                toolCheckBox.Checked += (_, _) =>
+                {
+                    if (isUpdating)
+                    {
+                        return;
+                    }
+
+                    isUpdating = true;
+                    toolsMainCheckBox.IsChecked = true;
+                    isUpdating = false;
+                };
+
+                toolCheckBox.Unchecked += (_, _) =>
+                {
+                    if (isUpdating)
+                    {
+                        return;
+                    }
+
+                    var anyToolCheckedNow = toolKeys.Any(k => checkBoxes[k].IsChecked == true);
+                    if (anyToolCheckedNow)
+                    {
+                        return;
+                    }
+
+                    isUpdating = true;
+                    toolsMainCheckBox.IsChecked = false;
+                    isUpdating = false;
+                };
+            }
+
+            // Ensure initial state also respects dependency.
+            var anyToolChecked = toolKeys.Any(k => checkBoxes[k].IsChecked == true);
+            if (anyToolChecked)
+            {
+                toolsMainCheckBox.IsChecked = true;
+            }
+            else if (toolsMainCheckBox.IsChecked == false)
+            {
+                SyncFromToolsMain(false);
+            }
         }
 
         private static void AddVisibilityGroup(
