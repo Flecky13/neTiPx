@@ -131,5 +131,24 @@ namespace neTiPx.Helpers
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PingTargets.xml");
             }
         }
+
+        public static string GetNetworkScanRangesXmlPath()
+        {
+            try
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var dir = Path.Combine(appData, "neTiPx");
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                return Path.Combine(dir, "NetworkScanRanges.xml");
+            }
+            catch
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NetworkScanRanges.xml");
+            }
+        }
     }
 }

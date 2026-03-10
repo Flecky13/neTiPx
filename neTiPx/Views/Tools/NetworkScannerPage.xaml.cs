@@ -352,7 +352,7 @@ namespace neTiPx.Views
                 using var process = Process.Start(processStartInfo);
                 if (process == null)
                 {
-                    return "-";
+                    return "Anderes Subnetz";
                 }
 
                 var output = await process.StandardOutput.ReadToEndAsync();
@@ -378,7 +378,7 @@ namespace neTiPx.Views
             {
             }
 
-            return "-";
+            return "Anderes Subnetz";
         }
 
         private async Task<string> GetHostnameAsync(IPAddress ipAddress)
