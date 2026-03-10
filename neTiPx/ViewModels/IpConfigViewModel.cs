@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -25,6 +26,7 @@ namespace neTiPx.ViewModels
         private readonly TimersTimer _pingTimer;
         private readonly SynchronizationContext? _uiContext;
         private bool _isLoadingProfile = false;
+        private bool _isMonitoringActive;
 
         private IpProfile? _selectedProfile;
         private string _gatewayStatusText = "Unbekannt";
@@ -1020,44 +1022,60 @@ namespace neTiPx.ViewModels
 
         private async Task UpdateStatusAsync()
         {
-            if (SelectedProfile == null)
+            try
             {
-                PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                return;
-            }
+                var timerEnabled = _pingTimer?.Enabled == true;
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] UpdateStatusAsync tick (timerEnabled={timerEnabled}, monitoringActive={_isMonitoringActive})");
 
-            var gateway = NormalizeHostAddress(SelectedProfile.Gateway);
-            var dns1 = NormalizeHostAddress(SelectedProfile.Dns1);
-            var dns2 = NormalizeHostAddress(SelectedProfile.Dns2);
+                if (!_isMonitoringActive)
+                {
+                    return;
+                }
 
-            // Nur prüfen, wenn in den Settings aktiviert
-            if (_settingsService.GetCheckConnectionGateway())
-            {
-                await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
-            }
-            else
-            {
-                PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
-            }
+                var selectedProfile = SelectedProfile;
+                if (selectedProfile == null)
+                {
+                    PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    return;
+                }
 
-            if (_settingsService.GetCheckConnectionDns1())
-            {
-                await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
-            }
-            else
-            {
-                PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
-            }
+                var gateway = NormalizeHostAddress(selectedProfile.Gateway);
+                var dns1 = NormalizeHostAddress(selectedProfile.Dns1);
+                var dns2 = NormalizeHostAddress(selectedProfile.Dns2);
 
-            if (_settingsService.GetCheckConnectionDns2())
-            {
-                await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+                // Nur prüfen, wenn in den Settings aktiviert
+                if (_settingsService.GetCheckConnectionGateway())
+                {
+                    await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+                }
+                else
+                {
+                    PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                }
+
+                if (_settingsService.GetCheckConnectionDns1())
+                {
+                    await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
+                }
+                else
+                {
+                    PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                }
+
+                if (_settingsService.GetCheckConnectionDns2())
+                {
+                    await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+                }
+                else
+                {
+                    PostDns2Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                PostDns2Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] UpdateStatusAsync error: {ex.GetType().Name}: {ex.Message}");
             }
         }
 
@@ -1090,12 +1108,14 @@ namespace neTiPx.ViewModels
         {
             if (string.IsNullOrWhiteSpace(address))
             {
+                Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Skip ping: address empty");
                 callback("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
             try
             {
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Ping -> {address}");
                 using var ping = new Ping();
                 var reply = await ping.SendPingAsync(address, 1000);
                 if (reply.Status == IPStatus.Success)
@@ -1118,10 +1138,12 @@ namespace neTiPx.ViewModels
             }
             catch (PingException)
             {
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] PingException -> {address}");
                 callback("Nicht erreichbar", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
             }
             catch
             {
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Ping error -> {address}");
                 callback("Fehler", "Ping: Fehler", GatewayStatusKind.Bad);
             }
         }
@@ -1182,8 +1204,11 @@ namespace neTiPx.ViewModels
 
         public void StartConnectionMonitoring()
         {
+            _isMonitoringActive = true;
+
             if (!_pingTimer.Enabled)
             {
+                Debug.WriteLine("[ReachabilityDebug][IpConfigPage] StartConnectionMonitoring");
                 _pingTimer.Start();
                 UpdateStatusAsync().ConfigureAwait(false);
             }
@@ -1191,8 +1216,11 @@ namespace neTiPx.ViewModels
 
         public void StopConnectionMonitoring()
         {
+            _isMonitoringActive = false;
+
             if (_pingTimer.Enabled)
             {
+                Debug.WriteLine("[ReachabilityDebug][IpConfigPage] StopConnectionMonitoring");
                 _pingTimer.Stop();
             }
         }

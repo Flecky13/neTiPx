@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -19,6 +20,9 @@ namespace neTiPx.ViewModels
         private readonly SettingsService _settingsService = new SettingsService();
         private readonly TimersTimer? _pingTimer;
         private readonly SynchronizationContext? _uiContext;
+        private readonly string _debugInstanceId = Guid.NewGuid().ToString("N").Substring(0, 8);
+        private long _debugTickCounter;
+        private bool _isMonitoringActive;
         private string? _selectedAdapterPrimary;
         private string? _selectedAdapterSecondary;
 
@@ -529,9 +533,19 @@ namespace neTiPx.ViewModels
         {
             try
             {
+                var tick = Interlocked.Increment(ref _debugTickCounter);
+                DebugLog($"Tick#{tick} start timerEnabled={_pingTimer?.Enabled} monitoringActive={_isMonitoringActive} primary='{SelectedAdapterPrimary ?? "-"}' visible={IsPrimaryAdapterSelected}");
+
+                if (!_isMonitoringActive)
+                {
+                    DebugLog($"Tick#{tick} skipped because monitoring is inactive");
+                    return;
+                }
+
                 // Prüfe, ob ein Primary Adapter ausgewählt ist
                 if (string.IsNullOrEmpty(SelectedAdapterPrimary) || IsPrimaryAdapterSelected != Visibility.Visible)
                 {
+                    DebugLog($"Tick#{tick} no active primary adapter");
                     PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                     PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                     PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
@@ -549,28 +563,33 @@ namespace neTiPx.ViewModels
                 dns1 = NormalizeHostAddress(dns1);
                 dns2 = NormalizeHostAddress(dns2);
 
+                var checkGateway = _settingsService.GetCheckConnectionGateway();
+                var checkDns1 = _settingsService.GetCheckConnectionDns1();
+                var checkDns2 = _settingsService.GetCheckConnectionDns2();
+                DebugLog($"Tick#{tick} targets gw={gateway} dns1={dns1} dns2={dns2} checks gw={checkGateway} dns1={checkDns1} dns2={checkDns2}");
+
                 // Nur prüfen, wenn in den Settings aktiviert
-                if (_settingsService.GetCheckConnectionGateway())
+                if (checkGateway)
                 {
-                    await CheckHostStatusAsync(gateway, (status, ping, kind) => PostGatewayStatus(status, ping, kind));
+                    await CheckHostStatusAsync(gateway, "Gateway", (status, ping, kind) => PostGatewayStatus(status, ping, kind));
                 }
                 else
                 {
                     PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
                 }
 
-                if (_settingsService.GetCheckConnectionDns1())
+                if (checkDns1)
                 {
-                    await CheckHostStatusAsync(dns1, (status, ping, kind) => PostDns1Status(status, ping, kind));
+                    await CheckHostStatusAsync(dns1, "DNS1", (status, ping, kind) => PostDns1Status(status, ping, kind));
                 }
                 else
                 {
                     PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
                 }
 
-                if (_settingsService.GetCheckConnectionDns2())
+                if (checkDns2)
                 {
-                    await CheckHostStatusAsync(dns2, (status, ping, kind) => PostDns2Status(status, ping, kind));
+                    await CheckHostStatusAsync(dns2, "DNS2", (status, ping, kind) => PostDns2Status(status, ping, kind));
                 }
                 else
                 {
@@ -608,16 +627,18 @@ namespace neTiPx.ViewModels
             return candidate;
         }
 
-        private async Task CheckHostStatusAsync(string address, System.Action<string, string, GatewayStatusKind> callback)
+        private async Task CheckHostStatusAsync(string address, string targetKind, System.Action<string, string, GatewayStatusKind> callback)
         {
             if (string.IsNullOrWhiteSpace(address))
             {
+                DebugLog($"Skip {targetKind}: address empty");
                 callback("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
             try
             {
+                DebugLog($"Ping start {targetKind} -> {address}");
                 using var ping = new Ping();
                 var reply = await ping.SendPingAsync(address, 1000);
                 if (reply.Status == IPStatus.Success)
@@ -631,21 +652,30 @@ namespace neTiPx.ViewModels
                     var statusText = ms <= thresholdFast ? "Erreichbar" : ms <= thresholdNormal ? "Langsam" : "Sehr langsam";
                     var statusKind = ms <= thresholdFast ? GatewayStatusKind.Good :
                                    ms <= thresholdNormal ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
+                    DebugLog($"Ping ok {targetKind} -> {address} ({ms} ms)");
                     callback(statusText, $"Ping: {ms} ms", statusKind);
                 }
                 else
                 {
+                    DebugLog($"Ping no-reply {targetKind} -> {address} status={reply.Status}");
                     callback("Nicht erreichbar", "Ping: timeout", GatewayStatusKind.Bad);
                 }
             }
             catch (PingException)
             {
+                DebugLog($"Ping exception {targetKind} -> {address}");
                 callback("Nicht erreichbar", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
             }
             catch
             {
+                DebugLog($"Ping error {targetKind} -> {address}");
                 callback("Fehler", "Ping: Fehler", GatewayStatusKind.Bad);
             }
+        }
+
+        private void DebugLog(string message)
+        {
+            Debug.WriteLine($"[ReachabilityDebug][AdapterPage][VM:{_debugInstanceId}][T:{Environment.CurrentManagedThreadId}] {DateTime.Now:HH:mm:ss.fff} {message}");
         }
 
         private void PostGatewayStatus(string statusText, string pingText, GatewayStatusKind statusKind)
@@ -704,18 +734,32 @@ namespace neTiPx.ViewModels
 
             public void StartConnectionMonitoring()
             {
+                _isMonitoringActive = true;
+
                 if (_pingTimer != null && !_pingTimer.Enabled)
                 {
+                    DebugLog("StartConnectionMonitoring");
                     _pingTimer.Start();
                     UpdateStatusAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    DebugLog("StartConnectionMonitoring ignored (timer already active)");
                 }
             }
 
             public void StopConnectionMonitoring()
             {
+                _isMonitoringActive = false;
+
                 if (_pingTimer != null && _pingTimer.Enabled)
                 {
+                    DebugLog("StopConnectionMonitoring");
                     _pingTimer.Stop();
+                }
+                else
+                {
+                    DebugLog("StopConnectionMonitoring ignored (timer already stopped)");
                 }
             }
     }
