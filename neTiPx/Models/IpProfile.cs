@@ -11,6 +11,7 @@ namespace neTiPx.Models
         private string _gateway = string.Empty;
         private string _dns1 = string.Empty;
         private string _dns2 = string.Empty;
+        private bool _routesEnabled;
         private bool _isDirty;
 
         public string Name
@@ -53,6 +54,12 @@ namespace neTiPx.Models
         {
             get => _dns2;
             set => SetProperty(ref _dns2, value);
+        }
+
+        public bool RoutesEnabled
+        {
+            get => _routesEnabled;
+            set => SetProperty(ref _routesEnabled, value);
         }
 
         public bool IsDirty

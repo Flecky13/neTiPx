@@ -128,6 +128,7 @@
                                     <CheckBox
                                         Content="Routen"
                                         Margin="0"
+                                        IsChecked="{Binding SelectedProfile.RoutesEnabled, Mode=TwoWay}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <Button
                                         ToolTipService.ToolTip="Routen"
@@ -136,7 +137,8 @@
                                         MinWidth="0"
                                         Width="26"
                                         Height="26"
-                                        IsEnabled="{Binding IsProfileSelected}">
+                                        IsEnabled="{Binding SelectedProfile.RoutesEnabled}"
+                                        Visibility="{Binding SelectedProfile.RoutesEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <SymbolIcon Symbol="Directions" />
                                     </Button>
                                 </StackPanel>

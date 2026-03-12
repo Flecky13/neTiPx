@@ -228,6 +228,7 @@ namespace neTiPx.ViewModels
                 // Copy mode and basic settings from XML
                 SelectedProfile.Mode = storedProfile.Mode;
                 SelectedProfile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
+                SelectedProfile.RoutesEnabled = storedProfile.RoutesEnabled;
 
                 // If mode is DHCP, load remaining settings from NIC
                 if (string.Equals(storedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
@@ -339,6 +340,7 @@ namespace neTiPx.ViewModels
             targetProfile.Gateway = sourceProfile.Gateway;
             targetProfile.Dns1 = sourceProfile.Dns1;
             targetProfile.Dns2 = sourceProfile.Dns2;
+            targetProfile.RoutesEnabled = sourceProfile.RoutesEnabled;
 
             targetProfile.IpAddresses.Clear();
             foreach (var entry in sourceProfile.IpAddresses)

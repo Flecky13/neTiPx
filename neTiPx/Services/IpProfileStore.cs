@@ -111,6 +111,7 @@ namespace neTiPx.Services
                         Gateway = (string?)profileElement.Attribute("gateway") ?? string.Empty,
                         Dns1 = (string?)profileElement.Attribute("dns1") ?? string.Empty,
                         Dns2 = (string?)profileElement.Attribute("dns2") ?? string.Empty,
+                        RoutesEnabled = bool.TryParse((string?)profileElement.Attribute("routesEnabled"), out var routesEnabled) && routesEnabled,
                         IsDirty = false
                     };
 
@@ -146,6 +147,7 @@ namespace neTiPx.Services
                         new XAttribute("gateway", profile.Gateway ?? string.Empty),
                         new XAttribute("dns1", profile.Dns1 ?? string.Empty),
                         new XAttribute("dns2", profile.Dns2 ?? string.Empty),
+                        new XAttribute("routesEnabled", profile.RoutesEnabled),
                         new XElement("ipAddresses",
                             profile.IpAddresses
                                 .Where(entry => !string.IsNullOrWhiteSpace(entry.IpAddress))
@@ -317,6 +319,7 @@ namespace neTiPx.Services
                 Gateway = source.Gateway,
                 Dns1 = source.Dns1,
                 Dns2 = source.Dns2,
+                RoutesEnabled = source.RoutesEnabled,
                 IsDirty = false
             };
 
