@@ -99,10 +99,16 @@ namespace neTiPx.ViewModels
         {
             profile.PropertyChanged += SelectedProfile_PropertyChanged;
             profile.IpAddresses.CollectionChanged += SelectedProfile_IpAddresses_CollectionChanged;
+            profile.Routes.CollectionChanged += SelectedProfile_Routes_CollectionChanged;
 
             foreach (var entry in profile.IpAddresses)
             {
                 entry.PropertyChanged += IpAddressEntry_PropertyChanged;
+            }
+
+            foreach (var route in profile.Routes)
+            {
+                route.PropertyChanged += RouteEntry_PropertyChanged;
             }
         }
 
@@ -110,10 +116,16 @@ namespace neTiPx.ViewModels
         {
             profile.PropertyChanged -= SelectedProfile_PropertyChanged;
             profile.IpAddresses.CollectionChanged -= SelectedProfile_IpAddresses_CollectionChanged;
+            profile.Routes.CollectionChanged -= SelectedProfile_Routes_CollectionChanged;
 
             foreach (var entry in profile.IpAddresses)
             {
                 entry.PropertyChanged -= IpAddressEntry_PropertyChanged;
+            }
+
+            foreach (var route in profile.Routes)
+            {
+                route.PropertyChanged -= RouteEntry_PropertyChanged;
             }
         }
 
@@ -166,6 +178,34 @@ namespace neTiPx.ViewModels
         }
 
         private void IpAddressEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            ValidateProfile();
+            MarkSelectedProfileDirty();
+        }
+
+        private void SelectedProfile_Routes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems.OfType<RouteEntry>())
+                {
+                    item.PropertyChanged -= RouteEntry_PropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (var item in e.NewItems.OfType<RouteEntry>())
+                {
+                    item.PropertyChanged += RouteEntry_PropertyChanged;
+                }
+            }
+
+            ValidateProfile();
+            MarkSelectedProfileDirty();
+        }
+
+        private void RouteEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             ValidateProfile();
             MarkSelectedProfileDirty();
@@ -229,6 +269,17 @@ namespace neTiPx.ViewModels
                 SelectedProfile.Mode = storedProfile.Mode;
                 SelectedProfile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
                 SelectedProfile.RoutesEnabled = storedProfile.RoutesEnabled;
+                SelectedProfile.Routes.Clear();
+                foreach (var route in storedProfile.Routes)
+                {
+                    SelectedProfile.Routes.Add(new RouteEntry
+                    {
+                        Destination = route.Destination,
+                        SubnetMask = route.SubnetMask,
+                        Gateway = route.Gateway,
+                        Metric = route.Metric > 0 ? route.Metric : 1
+                    });
+                }
 
                 // If mode is DHCP, load remaining settings from NIC
                 if (string.Equals(storedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
@@ -355,6 +406,18 @@ namespace neTiPx.ViewModels
             if (targetProfile.IpAddresses.Count == 0)
             {
                 targetProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+            }
+
+            targetProfile.Routes.Clear();
+            foreach (var route in sourceProfile.Routes)
+            {
+                targetProfile.Routes.Add(new RouteEntry
+                {
+                    Destination = route.Destination,
+                    SubnetMask = route.SubnetMask,
+                    Gateway = route.Gateway,
+                    Metric = route.Metric > 0 ? route.Metric : 1
+                });
             }
         }
 
@@ -869,7 +932,7 @@ namespace neTiPx.ViewModels
                 names.Add(profile.Name);
             }
 
-            values[$"{profile.Name}.Adapter"] = profile.AdapterName;
+            values[$"{profile.Name}.Adapter"] = profile.AdapterName ?? string.Empty;
             values[$"{profile.Name}.Mode"] = profile.Mode;
             values[$"{profile.Name}.GW"] = profile.Gateway;
             values[$"{profile.Name}.DNS"] = profile.Dns;
@@ -986,8 +1049,54 @@ namespace neTiPx.ViewModels
                 }
             }
 
+            if (SelectedProfile.RoutesEnabled)
+            {
+                for (int i = 0; i < SelectedProfile.Routes.Count; i++)
+                {
+                    var route = SelectedProfile.Routes[i];
+
+                    if (string.IsNullOrWhiteSpace(route.Destination) &&
+                        string.IsNullOrWhiteSpace(route.SubnetMask) &&
+                        string.IsNullOrWhiteSpace(route.Gateway))
+                    {
+                        continue;
+                    }
+
+                    if (!IsValidIpAddress(route.Destination))
+                    {
+                        errors.Add($"Route #{i + 1}: Zieladresse ungültig");
+                    }
+
+                    if (!IsValidSubnetMask(route.SubnetMask))
+                    {
+                        errors.Add($"Route #{i + 1}: Subnetzmaske ungültig");
+                    }
+
+                    if (!IsValidIpAddress(route.Gateway))
+                    {
+                        errors.Add($"Route #{i + 1}: Gateway ungültig");
+                    }
+
+                    if (route.Metric <= 0)
+                    {
+                        errors.Add($"Route #{i + 1}: Metrik muss > 0 sein");
+                    }
+
+                    if (IsValidIpAddress(route.Destination) && IsValidSubnetMask(route.SubnetMask) &&
+                        !IsNetworkAddress(route.Destination, route.SubnetMask))
+                    {
+                        errors.Add($"Route #{i + 1}: Ziel muss eine Netzadresse sein");
+                    }
+                }
+            }
+
             HasValidationErrors = errors.Count > 0;
             ValidationMessage = HasValidationErrors ? string.Join(", ", errors) : "Validierung erfolgreich";
+        }
+
+        public void RevalidateProfile()
+        {
+            ValidateProfile();
         }
 
         private static bool IsValidIpAddress(string ipAddress)
@@ -1020,6 +1129,34 @@ namespace neTiPx.ViewModels
 
             var inverted = ~mask;
             return (inverted & (inverted + 1)) == 0;
+        }
+
+        private static bool IsNetworkAddress(string destination, string subnetMask)
+        {
+            if (!IPAddress.TryParse(destination, out var destinationIp) || !IPAddress.TryParse(subnetMask, out var subnetIp))
+            {
+                return false;
+            }
+
+            var destinationBytes = destinationIp.GetAddressBytes();
+            var subnetBytes = subnetIp.GetAddressBytes();
+
+            if (destinationBytes.Length != 4 || subnetBytes.Length != 4)
+            {
+                return false;
+            }
+
+            var destinationValue = ((uint)destinationBytes[0] << 24) |
+                                   ((uint)destinationBytes[1] << 16) |
+                                   ((uint)destinationBytes[2] << 8) |
+                                   destinationBytes[3];
+
+            var mask = ((uint)subnetBytes[0] << 24) |
+                       ((uint)subnetBytes[1] << 16) |
+                       ((uint)subnetBytes[2] << 8) |
+                       subnetBytes[3];
+
+            return (destinationValue & mask) == destinationValue;
         }
 
         private async Task UpdateStatusAsync()

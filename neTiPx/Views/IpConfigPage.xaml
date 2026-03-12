@@ -137,6 +137,7 @@
                                         MinWidth="0"
                                         Width="26"
                                         Height="26"
+                                        Click="RoutesButton_Click"
                                         IsEnabled="{Binding SelectedProfile.RoutesEnabled}"
                                         Visibility="{Binding SelectedProfile.RoutesEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <SymbolIcon Symbol="Directions" />

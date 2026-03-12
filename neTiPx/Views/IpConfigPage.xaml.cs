@@ -155,5 +155,16 @@ namespace neTiPx.Views
                 _isHandlingSelection = false;
             }
         }
+
+        private void RoutesButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not IpConfigViewModel viewModel || viewModel.SelectedProfile == null)
+            {
+                return;
+            }
+
+            var routeWindow = new RouteConfigWindow(viewModel.SelectedProfile, viewModel);
+            routeWindow.Activate();
+        }
     }
 }

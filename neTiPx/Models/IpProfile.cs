@@ -103,5 +103,7 @@ namespace neTiPx.Models
         }
 
         public ObservableCollection<IpAddressEntry> IpAddresses { get; } = new ObservableCollection<IpAddressEntry>();
+
+        public ObservableCollection<RouteEntry> Routes { get; } = new ObservableCollection<RouteEntry>();
     }
 }

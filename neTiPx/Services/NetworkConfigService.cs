@@ -81,6 +81,32 @@ namespace neTiPx.Services
                 }
             }
 
+            if (profile.RoutesEnabled)
+            {
+                for (int i = 0; i < profile.Routes.Count; i++)
+                {
+                    var route = profile.Routes[i];
+                    var (routeValid, routeError) = ValidateRoute(route);
+                    if (!routeValid)
+                    {
+                        return (false, $"Routen-Validierung #{i + 1}: {routeError}");
+                    }
+
+                    var prefixLength = SubnetMaskToPrefix(route.SubnetMask);
+                    if (prefixLength <= 0)
+                    {
+                        return (false, $"Routen-Validierung #{i + 1}: Subnetzmaske ist ungueltig.");
+                    }
+
+                    var prefix = $"{route.Destination}/{prefixLength}";
+                    var metric = route.Metric > 0 ? route.Metric : 1;
+
+                    // Replace existing route if present.
+                    commands.Add($"netsh interface ipv4 delete route prefix={prefix} interface=\"{ni.Name}\" >nul 2>&1");
+                    commands.Add($"netsh interface ipv4 add route prefix={prefix} interface=\"{ni.Name}\" nexthop={route.Gateway} metric={metric}");
+                }
+            }
+
             return RunNetshCommandsElevated(commands);
         }
 
@@ -239,6 +265,86 @@ namespace neTiPx.Services
                 uint testNetwork = testUint & subnetUint;
 
                 return ipNetwork == testNetwork;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static (bool valid, string errorMessage) ValidateRoute(RouteEntry route)
+        {
+            if (string.IsNullOrWhiteSpace(route.Destination) || !IsValidIPv4(route.Destination))
+            {
+                return (false, $"Ziel '{route.Destination}' ist ungueltig.");
+            }
+
+            if (string.IsNullOrWhiteSpace(route.SubnetMask) || !IsValidSubnetMask(route.SubnetMask))
+            {
+                return (false, $"Subnetzmaske '{route.SubnetMask}' ist ungueltig.");
+            }
+
+            if (string.IsNullOrWhiteSpace(route.Gateway) || !IsValidIPv4(route.Gateway))
+            {
+                return (false, $"Gateway '{route.Gateway}' ist ungueltig.");
+            }
+
+            if (!IsNetworkAddress(route.Destination, route.SubnetMask))
+            {
+                return (false, $"Ziel '{route.Destination}' ist keine gueltige Netzadresse fuer '{route.SubnetMask}'.");
+            }
+
+            if (route.Metric <= 0)
+            {
+                return (false, "Metrik muss groesser als 0 sein.");
+            }
+
+            return (true, string.Empty);
+        }
+
+        private static int SubnetMaskToPrefix(string subnet)
+        {
+            if (!IsValidSubnetMask(subnet))
+            {
+                return -1;
+            }
+
+            var bytes = System.Net.IPAddress.Parse(subnet).GetAddressBytes();
+            uint mask = ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
+
+            int prefix = 0;
+            for (int i = 31; i >= 0; i--)
+            {
+                if ((mask & (1u << i)) != 0)
+                {
+                    prefix++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return prefix;
+        }
+
+        private static bool IsNetworkAddress(string destination, string subnet)
+        {
+            try
+            {
+                if (!System.Net.IPAddress.TryParse(destination, out var destinationAddr) ||
+                    !System.Net.IPAddress.TryParse(subnet, out var subnetAddr))
+                {
+                    return false;
+                }
+
+                var destinationBytes = destinationAddr.GetAddressBytes();
+                var subnetBytes = subnetAddr.GetAddressBytes();
+
+                uint destinationUint = ((uint)destinationBytes[0] << 24) | ((uint)destinationBytes[1] << 16) | ((uint)destinationBytes[2] << 8) | destinationBytes[3];
+                uint subnetUint = ((uint)subnetBytes[0] << 24) | ((uint)subnetBytes[1] << 16) | ((uint)subnetBytes[2] << 8) | subnetBytes[3];
+
+                return (destinationUint & subnetUint) == destinationUint;
             }
             catch
             {

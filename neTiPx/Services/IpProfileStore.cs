@@ -85,6 +85,11 @@ namespace neTiPx.Services
                 return true;
             }
 
+            if (profile.RoutesEnabled || profile.Routes.Any(route => !string.IsNullOrWhiteSpace(route.Destination)))
+            {
+                return true;
+            }
+
             return profile.IpAddresses.Any(entry => !string.IsNullOrWhiteSpace(entry.IpAddress));
         }
 
@@ -125,6 +130,18 @@ namespace neTiPx.Services
                         });
                     }
 
+                    var routeEntries = profileElement.Element("routes")?.Elements("entry") ?? Enumerable.Empty<XElement>();
+                    foreach (var route in routeEntries)
+                    {
+                        profile.Routes.Add(new RouteEntry
+                        {
+                            Destination = (string?)route.Attribute("destination") ?? string.Empty,
+                            SubnetMask = (string?)route.Attribute("subnetMask") ?? string.Empty,
+                            Gateway = (string?)route.Attribute("gateway") ?? string.Empty,
+                            Metric = int.TryParse((string?)route.Attribute("metric"), out var metric) && metric > 0 ? metric : 1
+                        });
+                    }
+
                     profiles.Add(profile);
                 }
 
@@ -154,7 +171,16 @@ namespace neTiPx.Services
                                 .Select(entry =>
                                     new XElement("entry",
                                         new XAttribute("ipAddress", entry.IpAddress ?? string.Empty),
-                                        new XAttribute("subnetMask", entry.SubnetMask ?? string.Empty)))))));
+                                        new XAttribute("subnetMask", entry.SubnetMask ?? string.Empty)))),
+                        new XElement("routes",
+                            profile.Routes
+                                .Where(route => !string.IsNullOrWhiteSpace(route.Destination))
+                                .Select(route =>
+                                    new XElement("entry",
+                                        new XAttribute("destination", route.Destination ?? string.Empty),
+                                        new XAttribute("subnetMask", route.SubnetMask ?? string.Empty),
+                                        new XAttribute("gateway", route.Gateway ?? string.Empty),
+                                        new XAttribute("metric", route.Metric > 0 ? route.Metric : 1)))))));
 
             var doc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root);
             var path = ConfigFileHelper.GetIpProfilesXmlPath();
@@ -329,6 +355,17 @@ namespace neTiPx.Services
                 {
                     IpAddress = entry.IpAddress,
                     SubnetMask = entry.SubnetMask
+                });
+            }
+
+            foreach (var route in source.Routes)
+            {
+                clone.Routes.Add(new RouteEntry
+                {
+                    Destination = route.Destination,
+                    SubnetMask = route.SubnetMask,
+                    Gateway = route.Gateway,
+                    Metric = route.Metric > 0 ? route.Metric : 1
                 });
             }
 
