@@ -110,6 +110,100 @@ namespace neTiPx.Services
             return RunNetshCommandsElevated(commands);
         }
 
+        public (bool success, string? error) RemoveRoute(IpProfile profile, RouteEntry route)
+        {
+            if (string.IsNullOrWhiteSpace(profile.AdapterName))
+            {
+                return (false, "Kein Adapter ausgewaehlt.");
+            }
+
+            var ni = FindNetworkInterface(profile.AdapterName);
+            if (ni == null)
+            {
+                return (false, "Netzwerkadapter nicht gefunden.");
+            }
+
+            var destination = route.Destination?.Trim() ?? string.Empty;
+            var subnetMask = route.SubnetMask?.Trim() ?? string.Empty;
+
+            if (!IsValidIPv4(destination))
+            {
+                return (false, "Route kann nicht geloescht werden: Zieladresse ist ungueltig.");
+            }
+
+            var prefixLength = SubnetMaskToPrefix(subnetMask);
+            if (prefixLength <= 0)
+            {
+                return (false, "Route kann nicht geloescht werden: Subnetzmaske ist ungueltig.");
+            }
+
+            var prefix = $"{destination}/{prefixLength}";
+
+            if (!RouteExists(ni.Name, prefix))
+            {
+                return (true, "Route nicht vorhanden.");
+            }
+
+            var commands = new List<string>
+            {
+                $"netsh interface ipv4 delete route prefix={prefix} interface=\"{ni.Name}\""
+            };
+
+            return RunNetshCommandsElevated(commands);
+        }
+
+        public (bool success, List<RouteEntry> routes, string? error) ReadStaticRoutes(IpProfile profile)
+        {
+            if (string.IsNullOrWhiteSpace(profile.AdapterName))
+            {
+                return (false, new List<RouteEntry>(), "Kein Adapter ausgewaehlt.");
+            }
+
+            var ni = FindNetworkInterface(profile.AdapterName);
+            if (ni == null)
+            {
+                return (false, new List<RouteEntry>(), "Netzwerkadapter nicht gefunden.");
+            }
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c netsh interface ipv4 show route interface=\"{ni.Name}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, new List<RouteEntry>(), "Routen konnten nicht eingelesen werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                var routes = ParseStaticRoutes(output);
+
+                if (routes.Count == 0)
+                {
+                    var persistentOutput = ReadRoutePrintOutput();
+                    routes = ParsePersistentRoutes(persistentOutput);
+                }
+
+                return (true, routes, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Routen: " + ex.Message);
+            }
+        }
+
         private static NetworkInterface? FindNetworkInterface(string adapterKey)
         {
             return NetworkInterface.GetAllNetworkInterfaces()
@@ -350,6 +444,260 @@ namespace neTiPx.Services
             {
                 return false;
             }
+        }
+
+        private static bool RouteExists(string interfaceName, string prefix)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c netsh interface ipv4 show route interface=\"{interfaceName}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return false;
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                return output.IndexOf(prefix, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static List<RouteEntry> ParseStaticRoutes(string output)
+        {
+            var routes = new List<RouteEntry>();
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                return routes;
+            }
+
+            var lines = output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                if (line.IndexOf("0.0.0.0/0", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    continue;
+                }
+
+                var prefixMatch = System.Text.RegularExpressions.Regex.Match(
+                    line,
+                    @"(?<prefix>(?:\d{1,3}\.){3}\d{1,3}/\d{1,2})");
+
+                if (!prefixMatch.Success)
+                {
+                    continue;
+                }
+
+                var prefix = prefixMatch.Groups["prefix"].Value.Trim();
+
+                var ipv4Matches = System.Text.RegularExpressions.Regex.Matches(
+                    line,
+                    @"\b(?:\d{1,3}\.){3}\d{1,3}\b");
+
+                if (ipv4Matches.Count == 0)
+                {
+                    continue;
+                }
+
+                // In netsh output the last IPv4 token is typically the nexthop/gateway.
+                var gateway = ipv4Matches[ipv4Matches.Count - 1].Value.Trim();
+
+                if (!TryParsePrefix(prefix, out var destination, out var subnetMask))
+                {
+                    continue;
+                }
+
+                if (!IsValidIPv4(gateway))
+                {
+                    continue;
+                }
+
+                var metric = 1;
+                var metricMatch = System.Text.RegularExpressions.Regex.Match(line, @"\b(?<metric>\d{1,5})\b");
+                if (metricMatch.Success && int.TryParse(metricMatch.Groups["metric"].Value, out var parsedMetric) && parsedMetric > 0)
+                {
+                    metric = parsedMetric;
+                }
+
+                routes.Add(new RouteEntry
+                {
+                    Destination = destination,
+                    SubnetMask = subnetMask,
+                    Gateway = gateway,
+                    Metric = metric
+                });
+            }
+
+            return routes
+                .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .ToList();
+        }
+
+        private static string ReadRoutePrintOutput()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = "/c route print -4",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return string.Empty;
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                return output;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static List<RouteEntry> ParsePersistentRoutes(string output)
+        {
+            var routes = new List<RouteEntry>();
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                return routes;
+            }
+
+            var lines = output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            bool inPersistentSection = false;
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.Trim();
+                if (line.Length == 0)
+                {
+                    continue;
+                }
+
+                if (line.IndexOf("Persistente Routen", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    line.IndexOf("Persistent Routes", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    inPersistentSection = true;
+                    continue;
+                }
+
+                if (!inPersistentSection)
+                {
+                    continue;
+                }
+
+                // End section when another heading starts.
+                if (line.EndsWith(":", StringComparison.Ordinal) &&
+                    line.IndexOf("Persistente Routen", StringComparison.OrdinalIgnoreCase) < 0 &&
+                    line.IndexOf("Persistent Routes", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    break;
+                }
+
+                var match = System.Text.RegularExpressions.Regex.Match(
+                    line,
+                    @"^(?<destination>(?:\d{1,3}\.){3}\d{1,3})\s+(?<mask>(?:\d{1,3}\.){3}\d{1,3})\s+(?<gateway>(?:\d{1,3}\.){3}\d{1,3})\s+(?<metric>\d+)$");
+
+                if (!match.Success)
+                {
+                    continue;
+                }
+
+                var destination = match.Groups["destination"].Value;
+                var mask = match.Groups["mask"].Value;
+                var gateway = match.Groups["gateway"].Value;
+                var metric = int.TryParse(match.Groups["metric"].Value, out var parsedMetric) && parsedMetric > 0 ? parsedMetric : 1;
+
+                if (!IsValidIPv4(destination) || !IsValidSubnetMask(mask) || !IsValidIPv4(gateway))
+                {
+                    continue;
+                }
+
+                routes.Add(new RouteEntry
+                {
+                    Destination = destination,
+                    SubnetMask = mask,
+                    Gateway = gateway,
+                    Metric = metric
+                });
+            }
+
+            return routes
+                .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .ToList();
+        }
+
+        private static bool TryParsePrefix(string prefix, out string destination, out string subnetMask)
+        {
+            destination = string.Empty;
+            subnetMask = string.Empty;
+
+            var parts = prefix.Split('/');
+            if (parts.Length != 2)
+            {
+                return false;
+            }
+
+            destination = parts[0].Trim();
+            if (!IsValidIPv4(destination))
+            {
+                return false;
+            }
+
+            if (!int.TryParse(parts[1], out var prefixLength) || prefixLength < 0 || prefixLength > 32)
+            {
+                return false;
+            }
+
+            subnetMask = PrefixLengthToSubnetMask(prefixLength);
+            return !string.IsNullOrWhiteSpace(subnetMask);
+        }
+
+        private static string PrefixLengthToSubnetMask(int prefixLength)
+        {
+            if (prefixLength < 0 || prefixLength > 32)
+            {
+                return string.Empty;
+            }
+
+            uint mask = prefixLength == 0 ? 0 : uint.MaxValue << (32 - prefixLength);
+            var bytes = new[]
+            {
+                (byte)((mask >> 24) & 0xFF),
+                (byte)((mask >> 16) & 0xFF),
+                (byte)((mask >> 8) & 0xFF),
+                (byte)(mask & 0xFF)
+            };
+
+            return new System.Net.IPAddress(bytes).ToString();
         }
     }
 }

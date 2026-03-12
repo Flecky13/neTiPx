@@ -7,67 +7,135 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:neTiPx.Models"
     mc:Ignorable="d">
-    <StackPanel Spacing="10" MinWidth="1180" HorizontalAlignment="Stretch">
-        <TextBlock Text="Konfiguriere statische IPv4-Routen, die beim Anwenden des Profils gesetzt werden." TextWrapping="Wrap" />
-
-        <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8" Margin="0,4,0,0">
-            <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12" />
-            <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" />
-            <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-            <TextBlock Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" />
-            <TextBlock Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" />
-        </Grid>
-
-        <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
-            <ItemsRepeater ItemsSource="{x:Bind Routes, Mode=OneWay}">
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:RouteEntry">
-                        <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8" Margin="0,0,0,8">
-                            <TextBox
-                                Text="{x:Bind Destination, Mode=TwoWay}"
-                                PlaceholderText="z.B. 10.10.0.0"
-                                ToolTipService.ToolTip="Zielnetzadresse" />
-                            <TextBox
-                                Grid.Column="1"
-                                Text="{x:Bind SubnetMask, Mode=TwoWay}"
-                                PlaceholderText="z.B. 255.255.255.0"
-                                ToolTipService.ToolTip="Subnetzmaske" />
-                            <TextBox
-                                Grid.Column="2"
-                                Text="{x:Bind Gateway, Mode=TwoWay}"
-                                PlaceholderText="z.B. 192.168.1.1"
-                                ToolTipService.ToolTip="Gateway" />
-                            <TextBox
-                                Grid.Column="3"
-                                Text="{x:Bind Metric, Mode=TwoWay}"
-                                PlaceholderText="1"
-                                ToolTipService.ToolTip="Metrik > 0" />
-                            <Button
-                                Grid.Column="4"
-                                Tag="{x:Bind}"
-                                Click="RemoveRoute_Click"
-                                ToolTipService.ToolTip="Route löschen"
-                                HorizontalAlignment="Stretch"
-                                Padding="10,8">
-                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
-                                    <TextBlock Text="Löschen" />
-                                </StackPanel>
-                            </Button>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-        </ScrollViewer>
-
-        <StackPanel Orientation="Horizontal" Spacing="8">
-            <Button Click="AddRoute_Click">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <FontIcon Glyph="&#xE710;" FontSize="14" />
-                    <TextBlock Text="Route hinzufügen" />
+    <Grid Background="{ThemeResource AppBackgroundBrush}">
+        <StackPanel Spacing="16" Padding="24" MinWidth="1180" HorizontalAlignment="Stretch">
+            <Border Style="{StaticResource CardBorder}" Padding="24">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Routen konfigurieren" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                    <TextBlock Text="Konfiguriere statische IPv4-Routen, die beim Anwenden des Profils zusätzlich gesetzt werden." TextWrapping="Wrap" />
                 </StackPanel>
-            </Button>
-            <TextBlock Text="Leere Zeilen werden ignoriert." VerticalAlignment="Center" Opacity="0.8" />
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Statische Routen im System" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="{x:Bind SystemRoutesStatus, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Click="ReloadSystemRoutes_Click" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                                <TextBlock Text="Neu Einlesen" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8" Margin="0,4,0,0">
+                        <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
+                    <ScrollViewer MaxHeight="210" VerticalScrollBarVisibility="Auto">
+                        <ItemsRepeater ItemsSource="{x:Bind SystemRoutes, Mode=OneWay}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="models:RouteEntry">
+                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8">
+                                            <TextBox Text="{x:Bind Destination, Mode=OneWay}" IsReadOnly="True" />
+                                            <TextBox Grid.Column="1" Text="{x:Bind SubnetMask, Mode=OneWay}" IsReadOnly="True" />
+                                            <TextBox Grid.Column="2" Text="{x:Bind Gateway, Mode=OneWay}" IsReadOnly="True" />
+                                            <TextBox Grid.Column="3" Text="{x:Bind Metric, Mode=OneWay}" IsReadOnly="True" />
+                                            <Button
+                                                Grid.Column="4"
+                                                Tag="{x:Bind}"
+                                                Click="RemoveSystemRoute_Click"
+                                                ToolTipService.ToolTip="Route im System löschen"
+                                                HorizontalAlignment="Stretch"
+                                                Padding="10,8">
+                                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                                    <TextBlock Text="Löschen" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Neue Routen für dieses Profil" Style="{StaticResource SectionTitle}" />
+                    <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8" Margin="0,4,0,0">
+                        <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
+                    <ScrollViewer MaxHeight="360" VerticalScrollBarVisibility="Auto">
+                        <ItemsRepeater ItemsSource="{x:Bind Routes, Mode=OneWay}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="models:RouteEntry">
+                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8">
+                                            <TextBox
+                                                Text="{x:Bind Destination, Mode=TwoWay}"
+                                                PlaceholderText="z.B. 10.10.0.0"
+                                                ToolTipService.ToolTip="Zielnetzadresse" />
+                                            <TextBox
+                                                Grid.Column="1"
+                                                Text="{x:Bind SubnetMask, Mode=TwoWay}"
+                                                PlaceholderText="z.B. 255.255.255.0"
+                                                ToolTipService.ToolTip="Subnetzmaske" />
+                                            <TextBox
+                                                Grid.Column="2"
+                                                Text="{x:Bind Gateway, Mode=TwoWay}"
+                                                PlaceholderText="z.B. 192.168.1.1"
+                                                ToolTipService.ToolTip="Gateway" />
+                                            <TextBox
+                                                Grid.Column="3"
+                                                Text="{x:Bind Metric, Mode=TwoWay}"
+                                                PlaceholderText="1"
+                                                ToolTipService.ToolTip="Metrik > 0" />
+                                            <Button
+                                                Grid.Column="4"
+                                                Tag="{x:Bind}"
+                                                Click="RemoveRoute_Click"
+                                                ToolTipService.ToolTip="Route löschen"
+                                                HorizontalAlignment="Stretch"
+                                                Padding="10,8">
+                                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                                    <TextBlock Text="Löschen" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Click="AddRoute_Click" Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE710;" FontSize="14" />
+                                <TextBlock Text="Route hinzufügen" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="Leere Zeilen werden ignoriert." VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </UserControl>

@@ -1,19 +1,48 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using neTiPx.Models;
 
 namespace neTiPx.Views
 {
-    public sealed partial class RouteConfigDialogContent : UserControl
+    public sealed partial class RouteConfigDialogContent : UserControl, INotifyPropertyChanged
     {
-        public ObservableCollection<RouteEntry> Routes { get; }
+        private readonly Func<RouteEntry, (bool success, string? message)>? _deleteRouteFromSystem;
+        private readonly Func<(bool success, List<RouteEntry> routes, string? error)>? _reloadSystemRoutes;
+        private string _systemRoutesStatus = "Noch nicht eingelesen.";
 
-        public RouteConfigDialogContent(IEnumerable<RouteEntry> sourceRoutes)
+        public ObservableCollection<RouteEntry> Routes { get; }
+        public ObservableCollection<RouteEntry> SystemRoutes { get; }
+
+        public string SystemRoutesStatus
+        {
+            get => _systemRoutesStatus;
+            set
+            {
+                if (!string.Equals(_systemRoutesStatus, value, StringComparison.Ordinal))
+                {
+                    _systemRoutesStatus = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public RouteConfigDialogContent(
+            IEnumerable<RouteEntry> sourceRoutes,
+            Func<RouteEntry, (bool success, string? message)>? deleteRouteFromSystem = null,
+            Func<(bool success, List<RouteEntry> routes, string? error)>? reloadSystemRoutes = null)
         {
             Routes = new ObservableCollection<RouteEntry>(sourceRoutes.Select(CloneRoute));
+            SystemRoutes = new ObservableCollection<RouteEntry>();
+            _deleteRouteFromSystem = deleteRouteFromSystem;
+            _reloadSystemRoutes = reloadSystemRoutes;
             InitializeComponent();
         }
 
@@ -44,14 +73,135 @@ namespace neTiPx.Views
             Routes.Add(new RouteEntry { Metric = 1 });
         }
 
-        private void RemoveRoute_Click(object sender, RoutedEventArgs e)
+        private async void RemoveRoute_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button || button.Tag is not RouteEntry route)
             {
                 return;
             }
 
+            if (_deleteRouteFromSystem != null)
+            {
+                var (success, message) = _deleteRouteFromSystem(CloneRoute(route));
+                if (!success)
+                {
+                    var dialog = new ContentDialog
+                    {
+                        Title = "Route konnte nicht geloescht werden",
+                        Content = message ?? "Unbekannter Fehler beim Entfernen der Route aus dem System.",
+                        CloseButtonText = "OK",
+                        DefaultButton = ContentDialogButton.Close,
+                        XamlRoot = XamlRoot
+                    };
+
+                    await dialog.ShowAsync();
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    var infoDialog = new ContentDialog
+                    {
+                        Title = "Hinweis",
+                        Content = message,
+                        CloseButtonText = "OK",
+                        DefaultButton = ContentDialogButton.Close,
+                        XamlRoot = XamlRoot
+                    };
+
+                    await infoDialog.ShowAsync();
+                }
+            }
+
             Routes.Remove(route);
+        }
+
+        private async void ReloadSystemRoutes_Click(object sender, RoutedEventArgs e)
+        {
+            if (_reloadSystemRoutes == null)
+            {
+                SystemRoutesStatus = "Einlesen aktuell nicht verfuegbar.";
+                return;
+            }
+
+            var result = _reloadSystemRoutes();
+            if (!result.success)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Routen konnten nicht eingelesen werden",
+                    Content = result.error ?? "Unbekannter Fehler.",
+                    CloseButtonText = "OK",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = XamlRoot
+                };
+
+                await dialog.ShowAsync();
+                return;
+            }
+
+            SystemRoutes.Clear();
+            foreach (var route in result.routes)
+            {
+                SystemRoutes.Add(CloneRoute(route));
+            }
+
+            SystemRoutesStatus = SystemRoutes.Count == 0
+                ? "Keine statischen Routen im System gefunden."
+                : $"{SystemRoutes.Count} statische Route(n) eingelesen.";
+        }
+
+        private async void RemoveSystemRoute_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag is not RouteEntry route)
+            {
+                return;
+            }
+
+            if (_deleteRouteFromSystem == null)
+            {
+                return;
+            }
+
+            var (success, message) = _deleteRouteFromSystem(CloneRoute(route));
+            if (!success)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Route konnte nicht geloescht werden",
+                    Content = message ?? "Unbekannter Fehler beim Entfernen der Route aus dem System.",
+                    CloseButtonText = "OK",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = XamlRoot
+                };
+
+                await dialog.ShowAsync();
+                return;
+            }
+
+            SystemRoutes.Remove(route);
+            SystemRoutesStatus = SystemRoutes.Count == 0
+                ? "Keine statischen Routen im System gefunden."
+                : $"{SystemRoutes.Count} statische Route(n) geladen.";
+
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                var infoDialog = new ContentDialog
+                {
+                    Title = "Hinweis",
+                    Content = message,
+                    CloseButtonText = "OK",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = XamlRoot
+                };
+
+                await infoDialog.ShowAsync();
+            }
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private static RouteEntry CloneRoute(RouteEntry route)

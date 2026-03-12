@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
 using neTiPx.Models;
+using neTiPx.Services;
 using neTiPx.ViewModels;
 using Windows.Graphics;
 
@@ -13,13 +16,14 @@ namespace neTiPx.Views
     {
         private readonly IpProfile _profile;
         private readonly IpConfigViewModel _viewModel;
+        private readonly NetworkConfigService _networkConfigService = new NetworkConfigService();
         private readonly RouteConfigDialogContent _content;
 
         public RouteConfigWindow(IpProfile profile, IpConfigViewModel viewModel)
         {
             _profile = profile;
             _viewModel = viewModel;
-            _content = new RouteConfigDialogContent(profile.Routes);
+            _content = new RouteConfigDialogContent(profile.Routes, DeleteRouteImmediately, ReloadSystemRoutes);
 
             Title = "Routen konfigurieren";
             Content = CreateLayout();
@@ -27,15 +31,46 @@ namespace neTiPx.Views
             ConfigureWindow();
         }
 
+        private (bool success, string? message) DeleteRouteImmediately(RouteEntry route)
+        {
+            var result = _networkConfigService.RemoveRoute(_profile, route);
+            if (!result.success)
+            {
+                return result;
+            }
+
+            var existingRoute = _profile.Routes.FirstOrDefault(r =>
+                string.Equals(r.Destination?.Trim(), route.Destination?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(r.SubnetMask?.Trim(), route.SubnetMask?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(r.Gateway?.Trim(), route.Gateway?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                r.Metric == route.Metric);
+
+            if (existingRoute != null)
+            {
+                _profile.Routes.Remove(existingRoute);
+            }
+
+            _viewModel.RevalidateProfile();
+            return (true, result.error);
+        }
+
+        private (bool success, System.Collections.Generic.List<RouteEntry> routes, string? error) ReloadSystemRoutes()
+        {
+            return _networkConfigService.ReadStaticRoutes(_profile);
+        }
+
         private UIElement CreateLayout()
         {
-            var root = new Grid();
+            var root = new Grid
+            {
+                Background = GetBrush("AppBackgroundBrush")
+            };
             root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
             var contentBorder = new Border
             {
-                Padding = new Thickness(16, 16, 16, 8),
+                Padding = new Thickness(0),
                 Child = _content
             };
             Grid.SetRow(contentBorder, 0);
@@ -52,14 +87,16 @@ namespace neTiPx.Views
             var cancelButton = new Button
             {
                 Content = "Abbrechen",
-                MinWidth = 120
+                MinWidth = 120,
+                Style = GetStyle("PrimaryAction")
             };
             cancelButton.Click += (_, _) => Close();
 
             var applyButton = new Button
             {
                 Content = "Übernehmen",
-                MinWidth = 120
+                MinWidth = 120,
+                Style = GetStyle("AccentButtonStyle")
             };
             applyButton.Click += ApplyButton_Click;
 
@@ -70,6 +107,16 @@ namespace neTiPx.Views
             root.Children.Add(buttonPanel);
 
             return root;
+        }
+
+        private static Style? GetStyle(string key)
+        {
+            return Application.Current.Resources.TryGetValue(key, out var value) ? value as Style : null;
+        }
+
+        private static Brush? GetBrush(string key)
+        {
+            return Application.Current.Resources.TryGetValue(key, out var value) ? value as Brush : null;
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
