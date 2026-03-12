@@ -147,8 +147,8 @@ namespace neTiPx.Views
             }
 
             SystemRoutesStatus = SystemRoutes.Count == 0
-                ? "Keine statischen Routen im System gefunden."
-                : $"{SystemRoutes.Count} statische Route(n) eingelesen.";
+                ? "Keine ständigen Routen im System gefunden."
+                : $"{SystemRoutes.Count} ständige Route(n) eingelesen.";
         }
 
         private async void RemoveSystemRoute_Click(object sender, RoutedEventArgs e)
@@ -181,8 +181,8 @@ namespace neTiPx.Views
 
             SystemRoutes.Remove(route);
             SystemRoutesStatus = SystemRoutes.Count == 0
-                ? "Keine statischen Routen im System gefunden."
-                : $"{SystemRoutes.Count} statische Route(n) geladen.";
+                ? "Keine ständigen Routen im System gefunden."
+                : $"{SystemRoutes.Count} ständige Route(n) geladen.";
 
             if (!string.IsNullOrWhiteSpace(message))
             {

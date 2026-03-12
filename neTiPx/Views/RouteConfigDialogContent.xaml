@@ -20,7 +20,7 @@
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="Statische Routen im System" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Ständige Routen im System" Style="{StaticResource SectionTitle}" />
                             <TextBlock Text="{x:Bind SystemRoutesStatus, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                         </StackPanel>
                         <Button Grid.Column="1" Click="ReloadSystemRoutes_Click" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center">

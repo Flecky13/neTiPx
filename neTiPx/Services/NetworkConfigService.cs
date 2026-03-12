@@ -139,68 +139,51 @@ namespace neTiPx.Services
 
             var prefix = $"{destination}/{prefixLength}";
 
-            if (!RouteExists(ni.Name, prefix))
+            if (!PersistentRouteExists(destination, subnetMask, route.Gateway))
             {
                 return (true, "Route nicht vorhanden.");
             }
 
             var commands = new List<string>
             {
-                $"netsh interface ipv4 delete route prefix={prefix} interface=\"{ni.Name}\""
+                $"route delete {destination} mask {subnetMask} {route.Gateway}"
             };
 
             return RunNetshCommandsElevated(commands);
         }
 
-        public (bool success, List<RouteEntry> routes, string? error) ReadStaticRoutes(IpProfile profile)
+        public (bool success, List<RouteEntry> routes, string? error, string debugInfo) ReadStaticRoutes(IpProfile profile)
         {
             if (string.IsNullOrWhiteSpace(profile.AdapterName))
             {
-                return (false, new List<RouteEntry>(), "Kein Adapter ausgewaehlt.");
+                return (false, new List<RouteEntry>(), "Kein Adapter ausgewaehlt.", "AdapterName im Profil ist leer.");
             }
 
             var ni = FindNetworkInterface(profile.AdapterName);
             if (ni == null)
             {
-                return (false, new List<RouteEntry>(), "Netzwerkadapter nicht gefunden.");
+                return (false, new List<RouteEntry>(), "Netzwerkadapter nicht gefunden.", $"Adapter '{profile.AdapterName}' konnte nicht aufgeloest werden.");
             }
 
             try
             {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c netsh interface ipv4 show route interface=\"{ni.Name}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8
-                };
+                var debug = new StringBuilder();
+                debug.AppendLine($"AdapterKey: {profile.AdapterName}");
+                debug.AppendLine($"Resolved Adapter: {ni.Name}");
 
-                using var process = Process.Start(psi);
-                if (process == null)
-                {
-                    return (false, new List<RouteEntry>(), "Routen konnten nicht eingelesen werden.");
-                }
+                var persistentOutput = ReadRoutePrintOutput();
+                debug.AppendLine($"route print output chars: {persistentOutput.Length}");
 
-                var output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
+                var routes = ParsePersistentRoutes(persistentOutput);
+                debug.AppendLine($"parsed persistent routes: {routes.Count}");
+                debug.AppendLine("route print preview:");
+                debug.AppendLine(CreatePreview(persistentOutput));
 
-                var routes = ParseStaticRoutes(output);
-
-                if (routes.Count == 0)
-                {
-                    var persistentOutput = ReadRoutePrintOutput();
-                    routes = ParsePersistentRoutes(persistentOutput);
-                }
-
-                return (true, routes, null);
+                return (true, routes, null, debug.ToString());
             }
             catch (Exception ex)
             {
-                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Routen: " + ex.Message);
+                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Routen: " + ex.Message, ex.ToString());
             }
         }
 
@@ -479,75 +462,15 @@ namespace neTiPx.Services
             }
         }
 
-        private static List<RouteEntry> ParseStaticRoutes(string output)
+        private static bool PersistentRouteExists(string destination, string subnetMask, string gateway)
         {
-            var routes = new List<RouteEntry>();
-            if (string.IsNullOrWhiteSpace(output))
-            {
-                return routes;
-            }
+            var output = ReadRoutePrintOutput();
+            var routes = ParsePersistentRoutes(output);
 
-            var lines = output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var line in lines)
-            {
-                if (line.IndexOf("0.0.0.0/0", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    continue;
-                }
-
-                var prefixMatch = System.Text.RegularExpressions.Regex.Match(
-                    line,
-                    @"(?<prefix>(?:\d{1,3}\.){3}\d{1,3}/\d{1,2})");
-
-                if (!prefixMatch.Success)
-                {
-                    continue;
-                }
-
-                var prefix = prefixMatch.Groups["prefix"].Value.Trim();
-
-                var ipv4Matches = System.Text.RegularExpressions.Regex.Matches(
-                    line,
-                    @"\b(?:\d{1,3}\.){3}\d{1,3}\b");
-
-                if (ipv4Matches.Count == 0)
-                {
-                    continue;
-                }
-
-                // In netsh output the last IPv4 token is typically the nexthop/gateway.
-                var gateway = ipv4Matches[ipv4Matches.Count - 1].Value.Trim();
-
-                if (!TryParsePrefix(prefix, out var destination, out var subnetMask))
-                {
-                    continue;
-                }
-
-                if (!IsValidIPv4(gateway))
-                {
-                    continue;
-                }
-
-                var metric = 1;
-                var metricMatch = System.Text.RegularExpressions.Regex.Match(line, @"\b(?<metric>\d{1,5})\b");
-                if (metricMatch.Success && int.TryParse(metricMatch.Groups["metric"].Value, out var parsedMetric) && parsedMetric > 0)
-                {
-                    metric = parsedMetric;
-                }
-
-                routes.Add(new RouteEntry
-                {
-                    Destination = destination,
-                    SubnetMask = subnetMask,
-                    Gateway = gateway,
-                    Metric = metric
-                });
-            }
-
-            return routes
-                .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
-                .Select(group => group.First())
-                .ToList();
+            return routes.Any(route =>
+                string.Equals(route.Destination, destination, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(route.SubnetMask, subnetMask, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(route.Gateway, gateway, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string ReadRoutePrintOutput()
@@ -653,6 +576,22 @@ namespace neTiPx.Services
                 .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.First())
                 .ToList();
+        }
+
+        private static string CreatePreview(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return "<leer>";
+            }
+
+            var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+                .Where(line => line != null)
+                .Take(20)
+                .Select(line => line.TrimEnd())
+                .ToList();
+
+            return string.Join(Environment.NewLine, lines);
         }
 
         private static bool TryParsePrefix(string prefix, out string destination, out string subnetMask)

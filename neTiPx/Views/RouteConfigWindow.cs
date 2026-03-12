@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Diagnostics;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -56,7 +57,13 @@ namespace neTiPx.Views
 
         private (bool success, System.Collections.Generic.List<RouteEntry> routes, string? error) ReloadSystemRoutes()
         {
-            return _networkConfigService.ReadStaticRoutes(_profile);
+            var result = _networkConfigService.ReadStaticRoutes(_profile);
+            if (!string.IsNullOrWhiteSpace(result.debugInfo))
+            {
+                Debug.WriteLine("[RouteConfig][Refresh]\n" + result.debugInfo);
+            }
+
+            return (result.success, result.routes, result.error);
         }
 
         private UIElement CreateLayout()
