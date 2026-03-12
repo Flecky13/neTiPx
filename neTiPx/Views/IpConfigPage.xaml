@@ -112,17 +112,33 @@
                             <!-- IP Modus -->
                             <StackPanel Spacing="8">
                                 <TextBlock Text="IP Modus" FontWeight="SemiBold" />
-                                <StackPanel Orientation="Horizontal" Spacing="24">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
                                     <RadioButton
                                         Content="DHCP"
                                         GroupName="IpMode"
+                                        Margin="0"
                                         IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=DHCP}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <RadioButton
                                         Content="Manual"
                                         GroupName="IpMode"
+                                        Margin="0"
                                         IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=Manual}"
                                         IsEnabled="{Binding IsProfileSelected}" />
+                                    <CheckBox
+                                        Content="Routen"
+                                        Margin="0"
+                                        IsEnabled="{Binding IsProfileSelected}" />
+                                    <Button
+                                        ToolTipService.ToolTip="Routen"
+                                        Margin="0"
+                                        Padding="2"
+                                        MinWidth="0"
+                                        Width="26"
+                                        Height="26"
+                                        IsEnabled="{Binding IsProfileSelected}">
+                                        <SymbolIcon Symbol="Directions" />
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
 
