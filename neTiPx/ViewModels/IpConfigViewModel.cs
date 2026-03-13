@@ -90,6 +90,8 @@ namespace neTiPx.ViewModels
 
                     OnPropertyChanged(nameof(IsProfileSelected));
                     OnPropertyChanged(nameof(IsManual));
+                    OnPropertyChanged(nameof(ConfiguredRoutesText));
+                    OnPropertyChanged(nameof(RouteApplicationModeText));
                     UpdateStatusAsync().ConfigureAwait(false);
                 }
             }
@@ -152,6 +154,17 @@ namespace neTiPx.ViewModels
                 ValidateProfile();
             }
 
+            if (e.PropertyName == nameof(IpProfile.AddRoutesOnApply))
+            {
+                OnPropertyChanged(nameof(RouteApplicationModeText));
+                OnPropertyChanged(nameof(SelectedProfile));
+            }
+
+            if (e.PropertyName == nameof(IpProfile.RoutesEnabled))
+            {
+                OnPropertyChanged(nameof(SelectedProfile));
+            }
+
             MarkSelectedProfileDirty();
         }
 
@@ -202,6 +215,7 @@ namespace neTiPx.ViewModels
             }
 
             ValidateProfile();
+            OnPropertyChanged(nameof(ConfiguredRoutesText));
             MarkSelectedProfileDirty();
         }
 
@@ -269,6 +283,7 @@ namespace neTiPx.ViewModels
                 SelectedProfile.Mode = storedProfile.Mode;
                 SelectedProfile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
                 SelectedProfile.RoutesEnabled = storedProfile.RoutesEnabled;
+                SelectedProfile.AddRoutesOnApply = storedProfile.AddRoutesOnApply;
                 SelectedProfile.Routes.Clear();
                 foreach (var route in storedProfile.Routes)
                 {
@@ -487,6 +502,10 @@ namespace neTiPx.ViewModels
 
         public bool IsManual => SelectedProfile != null &&
                                 string.Equals(SelectedProfile.Mode, "Manual", StringComparison.OrdinalIgnoreCase);
+
+        public string ConfiguredRoutesText => $"{SelectedProfile?.Routes.Count ?? 0} Ständige Routen";
+
+        public string RouteApplicationModeText => SelectedProfile?.AddRoutesOnApply == true ? "hinzufügen" : "setzen";
 
         public string ValidationMessage
         {
@@ -1097,6 +1116,8 @@ namespace neTiPx.ViewModels
         public void RevalidateProfile()
         {
             ValidateProfile();
+            OnPropertyChanged(nameof(ConfiguredRoutesText));
+            OnPropertyChanged(nameof(RouteApplicationModeText));
         }
 
         private static bool IsValidIpAddress(string ipAddress)

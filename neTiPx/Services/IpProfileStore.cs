@@ -117,6 +117,7 @@ namespace neTiPx.Services
                         Dns1 = (string?)profileElement.Attribute("dns1") ?? string.Empty,
                         Dns2 = (string?)profileElement.Attribute("dns2") ?? string.Empty,
                         RoutesEnabled = bool.TryParse((string?)profileElement.Attribute("routesEnabled"), out var routesEnabled) && routesEnabled,
+                        AddRoutesOnApply = !bool.TryParse((string?)profileElement.Attribute("addRoutesOnApply"), out var addRoutesOnApply) || addRoutesOnApply,
                         IsDirty = false
                     };
 
@@ -165,6 +166,7 @@ namespace neTiPx.Services
                         new XAttribute("dns1", profile.Dns1 ?? string.Empty),
                         new XAttribute("dns2", profile.Dns2 ?? string.Empty),
                         new XAttribute("routesEnabled", profile.RoutesEnabled),
+                        new XAttribute("addRoutesOnApply", profile.AddRoutesOnApply),
                         new XElement("ipAddresses",
                             profile.IpAddresses
                                 .Where(entry => !string.IsNullOrWhiteSpace(entry.IpAddress))
@@ -346,6 +348,7 @@ namespace neTiPx.Services
                 Dns1 = source.Dns1,
                 Dns2 = source.Dns2,
                 RoutesEnabled = source.RoutesEnabled,
+                AddRoutesOnApply = source.AddRoutesOnApply,
                 IsDirty = false
             };
 

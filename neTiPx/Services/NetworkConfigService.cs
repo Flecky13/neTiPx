@@ -84,6 +84,24 @@ namespace neTiPx.Services
 
             if (profile.RoutesEnabled)
             {
+                if (!profile.AddRoutesOnApply)
+                {
+                    var clearRoutesResult = TryReadPersistentRoutesFromCim();
+                    var persistentRoutes = clearRoutesResult.success
+                        ? clearRoutesResult.routes
+                        : ParseRoutePrintRoutes(ReadRoutePrintOutput(), includeActiveRoutes: false, includePersistentRoutes: true);
+
+                    foreach (var persistentRoute in persistentRoutes)
+                    {
+                        if (!IsValidIPv4(persistentRoute.Destination) || SubnetMaskToPrefix(persistentRoute.SubnetMask) <= 0)
+                        {
+                            continue;
+                        }
+
+                        commands.Add($"route delete {persistentRoute.Destination} mask {persistentRoute.SubnetMask} {persistentRoute.Gateway}");
+                    }
+                }
+
                 for (int i = 0; i < profile.Routes.Count; i++)
                 {
                     var route = profile.Routes[i];

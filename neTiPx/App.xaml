@@ -74,6 +74,7 @@
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <converters:StringFormatConverter x:Key="StringFormatConverter" />
             <converters:StringToModeConverter x:Key="StringToModeConverter" />
+            <converters:RouteModeToBrushConverter x:Key="RouteModeToBrushConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

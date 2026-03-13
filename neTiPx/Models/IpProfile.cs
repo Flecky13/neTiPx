@@ -12,6 +12,7 @@ namespace neTiPx.Models
         private string _dns1 = string.Empty;
         private string _dns2 = string.Empty;
         private bool _routesEnabled;
+        private bool _addRoutesOnApply = true;
         private bool _isDirty;
 
         public string Name
@@ -60,6 +61,12 @@ namespace neTiPx.Models
         {
             get => _routesEnabled;
             set => SetProperty(ref _routesEnabled, value);
+        }
+
+        public bool AddRoutesOnApply
+        {
+            get => _addRoutesOnApply;
+            set => SetProperty(ref _addRoutesOnApply, value);
         }
 
         public bool IsDirty

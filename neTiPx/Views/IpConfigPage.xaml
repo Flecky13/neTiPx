@@ -126,12 +126,12 @@
                                         IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=Manual}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <CheckBox
-                                        Content="Routen"
+                                        Content="Routen Aktivieren"
                                         Margin="0"
                                         IsChecked="{Binding SelectedProfile.RoutesEnabled, Mode=TwoWay}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <Button
-                                        ToolTipService.ToolTip="Routen"
+                                        ToolTipService.ToolTip="Routen Aktivieren"
                                         Margin="0"
                                         Padding="2"
                                         MinWidth="0"
@@ -147,28 +147,49 @@
 
                             <!-- Gateway -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Gateway" FontWeight="SemiBold" />
-                                <TextBox
-                                    Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
-                                    PlaceholderText="Gateway (z.B. 192.168.1.1)"
-                                    ToolTipService.ToolTip="Beispiel: 192.168.1.1"
-                                    IsEnabled="{Binding IsManual}" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                                    <TextBlock Text="Gateway" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{Binding ConfiguredRoutesText}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=count}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                                    <TextBox
+                                        Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
+                                        PlaceholderText="Gateway (z.B. 192.168.1.1)"
+                                        ToolTipService.ToolTip="Beispiel: 192.168.1.1"
+                                        IsEnabled="{Binding IsManual}" />
+                                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <CheckBox
+                                            IsChecked="{Binding SelectedProfile.AddRoutesOnApply, Mode=TwoWay}"
+                                            IsEnabled="{Binding SelectedProfile.RoutesEnabled}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock
+                                                    Text="setzen"
+                                                    Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=set}" />
+                                                <TextBlock
+                                                    Text="hinzufügen"
+                                                    Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=add}" />
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
 
                             <!-- DNS Server -->
                             <StackPanel Spacing="4">
                                 <TextBlock Text="DNS Server" FontWeight="SemiBold" />
-                                <TextBox
-                                    Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
-                                    PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
-                                    ToolTipService.ToolTip="Beispiel: 8.8.8.8"
-                                    Margin="0,0,0,2"
-                                    IsEnabled="{Binding IsManual}" />
-                                <TextBox
-                                    Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
-                                    PlaceholderText="DNS 2 (z.B. 8.8.4.4)"
-                                    ToolTipService.ToolTip="Beispiel: 8.8.4.4"
-                                    IsEnabled="{Binding IsManual}" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                                    <TextBox
+                                        Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
+                                        PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
+                                        ToolTipService.ToolTip="Beispiel: 8.8.8.8"
+                                        IsEnabled="{Binding IsManual}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
+                                        PlaceholderText="DNS 2 (z.B. 8.8.4.4)"
+                                        ToolTipService.ToolTip="Beispiel: 8.8.4.4"
+                                        IsEnabled="{Binding IsManual}" />
+                                </Grid>
                             </StackPanel>
 
                             <!-- IP Adressen -->
