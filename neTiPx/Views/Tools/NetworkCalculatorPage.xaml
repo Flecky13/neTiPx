@@ -52,11 +52,11 @@
                         <Button Grid.Column="1"
                                 Content="-"
                                 Click="NetworkCalcHostsMinusButton_Click"
-                                ToolTipService.ToolTip="Nächste kleinere gültige Host-Anzahl" />
+                                ToolTipService.ToolTip="Anzahl hosts reduzieren " />
                         <Button Grid.Column="2"
                                 Content="+"
                                 Click="NetworkCalcHostsPlusButton_Click"
-                                ToolTipService.ToolTip="Nächste größere gültige Host-Anzahl" />
+                                ToolTipService.ToolTip="Anzahl Hosts erhöhen" />
                     </Grid>
                     <TextBlock x:Name="NetworkCalcIpScopeTextBlock"
                                Text="IP-Bereich: -"

@@ -76,21 +76,21 @@
 
                                     <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding ResponseTimeIpv4, Mode=OneWay}" IsReadOnly="True" PlaceholderText="-- ms" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
 
-                                    <Ellipse Grid.Row="0" Grid.Column="3" Width="12" Height="12" Fill="{Binding StatusColorIpv4}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="IPv4 Status" />
+                                    <Ellipse Grid.Row="0" Grid.Column="3" Width="12" Height="12" Fill="{Binding StatusColorIpv4}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="IPv4 Erreichbarkeit" />
 
                                     <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding ResponseTimeIpv6, Mode=OneWay}" IsReadOnly="True" PlaceholderText="-- ms" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
 
-                                    <Ellipse Grid.Row="0" Grid.Column="5" Width="12" Height="12" Fill="{Binding StatusColorIpv6}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="IPv6 Status" />
+                                    <Ellipse Grid.Row="0" Grid.Column="5" Width="12" Height="12" Fill="{Binding StatusColorIpv6}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="IPv6 Erreichbarkeit" />
 
-                                    <Button Grid.Row="0" Grid.Column="6" Click="DeletePingTarget_Click" Tag="{Binding}" ToolTipService.ToolTip="Ziel löschen" VerticalAlignment="Center" Padding="8" MinWidth="0">
+                                    <Button Grid.Row="0" Grid.Column="6" Click="DeletePingTarget_Click" Tag="{Binding}" ToolTipService.ToolTip="Ping löschen" VerticalAlignment="Center" Padding="8" MinWidth="0">
                                         <FontIcon Glyph="&#xE74D;" FontSize="16" />
                                     </Button>
 
-                                    <Button Grid.Row="0" Grid.Column="7" Click="OpenPingLogButton_Click" Tag="{Binding}" ToolTipService.ToolTip="Log-Datei öffnen" VerticalAlignment="Center" Padding="8" MinWidth="0">
+                                    <Button Grid.Row="0" Grid.Column="7" Click="OpenPingLogButton_Click" Tag="{Binding}" ToolTipService.ToolTip="Log Datei Öffnen" VerticalAlignment="Center" Padding="8" MinWidth="0">
                                         <FontIcon Glyph="&#xE8A5;" FontSize="16" />
                                     </Button>
 
-                                    <CheckBox Grid.Row="0" Grid.Column="8" IsChecked="{Binding IsPingEnabled, Mode=TwoWay}" Tag="{Binding}" Click="PingEnabledCheckBox_Click" ToolTipService.ToolTip="Ping aktivieren/deaktivieren" MinWidth="32" MinHeight="32" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <CheckBox Grid.Row="0" Grid.Column="8" IsChecked="{Binding IsPingEnabled, Mode=TwoWay}" Tag="{Binding}" Click="PingEnabledCheckBox_Click" ToolTipService.ToolTip="Aktiviert Ping " MinWidth="32" MinHeight="32" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <CheckBox.Resources>
                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#7A7A7A" />
                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="Transparent" />

@@ -60,7 +60,7 @@
                                 x:Name="PrimaryAdapterCombo"
                                 HorizontalAlignment="Stretch"
                                 PlaceholderText="Adapter wählen..."
-                                ToolTipService.ToolTip="Legt den primären Netzwerkadapter (NIC 1) fest"
+                                ToolTipService.ToolTip="Ihre primäre Netzwerkkarte"
                                 SelectionChanged="PrimaryAdapterCombo_SelectionChanged" />
                         </StackPanel>
 
@@ -71,7 +71,7 @@
                                 x:Name="SecondaryAdapterCombo"
                                 HorizontalAlignment="Stretch"
                                 PlaceholderText="Adapter wählen..."
-                                ToolTipService.ToolTip="Legt den sekundären Netzwerkadapter (NIC 2) fest"
+                                ToolTipService.ToolTip="Ihre sekundäre Netzwerkkarte"
                                 SelectionChanged="SecondaryAdapterCombo_SelectionChanged" />
                         </StackPanel>
                         </StackPanel>
@@ -109,7 +109,7 @@
                             <Button
                                 Content="Standard"
                                 Click="ResetPingLogFolderButton_Click"
-                                ToolTipService.ToolTip="Setzt den Standardordner zurück" />
+                                ToolTipService.ToolTip="Auf Standart zurücksetzen" />
                         </StackPanel>
                         </StackPanel>
                         <TextBlock x:Name="PingSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
@@ -135,7 +135,7 @@
                                         x:Name="HoverWindowStateCombo"
                                         HorizontalAlignment="Stretch"
                                         SelectionChanged="HoverWindowStateCombo_SelectionChanged"
-                                        ToolTipService.ToolTip="Aktiviert oder deaktiviert das Hover-Infofenster"
+                                        ToolTipService.ToolTip="Aktiviert die Maus Over funktion im Systray "
                                         PlaceholderText="Wählen...">
                                         <ComboBoxItem>Aktiv</ComboBoxItem>
                                         <ComboBoxItem>Inaktiv</ComboBoxItem>
@@ -148,7 +148,7 @@
                                         x:Name="HoverWindowDelayCombo"
                                         HorizontalAlignment="Stretch"
                                         SelectionChanged="HoverWindowDelayCombo_SelectionChanged"
-                                        ToolTipService.ToolTip="Bestimmt die Verzögerung bis zur Anzeige des Hover-Fensters"
+                                        ToolTipService.ToolTip="Anzahl sekunden bis Info fenster erscheint"
                                         PlaceholderText="Wählen...">
                                         <ComboBoxItem>1 Sek.</ComboBoxItem>
                                         <ComboBoxItem>2 Sek.</ComboBoxItem>
@@ -164,7 +164,7 @@
                                     x:Name="HoverWindowVerticalAnchorCombo"
                                     HorizontalAlignment="Stretch"
                                     SelectionChanged="HoverWindowVerticalAnchorCombo_SelectionChanged"
-                                    ToolTipService.ToolTip="Legt fest, ob das Hover-Fenster am oberen oder unteren Bildschirmrand ausgerichtet wird"
+                                    ToolTipService.ToolTip="Position Infofenster"
                                     PlaceholderText="Wählen...">
                                     <ComboBoxItem>Oben</ComboBoxItem>
                                     <ComboBoxItem>Unten</ComboBoxItem>
@@ -228,7 +228,7 @@
                                     InputScope="Number"
                                     MaxLength="3"
                                     Width="60"
-                                    ToolTipService.ToolTip="Grenzwert in ms für schnelle Verbindungen"
+                                    ToolTipService.ToolTip="Verbindungsqualität Gut wenn kleiner "
                                     TextChanged="PingThresholdFastTextBox_TextChanged" />
 
                                 <!-- Operator < -->
@@ -246,16 +246,16 @@
                                     InputScope="Number"
                                     MaxLength="3"
                                     Width="60"
-                                    ToolTipService.ToolTip="Grenzwert in ms für normale Verbindungen"
+                                    ToolTipService.ToolTip="Normale Geschwindigkeit"
                                     TextChanged="PingThresholdNormalTextBox_TextChanged" />
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Drei Checkboxen für Gateway/DNS -->
                         <StackPanel Spacing="6">
-                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" ToolTipService.ToolTip="Überwacht den Gateway-Status" Checked="CheckGatewayCheckBox_Checked" Unchecked="CheckGatewayCheckBox_Unchecked" />
-                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" ToolTipService.ToolTip="Überwacht den DNS 1-Status" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
-                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" ToolTipService.ToolTip="Überwacht den DNS 2-Status" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" ToolTipService.ToolTip="Verbindungsqualität Schlecht wenn grösser" Checked="CheckGatewayCheckBox_Checked" Unchecked="CheckGatewayCheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" ToolTipService.ToolTip="Erreichbarkeit für DNS 1 aktiv" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" ToolTipService.ToolTip="Erreichbarkeit für DNS 2 Aktiv" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
                         </StackPanel>
                         </StackPanel>
                         <TextBlock x:Name="ConnectionStatusSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
@@ -352,7 +352,7 @@
                             x:Name="ColorSchemeCombo"
                             HorizontalAlignment="Stretch"
                             DisplayMemberPath="DisplayName"
-                            ToolTipService.ToolTip="Wählt das Farbthema der Anwendung"
+                            ToolTipService.ToolTip="Themenlayout auswählen"
                             SelectionChanged="ColorSchemeCombo_SelectionChanged" />
                     </StackPanel>
                 </Border>
@@ -372,13 +372,13 @@
                         <CheckBox
                             x:Name="AutostartCheckBox"
                             Content="mit Windows Starten"
-                            ToolTipService.ToolTip="Startet neTiPx automatisch mit Windows"
+                            ToolTipService.ToolTip="mit Windows starten"
                             Checked="AutostartCheckBox_Checked"
                             Unchecked="AutostartCheckBox_Unchecked" />
                         <CheckBox
                             x:Name="CloseToTrayCheckBox"
                             Content="Beim Schließen in den Systray minimieren"
-                            ToolTipService.ToolTip="Minimiert beim Schließen in den Systray statt zu beenden"
+                            ToolTipService.ToolTip="Beim Schliessen in Systray minimieren"
                             Checked="CloseToTrayCheckBox_Checked"
                             Unchecked="CloseToTrayCheckBox_Unchecked" />
                     </StackPanel>

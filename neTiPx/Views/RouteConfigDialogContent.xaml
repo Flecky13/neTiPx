@@ -64,7 +64,7 @@
                                                 <Button
                                                     Tag="{x:Bind}"
                                                     Click="RemoveSystemRoute_Click"
-                                                    ToolTipService.ToolTip="Route im System löschen"
+                                                    ToolTipService.ToolTip="Löscht diese Ständige Route"
                                                     VerticalAlignment="Center"
                                                     Padding="8"
                                                     MinWidth="0"
@@ -117,30 +117,30 @@
                                                 Text="{x:Bind Destination, Mode=TwoWay}"
                                                 PlaceholderText="z.B. 10.10.0.0"
                                                 Margin="1,0"
-                                                ToolTipService.ToolTip="Zielnetzadresse" />
+                                                ToolTipService.ToolTip="Zielnetzwerk adresse eingeben zb:10.10.10.0" />
                                             <TextBox
                                                 Grid.Column="1"
                                                 Text="{x:Bind SubnetMask, Mode=TwoWay}"
                                                 PlaceholderText="z.B. 255.255.255.0"
                                                 Margin="1,0"
-                                                ToolTipService.ToolTip="Subnetzmaske" />
+                                                ToolTipService.ToolTip="Subnetmaske zb:255.0.0.0" />
                                             <TextBox
                                                 Grid.Column="2"
                                                 Text="{x:Bind Gateway, Mode=TwoWay}"
                                                 PlaceholderText="z.B. 192.168.1.1"
                                                 Margin="1,0"
-                                                ToolTipService.ToolTip="Gateway" />
+                                                ToolTipService.ToolTip="Router Adresse " />
                                             <TextBox
                                                 Grid.Column="3"
                                                 Text="{x:Bind Metric, Mode=TwoWay}"
                                                 PlaceholderText="1"
                                                 Margin="1,0"
-                                                ToolTipService.ToolTip="Metrik > 0" />
+                                                ToolTipService.ToolTip="Metrix >0 " />
                                             <Button
                                                 Grid.Column="4"
                                                 Tag="{x:Bind}"
                                                 Click="RemoveRoute_Click"
-                                                ToolTipService.ToolTip="Route löschen"
+                                                ToolTipService.ToolTip="Löscht Route aus IP-Profil"
                                                 VerticalAlignment="Center"
                                                 Padding="8"
                                                 MinWidth="0"
@@ -151,7 +151,7 @@
                                                 Grid.Column="4"
                                                 Tag="{x:Bind}"
                                                 Click="ApplyRoute_Click"
-                                                ToolTipService.ToolTip="Route im System anlegen"
+                                                ToolTipService.ToolTip="sofortiges anwenden der Eingestellten route"
                                                 VerticalAlignment="Center"
                                                 Padding="8"
                                                 MinWidth="0"
