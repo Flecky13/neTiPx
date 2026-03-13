@@ -15,6 +15,8 @@ namespace neTiPx.Views
 {
     public sealed class RouteConfigWindow : Window
     {
+        private const int FixedWindowWidth = 690;
+        private const int FixedWindowHeight = 900;
         private readonly IpProfile _profile;
         private readonly IpConfigViewModel _viewModel;
         private readonly NetworkConfigService _networkConfigService = new NetworkConfigService();
@@ -147,18 +149,16 @@ namespace neTiPx.Views
             if (appWindow.Presenter is OverlappedPresenter presenter)
             {
                 presenter.SetBorderAndTitleBar(true, true);
-                presenter.IsResizable = true;
-                presenter.IsMaximizable = true;
+                presenter.IsResizable = false;
+                presenter.IsMaximizable = false;
                 presenter.IsMinimizable = false;
             }
 
-            const int width = 1400;
-            const int height = 620;
-            appWindow.Resize(new SizeInt32(width, height));
+            appWindow.Resize(new SizeInt32(FixedWindowWidth, FixedWindowHeight));
 
             var mainWindow = WindowHelper.GetAppWindow(App.MainWindow);
-            var x = mainWindow.Position.X + Math.Max(40, (mainWindow.Size.Width - width) / 2);
-            var y = mainWindow.Position.Y + Math.Max(40, (mainWindow.Size.Height - height) / 2);
+            var x = mainWindow.Position.X + Math.Max(40, (mainWindow.Size.Width - FixedWindowWidth) / 2);
+            var y = mainWindow.Position.Y + Math.Max(40, (mainWindow.Size.Height - FixedWindowHeight) / 2);
             appWindow.Move(new PointInt32(x, y));
         }
     }

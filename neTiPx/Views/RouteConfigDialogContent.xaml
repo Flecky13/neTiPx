@@ -12,7 +12,7 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
     <Grid Background="{ThemeResource AppBackgroundBrush}">
-        <StackPanel Spacing="16" Padding="24" MinWidth="1180" HorizontalAlignment="Stretch">
+        <StackPanel Spacing="16" Padding="24" MinWidth="680" HorizontalAlignment="Stretch">
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <StackPanel Spacing="8">
                     <TextBlock Text="Routen konfigurieren" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
@@ -93,7 +93,7 @@
             <Border Style="{StaticResource CardBorder}" Padding="16">
                 <StackPanel Spacing="12">
                     <TextBlock Text="Neue Routen für dieses Profil" Style="{StaticResource SectionTitle}" />
-                    <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8" Margin="0,4,0,0">
+                    <Grid ColumnDefinitions="140,140,140,50,90" ColumnSpacing="6" Margin="0,4,0,0">
                         <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -105,26 +105,30 @@
                         <ItemsRepeater ItemsSource="{x:Bind Routes, Mode=OneWay}">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="models:RouteEntry">
-                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
-                                        <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8">
+                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="2" Margin="0,0,0,1">
+                                        <Grid ColumnDefinitions="140,140,140,50,90" ColumnSpacing="6">
                                             <TextBox
                                                 Text="{x:Bind Destination, Mode=TwoWay}"
                                                 PlaceholderText="z.B. 10.10.0.0"
+                                                Margin="1,0"
                                                 ToolTipService.ToolTip="Zielnetzadresse" />
                                             <TextBox
                                                 Grid.Column="1"
                                                 Text="{x:Bind SubnetMask, Mode=TwoWay}"
                                                 PlaceholderText="z.B. 255.255.255.0"
+                                                Margin="1,0"
                                                 ToolTipService.ToolTip="Subnetzmaske" />
                                             <TextBox
                                                 Grid.Column="2"
                                                 Text="{x:Bind Gateway, Mode=TwoWay}"
                                                 PlaceholderText="z.B. 192.168.1.1"
+                                                Margin="1,0"
                                                 ToolTipService.ToolTip="Gateway" />
                                             <TextBox
                                                 Grid.Column="3"
                                                 Text="{x:Bind Metric, Mode=TwoWay}"
                                                 PlaceholderText="1"
+                                                Margin="1,0"
                                                 ToolTipService.ToolTip="Metrik > 0" />
                                             <Button
                                                 Grid.Column="4"
@@ -132,7 +136,7 @@
                                                 Click="RemoveRoute_Click"
                                                 ToolTipService.ToolTip="Route löschen"
                                                 HorizontalAlignment="Stretch"
-                                                Padding="10,8">
+                                                Padding="6,3">
                                                 <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                                     <FontIcon Glyph="&#xE74D;" FontSize="14" />
                                                     <TextBlock Text="Löschen" />
