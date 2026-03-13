@@ -144,6 +144,7 @@ namespace neTiPx.Views
 
             Routes.Remove(route);
             RefreshSystemRouteMarkers();
+            await ReloadSystemRoutesInternalAsync(showErrorDialog: false);
         }
 
         private async void ApplyRoute_Click(object sender, RoutedEventArgs e)
