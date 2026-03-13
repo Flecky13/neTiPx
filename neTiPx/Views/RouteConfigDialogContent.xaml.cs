@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System;
 using System.ComponentModel;
+using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -15,6 +16,7 @@ namespace neTiPx.Views
         private readonly Func<RouteEntry, (bool success, string? message)>? _deleteRouteFromSystem;
         private readonly Func<(bool success, List<RouteEntry> routes, string? error)>? _reloadSystemRoutes;
         private string _systemRoutesStatus = "Noch nicht eingelesen.";
+        private bool _isSystemRoutesLoading;
 
         public ObservableCollection<RouteEntry> Routes { get; }
         public ObservableCollection<RouteEntry> SystemRoutes { get; }
@@ -44,6 +46,14 @@ namespace neTiPx.Views
             _deleteRouteFromSystem = deleteRouteFromSystem;
             _reloadSystemRoutes = reloadSystemRoutes;
             InitializeComponent();
+
+            Routes.CollectionChanged += Routes_CollectionChanged;
+            foreach (var route in Routes)
+            {
+                route.PropertyChanged += ProfileRoute_PropertyChanged;
+            }
+
+            Loaded += RouteConfigDialogContent_Loaded;
         }
 
         public List<RouteEntry> GetRoutes()
@@ -114,29 +124,47 @@ namespace neTiPx.Views
             }
 
             Routes.Remove(route);
+            RefreshSystemRouteMarkers();
         }
 
         private async void ReloadSystemRoutes_Click(object sender, RoutedEventArgs e)
         {
+            await ReloadSystemRoutesInternalAsync(showErrorDialog: true);
+        }
+
+        private async System.Threading.Tasks.Task ReloadSystemRoutesInternalAsync(bool showErrorDialog)
+        {
+            if (_isSystemRoutesLoading)
+            {
+                return;
+            }
+
             if (_reloadSystemRoutes == null)
             {
                 SystemRoutesStatus = "Einlesen aktuell nicht verfuegbar.";
                 return;
             }
 
+            _isSystemRoutesLoading = true;
+
             var result = _reloadSystemRoutes();
             if (!result.success)
             {
-                var dialog = new ContentDialog
+                if (showErrorDialog)
                 {
-                    Title = "Routen konnten nicht eingelesen werden",
-                    Content = result.error ?? "Unbekannter Fehler.",
-                    CloseButtonText = "OK",
-                    DefaultButton = ContentDialogButton.Close,
-                    XamlRoot = XamlRoot
-                };
+                    var dialog = new ContentDialog
+                    {
+                        Title = "Routen konnten nicht eingelesen werden",
+                        Content = result.error ?? "Unbekannter Fehler.",
+                        CloseButtonText = "OK",
+                        DefaultButton = ContentDialogButton.Close,
+                        XamlRoot = XamlRoot
+                    };
 
-                await dialog.ShowAsync();
+                    await dialog.ShowAsync();
+                }
+
+                _isSystemRoutesLoading = false;
                 return;
             }
 
@@ -146,9 +174,13 @@ namespace neTiPx.Views
                 SystemRoutes.Add(CloneRoute(route));
             }
 
+            RefreshSystemRouteMarkers();
+
             SystemRoutesStatus = SystemRoutes.Count == 0
                 ? "Keine ständigen Routen im System gefunden."
                 : $"{SystemRoutes.Count} ständige Route(n) eingelesen.";
+
+            _isSystemRoutesLoading = false;
         }
 
         private async void RemoveSystemRoute_Click(object sender, RoutedEventArgs e)
@@ -180,6 +212,7 @@ namespace neTiPx.Views
             }
 
             SystemRoutes.Remove(route);
+            RefreshSystemRouteMarkers();
             SystemRoutesStatus = SystemRoutes.Count == 0
                 ? "Keine ständigen Routen im System gefunden."
                 : $"{SystemRoutes.Count} ständige Route(n) geladen.";
@@ -197,6 +230,59 @@ namespace neTiPx.Views
 
                 await infoDialog.ShowAsync();
             }
+        }
+
+        private async void RouteConfigDialogContent_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= RouteConfigDialogContent_Loaded;
+            await ReloadSystemRoutesInternalAsync(showErrorDialog: false);
+        }
+
+        private void Routes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (var oldItem in e.OldItems.OfType<RouteEntry>())
+                {
+                    oldItem.PropertyChanged -= ProfileRoute_PropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (var newItem in e.NewItems.OfType<RouteEntry>())
+                {
+                    newItem.PropertyChanged += ProfileRoute_PropertyChanged;
+                }
+            }
+
+            RefreshSystemRouteMarkers();
+        }
+
+        private void ProfileRoute_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            RefreshSystemRouteMarkers();
+        }
+
+        private void RefreshSystemRouteMarkers()
+        {
+            foreach (var systemRoute in SystemRoutes)
+            {
+                var isProfileMatch = Routes.Any(profileRoute => RoutesEqual(profileRoute, systemRoute));
+                systemRoute.IsProfileMatch = isProfileMatch;
+                systemRoute.CanDeleteFromSystem = !isProfileMatch;
+            }
+        }
+
+        private static bool RoutesEqual(RouteEntry left, RouteEntry right)
+        {
+            var leftMetric = left.Metric > 0 ? left.Metric : 1;
+            var rightMetric = right.Metric > 0 ? right.Metric : 1;
+
+            return string.Equals(left.Destination?.Trim(), right.Destination?.Trim(), StringComparison.OrdinalIgnoreCase)
+                && string.Equals(left.SubnetMask?.Trim(), right.SubnetMask?.Trim(), StringComparison.OrdinalIgnoreCase)
+                && string.Equals(left.Gateway?.Trim(), right.Gateway?.Trim(), StringComparison.OrdinalIgnoreCase)
+                && leftMetric == rightMetric;
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using neTiPx.Models;
 
 namespace neTiPx.Services
@@ -171,11 +172,21 @@ namespace neTiPx.Services
                 debug.AppendLine($"AdapterKey: {profile.AdapterName}");
                 debug.AppendLine($"Resolved Adapter: {ni.Name}");
 
+                var cimResult = TryReadPersistentRoutesFromCim();
+                if (cimResult.success)
+                {
+                    debug.AppendLine($"CIM source: Win32_IP4PersistedRouteTable");
+                    debug.AppendLine($"parsed persistent routes via CIM: {cimResult.routes.Count}");
+                    return (true, cimResult.routes, null, debug.ToString());
+                }
+
+                debug.AppendLine($"CIM read failed: {cimResult.error ?? "unknown error"}");
+
                 var persistentOutput = ReadRoutePrintOutput();
                 debug.AppendLine($"route print output chars: {persistentOutput.Length}");
 
-                var routes = ParsePersistentRoutes(persistentOutput);
-                debug.AppendLine($"parsed persistent routes: {routes.Count}");
+                var routes = ParseRoutePrintRoutes(persistentOutput, includeActiveRoutes: false, includePersistentRoutes: true);
+                debug.AppendLine($"parsed persistent routes via route print fallback: {routes.Count}");
                 debug.AppendLine("route print preview:");
                 debug.AppendLine(CreatePreview(persistentOutput));
 
@@ -464,13 +475,121 @@ namespace neTiPx.Services
 
         private static bool PersistentRouteExists(string destination, string subnetMask, string gateway)
         {
-            var output = ReadRoutePrintOutput();
-            var routes = ParsePersistentRoutes(output);
+            var cimResult = TryReadPersistentRoutesFromCim();
+            var routes = cimResult.success
+                ? cimResult.routes
+                : ParseRoutePrintRoutes(ReadRoutePrintOutput(), includeActiveRoutes: false, includePersistentRoutes: true);
 
             return routes.Any(route =>
                 string.Equals(route.Destination, destination, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(route.SubnetMask, subnetMask, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(route.Gateway, gateway, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static (bool success, List<RouteEntry> routes, string? error) TryReadPersistentRoutesFromCim()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"@(Get-CimInstance -ClassName Win32_IP4PersistedRouteTable | Select-Object Destination,Mask,NextHop,Metric1) | ConvertTo-Json -Compress\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, new List<RouteEntry>(), "powershell process could not be started");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    return (false, new List<RouteEntry>(), string.IsNullOrWhiteSpace(error) ? $"powershell exit code {process.ExitCode}" : error.Trim());
+                }
+
+                var trimmed = output.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed))
+                {
+                    return (true, new List<RouteEntry>(), null);
+                }
+
+                using var document = JsonDocument.Parse(trimmed);
+                var parsed = new List<RouteEntry>();
+                if (document.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var element in document.RootElement.EnumerateArray())
+                    {
+                        AddCimRoute(parsed, element);
+                    }
+                }
+                else if (document.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    AddCimRoute(parsed, document.RootElement);
+                }
+
+                return (true,
+                    parsed
+                        .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
+                        .Select(group => group.First())
+                        .ToList(),
+                    null);
+            }
+            catch (Exception ex)
+            {
+                return (false, new List<RouteEntry>(), ex.Message);
+            }
+        }
+
+        private static void AddCimRoute(List<RouteEntry> routes, JsonElement element)
+        {
+            var destination = GetJsonStringValue(element, "Destination");
+            var subnetMask = GetJsonStringValue(element, "Mask");
+            var gateway = GetJsonStringValue(element, "NextHop");
+            var metricText = GetJsonStringValue(element, "Metric1");
+
+            if (!int.TryParse(metricText, out var metric) || metric <= 0)
+            {
+                metric = 1;
+            }
+
+            if (!IsValidIPv4(destination) || !IsValidSubnetMask(subnetMask) || !IsValidIPv4(gateway))
+            {
+                return;
+            }
+
+            routes.Add(new RouteEntry
+            {
+                Destination = destination,
+                SubnetMask = subnetMask,
+                Gateway = gateway,
+                Metric = metric
+            });
+        }
+
+        private static string GetJsonStringValue(JsonElement element, string propertyName)
+        {
+            if (!element.TryGetProperty(propertyName, out var property))
+            {
+                return string.Empty;
+            }
+
+            return property.ValueKind switch
+            {
+                JsonValueKind.String => property.GetString()?.Trim() ?? string.Empty,
+                JsonValueKind.Number => property.GetRawText().Trim(),
+                JsonValueKind.Null => string.Empty,
+                _ => property.GetRawText().Trim('"', ' ')
+            };
         }
 
         private static string ReadRoutePrintOutput()
@@ -505,7 +624,7 @@ namespace neTiPx.Services
             }
         }
 
-        private static List<RouteEntry> ParsePersistentRoutes(string output)
+        private static List<RouteEntry> ParseRoutePrintRoutes(string output, bool includeActiveRoutes, bool includePersistentRoutes)
         {
             var routes = new List<RouteEntry>();
             if (string.IsNullOrWhiteSpace(output))
@@ -514,7 +633,7 @@ namespace neTiPx.Services
             }
 
             var lines = output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            bool inPersistentSection = false;
+            var section = RoutePrintSection.None;
 
             foreach (var rawLine in lines)
             {
@@ -524,58 +643,118 @@ namespace neTiPx.Services
                     continue;
                 }
 
-                if (line.IndexOf("Persistente Routen", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    line.IndexOf("Persistent Routes", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (IsActiveRoutesHeading(line))
                 {
-                    inPersistentSection = true;
+                    section = RoutePrintSection.ActiveRoutes;
                     continue;
                 }
 
-                if (!inPersistentSection)
+                if (IsPersistentRoutesHeading(line))
+                {
+                    section = RoutePrintSection.PersistentRoutes;
+                    continue;
+                }
+
+                if (section == RoutePrintSection.None)
                 {
                     continue;
                 }
 
-                // End section when another heading starts.
-                if (line.EndsWith(":", StringComparison.Ordinal) &&
-                    line.IndexOf("Persistente Routen", StringComparison.OrdinalIgnoreCase) < 0 &&
-                    line.IndexOf("Persistent Routes", StringComparison.OrdinalIgnoreCase) < 0)
+                if (IsSectionDivider(line) || IsColumnHeading(line))
+                {
+                    continue;
+                }
+
+                if (line.IndexOf("IPv6", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     break;
                 }
 
-                var match = System.Text.RegularExpressions.Regex.Match(
-                    line,
-                    @"^(?<destination>(?:\d{1,3}\.){3}\d{1,3})\s+(?<mask>(?:\d{1,3}\.){3}\d{1,3})\s+(?<gateway>(?:\d{1,3}\.){3}\d{1,3})\s+(?<metric>\d+)$");
+                var parts = System.Text.RegularExpressions.Regex
+                    .Split(line, @"\s{2,}")
+                    .Where(part => !string.IsNullOrWhiteSpace(part))
+                    .ToArray();
 
-                if (!match.Success)
+                if (section == RoutePrintSection.ActiveRoutes)
+                {
+                    if (!includeActiveRoutes || parts.Length < 5)
+                    {
+                        continue;
+                    }
+
+                    AddParsedRoute(routes, parts[0], parts[1], parts[2], parts[4]);
+                    continue;
+                }
+
+                if (!includePersistentRoutes || parts.Length < 4)
                 {
                     continue;
                 }
 
-                var destination = match.Groups["destination"].Value;
-                var mask = match.Groups["mask"].Value;
-                var gateway = match.Groups["gateway"].Value;
-                var metric = int.TryParse(match.Groups["metric"].Value, out var parsedMetric) && parsedMetric > 0 ? parsedMetric : 1;
-
-                if (!IsValidIPv4(destination) || !IsValidSubnetMask(mask) || !IsValidIPv4(gateway))
-                {
-                    continue;
-                }
-
-                routes.Add(new RouteEntry
-                {
-                    Destination = destination,
-                    SubnetMask = mask,
-                    Gateway = gateway,
-                    Metric = metric
-                });
+                AddParsedRoute(routes, parts[0], parts[1], parts[2], parts[3]);
             }
 
             return routes
                 .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.First())
                 .ToList();
+        }
+
+        private static void AddParsedRoute(List<RouteEntry> routes, string destination, string mask, string gateway, string metricText)
+        {
+            var normalizedDestination = destination.Trim();
+            var normalizedMask = mask.Trim();
+            var normalizedGateway = gateway.Trim();
+
+            if (!int.TryParse(metricText.Trim(), out var metric) || metric <= 0)
+            {
+                metric = 1;
+            }
+
+            if (!IsValidIPv4(normalizedDestination) || !IsValidSubnetMask(normalizedMask))
+            {
+                return;
+            }
+
+            routes.Add(new RouteEntry
+            {
+                Destination = normalizedDestination,
+                SubnetMask = normalizedMask,
+                Gateway = normalizedGateway,
+                Metric = metric
+            });
+        }
+
+        private static bool IsActiveRoutesHeading(string line)
+        {
+            return line.Equals("Aktive Routen:", StringComparison.OrdinalIgnoreCase) ||
+                   line.Equals("Active Routes:", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsPersistentRoutesHeading(string line)
+        {
+             return line.Equals("Ständige Routen:", StringComparison.OrdinalIgnoreCase) ||
+                 line.Equals("Staendige Routen:", StringComparison.OrdinalIgnoreCase) ||
+                 line.Equals("Persistente Routen:", StringComparison.OrdinalIgnoreCase) ||
+                   line.Equals("Persistent Routes:", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsColumnHeading(string line)
+        {
+            return line.StartsWith("Netzwerkziel", StringComparison.OrdinalIgnoreCase) ||
+                   line.StartsWith("Network Destination", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsSectionDivider(string line)
+        {
+            return line.All(ch => ch == '=');
+        }
+
+        private enum RoutePrintSection
+        {
+            None,
+            ActiveRoutes,
+            PersistentRoutes
         }
 
         private static string CreatePreview(string text)

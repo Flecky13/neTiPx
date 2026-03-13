@@ -8,6 +8,8 @@ namespace neTiPx.Models
         private string _subnetMask = string.Empty;
         private string _gateway = string.Empty;
         private int _metric = 1;
+        private bool _isProfileMatch;
+        private bool _canDeleteFromSystem = true;
 
         public string Destination
         {
@@ -31,6 +33,18 @@ namespace neTiPx.Models
         {
             get => _metric;
             set => SetProperty(ref _metric, value);
+        }
+
+        public bool IsProfileMatch
+        {
+            get => _isProfileMatch;
+            set => SetProperty(ref _isProfileMatch, value);
+        }
+
+        public bool CanDeleteFromSystem
+        {
+            get => _canDeleteFromSystem;
+            set => SetProperty(ref _canDeleteFromSystem, value);
         }
     }
 }
