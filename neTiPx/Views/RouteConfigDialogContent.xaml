@@ -144,10 +144,24 @@
                                                 Click="RemoveRoute_Click"
                                                 ToolTipService.ToolTip="Route löschen"
                                                 HorizontalAlignment="Stretch"
-                                                Padding="6,3">
+                                                Padding="6,3"
+                                                Visibility="{x:Bind ShowDeleteButton, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                                     <FontIcon Glyph="&#xE74D;" FontSize="14" />
                                                     <TextBlock Text="Löschen" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button
+                                                Grid.Column="4"
+                                                Tag="{x:Bind}"
+                                                Click="ApplyRoute_Click"
+                                                ToolTipService.ToolTip="Route im System anlegen"
+                                                HorizontalAlignment="Stretch"
+                                                Padding="6,3"
+                                                Visibility="{x:Bind ShowApplyButton, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE73E;" FontSize="14" />
+                                                    <TextBlock Text="Anwenden" />
                                                 </StackPanel>
                                             </Button>
                                         </Grid>

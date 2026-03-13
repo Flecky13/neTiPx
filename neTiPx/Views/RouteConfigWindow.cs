@@ -26,7 +26,7 @@ namespace neTiPx.Views
         {
             _profile = profile;
             _viewModel = viewModel;
-            _content = new RouteConfigDialogContent(profile.Routes, DeleteRouteImmediately, ReloadSystemRoutes);
+            _content = new RouteConfigDialogContent(profile.Routes, DeleteRouteImmediately, AddRouteImmediately, ReloadSystemRoutes);
 
             Title = "Routen konfigurieren";
             Content = CreateLayout();
@@ -51,6 +51,43 @@ namespace neTiPx.Views
             if (existingRoute != null)
             {
                 _profile.Routes.Remove(existingRoute);
+            }
+
+            _viewModel.RevalidateProfile();
+            return (true, result.error);
+        }
+
+        private (bool success, string? message) AddRouteImmediately(RouteEntry route)
+        {
+            var sanitizedRoute = new RouteEntry
+            {
+                Destination = route.Destination?.Trim() ?? string.Empty,
+                SubnetMask = route.SubnetMask?.Trim() ?? string.Empty,
+                Gateway = route.Gateway?.Trim() ?? string.Empty,
+                Metric = route.Metric > 0 ? route.Metric : 1
+            };
+
+            var result = _networkConfigService.AddRoute(_profile, sanitizedRoute);
+            if (!result.success)
+            {
+                return result;
+            }
+
+            var existingRoute = _profile.Routes.FirstOrDefault(r =>
+                string.Equals(r.Destination?.Trim(), sanitizedRoute.Destination, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(r.SubnetMask?.Trim(), sanitizedRoute.SubnetMask, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(r.Gateway?.Trim(), sanitizedRoute.Gateway, StringComparison.OrdinalIgnoreCase) &&
+                (r.Metric > 0 ? r.Metric : 1) == sanitizedRoute.Metric);
+
+            if (existingRoute == null)
+            {
+                _profile.Routes.Add(new RouteEntry
+                {
+                    Destination = sanitizedRoute.Destination,
+                    SubnetMask = sanitizedRoute.SubnetMask,
+                    Gateway = sanitizedRoute.Gateway,
+                    Metric = sanitizedRoute.Metric
+                });
             }
 
             _viewModel.RevalidateProfile();

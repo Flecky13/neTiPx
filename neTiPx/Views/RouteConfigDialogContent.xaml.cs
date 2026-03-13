@@ -14,9 +14,11 @@ namespace neTiPx.Views
     public sealed partial class RouteConfigDialogContent : UserControl, INotifyPropertyChanged
     {
         private readonly Func<RouteEntry, (bool success, string? message)>? _deleteRouteFromSystem;
+        private readonly Func<RouteEntry, (bool success, string? message)>? _addRouteToSystem;
         private readonly Func<(bool success, List<RouteEntry> routes, string? error)>? _reloadSystemRoutes;
         private string _systemRoutesStatus = "Noch nicht eingelesen.";
         private bool _isSystemRoutesLoading;
+        private bool _isRefreshingMarkers;
 
         public ObservableCollection<RouteEntry> Routes { get; }
         public ObservableCollection<RouteEntry> SystemRoutes { get; }
@@ -43,11 +45,13 @@ namespace neTiPx.Views
         public RouteConfigDialogContent(
             IEnumerable<RouteEntry> sourceRoutes,
             Func<RouteEntry, (bool success, string? message)>? deleteRouteFromSystem = null,
+            Func<RouteEntry, (bool success, string? message)>? addRouteToSystem = null,
             Func<(bool success, List<RouteEntry> routes, string? error)>? reloadSystemRoutes = null)
         {
             Routes = new ObservableCollection<RouteEntry>(sourceRoutes.Select(CloneRoute));
             SystemRoutes = new ObservableCollection<RouteEntry>();
             _deleteRouteFromSystem = deleteRouteFromSystem;
+            _addRouteToSystem = addRouteToSystem;
             _reloadSystemRoutes = reloadSystemRoutes;
             InitializeComponent();
 
@@ -101,14 +105,18 @@ namespace neTiPx.Views
                 return;
             }
 
-            if (_deleteRouteFromSystem != null)
+            bool hasContent = !string.IsNullOrWhiteSpace(route.Destination)
+                || !string.IsNullOrWhiteSpace(route.SubnetMask)
+                || !string.IsNullOrWhiteSpace(route.Gateway);
+
+            if (hasContent && _deleteRouteFromSystem != null)
             {
                 var (success, message) = _deleteRouteFromSystem(CloneRoute(route));
                 if (!success)
                 {
                     var dialog = new ContentDialog
                     {
-                        Title = "Route konnte nicht geloescht werden",
+                        Title = "Route konnte nicht gelöscht werden",
                         Content = message ?? "Unbekannter Fehler beim Entfernen der Route aus dem System.",
                         CloseButtonText = "OK",
                         DefaultButton = ContentDialogButton.Close,
@@ -136,6 +144,57 @@ namespace neTiPx.Views
 
             Routes.Remove(route);
             RefreshSystemRouteMarkers();
+        }
+
+        private async void ApplyRoute_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag is not RouteEntry route)
+            {
+                return;
+            }
+
+            if (_addRouteToSystem == null)
+            {
+                return;
+            }
+
+            var routeToApply = CloneRoute(route);
+            routeToApply.Destination = routeToApply.Destination?.Trim() ?? string.Empty;
+            routeToApply.SubnetMask = routeToApply.SubnetMask?.Trim() ?? string.Empty;
+            routeToApply.Gateway = routeToApply.Gateway?.Trim() ?? string.Empty;
+            routeToApply.Metric = routeToApply.Metric > 0 ? routeToApply.Metric : 1;
+
+            var (success, message) = _addRouteToSystem(routeToApply);
+            if (!success)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Route konnte nicht angewendet werden",
+                    Content = message ?? "Unbekannter Fehler beim Hinzufuegen der Route.",
+                    CloseButtonText = "OK",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = XamlRoot
+                };
+
+                await dialog.ShowAsync();
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                var infoDialog = new ContentDialog
+                {
+                    Title = "Hinweis",
+                    Content = message,
+                    CloseButtonText = "OK",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = XamlRoot
+                };
+
+                await infoDialog.ShowAsync();
+            }
+
+            await ReloadSystemRoutesInternalAsync(showErrorDialog: false);
         }
 
         private async void ReloadSystemRoutes_Click(object sender, RoutedEventArgs e)
@@ -272,16 +331,45 @@ namespace neTiPx.Views
 
         private void ProfileRoute_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(RouteEntry.ShowDeleteButton)
+                || e.PropertyName == nameof(RouteEntry.ShowApplyButton))
+            {
+                return;
+            }
+
             RefreshSystemRouteMarkers();
         }
 
         private void RefreshSystemRouteMarkers()
         {
-            foreach (var systemRoute in SystemRoutes)
+            if (_isRefreshingMarkers)
             {
-                var isProfileMatch = Routes.Any(profileRoute => RoutesEqual(profileRoute, systemRoute));
-                systemRoute.IsProfileMatch = isProfileMatch;
-                systemRoute.CanDeleteFromSystem = !isProfileMatch;
+                return;
+            }
+
+            _isRefreshingMarkers = true;
+            try
+            {
+                foreach (var systemRoute in SystemRoutes)
+                {
+                    var isProfileMatch = Routes.Any(profileRoute => RoutesEqual(profileRoute, systemRoute));
+                    systemRoute.IsProfileMatch = isProfileMatch;
+                    systemRoute.CanDeleteFromSystem = !isProfileMatch;
+                }
+
+                foreach (var profileRoute in Routes)
+                {
+                    bool isEmpty = string.IsNullOrWhiteSpace(profileRoute.Destination)
+                        && string.IsNullOrWhiteSpace(profileRoute.SubnetMask)
+                        && string.IsNullOrWhiteSpace(profileRoute.Gateway);
+                    bool existsInSystem = SystemRoutes.Any(sysRoute => RoutesEqual(profileRoute, sysRoute));
+                    profileRoute.ShowDeleteButton = isEmpty || existsInSystem;
+                    profileRoute.ShowApplyButton = !isEmpty && !existsInSystem;
+                }
+            }
+            finally
+            {
+                _isRefreshingMarkers = false;
             }
         }
 

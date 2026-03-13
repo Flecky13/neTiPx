@@ -10,6 +10,8 @@ namespace neTiPx.Models
         private int _metric = 1;
         private bool _isProfileMatch;
         private bool _canDeleteFromSystem = true;
+        private bool _showDeleteButton;
+        private bool _showApplyButton;
 
         public string Destination
         {
@@ -45,6 +47,18 @@ namespace neTiPx.Models
         {
             get => _canDeleteFromSystem;
             set => SetProperty(ref _canDeleteFromSystem, value);
+        }
+
+        public bool ShowDeleteButton
+        {
+            get => _showDeleteButton;
+            set => SetProperty(ref _showDeleteButton, value);
+        }
+
+        public bool ShowApplyButton
+        {
+            get => _showApplyButton;
+            set => SetProperty(ref _showApplyButton, value);
         }
     }
 }

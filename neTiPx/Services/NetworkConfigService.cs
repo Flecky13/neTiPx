@@ -153,6 +153,46 @@ namespace neTiPx.Services
             return RunNetshCommandsElevated(commands);
         }
 
+        public (bool success, string? error) AddRoute(IpProfile profile, RouteEntry route)
+        {
+            if (string.IsNullOrWhiteSpace(profile.AdapterName))
+            {
+                return (false, "Kein Adapter ausgewaehlt.");
+            }
+
+            var ni = FindNetworkInterface(profile.AdapterName);
+            if (ni == null)
+            {
+                return (false, "Netzwerkadapter nicht gefunden.");
+            }
+
+            var sanitizedRoute = new RouteEntry
+            {
+                Destination = route.Destination?.Trim() ?? string.Empty,
+                SubnetMask = route.SubnetMask?.Trim() ?? string.Empty,
+                Gateway = route.Gateway?.Trim() ?? string.Empty,
+                Metric = route.Metric > 0 ? route.Metric : 1
+            };
+
+            var (isValid, validationError) = ValidateRoute(sanitizedRoute);
+            if (!isValid)
+            {
+                return (false, validationError);
+            }
+
+            if (PersistentRouteExists(sanitizedRoute.Destination, sanitizedRoute.SubnetMask, sanitizedRoute.Gateway))
+            {
+                return (true, "Route bereits vorhanden.");
+            }
+
+            var commands = new List<string>
+            {
+                $"route -p add {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
+            };
+
+            return RunNetshCommandsElevated(commands);
+        }
+
         public (bool success, List<RouteEntry> routes, string? error, string debugInfo) ReadStaticRoutes(IpProfile profile)
         {
             if (string.IsNullOrWhiteSpace(profile.AdapterName))
