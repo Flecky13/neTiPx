@@ -35,7 +35,7 @@
                         </Button>
                     </Grid>
 
-                    <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8" Margin="0,4,0,0">
+                    <Grid ColumnDefinitions="140,140,140,50,90" ColumnSpacing="6" Margin="0,4,0,0">
                         <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -43,12 +43,12 @@
                         <TextBlock Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
 
-                    <ScrollViewer MaxHeight="210" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto">
                         <ItemsRepeater ItemsSource="{x:Bind SystemRoutes, Mode=OneWay}">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="models:RouteEntry">
-                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
-                                        <Grid ColumnDefinitions="*,*,*,120,110" ColumnSpacing="8">
+                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="2" Margin="0">
+                                        <Grid ColumnDefinitions="140,140,140,50,90" ColumnSpacing="6">
                                             <Border
                                                 Grid.ColumnSpan="5"
                                                 Width="6"
@@ -56,17 +56,17 @@
                                                 CornerRadius="3"
                                                 Background="{ThemeResource AccentFillColorDefaultBrush}"
                                                 Visibility="{x:Bind IsProfileMatch, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                            <TextBox Text="{x:Bind Destination, Mode=OneWay}" IsReadOnly="True" />
-                                            <TextBox Grid.Column="1" Text="{x:Bind SubnetMask, Mode=OneWay}" IsReadOnly="True" />
-                                            <TextBox Grid.Column="2" Text="{x:Bind Gateway, Mode=OneWay}" IsReadOnly="True" />
-                                            <TextBox Grid.Column="3" Text="{x:Bind Metric, Mode=OneWay}" IsReadOnly="True" />
+                                            <TextBlock Text="{x:Bind Destination, Mode=OneWay}" VerticalAlignment="Center" Margin="1,0" Width="120" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind SubnetMask, Mode=OneWay}" VerticalAlignment="Center" Margin="1,0" Width="120" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind Gateway, Mode=OneWay}" VerticalAlignment="Center" Margin="1,0" Width="120" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="3" Text="{x:Bind Metric, Mode=OneWay}" VerticalAlignment="Center" Margin="1,0" Width="40" TextAlignment="Right" />
                                             <Grid Grid.Column="4">
                                                 <Button
                                                     Tag="{x:Bind}"
                                                     Click="RemoveSystemRoute_Click"
                                                     ToolTipService.ToolTip="Route im System löschen"
                                                     HorizontalAlignment="Stretch"
-                                                    Padding="10,8"
+                                                    Padding="6,3"
                                                     Visibility="{x:Bind CanDeleteFromSystem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                     <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                                                         <FontIcon Glyph="&#xE74D;" FontSize="14" />
