@@ -52,6 +52,15 @@ namespace neTiPx.ViewModels
         private string _dns2StatusText = "Unbekannt";
         private string _dns2PingText = "Ping: -";
         private GatewayStatusKind _dns2StatusKind = GatewayStatusKind.Unknown;
+        private string _gatewayV6StatusText = "Unbekannt";
+        private string _gatewayV6PingText = "Ping: -";
+        private GatewayStatusKind _gatewayV6StatusKind = GatewayStatusKind.Unknown;
+        private string _dns1V6StatusText = "Unbekannt";
+        private string _dns1V6PingText = "Ping: -";
+        private GatewayStatusKind _dns1V6StatusKind = GatewayStatusKind.Unknown;
+        private string _dns2V6StatusText = "Unbekannt";
+        private string _dns2V6PingText = "Ping: -";
+        private GatewayStatusKind _dns2V6StatusKind = GatewayStatusKind.Unknown;
         private string _secondaryGatewayStatusText = "Unbekannt";
         private string _secondaryGatewayPingText = "Ping: -";
         private GatewayStatusKind _secondaryGatewayStatusKind = GatewayStatusKind.Unknown;
@@ -61,6 +70,15 @@ namespace neTiPx.ViewModels
         private string _secondaryDns2StatusText = "Unbekannt";
         private string _secondaryDns2PingText = "Ping: -";
         private GatewayStatusKind _secondaryDns2StatusKind = GatewayStatusKind.Unknown;
+        private string _secondaryGatewayV6StatusText = "Unbekannt";
+        private string _secondaryGatewayV6PingText = "Ping: -";
+        private GatewayStatusKind _secondaryGatewayV6StatusKind = GatewayStatusKind.Unknown;
+        private string _secondaryDns1V6StatusText = "Unbekannt";
+        private string _secondaryDns1V6PingText = "Ping: -";
+        private GatewayStatusKind _secondaryDns1V6StatusKind = GatewayStatusKind.Unknown;
+        private string _secondaryDns2V6StatusText = "Unbekannt";
+        private string _secondaryDns2V6PingText = "Ping: -";
+        private GatewayStatusKind _secondaryDns2V6StatusKind = GatewayStatusKind.Unknown;
 
         public AdapterViewModel()
         {
@@ -260,6 +278,60 @@ namespace neTiPx.ViewModels
             set => SetProperty(ref _dns2StatusKind, value);
         }
 
+        public string GatewayV6StatusText
+        {
+            get => _gatewayV6StatusText;
+            set => SetProperty(ref _gatewayV6StatusText, value);
+        }
+
+        public string GatewayV6PingText
+        {
+            get => _gatewayV6PingText;
+            set => SetProperty(ref _gatewayV6PingText, value);
+        }
+
+        public GatewayStatusKind GatewayV6StatusKind
+        {
+            get => _gatewayV6StatusKind;
+            set => SetProperty(ref _gatewayV6StatusKind, value);
+        }
+
+        public string Dns1V6StatusText
+        {
+            get => _dns1V6StatusText;
+            set => SetProperty(ref _dns1V6StatusText, value);
+        }
+
+        public string Dns1V6PingText
+        {
+            get => _dns1V6PingText;
+            set => SetProperty(ref _dns1V6PingText, value);
+        }
+
+        public GatewayStatusKind Dns1V6StatusKind
+        {
+            get => _dns1V6StatusKind;
+            set => SetProperty(ref _dns1V6StatusKind, value);
+        }
+
+        public string Dns2V6StatusText
+        {
+            get => _dns2V6StatusText;
+            set => SetProperty(ref _dns2V6StatusText, value);
+        }
+
+        public string Dns2V6PingText
+        {
+            get => _dns2V6PingText;
+            set => SetProperty(ref _dns2V6PingText, value);
+        }
+
+        public GatewayStatusKind Dns2V6StatusKind
+        {
+            get => _dns2V6StatusKind;
+            set => SetProperty(ref _dns2V6StatusKind, value);
+        }
+
         public string SecondaryGatewayStatusText
         {
             get => _secondaryGatewayStatusText;
@@ -314,6 +386,60 @@ namespace neTiPx.ViewModels
             set => SetProperty(ref _secondaryDns2StatusKind, value);
         }
 
+        public string SecondaryGatewayV6StatusText
+        {
+            get => _secondaryGatewayV6StatusText;
+            set => SetProperty(ref _secondaryGatewayV6StatusText, value);
+        }
+
+        public string SecondaryGatewayV6PingText
+        {
+            get => _secondaryGatewayV6PingText;
+            set => SetProperty(ref _secondaryGatewayV6PingText, value);
+        }
+
+        public GatewayStatusKind SecondaryGatewayV6StatusKind
+        {
+            get => _secondaryGatewayV6StatusKind;
+            set => SetProperty(ref _secondaryGatewayV6StatusKind, value);
+        }
+
+        public string SecondaryDns1V6StatusText
+        {
+            get => _secondaryDns1V6StatusText;
+            set => SetProperty(ref _secondaryDns1V6StatusText, value);
+        }
+
+        public string SecondaryDns1V6PingText
+        {
+            get => _secondaryDns1V6PingText;
+            set => SetProperty(ref _secondaryDns1V6PingText, value);
+        }
+
+        public GatewayStatusKind SecondaryDns1V6StatusKind
+        {
+            get => _secondaryDns1V6StatusKind;
+            set => SetProperty(ref _secondaryDns1V6StatusKind, value);
+        }
+
+        public string SecondaryDns2V6StatusText
+        {
+            get => _secondaryDns2V6StatusText;
+            set => SetProperty(ref _secondaryDns2V6StatusText, value);
+        }
+
+        public string SecondaryDns2V6PingText
+        {
+            get => _secondaryDns2V6PingText;
+            set => SetProperty(ref _secondaryDns2V6PingText, value);
+        }
+
+        public GatewayStatusKind SecondaryDns2V6StatusKind
+        {
+            get => _secondaryDns2V6StatusKind;
+            set => SetProperty(ref _secondaryDns2V6StatusKind, value);
+        }
+
         public bool ShowGatewayStatus => _settingsService.GetCheckConnectionGateway();
         public bool ShowDns1Status => _settingsService.GetCheckConnectionDns1();
         public bool ShowDns2Status => _settingsService.GetCheckConnectionDns2();
@@ -351,6 +477,36 @@ namespace neTiPx.ViewModels
             }
         }
 
+        public string PrimaryDns1AddressV6
+        {
+            get
+            {
+                try
+                {
+                    return PrimaryAdapterDns6List?.Count > 0 ? PrimaryAdapterDns6List[0] : string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        public string PrimaryDns2AddressV6
+        {
+            get
+            {
+                try
+                {
+                    return PrimaryAdapterDns6List?.Count > 1 ? PrimaryAdapterDns6List[1] : string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
         public string SecondaryDns1Address
         {
             get
@@ -373,6 +529,36 @@ namespace neTiPx.ViewModels
                 try
                 {
                     return SecondaryAdapterDns4List?.Count > 1 ? SecondaryAdapterDns4List[1] : string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        public string SecondaryDns1AddressV6
+        {
+            get
+            {
+                try
+                {
+                    return SecondaryAdapterDns6List?.Count > 0 ? SecondaryAdapterDns6List[0] : string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        public string SecondaryDns2AddressV6
+        {
+            get
+            {
+                try
+                {
+                    return SecondaryAdapterDns6List?.Count > 1 ? SecondaryAdapterDns6List[1] : string.Empty;
                 }
                 catch
                 {
@@ -482,6 +668,8 @@ namespace neTiPx.ViewModels
                 {
                     PrimaryAdapterDns6List.Add(hasIpv6 ? "Keine DNS konfiguriert" : "Keine IPv6 konfiguriert");
                 }
+                OnPropertyChanged(nameof(PrimaryDns1AddressV6));
+                OnPropertyChanged(nameof(PrimaryDns2AddressV6));
                 // Update connection status after loading adapter info
                 UpdateStatusAsync().ConfigureAwait(false);            }
             else
@@ -585,6 +773,8 @@ namespace neTiPx.ViewModels
                 {
                     SecondaryAdapterDns6List.Add(hasIpv6 ? "Keine DNS konfiguriert" : "Keine IPv6 konfiguriert");
                 }
+                OnPropertyChanged(nameof(SecondaryDns1AddressV6));
+                OnPropertyChanged(nameof(SecondaryDns2AddressV6));
 
                 UpdateStatusAsync().ConfigureAwait(false);
             }
@@ -611,6 +801,8 @@ namespace neTiPx.ViewModels
 
             OnPropertyChanged(nameof(PrimaryDns1Address));
             OnPropertyChanged(nameof(PrimaryDns2Address));
+            OnPropertyChanged(nameof(PrimaryDns1AddressV6));
+            OnPropertyChanged(nameof(PrimaryDns2AddressV6));
         }
 
         private void ClearSecondaryAdapterInfo()
@@ -628,6 +820,8 @@ namespace neTiPx.ViewModels
 
             OnPropertyChanged(nameof(SecondaryDns1Address));
             OnPropertyChanged(nameof(SecondaryDns2Address));
+            OnPropertyChanged(nameof(SecondaryDns1AddressV6));
+            OnPropertyChanged(nameof(SecondaryDns2AddressV6));
         }
 
         private async Task UpdateStatusAsync()
@@ -648,18 +842,28 @@ namespace neTiPx.ViewModels
                     isVisible: IsPrimaryAdapterSelected == Visibility.Visible,
                     gatewayAddress: PrimaryAdapterGateway,
                     dnsAddresses: PrimaryAdapterDns4List?.ToList(),
+                    gatewayAddressV6: PrimaryAdapterGateway6,
+                    dnsAddressesV6: PrimaryAdapterDns6List?.ToList(),
                     postGateway: PostGatewayStatus,
                     postDns1: PostDns1Status,
-                    postDns2: PostDns2Status);
+                    postDns2: PostDns2Status,
+                    postGatewayV6: PostGatewayV6Status,
+                    postDns1V6: PostDns1V6Status,
+                    postDns2V6: PostDns2V6Status);
 
                 await UpdateAdapterStatusAsync(
                     adapterKey: "NIC2",
                     isVisible: IsSecondaryAdapterSelected == Visibility.Visible,
                     gatewayAddress: SecondaryAdapterGateway,
                     dnsAddresses: SecondaryAdapterDns4List?.ToList(),
+                    gatewayAddressV6: SecondaryAdapterGateway6,
+                    dnsAddressesV6: SecondaryAdapterDns6List?.ToList(),
                     postGateway: PostSecondaryGatewayStatus,
                     postDns1: PostSecondaryDns1Status,
-                    postDns2: PostSecondaryDns2Status);
+                    postDns2: PostSecondaryDns2Status,
+                    postGatewayV6: PostSecondaryGatewayV6Status,
+                    postDns1V6: PostSecondaryDns1V6Status,
+                    postDns2V6: PostSecondaryDns2V6Status);
             }
             catch
             {
@@ -674,24 +878,35 @@ namespace neTiPx.ViewModels
             System.Collections.Generic.List<string>? dnsAddresses,
             System.Action<string, string, GatewayStatusKind> postGateway,
             System.Action<string, string, GatewayStatusKind> postDns1,
-            System.Action<string, string, GatewayStatusKind> postDns2)
+            System.Action<string, string, GatewayStatusKind> postDns2,
+            string? gatewayAddressV6,
+            System.Collections.Generic.List<string>? dnsAddressesV6,
+            System.Action<string, string, GatewayStatusKind> postGatewayV6,
+            System.Action<string, string, GatewayStatusKind> postDns1V6,
+            System.Action<string, string, GatewayStatusKind> postDns2V6)
         {
             if (!isVisible)
             {
                 postGateway("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 postDns1("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 postDns2("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                postGatewayV6("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                postDns1V6("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                postDns2V6("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
             var gateway = NormalizeHostAddress(gatewayAddress);
             var dns1 = NormalizeHostAddress(dnsAddresses != null && dnsAddresses.Count > 0 ? dnsAddresses[0] : string.Empty);
             var dns2 = NormalizeHostAddress(dnsAddresses != null && dnsAddresses.Count > 1 ? dnsAddresses[1] : string.Empty);
+            var gatewayV6 = NormalizeHostAddress(gatewayAddressV6);
+            var dns1V6 = NormalizeHostAddress(dnsAddressesV6 != null && dnsAddressesV6.Count > 0 ? dnsAddressesV6[0] : string.Empty);
+            var dns2V6 = NormalizeHostAddress(dnsAddressesV6 != null && dnsAddressesV6.Count > 1 ? dnsAddressesV6[1] : string.Empty);
 
             var checkGateway = _settingsService.GetCheckConnectionGateway();
             var checkDns1 = _settingsService.GetCheckConnectionDns1();
             var checkDns2 = _settingsService.GetCheckConnectionDns2();
-            DebugLog($"{adapterKey} targets gw={gateway} dns1={dns1} dns2={dns2} checks gw={checkGateway} dns1={checkDns1} dns2={checkDns2}");
+            DebugLog($"{adapterKey} targets gw={gateway} dns1={dns1} dns2={dns2} gw6={gatewayV6} dns16={dns1V6} dns26={dns2V6} checks gw={checkGateway} dns1={checkDns1} dns2={checkDns2}");
 
             if (checkGateway)
             {
@@ -718,6 +933,33 @@ namespace neTiPx.ViewModels
             else
             {
                 postDns2("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+            }
+
+            if (checkGateway)
+            {
+                await CheckHostStatusAsync(gatewayV6, adapterKey + "-GatewayV6", (status, ping, kind) => postGatewayV6(status, ping, kind));
+            }
+            else
+            {
+                postGatewayV6("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+            }
+
+            if (checkDns1)
+            {
+                await CheckHostStatusAsync(dns1V6, adapterKey + "-DNS1V6", (status, ping, kind) => postDns1V6(status, ping, kind));
+            }
+            else
+            {
+                postDns1V6("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+            }
+
+            if (checkDns2)
+            {
+                await CheckHostStatusAsync(dns2V6, adapterKey + "-DNS2V6", (status, ping, kind) => postDns2V6(status, ping, kind));
+            }
+            else
+            {
+                postDns2V6("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
             }
         }
 
@@ -851,6 +1093,60 @@ namespace neTiPx.ViewModels
             }, null);
         }
 
+        private void PostGatewayV6Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                GatewayV6StatusText = statusText;
+                GatewayV6PingText = pingText;
+                GatewayV6StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                GatewayV6StatusText = statusText;
+                GatewayV6PingText = pingText;
+                GatewayV6StatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostDns1V6Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                Dns1V6StatusText = statusText;
+                Dns1V6PingText = pingText;
+                Dns1V6StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                Dns1V6StatusText = statusText;
+                Dns1V6PingText = pingText;
+                Dns1V6StatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostDns2V6Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                Dns2V6StatusText = statusText;
+                Dns2V6PingText = pingText;
+                Dns2V6StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                Dns2V6StatusText = statusText;
+                Dns2V6PingText = pingText;
+                Dns2V6StatusKind = statusKind;
+            }, null);
+        }
+
         private void PostSecondaryGatewayStatus(string statusText, string pingText, GatewayStatusKind statusKind)
         {
             if (_uiContext == null)
@@ -902,6 +1198,60 @@ namespace neTiPx.ViewModels
                 SecondaryDns2StatusText = statusText;
                 SecondaryDns2PingText = pingText;
                 SecondaryDns2StatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostSecondaryGatewayV6Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                SecondaryGatewayV6StatusText = statusText;
+                SecondaryGatewayV6PingText = pingText;
+                SecondaryGatewayV6StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                SecondaryGatewayV6StatusText = statusText;
+                SecondaryGatewayV6PingText = pingText;
+                SecondaryGatewayV6StatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostSecondaryDns1V6Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                SecondaryDns1V6StatusText = statusText;
+                SecondaryDns1V6PingText = pingText;
+                SecondaryDns1V6StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                SecondaryDns1V6StatusText = statusText;
+                SecondaryDns1V6PingText = pingText;
+                SecondaryDns1V6StatusKind = statusKind;
+            }, null);
+        }
+
+        private void PostSecondaryDns2V6Status(string statusText, string pingText, GatewayStatusKind statusKind)
+        {
+            if (_uiContext == null)
+            {
+                SecondaryDns2V6StatusText = statusText;
+                SecondaryDns2V6PingText = pingText;
+                SecondaryDns2V6StatusKind = statusKind;
+                return;
+            }
+
+            _uiContext.Post(_ =>
+            {
+                SecondaryDns2V6StatusText = statusText;
+                SecondaryDns2V6PingText = pingText;
+                SecondaryDns2V6StatusKind = statusKind;
             }, null);
         }
 

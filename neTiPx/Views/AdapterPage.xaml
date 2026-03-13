@@ -233,35 +233,75 @@
                     <StackPanel Spacing="8">
                         <TextBlock Text="Status NIC 1" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                        <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="12" Height="12" Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding GatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding PrimaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding GatewayPingText}" FontSize="11" Opacity="0.7" />
-                        </StackPanel>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="8">
+                                <TextBlock Text="IPv4" FontWeight="SemiBold" FontSize="12" />
 
-                        <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="12" Height="12" Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Dns1StatusText}" VerticalAlignment="Center" FontSize="12" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding PrimaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding Dns1PingText}" FontSize="11" Opacity="0.7" />
-                        </StackPanel>
+                                <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding GatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding PrimaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding GatewayPingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
 
-                        <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="12" Height="12" Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Dns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Dns1StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding PrimaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Dns1PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Dns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding PrimaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Dns2PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
                             </StackPanel>
-                            <TextBlock Text="{Binding PrimaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding Dns2PingText}" FontSize="11" Opacity="0.7" />
-                        </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="8">
+                                <TextBlock Text="IPv6" FontWeight="SemiBold" FontSize="12" />
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding GatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding GatewayV6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding PrimaryAdapterGateway6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding GatewayV6PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Dns1V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding PrimaryDns1AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Dns1V6PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Dns2V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding PrimaryDns2AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Dns2V6PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
 
@@ -269,35 +309,75 @@
                     <StackPanel Spacing="8">
                         <TextBlock Text="Status NIC 2" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                        <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding SecondaryGatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding SecondaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding SecondaryGatewayPingText}" FontSize="11" Opacity="0.7" />
-                        </StackPanel>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <StackPanel Grid.Column="0" Spacing="8">
+                                <TextBlock Text="IPv4" FontWeight="SemiBold" FontSize="12" />
 
-                        <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding SecondaryDns1StatusText}" VerticalAlignment="Center" FontSize="12" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding SecondaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding SecondaryDns1PingText}" FontSize="11" Opacity="0.7" />
-                        </StackPanel>
+                                <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SecondaryGatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SecondaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding SecondaryGatewayPingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
 
-                        <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding SecondaryDns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SecondaryDns1StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SecondaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding SecondaryDns1PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SecondaryDns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SecondaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding SecondaryDns2PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
                             </StackPanel>
-                            <TextBlock Text="{Binding SecondaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding SecondaryDns2PingText}" FontSize="11" Opacity="0.7" />
-                        </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="8">
+                                <TextBlock Text="IPv6" FontWeight="SemiBold" FontSize="12" />
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SecondaryGatewayV6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SecondaryAdapterGateway6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding SecondaryGatewayV6PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SecondaryDns1V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SecondaryDns1AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding SecondaryDns1V6PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SecondaryDns2V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SecondaryDns2AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding SecondaryDns2V6PingText}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
             </Grid>
