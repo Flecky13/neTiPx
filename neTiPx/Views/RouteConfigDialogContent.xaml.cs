@@ -21,6 +21,10 @@ namespace neTiPx.Views
         public ObservableCollection<RouteEntry> Routes { get; }
         public ObservableCollection<RouteEntry> SystemRoutes { get; }
 
+        private const int MaxRoutes = 8;
+
+        public bool CanAddRoute => Routes.Count < MaxRoutes;
+
         public string SystemRoutesStatus
         {
             get => _systemRoutesStatus;
@@ -48,6 +52,7 @@ namespace neTiPx.Views
             InitializeComponent();
 
             Routes.CollectionChanged += Routes_CollectionChanged;
+            Routes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(CanAddRoute));
             foreach (var route in Routes)
             {
                 route.PropertyChanged += ProfileRoute_PropertyChanged;
@@ -80,7 +85,13 @@ namespace neTiPx.Views
 
         private void AddRoute_Click(object sender, RoutedEventArgs e)
         {
+            if (Routes.Count >= MaxRoutes)
+            {
+                return;
+            }
+
             Routes.Add(new RouteEntry { Metric = 1 });
+            OnPropertyChanged(nameof(CanAddRoute));
         }
 
         private async void RemoveRoute_Click(object sender, RoutedEventArgs e)
