@@ -18,12 +18,14 @@
   - [WLAN Scanner](#wlan-scanner)
   - [Netzwerk-Rechner](#netzwerk-rechner)
   - [Netzwerkscanner](#netzwerkscanner)
+  - [Routen Tool](#routen-tool)
   - [Einstellungen](#einstellungen)
 - [Funktionen im Detail](#-funktionen-im-detail)
   - [PING Tool](#ping-tool-1)
   - [Ping-Logging](#ping-logging)
   - [WLAN Scanner - Technische Details](#wlan-scanner---technische-details)
   - [Netzwerkscanner - Technische Details](#netzwerkscanner---technische-details)
+  - [Routenverwaltung und Routing-Analyse](#routenverwaltung-und-routing-analyse)
 - [Systemanforderungen](#-systemanforderungen)
 - [Installation](#-installation)
 
@@ -44,7 +46,8 @@
 - 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
 - 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
 - 🔎 **Netzwerkscanner**: Scan von IP-Bereichen mit Port-Prüfung und Detailansicht gefundener Geräte
-- 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner und Netzwerkscanner als eigene Unterseiten mit Lazy-Loading
+- 🛣️ **Routen Tool**: Anzeige aktueller IPv4-Routen inkl. Löschfunktion für benutzerseitige/persistente Routen und direktem Hinzufügen neuer Routen
+- 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner, Netzwerkscanner und Routen als eigene Unterseiten mit Lazy-Loading
 - 🗂️ **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
 - 🛠️ **Versteckte Admin-Konfiguration**: Auf der Settings-Seite öffnet das Wort `Wünschen` einen Dialog zur Pflege der Seiten-Sichtbarkeit
 
@@ -80,6 +83,9 @@ Verwalten Sie mehrere IP-Profile und wechseln Sie schnell zwischen verschiedenen
 - **DHCP oder Manuell**: Wählen Sie zwischen automatischer und manueller IP-Konfiguration
 - **Multiple IP-Adressen**: Weisen Sie einem Adapter mehrere IP-Adressen zu
 - **DNS-Konfiguration**: Konfigurieren Sie primäre und sekundäre DNS-Server
+- **Routen pro Profil**: Verwalten Sie statische IPv4-Routen direkt im IP-Profil
+- **Routenmodus**: Wählen Sie pro Profil zwischen `ersetzen` und `hinzufügen` vorhandener persistenter Routen
+- **Systemabgleich**: Bereits vorhandene Systemrouten werden beim Profil-Dialog erkannt und markiert
 - **Echtzeit-Verbindungsstatus**: Überwachen Sie Gateway und DNS-Server mit farbcodierter Ampel
   - 🟢 Grün: Erreichbar (guter Ping)
   - 🟡 Gelb: Erreichbar (langsamer Ping)
@@ -159,6 +165,17 @@ Der Netzwerkscanner durchsucht lokale IP-Bereiche und zeigt erkannte Geräte ink
 - **Port-Prüfung**: Frei konfigurierbare Portliste für Erreichbarkeits- und Dienstprüfung
 - **Geräteliste mit Details**: Übersicht erkannter Hosts mit Detailbereich zur schnellen Auswertung
 - **Direktaktionen**: Offene Ports können per Doppelklick mit der Standardanwendung geöffnet werden
+
+### Routen Tool
+
+Das Routen Tool zeigt die aktuelle IPv4-Routing-Tabelle und unterstützt die gezielte Analyse für ein konkretes Ziel.
+
+**Funktionen:**
+- **Routenübersicht**: Anzeige aktiver und persistenter IPv4-Routen inklusive Default-Route (`0.0.0.0/0`)
+- **Löschlogik nach Quelle**: Löschbutton nur für benutzerseitige/statische Routen, Systemrouten werden als `Systemroute` gekennzeichnet
+- **Ziel-IP-Filter**: Eingabe einer Ziel-IP zeigt nur die tatsächlich relevanten Routen (Longest Prefix Match + Metrik)
+- **Sortierbare Tabelle**: Sortierung über Spaltenköpfe mit Richtungsanzeige (`▲`/`▼`)
+- **Route hinzufügen**: Persistente Route direkt aus dem Tool anlegen
 
 ### Einstellungen
 
@@ -252,12 +269,20 @@ zurück zum
 - **Sortierbare Ergebnisliste**: Geräte können nach relevanten Spalten geordnet werden
 - **Detailansicht je Gerät**: Zusammengefasste Host-Informationen und erkannte offene Ports
 
+### Routenverwaltung und Routing-Analyse
+
+- **Quellenbasierte Klassifizierung**: Kombination aus `route print`, CIM (`Win32_IP4PersistedRouteTable`) und `Get-NetRoute` zur Unterscheidung von System- und Benutzer-Routen
+- **Persistenz-Erkennung**: Statische/persistente Routen werden als löschbar erkannt, systemseitige On-link/Local/DHCP-Routen bleiben geschützt
+- **Routing-Entscheidung im Filter**: Für Ziel-IPs werden nur Kandidaten mit bestem Präfix und bester Metrik angezeigt
+- **Sichere Lösch-/Add-Operationen**: Route-Änderungen erfolgen erhöht und werden nach Aktion in der Tabelle neu eingelesen
+
 ### IP-Profilverwaltung
 
 - **Mehrere Profile**: Speichern Sie unterschiedliche Netzwerkkonfigurationen für verschiedene Standorte (Büro, Home Office, Extern)
 - **Schnelles Umschalten**: Wechseln Sie mit wenigen Klicks zwischen gespeicherten Profilen
 - **DHCP-Unterstützung**: Automatische IP-Konfiguration via DHCP
 - **Manuelle Konfiguration**: Detaillierte Kontrolle über IP-Adressen, Subnetzmasken, Gateway und DNS
+- **Integrierte Routenverwaltung**: Profilbezogene statische IPv4-Routen mit Dialog zur Pflege und Systemabgleich
 - **Validierung**: Automatische Überprüfung der eingegebenen IP-Adressen und Netzwerkkonfiguration
 - **Multi-IP**: Weisen Sie einem Adapter mehrere IP-Adressen gleichzeitig zu
 

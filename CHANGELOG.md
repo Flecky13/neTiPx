@@ -4,6 +4,24 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.5.1.0]
+
+### Added
+- **Tools / Routen**: Neue Unterseite `Routen` mit Übersicht aktueller IPv4-Routen, direktem Löschen (abhängig von Klassifizierung) und Bereich zum Hinzufügen persistenter Routen.
+- **Routen-Analyse**: Ziel-IP-Filter auf der Routen-Seite, der nur die für das Ziel relevanten Kandidaten gemäß Routing-Entscheidung anzeigt (Longest Prefix Match + Metrik).
+- **Routen-Tabelle**: Sortierbare Spaltenköpfe (Zielnetz, Subnetzmaske, Gateway, Metrik) inkl. Sortierrichtungsanzeige.
+- **IP-Profile / Routen**: IP-Profile um erweiterte Routenfunktionen ergänzt (Routen im Profil verwalten, Route-Modus für Anwenden/Hinzufügen, Abgleich mit bestehenden Systemrouten).
+
+### Changed
+- **Adapter-Status**: Statuskarten in der Adapter-Ansicht auf Dual-Stack erweitert (IPv4 links, IPv6 rechts) für NIC 1 und NIC 2.
+- **Tools / Routen Layout**: Karten und Tabellenbreiten reagieren jetzt auf die Fensterbreite; Aktionsspalte stabilisiert mit Platzhaltertext `Systemroute` bei nicht löschbaren Einträgen.
+- **Tools-Navigation**: Neue Tool-Unterseite `Routen` in die Navigation und Sichtbarkeitskonfiguration integriert.
+
+### Fixed
+- **Tray / Mausover**: Nach Klick auf das Systray-Icon (links oder rechts) wird das Infofenster für 10 Sekunden unterdrückt.
+- **Routen-Einlesen**: Default-Route `0.0.0.0 / 0.0.0.0` wird korrekt in der Routenliste angezeigt.
+- **Routen-Klassifizierung**: Löschbarkeit basiert auf Routing-Quelle (u. a. `Get-NetRoute` Protokoll und persistente Routen), nicht nur auf Erstellung über die Tool-Seite.
+
 ## [1.4.2.0]
 
 ### Added
