@@ -35,7 +35,7 @@
             </Grid>
         </Border>
 
-        <!-- Einklappbares Menü mit Unterseiten -->
+        <!-- Einklappbares Menue mit Unterseiten -->
         <NavigationView
             x:Name="ToolsNavView"
             Grid.Row="1"
@@ -68,6 +68,11 @@
                         <FontIcon Glyph="&#xE774;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Routen" Tag="Routes">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8CE;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.Content>
@@ -84,6 +89,9 @@
 
                         <!-- Netzwerkscanner Unterseite -->
                         <Frame x:Name="NetworkScannerPanel" Padding="24" Visibility="Collapsed" />
+
+                        <!-- Routen Unterseite -->
+                        <Frame x:Name="RoutesPanel" Visibility="Collapsed" />
                     </Grid>
                 </ScrollViewer>
             </NavigationView.Content>

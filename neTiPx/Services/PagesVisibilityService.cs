@@ -22,7 +22,8 @@ namespace neTiPx.Services
             "Ping",
             "Wlan",
             "NetworkCalculator",
-            "NetworkScanner"
+            "NetworkScanner",
+            "Routes"
         };
 
         private static readonly string[] _xmlManagedPages = new[]
@@ -34,7 +35,8 @@ namespace neTiPx.Services
             "Ping",
             "Wlan",
             "NetworkCalculator",
-            "NetworkScanner"
+            "NetworkScanner",
+            "Routes"
         };
 
         private static readonly string[] _alwaysVisiblePages = new[]

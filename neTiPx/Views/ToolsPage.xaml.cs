@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using neTiPx.Services;
+using neTiPx.Views.Tools;
 
 namespace neTiPx.Views
 {
@@ -92,6 +93,7 @@ namespace neTiPx.Views
                 if (WlanPanel != null) WlanPanel.Visibility = Visibility.Collapsed;
                 if (NetworkCalculatorPanel != null) NetworkCalculatorPanel.Visibility = Visibility.Collapsed;
                 if (NetworkScannerPanel != null) NetworkScannerPanel.Visibility = Visibility.Collapsed;
+                   if (RoutesPanel != null) RoutesPanel.Visibility = Visibility.Collapsed;
 
                 // Ausgewähltes Panel anzeigen
                 switch (tag)
@@ -140,6 +142,17 @@ namespace neTiPx.Views
                         }
                         SetPingPageHostActiveState(false);
                         break;
+                       case "Routes":
+                           if (RoutesPanel != null)
+                           {
+                               RoutesPanel.Visibility = Visibility.Visible;
+                               if (RoutesPanel.Content == null)
+                               {
+                                   RoutesPanel.Navigate(typeof(RoutesPage));
+                               }
+                           }
+                           SetPingPageHostActiveState(false);
+                           break;
                 }
             }
         }

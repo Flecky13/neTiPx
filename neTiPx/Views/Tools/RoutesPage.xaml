@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="neTiPx.Views.Tools.RoutesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:neTiPx.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:neTiPx.Models"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+
+    <ScrollViewer Padding="0,0,0,24">
+        <StackPanel Spacing="16" MaxWidth="700" HorizontalAlignment="Left">
+
+            <!-- Oberer Bereich: Ständige Routen im System -->
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Ständige Routen im System" Style="{StaticResource SectionTitle}" />
+                            <TextBlock x:Name="RoutesStatusText" Text="Wird eingelesen..."
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Click="RefreshRoutes_Click"
+                                Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center"
+                                ToolTipService.ToolTip="Routen aus dem System neu einlesen">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                                <TextBlock Text="Neu Einlesen" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Spaltenköpfe -->
+                    <Grid ColumnDefinitions="140,140,140,50,48" ColumnSpacing="6" Margin="4,4,0,0">
+                        <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
+                    <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                        <ItemsRepeater x:Name="RoutesRepeater" ItemsSource="{x:Bind Routes, Mode=OneWay}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="models:RouteEntry">
+                                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1" CornerRadius="6" Padding="2" Margin="0,0,0,2">
+                                        <Grid ColumnDefinitions="140,140,140,50,48" ColumnSpacing="6">
+                                            <TextBlock Text="{x:Bind Destination, Mode=OneWay}"
+                                                       VerticalAlignment="Center" Margin="4,4" FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{x:Bind SubnetMask, Mode=OneWay}"
+                                                       VerticalAlignment="Center" Margin="4,4" FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" Text="{x:Bind Gateway, Mode=OneWay}"
+                                                       VerticalAlignment="Center" Margin="4,4" FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="3" Text="{x:Bind Metric, Mode=OneWay}"
+                                                       VerticalAlignment="Center" Margin="4,4" FontSize="12"
+                                                       TextAlignment="Right" />
+                                            <Button Grid.Column="4"
+                                                    Tag="{x:Bind}"
+                                                    Click="DeleteRoute_Click"
+                                                    ToolTipService.ToolTip="Ständige Route dauerhaft aus dem System entfernen"
+                                                    VerticalAlignment="Center"
+                                                    Padding="8" MinWidth="0"
+                                                    Visibility="{x:Bind CanDeleteFromSystem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- Unterer Bereich: Route hinzufügen -->
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Route hinzufügen" Style="{StaticResource SectionTitle}" />
+
+                    <!-- Spaltenköpfe -->
+                    <Grid ColumnDefinitions="140,140,140,50" ColumnSpacing="8">
+                        <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
+                    <!-- Eingabefelder -->
+                    <Grid ColumnDefinitions="140,140,140,50" ColumnSpacing="8">
+                        <TextBox x:Name="AddDestinationBox"
+                                 PlaceholderText="z.B. 10.10.0.0"
+                                 ToolTipService.ToolTip="Zielnetzwerk-Adresse, z.B. 10.10.0.0" />
+                        <TextBox x:Name="AddSubnetBox" Grid.Column="1"
+                                 PlaceholderText="z.B. 255.255.0.0"
+                                 ToolTipService.ToolTip="Subnetzmaske, z.B. 255.255.0.0" />
+                        <TextBox x:Name="AddGatewayBox" Grid.Column="2"
+                                 PlaceholderText="z.B. 192.168.1.1"
+                                 ToolTipService.ToolTip="Gateway-Adresse, z.B. 192.168.1.1" />
+                        <TextBox x:Name="AddMetricBox" Grid.Column="3"
+                                 PlaceholderText="1"
+                                 ToolTipService.ToolTip="Metrik, Standard: 1" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Button Click="AddRoute_Click" Style="{StaticResource AccentButtonStyle}"
+                                ToolTipService.ToolTip="Ständige Route zum System hinzufügen">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE710;" FontSize="14" />
+                                <TextBlock Text="Route hinzufügen" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock x:Name="AddStatusText" Text=""
+                                   Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   Visibility="Collapsed" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

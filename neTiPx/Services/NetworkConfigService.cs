@@ -129,6 +129,93 @@ namespace neTiPx.Services
             return RunNetshCommandsElevated(commands);
         }
 
+        public (bool success, List<RouteEntry> routes, string? error) ReadAllPersistentRoutes()
+        {
+            try
+            {
+                var routePrintOutput = ReadRoutePrintOutput();
+                var allRoutes = ParseRoutePrintRoutes(routePrintOutput, includeActiveRoutes: true, includePersistentRoutes: true);
+                var cimResult = TryReadPersistentRoutesFromCim();
+                var netRouteResult = TryReadNetRoutesFromPowerShell();
+
+                if (allRoutes.Count == 0)
+                {
+                    if (cimResult.success)
+                    {
+                        allRoutes = cimResult.routes;
+                    }
+                }
+
+                var persistentRouteKeys = new HashSet<string>(
+                    cimResult.routes.Select(route => BuildRouteKey(route.Destination, route.SubnetMask, route.Gateway)),
+                    StringComparer.OrdinalIgnoreCase);
+
+                var userRouteKeys = new HashSet<string>(
+                    netRouteResult.routes
+                        .Where(route => route.CanDeleteFromSystem)
+                        .Select(route => BuildRouteKey(route.Destination, route.SubnetMask, route.Gateway)),
+                    StringComparer.OrdinalIgnoreCase);
+
+                var normalized = allRoutes
+                    .GroupBy(r => $"{r.Destination}|{r.SubnetMask}|{r.Gateway}|{r.Metric}", StringComparer.OrdinalIgnoreCase)
+                    .Select(g =>
+                    {
+                        var first = g.First();
+                        var key = BuildRouteKey(first.Destination, first.SubnetMask, first.Gateway);
+                        first.CanDeleteFromSystem = persistentRouteKeys.Contains(key) || userRouteKeys.Contains(key);
+                        return first;
+                    })
+                    .ToList();
+
+                return (true, normalized, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Routen: " + ex.Message);
+            }
+        }
+
+        public (bool success, string? error) DeleteRoute(RouteEntry route)
+        {
+            var destination = route.Destination?.Trim() ?? string.Empty;
+            var subnetMask = route.SubnetMask?.Trim() ?? string.Empty;
+
+            if (!IsValidIPv4(destination))
+                return (false, "Zieladresse ist ungültig.");
+
+            if (SubnetMaskToPrefix(subnetMask) <= 0)
+                return (false, "Subnetzmaske ist ungültig.");
+
+            var commands = new List<string>
+            {
+                $"route delete {destination} mask {subnetMask} {route.Gateway}"
+            };
+
+            return RunNetshCommandsElevated(commands);
+        }
+
+        public (bool success, string? error) AddRouteStandalone(RouteEntry route)
+        {
+            var sanitizedRoute = new RouteEntry
+            {
+                Destination = route.Destination?.Trim() ?? string.Empty,
+                SubnetMask = route.SubnetMask?.Trim() ?? string.Empty,
+                Gateway = route.Gateway?.Trim() ?? string.Empty,
+                Metric = route.Metric > 0 ? route.Metric : 1
+            };
+
+            var (isValid, validationError) = ValidateRoute(sanitizedRoute);
+            if (!isValid)
+                return (false, validationError);
+
+            var commands = new List<string>
+            {
+                $"route -p add {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
+            };
+
+            return RunNetshCommandsElevated(commands);
+        }
+
         public (bool success, string? error) RemoveRoute(IpProfile profile, RouteEntry route)
         {
             if (string.IsNullOrWhiteSpace(profile.AdapterName))
@@ -630,7 +717,8 @@ namespace neTiPx.Services
                 Destination = destination,
                 SubnetMask = subnetMask,
                 Gateway = gateway,
-                Metric = metric
+                Metric = metric,
+                CanDeleteFromSystem = true
             });
         }
 
@@ -680,6 +768,106 @@ namespace neTiPx.Services
             {
                 return string.Empty;
             }
+        }
+
+        private static (bool success, List<RouteEntry> routes, string? error) TryReadNetRoutesFromPowerShell()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"@(Get-NetRoute -AddressFamily IPv4 | Select-Object DestinationPrefix,NextHop,RouteMetric,Protocol) | ConvertTo-Json -Compress\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, new List<RouteEntry>(), "powershell process could not be started");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    return (false, new List<RouteEntry>(), string.IsNullOrWhiteSpace(error) ? $"powershell exit code {process.ExitCode}" : error.Trim());
+                }
+
+                var trimmed = output.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed))
+                {
+                    return (true, new List<RouteEntry>(), null);
+                }
+
+                using var document = JsonDocument.Parse(trimmed);
+                var parsed = new List<RouteEntry>();
+                if (document.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var element in document.RootElement.EnumerateArray())
+                    {
+                        AddNetRoute(parsed, element);
+                    }
+                }
+                else if (document.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    AddNetRoute(parsed, document.RootElement);
+                }
+
+                return (true,
+                    parsed
+                        .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
+                        .Select(group => group.First())
+                        .ToList(),
+                    null);
+            }
+            catch (Exception ex)
+            {
+                return (false, new List<RouteEntry>(), ex.Message);
+            }
+        }
+
+        private static void AddNetRoute(List<RouteEntry> routes, JsonElement element)
+        {
+            var destinationPrefix = GetJsonStringValue(element, "DestinationPrefix");
+            var nextHop = GetJsonStringValue(element, "NextHop");
+            var routeMetricText = GetJsonStringValue(element, "RouteMetric");
+            var protocol = GetJsonStringValue(element, "Protocol");
+
+            if (string.IsNullOrWhiteSpace(destinationPrefix) || !TryParsePrefix(destinationPrefix, out var destination, out var subnetMask))
+            {
+                return;
+            }
+
+            if (!int.TryParse(routeMetricText, out var metric) || metric <= 0)
+            {
+                metric = 1;
+            }
+
+            var normalizedGateway = string.IsNullOrWhiteSpace(nextHop) ? "On-link" : nextHop;
+            var canDelete = string.Equals(protocol, "NetMgmt", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(protocol, "Static", StringComparison.OrdinalIgnoreCase);
+
+            routes.Add(new RouteEntry
+            {
+                Destination = destination,
+                SubnetMask = subnetMask,
+                Gateway = normalizedGateway,
+                Metric = metric,
+                CanDeleteFromSystem = canDelete
+            });
+        }
+
+        private static string BuildRouteKey(string destination, string subnetMask, string gateway)
+        {
+            return $"{destination?.Trim()}|{subnetMask?.Trim()}|{gateway?.Trim()}";
         }
 
         private static List<RouteEntry> ParseRoutePrintRoutes(string output, bool includeActiveRoutes, bool includePersistentRoutes)
@@ -740,7 +928,7 @@ namespace neTiPx.Services
                         continue;
                     }
 
-                    AddParsedRoute(routes, parts[0], parts[1], parts[2], parts[4]);
+                    AddParsedRoute(routes, parts[0], parts[1], parts[2], parts[4], canDeleteFromSystem: false);
                     continue;
                 }
 
@@ -749,16 +937,21 @@ namespace neTiPx.Services
                     continue;
                 }
 
-                AddParsedRoute(routes, parts[0], parts[1], parts[2], parts[3]);
+                AddParsedRoute(routes, parts[0], parts[1], parts[2], parts[3], canDeleteFromSystem: true);
             }
 
             return routes
                 .GroupBy(route => $"{route.Destination}|{route.SubnetMask}|{route.Gateway}|{route.Metric}", StringComparer.OrdinalIgnoreCase)
-                .Select(group => group.First())
+                .Select(group =>
+                {
+                    var first = group.First();
+                    first.CanDeleteFromSystem = group.Any(r => r.CanDeleteFromSystem);
+                    return first;
+                })
                 .ToList();
         }
 
-        private static void AddParsedRoute(List<RouteEntry> routes, string destination, string mask, string gateway, string metricText)
+        private static void AddParsedRoute(List<RouteEntry> routes, string destination, string mask, string gateway, string metricText, bool canDeleteFromSystem)
         {
             var normalizedDestination = destination.Trim();
             var normalizedMask = mask.Trim();
@@ -779,7 +972,8 @@ namespace neTiPx.Services
                 Destination = normalizedDestination,
                 SubnetMask = normalizedMask,
                 Gateway = normalizedGateway,
-                Metric = metric
+                Metric = metric,
+                CanDeleteFromSystem = canDeleteFromSystem
             });
         }
 
