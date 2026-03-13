@@ -25,6 +25,7 @@ namespace neTiPx.Services
         private const int NimDelete = 0x00000002;
 
         private const int WmMouseMove = 0x0200;
+        private const int WmLButtonUp = 0x0202;
         private const int WmLButtonDblClk = 0x0203;
         private const int WmRButtonUp = 0x0205;
 
@@ -40,6 +41,7 @@ namespace neTiPx.Services
         private readonly DispatcherQueue _dispatcherQueue;
 
         private bool _isMouseOver;
+        private DateTime _suppressHoverUntil = DateTime.MinValue;
         private Point _enterCursorPosition;
         private IntPtr _iconHandle = IntPtr.Zero;
         private IntPtr _windowHandle = IntPtr.Zero;
@@ -141,10 +143,15 @@ namespace neTiPx.Services
                     case WmMouseMove:
                         HandleMouseMove();
                         break;
+                    case WmLButtonUp:
+                        SuppressHoverWindow();
+                        break;
                     case WmLButtonDblClk:
+                        SuppressHoverWindow();
                         ShowMainWindow();
                         break;
                     case WmRButtonUp:
+                        SuppressHoverWindow();
                         ShowContextMenu();
                         break;
                 }
@@ -153,8 +160,18 @@ namespace neTiPx.Services
             return CallWindowProc(_oldWndProc, hWnd, msg, wParam, lParam);
         }
 
+        private void SuppressHoverWindow()
+        {
+            _suppressHoverUntil = DateTime.UtcNow.AddSeconds(10);
+            _isMouseOver = false;
+            HideHoverWindow();
+        }
+
         private void HandleMouseMove()
         {
+            if (DateTime.UtcNow < _suppressHoverUntil)
+                return;
+
             if (!_isMouseOver)
             {
                 _isMouseOver = true;
