@@ -10,13 +10,14 @@
     mc:Ignorable="d">
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
     </Page.Resources>
 
-    <ScrollViewer Padding="0,0,0,24">
-        <StackPanel Spacing="16" MaxWidth="700" HorizontalAlignment="Left">
+    <ScrollViewer Padding="0,0,0,24" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="16" HorizontalAlignment="Stretch">
 
             <!-- Oberer Bereich: Ständige Routen im System -->
-            <Border Style="{StaticResource CardBorder}" Padding="16">
+            <Border Style="{StaticResource CardBorder}" Padding="16" HorizontalAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <StackPanel Spacing="2">
@@ -34,27 +35,59 @@
                         </Button>
                     </Grid>
 
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBox x:Name="DestinationFilterBox"
+                                 PlaceholderText="Ziel-IP-Filter, z.B. 10.10.20.5"
+                                 TextChanged="DestinationFilterBox_TextChanged"
+                                 ToolTipService.ToolTip="Zeigt nur Routen, die für diese Ziel-IP gemäß Routing-Entscheidung in Betracht kommen" />
+                        <Button Grid.Column="1"
+                                Click="ClearFilter_Click"
+                                ToolTipService.ToolTip="Ziel-IP-Filter löschen">
+                            <FontIcon Glyph="&#xE711;" />
+                        </Button>
+                    </Grid>
+
                     <!-- Spaltenköpfe -->
-                    <Grid ColumnDefinitions="140,140,140,50,48" ColumnSpacing="6" Margin="4,4,0,0">
-                        <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Grid ColumnDefinitions="2*,2*,2*,70,110" ColumnSpacing="8" Margin="4,4,0,0">
+                        <Button Click="SortDestination_Click" HorizontalAlignment="Left" MinWidth="0" Padding="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock x:Name="DestinationHeaderText" Text="Zielnetz" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="DestinationSortIndicator" Text="" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" Click="SortSubnetMask_Click" HorizontalAlignment="Left" MinWidth="0" Padding="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock x:Name="SubnetHeaderText" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="SubnetSortIndicator" Text="" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" Click="SortGateway_Click" HorizontalAlignment="Left" MinWidth="0" Padding="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock x:Name="GatewayHeaderText" Text="Gateway" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="GatewaySortIndicator" Text="" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="3" Click="SortMetric_Click" HorizontalAlignment="Left" MinWidth="0" Padding="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock x:Name="MetricHeaderText" Text="Metrik" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="MetricSortIndicator" Text="" FontSize="12" />
+                            </StackPanel>
+                        </Button>
                         <TextBlock Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
 
-                    <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
-                        <ItemsRepeater x:Name="RoutesRepeater" ItemsSource="{x:Bind Routes, Mode=OneWay}">
+                    <ScrollViewer MaxHeight="280" VerticalScrollBarVisibility="Auto">
+                        <ItemsRepeater x:Name="RoutesRepeater" ItemsSource="{x:Bind FilteredRoutes, Mode=OneWay}">
                             <ItemsRepeater.ItemTemplate>
                                 <DataTemplate x:DataType="models:RouteEntry">
                                     <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                             BorderThickness="1" CornerRadius="6" Padding="2" Margin="0,0,0,2">
-                                        <Grid ColumnDefinitions="140,140,140,50,48" ColumnSpacing="6">
+                                        <Grid ColumnDefinitions="2*,2*,2*,70,110" ColumnSpacing="8">
                                             <TextBlock Text="{x:Bind Destination, Mode=OneWay}"
                                                        VerticalAlignment="Center" Margin="4,4" FontSize="12"
                                                        TextTrimming="CharacterEllipsis" />
@@ -67,15 +100,26 @@
                                             <TextBlock Grid.Column="3" Text="{x:Bind Metric, Mode=OneWay}"
                                                        VerticalAlignment="Center" Margin="4,4" FontSize="12"
                                                        TextAlignment="Right" />
-                                            <Button Grid.Column="4"
+                                            <Grid Grid.Column="4" MinWidth="110">
+                                                <Button
                                                     Tag="{x:Bind}"
                                                     Click="DeleteRoute_Click"
                                                     ToolTipService.ToolTip="Ständige Route dauerhaft aus dem System entfernen"
                                                     VerticalAlignment="Center"
-                                                    Padding="8" MinWidth="0"
+                                                    HorizontalAlignment="Center"
+                                                    Padding="8"
+                                                    MinWidth="0"
                                                     Visibility="{x:Bind CanDeleteFromSystem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <FontIcon Glyph="&#xE74D;" FontSize="14" />
-                                            </Button>
+                                                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                                </Button>
+                                                <TextBlock
+                                                    Text="Systemroute"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    FontSize="12"
+                                                    Visibility="{x:Bind CanDeleteFromSystem, Mode=OneWay, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" />
+                                            </Grid>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -86,12 +130,12 @@
             </Border>
 
             <!-- Unterer Bereich: Route hinzufügen -->
-            <Border Style="{StaticResource CardBorder}" Padding="16">
+            <Border Style="{StaticResource CardBorder}" Padding="16" HorizontalAlignment="Stretch">
                 <StackPanel Spacing="12">
                     <TextBlock Text="Route hinzufügen" Style="{StaticResource SectionTitle}" />
 
                     <!-- Spaltenköpfe -->
-                    <Grid ColumnDefinitions="140,140,140,50" ColumnSpacing="8">
+                    <Grid ColumnDefinitions="2*,2*,2*,Auto" ColumnSpacing="8">
                         <TextBlock Text="Zielnetz" FontWeight="SemiBold" FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12"
@@ -103,7 +147,7 @@
                     </Grid>
 
                     <!-- Eingabefelder -->
-                    <Grid ColumnDefinitions="140,140,140,50" ColumnSpacing="8">
+                    <Grid ColumnDefinitions="2*,2*,2*,Auto" ColumnSpacing="8">
                         <TextBox x:Name="AddDestinationBox"
                                  PlaceholderText="z.B. 10.10.0.0"
                                  ToolTipService.ToolTip="Zielnetzwerk-Adresse, z.B. 10.10.0.0" />

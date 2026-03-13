@@ -956,13 +956,15 @@ namespace neTiPx.Services
             var normalizedDestination = destination.Trim();
             var normalizedMask = mask.Trim();
             var normalizedGateway = gateway.Trim();
+            var isDefaultRoute = string.Equals(normalizedDestination, "0.0.0.0", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(normalizedMask, "0.0.0.0", StringComparison.OrdinalIgnoreCase);
 
             if (!int.TryParse(metricText.Trim(), out var metric) || metric <= 0)
             {
                 metric = 1;
             }
 
-            if (!IsValidIPv4(normalizedDestination) || !IsValidSubnetMask(normalizedMask))
+            if (!IsValidIPv4(normalizedDestination) || (!IsValidSubnetMask(normalizedMask) && !isDefaultRoute))
             {
                 return;
             }
