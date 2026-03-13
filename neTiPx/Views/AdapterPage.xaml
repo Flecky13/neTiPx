@@ -38,7 +38,7 @@
                     <StackPanel Spacing="16">
                         <!-- Titel -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Netzwerkkarte 1" Style="{StaticResource SectionTitle}" FontSize="18" FontWeight="Bold" />
+                            <TextBlock Text="Netzwerkkarte 1" Style="{StaticResource SectionTitle}" FontSize="16" FontWeight="Bold" />
                         </StackPanel>
 
                         <!-- Name -->
@@ -136,7 +136,7 @@
                     <StackPanel Spacing="16">
                         <!-- Titel -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Netzwerkkarte 2" Style="{StaticResource SectionTitle}" FontSize="18" FontWeight="Bold" />
+                            <TextBlock Text="Netzwerkkarte 2" Style="{StaticResource SectionTitle}" FontSize="16" FontWeight="Bold" />
                         </StackPanel>
 
                         <!-- Name -->
