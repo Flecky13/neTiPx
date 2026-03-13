@@ -86,11 +86,11 @@
                 <!-- Mittlerer Bereich: Settings -->
                 <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="16">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel Spacing="16">
+                        <StackPanel Spacing="12">
                             <TextBlock Text="Profil-Einstellungen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
                             <!-- Profilname -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="4">
                                 <TextBlock Text="Profilname" FontWeight="SemiBold" />
                                 <TextBox
                                     Text="{Binding SelectedProfile.Name, Mode=TwoWay}"
@@ -99,7 +99,7 @@
                             </StackPanel>
 
                             <!-- Netzwerkkarte -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="4">
                                 <TextBlock Text="Netzwerkkarte" FontWeight="SemiBold" />
                                 <ComboBox
                                     ItemsSource="{Binding AdapterList}"
@@ -110,7 +110,7 @@
                             </StackPanel>
 
                             <!-- IP Modus -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="4">
                                 <TextBlock Text="IP Modus" FontWeight="SemiBold" />
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <RadioButton
@@ -146,7 +146,7 @@
                             </StackPanel>
 
                             <!-- Gateway -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="4">
                                 <TextBlock Text="Gateway" FontWeight="SemiBold" />
                                 <TextBox
                                     Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
@@ -156,13 +156,13 @@
                             </StackPanel>
 
                             <!-- DNS Server -->
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="4">
                                 <TextBlock Text="DNS Server" FontWeight="SemiBold" />
                                 <TextBox
                                     Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
                                     PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
                                     ToolTipService.ToolTip="Beispiel: 8.8.8.8"
-                                    Margin="0,0,0,8"
+                                    Margin="0,0,0,2"
                                     IsEnabled="{Binding IsManual}" />
                                 <TextBox
                                     Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
@@ -172,11 +172,11 @@
                             </StackPanel>
 
                             <!-- IP Adressen -->
-                            <StackPanel Spacing="12">
+                            <StackPanel Spacing="8">
                                 <TextBlock
                                     Text="IP Adressen" FontWeight="SemiBold"/>
 
-                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8">
+                                <Grid ColumnDefinitions="170,170,90" ColumnSpacing="6" Margin="0,2,0,0">
                                     <TextBlock Text="IP Adresse" FontWeight="SemiBold" FontSize="12" />
                                     <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" />
                                     <TextBlock Grid.Column="2" Text="Aktion" FontWeight="SemiBold" FontSize="12" />
@@ -188,28 +188,34 @@
                                     <ItemsRepeater ItemsSource="{Binding SelectedProfile.IpAddresses}">
                                         <ItemsRepeater.ItemTemplate>
                                             <DataTemplate x:DataType="models:IpAddressEntry">
-                                                <Grid ColumnDefinitions="*,*,Auto" Margin="0,0,0,8" ColumnSpacing="8">
-                                                    <TextBox
-                                                        Text="{x:Bind IpAddress, Mode=TwoWay}"
-                                                        PlaceholderText="z.B. 192.168.1.10"
-                                                        ToolTipService.ToolTip="Beispiel: 192.168.1.10"
-                                                        IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                                    <TextBox
-                                                        Grid.Column="1"
-                                                        Text="{x:Bind SubnetMask, Mode=TwoWay}"
-                                                        PlaceholderText="255.255.255.0 , /24"
-                                                        ToolTipService.ToolTip="Beispiel: 255.255.255.0, /24 oder 24"
-                                                        IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                                    <Button
-                                                        Grid.Column="2"
-                                                        Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
-                                                        CommandParameter="{Binding}"
-                                                        ToolTipService.ToolTip="IP entfernen"
-                                                        Padding="8"
-                                                        IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}">
-                                                        <FontIcon Glyph="&#xE74D;" FontSize="16" />
-                                                    </Button>
-                                                </Grid>
+                                                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="2" Margin="0,0,0,1">
+                                                    <Grid ColumnDefinitions="170,170,90" ColumnSpacing="6">
+                                                        <TextBox
+                                                            Text="{x:Bind IpAddress, Mode=TwoWay}"
+                                                            PlaceholderText="z.B. 192.168.1.10"
+                                                            ToolTipService.ToolTip="Beispiel: 192.168.1.10"
+                                                            Margin="1,0"
+                                                            IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
+                                                        <TextBox
+                                                            Grid.Column="1"
+                                                            Text="{x:Bind SubnetMask, Mode=TwoWay}"
+                                                            PlaceholderText="255.255.255.0 , /24"
+                                                            ToolTipService.ToolTip="Beispiel: 255.255.255.0, /24 oder 24"
+                                                            Margin="1,0"
+                                                            IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
+                                                        <Button
+                                                            Grid.Column="2"
+                                                            Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTipService.ToolTip="IP entfernen"
+                                                            VerticalAlignment="Center"
+                                                            Padding="8"
+                                                            MinWidth="0"
+                                                            IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}">
+                                                            <FontIcon Glyph="&#xE74D;" FontSize="16" />
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
                                             </DataTemplate>
                                         </ItemsRepeater.ItemTemplate>
                                     </ItemsRepeater>

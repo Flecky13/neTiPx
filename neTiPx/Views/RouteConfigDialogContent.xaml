@@ -65,13 +65,11 @@
                                                     Tag="{x:Bind}"
                                                     Click="RemoveSystemRoute_Click"
                                                     ToolTipService.ToolTip="Route im System löschen"
-                                                    HorizontalAlignment="Stretch"
-                                                    Padding="6,3"
+                                                    VerticalAlignment="Center"
+                                                    Padding="8"
+                                                    MinWidth="0"
                                                     Visibility="{x:Bind CanDeleteFromSystem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                        <FontIcon Glyph="&#xE74D;" FontSize="14" />
-                                                        <TextBlock Text="Löschen" />
-                                                    </StackPanel>
+                                                    <FontIcon Glyph="&#xE74D;" FontSize="16" />
                                                 </Button>
                                                 <TextBlock
                                                     Text="Profil"
@@ -143,26 +141,22 @@
                                                 Tag="{x:Bind}"
                                                 Click="RemoveRoute_Click"
                                                 ToolTipService.ToolTip="Route löschen"
-                                                HorizontalAlignment="Stretch"
-                                                Padding="6,3"
+                                                VerticalAlignment="Center"
+                                                Padding="8"
+                                                MinWidth="0"
                                                 Visibility="{x:Bind ShowDeleteButton, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE74D;" FontSize="14" />
-                                                    <TextBlock Text="Löschen" />
-                                                </StackPanel>
+                                                <FontIcon Glyph="&#xE74D;" FontSize="16" />
                                             </Button>
                                             <Button
                                                 Grid.Column="4"
                                                 Tag="{x:Bind}"
                                                 Click="ApplyRoute_Click"
                                                 ToolTipService.ToolTip="Route im System anlegen"
-                                                HorizontalAlignment="Stretch"
-                                                Padding="6,3"
+                                                VerticalAlignment="Center"
+                                                Padding="8"
+                                                MinWidth="0"
                                                 Visibility="{x:Bind ShowApplyButton, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="&#xE73E;" FontSize="14" />
-                                                    <TextBlock Text="Anwenden" />
-                                                </StackPanel>
+                                                <FontIcon Glyph="&#xE73E;" FontSize="16" />
                                             </Button>
                                         </Grid>
                                     </Border>
