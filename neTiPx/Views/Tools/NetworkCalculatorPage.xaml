@@ -47,6 +47,7 @@
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                         <TextBox x:Name="NetworkCalcMaxHostsTextBox"
                                  Grid.Column="0"
+                                 IsReadOnly="True"
                                  TextChanged="NetworkCalcMaxHostsTextBox_TextChanged"
                                  PlaceholderText="z.B. 254" />
                         <Button Grid.Column="1"
