@@ -220,6 +220,12 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - **Benutzerdefinierte Themes**: Erstellen und bearbeiten Sie eigene Farbthemen
 - **Theme-Editor**: Passen Sie Hintergrund-, Text- und Akzentfarben individuell an
 
+#### 🌐 Sprachauswahl
+
+- Die Anwendung unterstützt mehrere Sprachen. Über das Dropdown-Menü in den Einstellungen kann die Anzeigesprache gewählt werden.
+- Im Dropdown werden die Eigenbezeichnungen der Sprachen (z. B. „Deutsch“, „English“, „Español“) angezeigt. Diese werden dynamisch aus den Sprachdateien geladen.
+- Änderungen der Sprache wirken sich sofort auf die gesamte Benutzeroberfläche aus.
+
 zurück zum
 [Inhaltsverzeichnis](#-inhaltsverzeichnis)
 ---

@@ -4,6 +4,14 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0.0]
+
+### Added
+- **Sprachauswahl**: Das Dropdown-Menü für die Sprache zeigt jetzt den Eigennamen jeder Sprache (z. B. „Deutsch“, „English“, „Español“) an. Die Namen werden dynamisch aus den Sprachdateien (LANG_SELF) geladen.
+
+### Changed
+- **Sprachauswahl**: Die bisherige Anzeige von Sprachcode + Name wurde durch die Anzeige des Eigenbezeichnung ersetzt, um die Auswahl für Nutzer klarer und internationaler zu gestalten.
+
 ## [1.5.1.0]
 
 ### Added
