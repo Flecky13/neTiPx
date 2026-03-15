@@ -13,10 +13,10 @@
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Einstellungen" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock x:Name="SettingsTitleText" Text="Einstellungen" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Konfiguriere dein Tool nach deinen" VerticalAlignment="Center" />
-                            <TextBlock Text="Wünschen"
+                            <TextBlock x:Name="SettingsSubtitlePreText" Text="Konfiguriere dein Tool nach deinen" VerticalAlignment="Center" />
+                            <TextBlock x:Name="SettingsSubtitleLinkText" Text="Wünschen"
                                        VerticalAlignment="Center"
                                        Tapped="OpenPagesVisibilityConfigText_Tapped" />
                         </StackPanel>
@@ -49,13 +49,13 @@
                 <!-- Oben Links: Netzwerkadapter -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="0">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="AdapterCardTitle" Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
                         <StackPanel x:Name="AdaptersSettingsContent" Spacing="12">
-                        <TextBlock Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="AdapterCardDesc" Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <!-- Primärer Adapter -->
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Primärer Adapter (NIC 1):" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock x:Name="PrimaryAdapterLabel" Text="Primärer Adapter (NIC 1):" FontWeight="SemiBold" FontSize="12" />
                             <ComboBox
                                 x:Name="PrimaryAdapterCombo"
                                 HorizontalAlignment="Stretch"
@@ -66,7 +66,7 @@
 
                         <!-- Sekundärer Adapter -->
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Sekundärer Adapter (NIC 2):" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock x:Name="SecondaryAdapterLabel" Text="Sekundärer Adapter (NIC 2):" FontWeight="SemiBold" FontSize="12" />
                             <ComboBox
                                 x:Name="SecondaryAdapterCombo"
                                 HorizontalAlignment="Stretch"
@@ -82,12 +82,12 @@
                 <!-- Oben Mitte: Ping-Logging -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="1">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Ping-Logging" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="PingLogCardTitle" Text="Ping-Logging" Style="{StaticResource SectionTitle}" />
                         <StackPanel x:Name="PingSettingsContent" Spacing="12">
-                        <TextBlock Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="PingLogCardDesc" Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Log-Ordner" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock x:Name="PingLogFolderLabel" Text="Log-Ordner" FontWeight="SemiBold" FontSize="12" />
                             <Border
                                 x:Name="PingLogFolderPathContainer"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -119,7 +119,7 @@
                 <!-- Oben Rechts: Maus Over Info Fenster -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="2">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Maus Over Info Fenster" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="HoverWindowCardTitle" Text="Maus Over Info Fenster" Style="{StaticResource SectionTitle}" />
 
                         <StackPanel Spacing="8">
 
@@ -130,7 +130,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Anzeige" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock x:Name="HoverDisplayLabel" Text="Anzeige" FontWeight="SemiBold" FontSize="12" />
                                     <ComboBox
                                         x:Name="HoverWindowStateCombo"
                                         HorizontalAlignment="Stretch"
@@ -143,7 +143,7 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Verzögert" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock x:Name="HoverDelayLabel" Text="Verzögert" FontWeight="SemiBold" FontSize="12" />
                                     <ComboBox
                                         x:Name="HoverWindowDelayCombo"
                                         HorizontalAlignment="Stretch"
@@ -159,7 +159,7 @@
                             </Grid>
 
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Position" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock x:Name="HoverPositionLabel" Text="Position" FontWeight="SemiBold" FontSize="12" />
                                 <ComboBox
                                     x:Name="HoverWindowVerticalAnchorCombo"
                                     HorizontalAlignment="Stretch"
@@ -178,7 +178,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Abstand rechts (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock x:Name="HoverRightOffsetLabel" Text="Abstand rechts (px)" FontWeight="SemiBold" FontSize="12" />
                                     <NumberBox
                                         x:Name="HoverWindowRightOffsetNumberBox"
                                         Minimum="0"
@@ -206,18 +206,18 @@
                 <!-- Mitte Links: Verbindungsstatus -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="0">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="ConnectionStatusCardTitle" Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" />
                         <StackPanel x:Name="ConnectionStatusSettingsContent" Spacing="12">
 
                         <!-- Ping-Schwellenwerte: zweizeilig -->
                         <StackPanel Spacing="8">
                             <!-- Zeile 1: Labels -->
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                <TextBlock Text="Schnell (ms):" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PingFastLabel" Text="Schnell (ms):" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                                 <TextBlock Text="&lt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
-                                <TextBlock Text="Normal:" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PingNormalLabel" Text="Normal:" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                                 <TextBlock Text="&gt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
-                                <TextBlock Text="Langsam (ms)" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PingSlowLabel" Text="Langsam (ms)" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
 
                             <!-- Zeile 2: TextBoxes mit Normal in der Mitte -->
@@ -265,9 +265,9 @@
                 <!-- Mitte Mitte: Netzwerkscanner -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="1">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="NetScannerCardTitle" Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" />
                         <StackPanel x:Name="NetworkScannerSettingsContent" Spacing="12">
-                        <TextBlock Text="Port-Scanning Einstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="NetScannerCardDesc" Text="Port-Scanning Einstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <!-- 3x3 Grid für Protokolle und Ports -->
                         <Grid RowSpacing="8" ColumnSpacing="12">
@@ -338,16 +338,16 @@
                 <!-- Mitte Rechts: Platzhalter -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="2">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="PlaceholderMidRightTitle" Text="Platzhalter" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="PlaceholderMidRightDesc" Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
                 <!-- Unten Rechts: Farbschema -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="2">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Farbschema" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Wählen Sie die Akzentfarbe" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="ColorSchemeCardTitle" Text="Farbschema" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="ColorSchemeCardDesc" Text="Wählen Sie die Akzentfarbe" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
                         <ComboBox
                             x:Name="ColorSchemeCombo"
                             HorizontalAlignment="Stretch"
@@ -357,18 +357,24 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Unten Links: Platzhalter -->
+                <!-- Unten Links: Sprache -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="0">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Platzhalter" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="LanguageCardTitle" Text="Sprache" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="LanguageCardDesc" Text="Anzeigesprache der Anwendung" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <ComboBox
+                            x:Name="LanguageCombo"
+                            HorizontalAlignment="Stretch"
+                            PlaceholderText="Sprache wählen..."
+                            ToolTipService.ToolTip="Anzeigesprache auswählen"
+                            SelectionChanged="LanguageCombo_SelectionChanged" />
                     </StackPanel>
                 </Border>
 
                 <!-- Unten Mitte: Platzhalter -->
                 <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="1">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Autostart" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="AutostartCardTitle" Text="Autostart" Style="{StaticResource SectionTitle}" />
                         <CheckBox
                             x:Name="AutostartCheckBox"
                             Content="mit Windows Starten"

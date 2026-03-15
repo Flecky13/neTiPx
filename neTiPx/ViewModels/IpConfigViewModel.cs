@@ -1273,11 +1273,19 @@ namespace neTiPx.ViewModels
                 return;
             }
 
+            // Nur valide IP-Adressen pingen, um Ausnahme-Spam bei ungültigen Host-Strings zu vermeiden.
+            if (!IPAddress.TryParse(address, out var parsedAddress))
+            {
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Skip ping: invalid ip '{address}'");
+                callback("Nicht erreichbar", "Ping: ungültige Adresse", GatewayStatusKind.Bad);
+                return;
+            }
+
             try
             {
-                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Ping -> {address}");
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Ping -> {parsedAddress}");
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(address, 1000);
+                var reply = await ping.SendPingAsync(parsedAddress, 1000);
                 if (reply.Status == IPStatus.Success)
                 {
                     var ms = reply.RoundtripTime;

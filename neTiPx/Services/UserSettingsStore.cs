@@ -37,6 +37,9 @@ namespace neTiPx.Services
             public int CustomPort1 { get; set; } = 0;
             public int CustomPort2 { get; set; } = 0;
             public int CustomPort3 { get; set; } = 0;
+
+            // Language
+            public string LanguageCode { get; set; } = "System";
         }
 
         public UserSettings ReadUserSettings()
@@ -166,7 +169,11 @@ namespace neTiPx.Services
                 new XAttribute("customPort3", settings.CustomPort3)
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement, networkScannerElement);
+            var languageElement = new XElement("language",
+                new XAttribute("code", settings.LanguageCode ?? "System")
+            );
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement, networkScannerElement, languageElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -310,6 +317,14 @@ namespace neTiPx.Services
                         settings.CustomPort2 = customPort2;
                     if (int.TryParse((string?)networkScannerElement.Attribute("customPort3"), out var customPort3))
                         settings.CustomPort3 = customPort3;
+                }
+
+                var languageElement = root.Element("language");
+                if (languageElement != null)
+                {
+                    var langCode = (string?)languageElement.Attribute("code");
+                    if (!string.IsNullOrWhiteSpace(langCode))
+                        settings.LanguageCode = langCode;
                 }
 
                 return settings;

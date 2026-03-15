@@ -17,8 +17,8 @@
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Info" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Anwendungs Informationen, Hilfe, Update" />
+                        <TextBlock x:Name="InfoTitleText" Text="Info" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock x:Name="InfoSubtitleText" Text="Anwendungs Informationen, Hilfe, Update" />
                     </StackPanel>
                     <Image
                         Grid.Column="1"
@@ -37,12 +37,12 @@
                     <StackPanel Grid.Column="0" Spacing="12" VerticalAlignment="Center">
                         <TextBlock Text="{Binding AppName}" FontSize="18" FontWeight="SemiBold" />
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
+                            <TextBlock x:Name="InstalledVersionLabel" Text="Installierte Version" Opacity="0.7" FontSize="12" />
                             <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
+                            <TextBlock x:Name="LatestVersionLabel" Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
                             <TextBlock Text="{Binding LatestVersion}" FontSize="16" FontWeight="SemiBold" />
                         </StackPanel>
 
@@ -53,6 +53,7 @@
                                 Fill="{Binding UpdateStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}"
                                 VerticalAlignment="Center" />
                             <TextBlock
+                                x:Name="UpdateStatusLabel"
                                 Text="Update-Status"
                                 FontSize="12"
                                 Opacity="0.7"
@@ -66,8 +67,8 @@
                             TextWrapping="Wrap" />
 
                         <StackPanel Spacing="2">
-                            <HyperlinkButton Content="GitHub Releases" NavigateUri="{Binding ReleasesUrl}" HorizontalAlignment="Left" Padding="0" />
-                            <HyperlinkButton Content="Latest Release" NavigateUri="{Binding LatestReleaseUrl}" HorizontalAlignment="Left" Padding="0" />
+                            <HyperlinkButton x:Name="GitHubReleasesLink" Content="GitHub Releases" NavigateUri="{Binding ReleasesUrl}" HorizontalAlignment="Left" Padding="0" />
+                            <HyperlinkButton x:Name="LatestReleaseLink" Content="Latest Release" NavigateUri="{Binding LatestReleaseUrl}" HorizontalAlignment="Left" Padding="0" />
                         </StackPanel>
                     </StackPanel>
 
@@ -79,7 +80,7 @@
                             MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE895;" FontSize="16" />
-                                <TextBlock Text="Auf Update Prüfen" />
+                                <TextBlock x:Name="CheckUpdateButtonText" Text="Auf Update Prüfen" />
                             </StackPanel>
                         </Button>
 
@@ -90,7 +91,7 @@
                             Style="{StaticResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE896;" FontSize="16" />
-                                <TextBlock Text="Update Installieren" />
+                                <TextBlock x:Name="InstallUpdateButtonText" Text="Update Installieren" />
                             </StackPanel>
                         </Button>
 
@@ -100,7 +101,7 @@
                             MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE8F3;" FontSize="16" />
-                                <TextBlock Text="Changelog / Release" />
+                                <TextBlock x:Name="ChangelogButtonText" Text="Changelog / Release" />
                             </StackPanel>
                         </Button>
 
@@ -110,7 +111,7 @@
                             MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE897;" FontSize="16" />
-                                <TextBlock Text="Hilfe" />
+                                <TextBlock x:Name="HelpButtonText" Text="Hilfe" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -120,10 +121,11 @@
             <!-- Lizenz & Kontakt Section -->
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Lizenz &amp; Kontakt" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock x:Name="LicenseTitleText" Text="Lizenz &amp; Kontakt" FontSize="18" FontWeight="SemiBold" />
 
                     <StackPanel Spacing="8">
                         <TextBlock
+                            x:Name="LicenseText"
                             Text="Siehe LICENSE im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden."
                             FontSize="13"
                             Opacity="0.8"
@@ -131,7 +133,7 @@
                     </StackPanel>
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
-                        <TextBlock Text="Kontakt:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
+                        <TextBlock x:Name="ContactLabel" Text="Kontakt:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
                         <HyperlinkButton
                             Grid.Row="0"
                             Grid.Column="1"
@@ -140,7 +142,7 @@
                             HorizontalAlignment="Left"
                             Padding="0" />
 
-                        <TextBlock Text="Support:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
+                        <TextBlock x:Name="SupportLabel" Text="Support:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
                         <HyperlinkButton
                             Grid.Row="1"
                             Grid.Column="1"

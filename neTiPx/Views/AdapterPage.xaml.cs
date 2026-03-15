@@ -2,13 +2,16 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
 using neTiPx.Helpers;
+using neTiPx.Services;
 using neTiPx.ViewModels;
+using System;
 using System.Diagnostics;
 
 namespace neTiPx.Views
 {
     public partial class AdapterPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private bool _isPageLoaded;
         private bool _isWindowActive;
         private AppWindow? _mainAppWindow;
@@ -18,11 +21,25 @@ namespace neTiPx.Views
             InitializeComponent();
             Loaded += AdapterPage_Loaded;
             Unloaded += AdapterPage_Unloaded;
+            _lm.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (AdapterTitleText != null) AdapterTitleText.Text = _lm.Lang("ADAPTER_TITLE");
+            if (AdapterSubtitleText != null) AdapterSubtitleText.Text = _lm.Lang("ADAPTER_SUBTITLE");
+            if (Nic1Title != null) Nic1Title.Text = _lm.Lang("ADAPTER_NIC1");
         }
 
         private void AdapterPage_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][AdapterPage] Loaded");
+            UpdateLanguage();
 
             _isPageLoaded = true;
             _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);
@@ -39,6 +56,7 @@ namespace neTiPx.Views
         private void AdapterPage_Unloaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][AdapterPage] Unloaded");
+            _lm.LanguageChanged -= OnLanguageChanged;
 
             _isPageLoaded = false;
             App.MainWindow.Activated -= MainWindow_Activated;

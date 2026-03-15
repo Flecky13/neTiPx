@@ -997,11 +997,19 @@ namespace neTiPx.ViewModels
                 return;
             }
 
+            // Nur valide IP-Adressen pingen, um Ausnahme-Spam bei ungültigen Host-Strings zu vermeiden.
+            if (!IPAddress.TryParse(address, out var parsedAddress))
+            {
+                DebugLog($"Skip {targetKind}: invalid ip '{address}'");
+                callback("Nicht erreichbar", "Ping: ungültige Adresse", GatewayStatusKind.Bad);
+                return;
+            }
+
             try
             {
-                DebugLog($"Ping start {targetKind} -> {address}");
+                DebugLog($"Ping start {targetKind} -> {parsedAddress}");
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(address, 1000);
+                var reply = await ping.SendPingAsync(parsedAddress, 1000);
                 if (reply.Status == IPStatus.Success)
                 {
                     var ms = reply.RoundtripTime;
@@ -1013,12 +1021,12 @@ namespace neTiPx.ViewModels
                     var statusText = ms <= thresholdFast ? "Erreichbar" : ms <= thresholdNormal ? "Langsam" : "Sehr langsam";
                     var statusKind = ms <= thresholdFast ? GatewayStatusKind.Good :
                                    ms <= thresholdNormal ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
-                    DebugLog($"Ping ok {targetKind} -> {address} ({ms} ms)");
+                    DebugLog($"Ping ok {targetKind} -> {parsedAddress} ({ms} ms)");
                     callback(statusText, $"Ping: {ms} ms", statusKind);
                 }
                 else
                 {
-                    DebugLog($"Ping no-reply {targetKind} -> {address} status={reply.Status}");
+                    DebugLog($"Ping no-reply {targetKind} -> {parsedAddress} status={reply.Status}");
                     callback("Nicht erreichbar", "Ping: timeout", GatewayStatusKind.Bad);
                 }
             }

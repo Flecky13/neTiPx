@@ -3,7 +3,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
 using neTiPx.Helpers;
 using neTiPx.Models;
+using neTiPx.Services;
 using neTiPx.ViewModels;
+using System;
 using System.Diagnostics;
 using System.Linq;
 
@@ -11,6 +13,7 @@ namespace neTiPx.Views
 {
     public partial class IpConfigPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private bool _isHandlingSelection;
         private bool _isPageLoaded;
         private bool _isWindowActive;
@@ -21,11 +24,27 @@ namespace neTiPx.Views
             InitializeComponent();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            _lm.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (IpConfigTitleText != null) IpConfigTitleText.Text = _lm.Lang("IPCONFIG_TITLE");
+            if (IpConfigSubtitleText != null) IpConfigSubtitleText.Text = _lm.Lang("IPCONFIG_SUBTITLE");
+            if (IpProfilesTitle != null) IpProfilesTitle.Text = _lm.Lang("IPCONFIG_IP_PROFILES");
+            if (NewProfileButtonText != null) NewProfileButtonText.Text = _lm.Lang("IPCONFIG_NEW_PROFILE");
+            if (ProfileSettingsTitle != null) ProfileSettingsTitle.Text = _lm.Lang("IPCONFIG_PROFILE_SETTINGS");
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Loaded");
+            UpdateLanguage();
 
             _isPageLoaded = true;
             _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);
@@ -48,6 +67,7 @@ namespace neTiPx.Views
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Unloaded");
+            _lm.LanguageChanged -= OnLanguageChanged;
 
             _isPageLoaded = false;
             App.MainWindow.Activated -= MainWindow_Activated;
@@ -121,10 +141,10 @@ namespace neTiPx.Views
                 {
                     var dialog = new ContentDialog
                     {
-                        Title = "Ungespeicherte Änderungen",
-                        Content = "Änderungen speichern, bevor das Profil verlassen wird?",
-                        PrimaryButtonText = "Speichern",
-                        CloseButtonText = "Nein",
+                        Title = _lm.Lang("IPCONFIG_UNSAVED_TITLE"),
+                        Content = _lm.Lang("IPCONFIG_UNSAVED_CONTENT"),
+                        PrimaryButtonText = _lm.Lang("IPCONFIG_SAVE"),
+                        CloseButtonText = _lm.Lang("IPCONFIG_NO"),
                         DefaultButton = ContentDialogButton.Primary,
                         XamlRoot = XamlRoot
                     };

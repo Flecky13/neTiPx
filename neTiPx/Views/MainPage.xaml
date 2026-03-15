@@ -35,27 +35,27 @@
             PaneOpening="RootNavView_PaneOpening"
             PaneClosing="RootNavView_PaneClosing">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Adapter Infos" Tag="Adapters">
+                <NavigationViewItem x:Name="NavItemAdapters" Content="Adapter Infos" Tag="Adapters">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7C3;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="IP Konfiguration" Tag="IpConfig">
+                <NavigationViewItem x:Name="NavItemIpConfig" Content="IP Konfiguration" Tag="IpConfig">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE839;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Tools" Tag="Tools">
+                <NavigationViewItem x:Name="NavItemTools" Content="Tools" Tag="Tools">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8B8;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Info" Tag="Info">
+                <NavigationViewItem x:Name="NavItemInfo" Content="Info" Tag="Info">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE946;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Einstellungen" Tag="Settings">
+                <NavigationViewItem x:Name="NavItemSettings" Content="Einstellungen" Tag="Settings">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE713;" />
                     </NavigationViewItem.Icon>

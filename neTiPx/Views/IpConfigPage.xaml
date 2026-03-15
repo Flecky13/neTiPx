@@ -19,8 +19,8 @@
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="IP Konfiguration" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Verwalte mehrere IP-Profile und Netzwerkeinstellungen" />
+                        <TextBlock x:Name="IpConfigTitleText" Text="IP Konfiguration" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock x:Name="IpConfigSubtitleText" Text="Verwalte mehrere IP-Profile und Netzwerkeinstellungen" />
                     </StackPanel>
                     <Image
                         Grid.Column="1"
@@ -37,7 +37,7 @@
                 <!-- Linker Bereich: Profil-Liste -->
                 <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="IP Profile" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+                        <TextBlock x:Name="IpProfilesTitle" Text="IP Profile" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
                         <!-- Profil-Liste -->
                         <ListView
@@ -77,7 +77,7 @@
                             Style="{StaticResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon Glyph="&#xE710;" FontSize="16" />
-                                <TextBlock Text="Neues Profil" />
+                                <TextBlock x:Name="NewProfileButtonText" Text="Neues Profil" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -87,7 +87,7 @@
                 <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="16">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Profil-Einstellungen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+                            <TextBlock x:Name="ProfileSettingsTitle" Text="Profil-Einstellungen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
                             <!-- Profilname -->
                             <StackPanel Spacing="4">

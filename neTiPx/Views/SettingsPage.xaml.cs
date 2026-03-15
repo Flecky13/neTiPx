@@ -15,6 +15,18 @@ using WinRT.Interop;
 
 namespace neTiPx.Views
 {
+    public sealed class LanguageComboItem
+    {
+        public LanguageComboItem(string displayName, string code)
+        {
+            DisplayName = displayName;
+            Code = code;
+        }
+
+        public string DisplayName { get; set; }
+        public string Code { get; }
+    }
+
     public sealed class ColorSchemeItem
     {
         public ColorSchemeItem(string displayName, ColorTheme theme)
@@ -40,17 +52,31 @@ namespace neTiPx.Views
         private List<string> _adapterList = new();
         private string _pingLogFolderPath = string.Empty;
         private bool _isLoading = true;
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
+        private bool _isUpdatingLanguageCombo = false;
 
         public SettingsPage()
         {
             InitializeComponent();
             Loaded += SettingsPage_Loaded;
+            Unloaded += SettingsPage_Unloaded;
+            _lm.LanguageChanged += OnLanguageChanged;
             _themeService = new ThemeSettingsService();
             _settingsService = new SettingsService();
             _colorThemeApplier = new ColorThemeApplier();
             _adapterStore = new AdapterStore();
             _autostartService = new AutostartService();
             _pingLogService = new PingLogService();
+        }
+
+        private void SettingsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -212,7 +238,12 @@ namespace neTiPx.Views
                 CustomPort3NumberBox.Value = _settingsService.GetCustomPort3();
             }
 
+            // Sprache laden
+            LoadLanguageCombo();
+
             _isLoading = false;
+
+            UpdateLanguage();
         }
 
         private async void SelectPingLogFolderButton_Click(object sender, RoutedEventArgs e)
@@ -245,8 +276,8 @@ namespace neTiPx.Views
             var mainPageKeys = new[] { "IpConfig", "Tools" };
             var toolPageKeys = new[] { "Ping", "Wlan", "NetworkCalculator", "NetworkScanner" };
 
-            AddVisibilityGroup(editorsPanel, "Hauptseiten", mainPageKeys, entries, checkBoxes);
-            AddVisibilityGroup(editorsPanel, "Tools", toolPageKeys, entries, checkBoxes);
+            AddVisibilityGroup(editorsPanel, _lm.Lang("DIALOG_MAIN_PAGES"), mainPageKeys, entries, checkBoxes);
+            AddVisibilityGroup(editorsPanel, _lm.Lang("DIALOG_TOOLS"), toolPageKeys, entries, checkBoxes);
 
             foreach (var entry in entries
                 .Where(e2 => !mainPageKeys.Contains(e2.Key, StringComparer.OrdinalIgnoreCase)
@@ -268,13 +299,13 @@ namespace neTiPx.Views
 
             var dialog = new ContentDialog
             {
-                Title = "Seiten-Sichtbarkeit",
+                Title = _lm.Lang("DIALOG_PAGES_VISIBILITY"),
                 Content = new ScrollViewer
                 {
                     Content = editorsPanel,
                     MaxHeight = 420
                 },
-                PrimaryButtonText = "Schließen",
+                PrimaryButtonText = _lm.Lang("DIALOG_CLOSE"),
                 DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = XamlRoot
             };
@@ -614,8 +645,8 @@ namespace neTiPx.Views
             }
 
             HoverWindowVerticalOffsetLabel.Text = HoverWindowVerticalAnchorCombo.SelectedIndex == 0
-                ? "Abstand oben (px)"
-                : "Abstand unten (px)";
+                ? _lm.Lang("SETTINGS_OFFSET_TOP")
+                : _lm.Lang("SETTINGS_OFFSET_BOTTOM");
         }
 
         private void CheckGatewayCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -853,6 +884,99 @@ namespace neTiPx.Views
             if (!double.IsNaN(args.NewValue))
             {
                 _settingsService.SetCustomPort3((int)args.NewValue);
+            }
+        }
+
+        private void LoadLanguageCombo()
+        {
+            if (LanguageCombo == null)
+                return;
+
+            var items = new List<LanguageComboItem>
+            {
+                new LanguageComboItem(_lm.Lang("SETTINGS_LANGUAGE_SYSTEM"), "System")
+            };
+
+            foreach (var code in _lm.GetAvailableLanguages())
+            {
+                var displayName = code.ToUpperInvariant();
+                items.Add(new LanguageComboItem(displayName, code));
+            }
+
+            LanguageCombo.ItemsSource      = items;
+            LanguageCombo.DisplayMemberPath = nameof(LanguageComboItem.DisplayName);
+
+            var saved = _settingsService.GetLanguageCode();
+            var selected = items.FirstOrDefault(i =>
+                string.Equals(i.Code, saved, StringComparison.OrdinalIgnoreCase))
+                ?? items.FirstOrDefault();
+
+            LanguageCombo.SelectedItem = selected;
+        }
+
+        private void LanguageCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoading || _isUpdatingLanguageCombo || LanguageCombo?.SelectedItem is not LanguageComboItem item)
+                return;
+
+            _settingsService.SetLanguageCode(item.Code);
+            _lm.LoadLanguage(item.Code);
+        }
+
+        private void UpdateLanguage()
+        {
+            if (SettingsTitleText != null) SettingsTitleText.Text = _lm.Lang("SETTINGS_TITLE");
+            if (SettingsSubtitlePreText != null) SettingsSubtitlePreText.Text = _lm.Lang("SETTINGS_SUBTITLE_PRE");
+            if (SettingsSubtitleLinkText != null) SettingsSubtitleLinkText.Text = _lm.Lang("SETTINGS_SUBTITLE_LINK");
+            if (AdapterCardTitle != null) AdapterCardTitle.Text = _lm.Lang("SETTINGS_ADAPTER_CARD");
+            if (AdapterCardDesc != null) AdapterCardDesc.Text = _lm.Lang("SETTINGS_ADAPTER_DESC");
+            if (PrimaryAdapterLabel != null) PrimaryAdapterLabel.Text = _lm.Lang("SETTINGS_PRIMARY_ADAPTER");
+            if (SecondaryAdapterLabel != null) SecondaryAdapterLabel.Text = _lm.Lang("SETTINGS_SECONDARY_ADAPTER");
+            if (AdaptersSettingsUnavailable != null) AdaptersSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
+            if (PingLogCardTitle != null) PingLogCardTitle.Text = _lm.Lang("SETTINGS_PING_LOG");
+            if (PingLogCardDesc != null) PingLogCardDesc.Text = _lm.Lang("SETTINGS_PING_LOG_DESC");
+            if (PingLogFolderLabel != null) PingLogFolderLabel.Text = _lm.Lang("SETTINGS_LOG_FOLDER");
+            if (PingSettingsUnavailable != null) PingSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
+            if (HoverWindowCardTitle != null) HoverWindowCardTitle.Text = _lm.Lang("SETTINGS_HOVER_WINDOW");
+            if (HoverDisplayLabel != null) HoverDisplayLabel.Text = _lm.Lang("SETTINGS_DISPLAY");
+            if (HoverDelayLabel != null) HoverDelayLabel.Text = _lm.Lang("SETTINGS_DELAYED");
+            if (HoverPositionLabel != null) HoverPositionLabel.Text = _lm.Lang("SETTINGS_POSITION");
+            if (HoverRightOffsetLabel != null) HoverRightOffsetLabel.Text = _lm.Lang("SETTINGS_OFFSET_RIGHT");
+            if (ConnectionStatusCardTitle != null) ConnectionStatusCardTitle.Text = _lm.Lang("SETTINGS_CONNECTION_STATUS");
+            if (PingFastLabel != null) PingFastLabel.Text = _lm.Lang("SETTINGS_FAST_MS");
+            if (PingNormalLabel != null) PingNormalLabel.Text = _lm.Lang("SETTINGS_NORMAL");
+            if (PingSlowLabel != null) PingSlowLabel.Text = _lm.Lang("SETTINGS_SLOW_MS");
+            if (ConnectionStatusSettingsUnavailable != null) ConnectionStatusSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
+            if (NetScannerCardTitle != null) NetScannerCardTitle.Text = _lm.Lang("SETTINGS_NET_SCANNER");
+            if (NetScannerCardDesc != null) NetScannerCardDesc.Text = _lm.Lang("SETTINGS_PORT_SCANNING");
+            if (NetworkScannerSettingsUnavailable != null) NetworkScannerSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
+            if (PlaceholderMidRightTitle != null) PlaceholderMidRightTitle.Text = _lm.Lang("SETTINGS_PLACEHOLDER");
+            if (PlaceholderMidRightDesc != null) PlaceholderMidRightDesc.Text = _lm.Lang("SETTINGS_PLACEHOLDER_DESC");
+            if (ColorSchemeCardTitle != null) ColorSchemeCardTitle.Text = _lm.Lang("SETTINGS_COLORSCHEME");
+            if (ColorSchemeCardDesc != null) ColorSchemeCardDesc.Text = _lm.Lang("SETTINGS_COLORSCHEME_DESC");
+            if (AutostartCardTitle != null) AutostartCardTitle.Text = _lm.Lang("SETTINGS_AUTOSTART");
+            if (LanguageCardTitle != null) LanguageCardTitle.Text = _lm.Lang("SETTINGS_LANGUAGE");
+            if (LanguageCardDesc != null) LanguageCardDesc.Text = _lm.Lang("SETTINGS_LANGUAGE_DESC");
+            UpdateHoverWindowVerticalOffsetLabel();
+            // Sprach-Combo-Beschriftung aktualisieren
+            if (LanguageCombo?.ItemsSource is List<LanguageComboItem> items && items.Count > 0)
+            {
+                _isUpdatingLanguageCombo = true;
+                try
+                {
+                    items[0].DisplayName = _lm.Lang("SETTINGS_LANGUAGE_SYSTEM");
+                    // Binding neu anstoßen: Quelle neu setzen
+                    LanguageCombo.ItemsSource = null;
+                    LanguageCombo.ItemsSource = items;
+                    var currentCode = _settingsService.GetLanguageCode();
+                    LanguageCombo.SelectedItem = items.FirstOrDefault(i =>
+                        string.Equals(i.Code, currentCode, StringComparison.OrdinalIgnoreCase))
+                        ?? items.FirstOrDefault();
+                }
+                finally
+                {
+                    _isUpdatingLanguageCombo = false;
+                }
             }
         }
 

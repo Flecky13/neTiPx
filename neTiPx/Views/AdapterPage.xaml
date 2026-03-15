@@ -18,8 +18,8 @@
             <Border Style="{StaticResource CardBorder}" Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Adapter" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Infos zu deine zwei Adaptern." />
+                        <TextBlock x:Name="AdapterTitleText" Text="Adapter" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock x:Name="AdapterSubtitleText" Text="Infos zu deine zwei Adaptern." />
                     </StackPanel>
                     <Image
                         Grid.Column="1"
@@ -38,7 +38,7 @@
                     <StackPanel Spacing="14">
                         <!-- Titel -->
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Netzwerkkarte 1" Style="{StaticResource SectionTitle}" FontSize="16" FontWeight="Bold" />
+                            <TextBlock x:Name="Nic1Title" Text="Netzwerkkarte 1" Style="{StaticResource SectionTitle}" FontSize="16" FontWeight="Bold" />
                         </StackPanel>
 
                         <!-- Name -->

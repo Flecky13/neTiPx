@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using neTiPx.Services;
+using System;
 
 namespace neTiPx.Views
 {
@@ -8,15 +9,42 @@ namespace neTiPx.Views
     {
         private readonly PagesVisibilityService _pagesVisibilityService = new PagesVisibilityService();
 
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
+
         public MainPage()
         {
             InitializeComponent();
             Loaded += MainPage_Loaded;
+            Unloaded += MainPage_Unloaded;
+            _lm.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void MainPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (NavItemAdapters != null) NavItemAdapters.Content = _lm.Lang("NAV_ADAPTERS");
+            if (NavItemIpConfig != null) NavItemIpConfig.Content = _lm.Lang("NAV_IPCONFIG");
+            if (NavItemTools != null) NavItemTools.Content = _lm.Lang("NAV_TOOLS");
+            if (NavItemInfo != null) NavItemInfo.Content = _lm.Lang("NAV_INFO");
+            if (NavItemSettings != null) NavItemSettings.Content = _lm.Lang("NAV_SETTINGS");
+            if (CopyrightText != null) CopyrightText.Text = _lm.Lang("APP_COPYRIGHT");
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             App.MainWindow.SetTitleBar(AppTitleBar);
+
+            // Sprache anwenden
+            UpdateLanguage();
 
             // Load and apply pages visibility
             ApplyMainPagesVisibility();

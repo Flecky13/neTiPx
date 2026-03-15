@@ -111,6 +111,10 @@ namespace neTiPx
                 colorThemeApplier.Apply(selectedTheme);
             }
 
+            // Sprache laden (vor dem ersten Navigieren, damit alle Pages lokalisiert starten)
+            var langCode = settingsService.GetLanguageCode();
+            LanguageManager.Instance.LoadLanguage(langCode);
+
             _ = rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
             MainWindow.Activate();
             WindowHelper.Hide(MainWindow);

@@ -3,16 +3,21 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using neTiPx.Services;
 using neTiPx.Views.Tools;
+using System;
 
 namespace neTiPx.Views
 {
     public partial class ToolsPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private readonly PagesVisibilityService _pagesVisibilityService = new PagesVisibilityService();
 
         public ToolsPage()
         {
             InitializeComponent();
+            Loaded += ToolsPage_Loaded;
+            Unloaded += ToolsPage_Unloaded;
+            _lm.LanguageChanged += OnLanguageChanged;
 
             if (PingPanel != null)
             {
@@ -34,6 +39,32 @@ namespace neTiPx.Views
                     ToolsNavView.SelectedItem = firstVisible;
                 }
             }
+        }
+
+        private void ToolsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void ToolsPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (ToolsTitleText != null) ToolsTitleText.Text = _lm.Lang("TOOLS_TITLE");
+            if (ToolsSubtitleText != null) ToolsSubtitleText.Text = _lm.Lang("TOOLS_SUBTITLE");
+            if (ToolsNavPing != null) ToolsNavPing.Content = _lm.Lang("TOOLS_PING");
+            if (ToolsNavWlan != null) ToolsNavWlan.Content = _lm.Lang("TOOLS_WLAN");
+            if (ToolsNavCalculator != null) ToolsNavCalculator.Content = _lm.Lang("TOOLS_NET_CALC");
+            if (ToolsNavScanner != null) ToolsNavScanner.Content = _lm.Lang("TOOLS_NET_SCAN");
+            if (ToolsNavRoutes != null) ToolsNavRoutes.Content = _lm.Lang("TOOLS_ROUTES");
         }
 
         public void RefreshVisibilityConfiguration()

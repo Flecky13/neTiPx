@@ -22,8 +22,8 @@
         <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="24" Margin="24,24,24,0">
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Tools" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
-                    <TextBlock Text="Netzwerk-Utilities und Diagnose-Tools" />
+                    <TextBlock x:Name="ToolsTitleText" Text="Tools" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                    <TextBlock x:Name="ToolsSubtitleText" Text="Netzwerk-Utilities und Diagnose-Tools" />
                 </StackPanel>
                 <Image
                     Grid.Column="1"
@@ -48,27 +48,27 @@
             Margin="24,16,24,24"
             SelectionChanged="ToolsNavView_SelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="PING" Tag="Ping">
+                <NavigationViewItem x:Name="ToolsNavPing" Content="PING" Tag="Ping">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE909;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="WLAN" Tag="Wlan">
+                <NavigationViewItem x:Name="ToolsNavWlan" Content="WLAN" Tag="Wlan">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE701;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Netzwerk-Rechner" Tag="NetworkCalculator">
+                <NavigationViewItem x:Name="ToolsNavCalculator" Content="Netzwerk-Rechner" Tag="NetworkCalculator">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8BD;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Netzwerkscanner" Tag="NetworkScanner">
+                <NavigationViewItem x:Name="ToolsNavScanner" Content="Netzwerkscanner" Tag="NetworkScanner">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE774;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Routen" Tag="Routes">
+                <NavigationViewItem x:Name="ToolsNavRoutes" Content="Routen" Tag="Routes">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8CE;" />
                     </NavigationViewItem.Icon>

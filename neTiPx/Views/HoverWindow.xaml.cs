@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
+using neTiPx.Services;
 using neTiPx.ViewModels;
 using Windows.Graphics;
 using Windows.UI;
@@ -14,15 +15,23 @@ namespace neTiPx.Views
 {
     public sealed class HoverWindow : Window
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private HoverViewModel ViewModelInstance;
         private ScrollViewer? _scrollViewer;
 
         public HoverWindow()
         {
             ViewModelInstance = new HoverViewModel();
+            _lm.LanguageChanged += OnLanguageChanged;
             CreateContent();
             ConfigureWindow();
             // Adjust height after content is created
+            AdjustWindowHeight();
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            CreateContent();
             AdjustWindowHeight();
         }
 
@@ -61,7 +70,7 @@ namespace neTiPx.Views
 
             var ipLabel = new TextBlock
             {
-                Text = "Öffentliche IP:",
+                Text = _lm.Lang("HOVER_PUBLIC_IP"),
                 FontSize = 13.5,
                 FontWeight = FontWeights.Bold,
                 Foreground = black,
@@ -146,9 +155,9 @@ namespace neTiPx.Views
             section.Children.Add(headerBorder);
 
             // IPv4 section
-            section.Children.Add(CreateDetailGrid("IPv4:", $"{nicPrefix}Ipv4", textColor));
-            section.Children.Add(CreateDetailGrid("Gateway4:", $"{nicPrefix}Gateway4", textColor));
-            section.Children.Add(CreateDetailGrid("DNS4:", $"{nicPrefix}Dns4", textColor));
+            section.Children.Add(CreateDetailGrid(_lm.Lang("HOVER_IPV4"), $"{nicPrefix}Ipv4", textColor));
+            section.Children.Add(CreateDetailGrid(_lm.Lang("HOVER_GATEWAY4"), $"{nicPrefix}Gateway4", textColor));
+            section.Children.Add(CreateDetailGrid(_lm.Lang("HOVER_DNS4"), $"{nicPrefix}Dns4", textColor));
 
             // IPv6 section (with visibility binding)
             var ipv6Container = new StackPanel
@@ -156,9 +165,9 @@ namespace neTiPx.Views
                 Orientation = Orientation.Vertical,
                 Spacing = 5
             };
-            ipv6Container.Children.Add(CreateDetailGrid("IPv6:", $"{nicPrefix}Ipv6", textColor));
-            ipv6Container.Children.Add(CreateDetailGrid("Gateway6:", $"{nicPrefix}Gateway6", textColor));
-            ipv6Container.Children.Add(CreateDetailGrid("DNS6:", $"{nicPrefix}Dns6", textColor));
+            ipv6Container.Children.Add(CreateDetailGrid(_lm.Lang("HOVER_IPV6"), $"{nicPrefix}Ipv6", textColor));
+            ipv6Container.Children.Add(CreateDetailGrid(_lm.Lang("HOVER_GATEWAY6"), $"{nicPrefix}Gateway6", textColor));
+            ipv6Container.Children.Add(CreateDetailGrid(_lm.Lang("HOVER_DNS6"), $"{nicPrefix}Dns6", textColor));
 
             // Bind IPv6 section visibility
             string hasIpv6Property = nicPrefix == "Nic1" ? "HasNic1Ipv6" : "HasNic2Ipv6";

@@ -379,5 +379,19 @@ namespace neTiPx.Services
             _userSettingsStore.WriteUserSettings(settings);
         }
 
+        // Language Settings
+        public string GetLanguageCode()
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            return settings.LanguageCode ?? "System";
+        }
+
+        public void SetLanguageCode(string languageCode)
+        {
+            var settings = _userSettingsStore.ReadUserSettings();
+            settings.LanguageCode = languageCode ?? "System";
+            _userSettingsStore.WriteUserSettings(settings);
+        }
+
     }
 }
