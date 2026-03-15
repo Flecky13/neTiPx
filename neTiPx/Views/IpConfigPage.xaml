@@ -54,11 +54,11 @@
                                             Grid.Column="0"
                                             Text="{Binding DisplayName}"
                                             VerticalAlignment="Center" />
-                                        <Button
+                                        <Button x:Name="DeleteProfileButton"
                                             Grid.Column="1"
                                             Command="{Binding DataContext.DeleteProfileCommand, ElementName=PageRoot}"
                                             CommandParameter="{Binding}"
-                                            ToolTipService.ToolTip="Profil löschen"
+                                            ToolTipService.ToolTip="{x:Null}"
                                             Padding="4"
                                             MinWidth="0"
                                             Background="Transparent"
@@ -130,8 +130,8 @@
                                         Margin="0"
                                         IsChecked="{Binding SelectedProfile.RoutesEnabled, Mode=TwoWay}"
                                         IsEnabled="{Binding IsProfileSelected}" />
-                                    <Button
-                                        ToolTipService.ToolTip="Aktiviert routen Funktion"
+                                    <Button x:Name="RoutesButton"
+                                        ToolTipService.ToolTip="{x:Null}"
                                         Margin="0"
                                         Padding="2"
                                         MinWidth="0"
@@ -152,10 +152,10 @@
                                     <TextBlock Grid.Column="1" Text="{Binding ConfiguredRoutesText}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=count}" />
                                 </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
-                                    <TextBox
+                                    <TextBox x:Name="GatewayTextBox"
                                         Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
                                         PlaceholderText="Gateway (z.B. 192.168.1.1)"
-                                        ToolTipService.ToolTip="Gateway eingeben zb:192.168.1.254"
+                                        ToolTipService.ToolTip="{x:Null}"
                                         IsEnabled="{Binding IsManual}" />
                                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <CheckBox
@@ -178,16 +178,16 @@
                             <StackPanel Spacing="4">
                                 <TextBlock Text="DNS Server" FontWeight="SemiBold" />
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
-                                    <TextBox
+                                    <TextBox x:Name="Dns1TextBox"
                                         Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
                                         PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
-                                        ToolTipService.ToolTip="Ersten DNS eintragen zb:192.168.1.254"
+                                        ToolTipService.ToolTip="{x:Null}"
                                         IsEnabled="{Binding IsManual}" />
-                                    <TextBox
+                                    <TextBox x:Name="Dns2TextBox"
                                         Grid.Column="1"
                                         Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
                                         PlaceholderText="DNS 2 (z.B. 8.8.4.4)"
-                                        ToolTipService.ToolTip="Zweiten DNS eintragen zb:8.8.8.8"
+                                        ToolTipService.ToolTip="{x:Null}"
                                         IsEnabled="{Binding IsManual}" />
                                 </Grid>
                             </StackPanel>
@@ -206,29 +206,29 @@
                                 <ScrollViewer
                                     VerticalScrollBarVisibility="Auto"
                                     MaxHeight="160">
-                                    <ItemsRepeater ItemsSource="{Binding SelectedProfile.IpAddresses}">
+                                    <ItemsRepeater x:Name="IpAddressesRepeater" ItemsSource="{Binding SelectedProfile.IpAddresses}">
                                         <ItemsRepeater.ItemTemplate>
                                             <DataTemplate x:DataType="models:IpAddressEntry">
                                                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="2" Margin="0,0,0,1">
                                                     <Grid ColumnDefinitions="170,170,90" ColumnSpacing="6">
-                                                        <TextBox
+                                                        <TextBox x:Name="IpAddressTextBox"
                                                             Text="{x:Bind IpAddress, Mode=TwoWay}"
                                                             PlaceholderText="z.B. 192.168.1.10"
-                                                            ToolTipService.ToolTip="Eigene IP Adressen eingeben zb:192.168.1.100"
+                                                            ToolTipService.ToolTip="{x:Null}"
                                                             Margin="1,0"
                                                             IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                                        <TextBox
+                                                        <TextBox x:Name="SubnetMaskTextBox"
                                                             Grid.Column="1"
                                                             Text="{x:Bind SubnetMask, Mode=TwoWay}"
                                                             PlaceholderText="255.255.255.0 , /24"
-                                                            ToolTipService.ToolTip="Subnetmaske eingeben, zb:255.255.255.0 oder in CIDR format"
+                                                            ToolTipService.ToolTip="{x:Null}"
                                                             Margin="1,0"
                                                             IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
-                                                        <Button
+                                                        <Button x:Name="RemoveIpButton"
                                                             Grid.Column="2"
                                                             Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
                                                             CommandParameter="{Binding}"
-                                                            ToolTipService.ToolTip="Löscht IP Zeile aus Profil"
+                                                            ToolTipService.ToolTip="{x:Null}"
                                                             VerticalAlignment="Center"
                                                             Padding="8"
                                                             MinWidth="0"
@@ -263,9 +263,9 @@
                         <StackPanel Spacing="12">
                             <TextBlock Text="Aktionen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                            <Button
+                            <Button x:Name="ApplyButton"
                                 Command="{Binding ApplyCommand}"
-                                ToolTipService.ToolTip="IP-Profil Einstellungen Anwenden"
+                                ToolTipService.ToolTip="{x:Null}"
                                 HorizontalAlignment="Stretch"
                                 Style="{StaticResource AccentButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -274,9 +274,9 @@
                                 </StackPanel>
                             </Button>
 
-                            <Button
+                            <Button x:Name="SaveButton"
                                 Command="{Binding SaveCommand}"
-                                ToolTipService.ToolTip="Speichert IP-Profil einstellungen"
+                                ToolTipService.ToolTip="{x:Null}"
                                 HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE74E;" FontSize="16" />

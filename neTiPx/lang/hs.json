@@ -67,6 +67,17 @@
   "IPCONFIG_PLACEHOLDER_DNS1": "der erschte DNS (z.B. 8.8.8.8)",
   "IPCONFIG_PLACEHOLDER_DNS2": "der Zweete DNS (z.B. 8.8.4.4)",
 
+  "IPCONFIG_TOOLTIP_DELETE_PROFILE": "Profil lösche",
+  "IPCONFIG_TOOLTIP_ROUTES": "Routen-Funktion an",
+  "IPCONFIG_TOOLTIP_GATEWAY": "Gateway ei’gehn z.B.: 192.168.1.254",
+  "IPCONFIG_TOOLTIP_DNS1": "Ersten DNS ei’gehn z.B.: 192.168.1.254",
+  "IPCONFIG_TOOLTIP_DNS2": "Zweiten DNS ei’gehn z.B.: 8.8.8.8",
+  "IPCONFIG_TOOLTIP_IP": "Eigene IP ei’gehn z.B.: 192.168.1.100",
+  "IPCONFIG_TOOLTIP_SUBNET": "Subnetzmaske ei’gehn z.B.: 255.255.255.0 oder im CIDR-Format",
+  "IPCONFIG_TOOLTIP_REMOVE_IP": "IP-Zeile aus Profil lösche",
+  "IPCONFIG_TOOLTIP_APPLY": "IP-Profil Einstellungen anwände",
+  "IPCONFIG_TOOLTIP_SAVE": "IP-Profil Einstellungen speichere",
+
   "TOOLS_TITLE": "Werkzeuch",
   "TOOLS_SUBTITLE": "Netz-Utilities un Diagnose-Sach",
   "TOOLS_PING": "PING",

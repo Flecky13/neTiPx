@@ -39,12 +39,91 @@ namespace neTiPx.Views
             if (IpProfilesTitle != null) IpProfilesTitle.Text = _lm.Lang("IPCONFIG_IP_PROFILES");
             if (NewProfileButtonText != null) NewProfileButtonText.Text = _lm.Lang("IPCONFIG_NEW_PROFILE");
             if (ProfileSettingsTitle != null) ProfileSettingsTitle.Text = _lm.Lang("IPCONFIG_PROFILE_SETTINGS");
+
+            // Tooltips dynamisch setzen
+            SetToolTips();
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Loaded");
             UpdateLanguage();
+        private void SetToolTips()
+        {
+            // Profil löschen Button (im ListView DataTemplate)
+            if (ProfileListView != null)
+            {
+                foreach (var item in ProfileListView.Items)
+                {
+                    var container = ProfileListView.ContainerFromItem(item) as Microsoft.UI.Xaml.Controls.ListViewItem;
+                    if (container != null)
+                    {
+                        var deleteButton = FindChildByName(container, "DeleteProfileButton") as Microsoft.UI.Xaml.Controls.Button;
+                        if (deleteButton != null)
+                        {
+                            ToolTipService.SetToolTip(deleteButton, _lm.Lang("IPCONFIG_TOOLTIP_DELETE_PROFILE"));
+                        }
+                    }
+                }
+            }
+
+            // Routen Button
+            if (RoutesButton != null)
+                ToolTipService.SetToolTip(RoutesButton, _lm.Lang("IPCONFIG_TOOLTIP_ROUTES"));
+
+            // Gateway
+            if (GatewayTextBox != null)
+                ToolTipService.SetToolTip(GatewayTextBox, _lm.Lang("IPCONFIG_TOOLTIP_GATEWAY"));
+
+            // DNS
+            if (Dns1TextBox != null)
+                ToolTipService.SetToolTip(Dns1TextBox, _lm.Lang("IPCONFIG_TOOLTIP_DNS1"));
+            if (Dns2TextBox != null)
+                ToolTipService.SetToolTip(Dns2TextBox, _lm.Lang("IPCONFIG_TOOLTIP_DNS2"));
+
+            // IP Adressen (ItemsRepeater)
+            if (IpAddressesRepeater != null)
+            {
+                foreach (var element in IpAddressesRepeater.Items)
+                {
+                    var container = IpAddressesRepeater.TryGetElement(IpAddressesRepeater.Items.IndexOf(element));
+                    if (container != null)
+                    {
+                        var ipBox = FindChildByName(container, "IpAddressTextBox") as Microsoft.UI.Xaml.Controls.TextBox;
+                        if (ipBox != null)
+                            ToolTipService.SetToolTip(ipBox, _lm.Lang("IPCONFIG_TOOLTIP_IP"));
+                        var subnetBox = FindChildByName(container, "SubnetMaskTextBox") as Microsoft.UI.Xaml.Controls.TextBox;
+                        if (subnetBox != null)
+                            ToolTipService.SetToolTip(subnetBox, _lm.Lang("IPCONFIG_TOOLTIP_SUBNET"));
+                        var removeBtn = FindChildByName(container, "RemoveIpButton") as Microsoft.UI.Xaml.Controls.Button;
+                        if (removeBtn != null)
+                            ToolTipService.SetToolTip(removeBtn, _lm.Lang("IPCONFIG_TOOLTIP_REMOVE_IP"));
+                    }
+                }
+            }
+
+            // Anwenden & Speichern
+            if (ApplyButton != null)
+                ToolTipService.SetToolTip(ApplyButton, _lm.Lang("IPCONFIG_TOOLTIP_APPLY"));
+            if (SaveButton != null)
+                ToolTipService.SetToolTip(SaveButton, _lm.Lang("IPCONFIG_TOOLTIP_SAVE"));
+        }
+
+        // Hilfsmethode zum Finden von Child-Elementen nach Name
+        private FrameworkElement? FindChildByName(DependencyObject parent, string name)
+        {
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is FrameworkElement fe && fe.Name == name)
+                    return fe;
+                var result = FindChildByName(child, name);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
 
             _isPageLoaded = true;
             _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);

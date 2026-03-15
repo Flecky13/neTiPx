@@ -1,4 +1,4 @@
-  {
+{
   "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Ihre primäre Netzwerkkarte",
   "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Ihre sekundäre Netzwerkkarte",
   "SETTINGS_TOOLTIP_RESET_FOLDER": "Auf Standard zurücksetzen",
@@ -69,6 +69,17 @@
   "IPCONFIG_PLACEHOLDER_GATEWAY": "Gateway (z.B. 192.168.1.1)",
   "IPCONFIG_PLACEHOLDER_DNS1": "Primärer DNS (z.B. 8.8.8.8)",
   "IPCONFIG_PLACEHOLDER_DNS2": "Sekundärer DNS (z.B. 8.8.4.4)",
+
+  "IPCONFIG_TOOLTIP_DELETE_PROFILE": "Profil löschen",
+  "IPCONFIG_TOOLTIP_ROUTES": "Aktiviert routen Funktion",
+  "IPCONFIG_TOOLTIP_GATEWAY": "Gateway eingeben zb:192.168.1.254",
+  "IPCONFIG_TOOLTIP_DNS1": "Ersten DNS eintragen zb:192.168.1.254",
+  "IPCONFIG_TOOLTIP_DNS2": "Zweiten DNS eintragen zb:8.8.8.8",
+  "IPCONFIG_TOOLTIP_IP": "Eigene IP Adressen eingeben zb:192.168.1.100",
+  "IPCONFIG_TOOLTIP_SUBNET": "Subnetmaske eingeben, zb:255.255.255.0 oder in CIDR format",
+  "IPCONFIG_TOOLTIP_REMOVE_IP": "Löscht IP Zeile aus Profil",
+  "IPCONFIG_TOOLTIP_APPLY": "IP-Profil Einstellungen Anwenden",
+  "IPCONFIG_TOOLTIP_SAVE": "Speichert IP-Profil einstellungen",
 
   "TOOLS_TITLE": "Tools",
   "TOOLS_SUBTITLE": "Netzwerk-Utilities und Diagnose-Tools",

@@ -67,6 +67,17 @@
   "IPCONFIG_PLACEHOLDER_DNS1": "DNS primaire (ex. 8.8.8.8)",
   "IPCONFIG_PLACEHOLDER_DNS2": "DNS secondaire (ex. 8.8.4.4)",
 
+  "IPCONFIG_TOOLTIP_DELETE_PROFILE": "Supprimer le profil",
+  "IPCONFIG_TOOLTIP_ROUTES": "Activer la fonction de routage",
+  "IPCONFIG_TOOLTIP_GATEWAY": "Entrez la passerelle ex.: 192.168.1.254",
+  "IPCONFIG_TOOLTIP_DNS1": "Entrez le premier DNS ex.: 192.168.1.254",
+  "IPCONFIG_TOOLTIP_DNS2": "Entrez le deuxième DNS ex.: 8.8.8.8",
+  "IPCONFIG_TOOLTIP_IP": "Entrez votre propre adresse IP ex.: 192.168.1.100",
+  "IPCONFIG_TOOLTIP_SUBNET": "Entrez le masque de sous-réseau, ex.: 255.255.255.0 ou au format CIDR",
+  "IPCONFIG_TOOLTIP_REMOVE_IP": "Supprimer la ligne IP du profil",
+  "IPCONFIG_TOOLTIP_APPLY": "Appliquer les paramètres du profil IP",
+  "IPCONFIG_TOOLTIP_SAVE": "Enregistrer les paramètres du profil IP",
+
   "TOOLS_TITLE": "Outils",
   "TOOLS_SUBTITLE": "Utilitaires réseau et outils de diagnostic",
   "TOOLS_PING": "PING",
