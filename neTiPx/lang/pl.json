@@ -1,4 +1,18 @@
 {
+  "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Twoja główna karta sieciowa",
+  "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Twoja dodatkowa karta sieciowa",
+  "SETTINGS_TOOLTIP_RESET_FOLDER": "Przywróć domyślne",
+  "SETTINGS_TOOLTIP_HOVER_ACTIVE": "Włącz funkcję podświetlenia myszą w zasobniku systemowym",
+  "SETTINGS_TOOLTIP_HOVER_DELAY": "Liczba sekund, zanim pojawi się okno informacji",
+  "SETTINGS_TOOLTIP_HOVER_POSITION": "Pozycja okna informacji",
+  "SETTINGS_TOOLTIP_PING_FAST": "Jakość połączenia dobra, jeśli niższa",
+  "SETTINGS_TOOLTIP_PING_NORMAL": "Normalna prędkość",
+  "SETTINGS_TOOLTIP_GATEWAY": "Jakość połączenia słaba, jeśli wyższa",
+  "SETTINGS_TOOLTIP_DNS1": "Dostępność DNS 1 aktywna",
+  "SETTINGS_TOOLTIP_DNS2": "Dostępność DNS 2 aktywna",
+  "SETTINGS_TOOLTIP_COLORSCHEME": "Wybierz motyw",
+  "SETTINGS_TOOLTIP_LANGUAGE": "Wybierz język wyświetlania",
+
   "LANG_SELF": "Polski",
   "NAV_ADAPTERS": "Informacje o adapterach",
   "NAV_IPCONFIG": "Konfiguracja IP",

@@ -1,4 +1,18 @@
 {
+  "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Dei Haupt-Netzwerkkart",
+  "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Dei zweite Netzwerkkart",
+  "SETTINGS_TOOLTIP_RESET_FOLDER": "Auf Standard zrucksetze",
+  "SETTINGS_TOOLTIP_HOVER_ACTIVE": "Maus-drauf-Funktion im Systray an",
+  "SETTINGS_TOOLTIP_HOVER_DELAY": "Wie vill Sekunde bis des Info-Fenster aufploppt",
+  "SETTINGS_TOOLTIP_HOVER_POSITION": "Wo des Info-Fenster steht",
+  "SETTINGS_TOOLTIP_PING_FAST": "Verbindung guad, wenn kleener",
+  "SETTINGS_TOOLTIP_PING_NORMAL": "Normale Geschwindigkeit",
+  "SETTINGS_TOOLTIP_GATEWAY": "Verbindung schlecht, wenn größer",
+  "SETTINGS_TOOLTIP_DNS1": "DNS 1 erreichbar",
+  "SETTINGS_TOOLTIP_DNS2": "DNS 2 erreichbar",
+  "SETTINGS_TOOLTIP_COLORSCHEME": "Thema aussuache",
+  "SETTINGS_TOOLTIP_LANGUAGE": "Sprache aussuache",
+
   "LANG_SELF": "Hessisch",
   "NAV_ADAPTERS": "Adapter-Sach",
   "NAV_IPCONFIG": "IP-Gemurkse",

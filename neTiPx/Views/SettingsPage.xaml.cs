@@ -963,6 +963,16 @@ namespace neTiPx.Views
             if (ColorSchemeCardTitle != null) ColorSchemeCardTitle.Text = _lm.Lang("SETTINGS_COLORSCHEME");
             if (ColorSchemeCardDesc != null) ColorSchemeCardDesc.Text = _lm.Lang("SETTINGS_COLORSCHEME_DESC");
             if (AutostartCardTitle != null) AutostartCardTitle.Text = _lm.Lang("SETTINGS_AUTOSTART");
+            if (AutostartCheckBox != null)
+            {
+                AutostartCheckBox.Content = _lm.Lang("SETTINGS_AUTOSTART_WINDOWS");
+                ToolTipService.SetToolTip(AutostartCheckBox, _lm.Lang("SETTINGS_AUTOSTART_WINDOWS"));
+            }
+            if (CloseToTrayCheckBox != null)
+            {
+                CloseToTrayCheckBox.Content = _lm.Lang("SETTINGS_CLOSE_TRAY");
+                ToolTipService.SetToolTip(CloseToTrayCheckBox, _lm.Lang("SETTINGS_CLOSE_TRAY"));
+            }
             if (LanguageCardTitle != null) LanguageCardTitle.Text = _lm.Lang("SETTINGS_LANGUAGE");
             if (LanguageCardDesc != null) LanguageCardDesc.Text = _lm.Lang("SETTINGS_LANGUAGE_DESC");
             UpdateHoverWindowVerticalOffsetLabel();

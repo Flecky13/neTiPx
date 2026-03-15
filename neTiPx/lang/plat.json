@@ -1,4 +1,18 @@
 {
+  "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Dien Haupt-Netzwerkkort",
+  "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Dien sekundäre Netzwerkkort",
+  "SETTINGS_TOOLTIP_RESET_FOLDER": "Op Standard trüchsetten",
+  "SETTINGS_TOOLTIP_HOVER_ACTIVE": "Maus-drauf-Funktion in’t Systemtray an",
+  "SETTINGS_TOOLTIP_HOVER_DELAY": "Wieviel Sekunnen bis dat Info-Fenster opdüüt",
+  "SETTINGS_TOOLTIP_HOVER_POSITION": "Wo dat Info-Fenster steiht",
+  "SETTINGS_TOOLTIP_PING_FAST": "Verbindung good, wenn kleener",
+  "SETTINGS_TOOLTIP_PING_NORMAL": "Normale Geschwindigkeet",
+  "SETTINGS_TOOLTIP_GATEWAY": "Verbindung schlecht, wenn grösser",
+  "SETTINGS_TOOLTIP_DNS1": "DNS 1 erreichbar",
+  "SETTINGS_TOOLTIP_DNS2": "DNS 2 erreichbar",
+  "SETTINGS_TOOLTIP_COLORSCHEME": "Thema wähl’n",
+  "SETTINGS_TOOLTIP_LANGUAGE": "Sprook wähl’n",
+
   "LANG_SELF": "Plattdeutsch",
   "NAV_ADAPTERS": "Adapter-Sach",
   "NAV_IPCONFIG": "IP-Einstellunge",

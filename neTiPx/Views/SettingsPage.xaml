@@ -377,14 +377,14 @@
                         <TextBlock x:Name="AutostartCardTitle" Text="Autostart" Style="{StaticResource SectionTitle}" />
                         <CheckBox
                             x:Name="AutostartCheckBox"
-                            Content="mit Windows Starten"
-                            ToolTipService.ToolTip="mit Windows starten"
+                            Content="..."
+                            ToolTipService.ToolTip="..."
                             Checked="AutostartCheckBox_Checked"
                             Unchecked="AutostartCheckBox_Unchecked" />
                         <CheckBox
                             x:Name="CloseToTrayCheckBox"
-                            Content="Beim Schließen in den Systray minimieren"
-                            ToolTipService.ToolTip="Beim Schliessen in Systray minimieren"
+                            Content="..."
+                            ToolTipService.ToolTip="..."
                             Checked="CloseToTrayCheckBox_Checked"
                             Unchecked="CloseToTrayCheckBox_Unchecked" />
                     </StackPanel>

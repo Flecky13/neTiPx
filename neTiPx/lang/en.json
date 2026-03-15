@@ -1,4 +1,18 @@
-{
+  {
+  "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Your primary network adapter",
+  "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Your secondary network adapter",
+  "SETTINGS_TOOLTIP_RESET_FOLDER": "Reset to default",
+  "SETTINGS_TOOLTIP_HOVER_ACTIVE": "Enables the mouse-over function in the system tray",
+  "SETTINGS_TOOLTIP_HOVER_DELAY": "Number of seconds before the info window appears",
+  "SETTINGS_TOOLTIP_HOVER_POSITION": "Info window position",
+  "SETTINGS_TOOLTIP_PING_FAST": "Connection quality is good if lower",
+  "SETTINGS_TOOLTIP_PING_NORMAL": "Normal speed",
+  "SETTINGS_TOOLTIP_GATEWAY": "Connection quality is poor if higher",
+  "SETTINGS_TOOLTIP_DNS1": "Reachability for DNS 1 active",
+  "SETTINGS_TOOLTIP_DNS2": "Reachability for DNS 2 active",
+  "SETTINGS_TOOLTIP_COLORSCHEME": "Select theme layout",
+  "SETTINGS_TOOLTIP_LANGUAGE": "Select display language",
+
   "LANG_SELF": "English",
   "NAV_ADAPTERS": "Adapter Info",
   "NAV_IPCONFIG": "IP Configuration",

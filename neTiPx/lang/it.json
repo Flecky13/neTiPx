@@ -1,4 +1,18 @@
 {
+  "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Il tuo adattatore di rete principale",
+  "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Il tuo adattatore di rete secondario",
+  "SETTINGS_TOOLTIP_RESET_FOLDER": "Ripristina impostazioni predefinite",
+  "SETTINGS_TOOLTIP_HOVER_ACTIVE": "Abilita la funzione passaggio del mouse nella barra di sistema",
+  "SETTINGS_TOOLTIP_HOVER_DELAY": "Numero di secondi prima che appaia la finestra informativa",
+  "SETTINGS_TOOLTIP_HOVER_POSITION": "Posizione della finestra informativa",
+  "SETTINGS_TOOLTIP_PING_FAST": "Qualità della connessione buona se più bassa",
+  "SETTINGS_TOOLTIP_PING_NORMAL": "Velocità normale",
+  "SETTINGS_TOOLTIP_GATEWAY": "Qualità della connessione scarsa se più alta",
+  "SETTINGS_TOOLTIP_DNS1": "Raggiungibilità per DNS 1 attiva",
+  "SETTINGS_TOOLTIP_DNS2": "Raggiungibilità per DNS 2 attiva",
+  "SETTINGS_TOOLTIP_COLORSCHEME": "Seleziona tema",
+  "SETTINGS_TOOLTIP_LANGUAGE": "Seleziona lingua di visualizzazione",
+
   "LANG_SELF": "Italiano",
   "NAV_ADAPTERS": "Info Adattatori",
   "NAV_IPCONFIG": "Configurazione IP",
