@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
@@ -8,12 +9,14 @@ using neTiPx.ViewModels;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Collections;
 
 namespace neTiPx.Views
 {
     public partial class IpConfigPage : Page
     {
         private static readonly LanguageManager _lm = LanguageManager.Instance;
+
         private bool _isHandlingSelection;
         private bool _isPageLoaded;
         private bool _isWindowActive;
@@ -22,8 +25,10 @@ namespace neTiPx.Views
         public IpConfigPage()
         {
             InitializeComponent();
+
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+
             _lm.LanguageChanged += OnLanguageChanged;
         }
 
@@ -40,92 +45,17 @@ namespace neTiPx.Views
             if (NewProfileButtonText != null) NewProfileButtonText.Text = _lm.Lang("IPCONFIG_NEW_PROFILE");
             if (ProfileSettingsTitle != null) ProfileSettingsTitle.Text = _lm.Lang("IPCONFIG_PROFILE_SETTINGS");
 
-            // Tooltips dynamisch setzen
             SetToolTips();
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Loaded");
+
             UpdateLanguage();
-        private void SetToolTips()
-        {
-            // Profil löschen Button (im ListView DataTemplate)
-            if (ProfileListView != null)
-            {
-                foreach (var item in ProfileListView.Items)
-                {
-                    var container = ProfileListView.ContainerFromItem(item) as Microsoft.UI.Xaml.Controls.ListViewItem;
-                    if (container != null)
-                    {
-                        var deleteButton = FindChildByName(container, "DeleteProfileButton") as Microsoft.UI.Xaml.Controls.Button;
-                        if (deleteButton != null)
-                        {
-                            ToolTipService.SetToolTip(deleteButton, _lm.Lang("IPCONFIG_TOOLTIP_DELETE_PROFILE"));
-                        }
-                    }
-                }
-            }
-
-            // Routen Button
-            if (RoutesButton != null)
-                ToolTipService.SetToolTip(RoutesButton, _lm.Lang("IPCONFIG_TOOLTIP_ROUTES"));
-
-            // Gateway
-            if (GatewayTextBox != null)
-                ToolTipService.SetToolTip(GatewayTextBox, _lm.Lang("IPCONFIG_TOOLTIP_GATEWAY"));
-
-            // DNS
-            if (Dns1TextBox != null)
-                ToolTipService.SetToolTip(Dns1TextBox, _lm.Lang("IPCONFIG_TOOLTIP_DNS1"));
-            if (Dns2TextBox != null)
-                ToolTipService.SetToolTip(Dns2TextBox, _lm.Lang("IPCONFIG_TOOLTIP_DNS2"));
-
-            // IP Adressen (ItemsRepeater)
-            if (IpAddressesRepeater != null)
-            {
-                foreach (var element in IpAddressesRepeater.Items)
-                {
-                    var container = IpAddressesRepeater.TryGetElement(IpAddressesRepeater.Items.IndexOf(element));
-                    if (container != null)
-                    {
-                        var ipBox = FindChildByName(container, "IpAddressTextBox") as Microsoft.UI.Xaml.Controls.TextBox;
-                        if (ipBox != null)
-                            ToolTipService.SetToolTip(ipBox, _lm.Lang("IPCONFIG_TOOLTIP_IP"));
-                        var subnetBox = FindChildByName(container, "SubnetMaskTextBox") as Microsoft.UI.Xaml.Controls.TextBox;
-                        if (subnetBox != null)
-                            ToolTipService.SetToolTip(subnetBox, _lm.Lang("IPCONFIG_TOOLTIP_SUBNET"));
-                        var removeBtn = FindChildByName(container, "RemoveIpButton") as Microsoft.UI.Xaml.Controls.Button;
-                        if (removeBtn != null)
-                            ToolTipService.SetToolTip(removeBtn, _lm.Lang("IPCONFIG_TOOLTIP_REMOVE_IP"));
-                    }
-                }
-            }
-
-            // Anwenden & Speichern
-            if (ApplyButton != null)
-                ToolTipService.SetToolTip(ApplyButton, _lm.Lang("IPCONFIG_TOOLTIP_APPLY"));
-            if (SaveButton != null)
-                ToolTipService.SetToolTip(SaveButton, _lm.Lang("IPCONFIG_TOOLTIP_SAVE"));
-        }
-
-        // Hilfsmethode zum Finden von Child-Elementen nach Name
-        private FrameworkElement? FindChildByName(DependencyObject parent, string name)
-        {
-            int count = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < count; i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is FrameworkElement fe && fe.Name == name)
-                    return fe;
-                var result = FindChildByName(child, name);
-                if (result != null)
-                    return result;
-            }
-            return null;
-        }
 
             _isPageLoaded = true;
+
             _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);
             if (_mainAppWindow != null)
             {
@@ -133,6 +63,7 @@ namespace neTiPx.Views
             }
 
             App.MainWindow.Activated += MainWindow_Activated;
+
             _isWindowActive = _mainAppWindow?.IsVisible == true;
 
             if (DataContext is IpConfigViewModel viewModel)
@@ -146,10 +77,13 @@ namespace neTiPx.Views
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Unloaded");
+
             _lm.LanguageChanged -= OnLanguageChanged;
 
             _isPageLoaded = false;
+
             App.MainWindow.Activated -= MainWindow_Activated;
+
             if (_mainAppWindow != null)
             {
                 _mainAppWindow.Changed -= MainAppWindow_Changed;
@@ -164,7 +98,9 @@ namespace neTiPx.Views
         private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
         {
             _isWindowActive = args.WindowActivationState != WindowActivationState.Deactivated;
+
             Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] WindowActivated state={args.WindowActivationState}");
+
             UpdateMonitoringState();
         }
 
@@ -180,40 +116,119 @@ namespace neTiPx.Views
         private void UpdateMonitoringState()
         {
             var isWindowVisible = _mainAppWindow?.IsVisible ?? false;
+
             var shouldMonitor = _isPageLoaded && _isWindowActive && isWindowVisible;
+
             Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] MonitoringState loaded={_isPageLoaded} active={_isWindowActive} visible={isWindowVisible} => shouldMonitor={shouldMonitor}");
 
             if (DataContext is not IpConfigViewModel viewModel)
-            {
                 return;
-            }
 
             if (shouldMonitor)
-            {
                 viewModel.StartConnectionMonitoring();
-            }
             else
-            {
                 viewModel.StopConnectionMonitoring();
+        }
+
+        private void SetToolTips()
+        {
+            if (ProfileListView != null)
+            {
+                foreach (var item in ProfileListView.Items)
+                {
+                    var container = ProfileListView.ContainerFromItem(item) as ListViewItem;
+
+                    if (container != null)
+                    {
+                        var deleteButton = FindChildByName(container, "DeleteProfileButton") as Button;
+
+                        if (deleteButton != null)
+                        {
+                            ToolTipService.SetToolTip(deleteButton, _lm.Lang("IPCONFIG_TOOLTIP_DELETE_PROFILE"));
+                        }
+                    }
+                }
             }
+
+            if (RoutesButton != null)
+                ToolTipService.SetToolTip(RoutesButton, _lm.Lang("IPCONFIG_TOOLTIP_ROUTES"));
+
+            if (GatewayTextBox != null)
+                ToolTipService.SetToolTip(GatewayTextBox, _lm.Lang("IPCONFIG_TOOLTIP_GATEWAY"));
+
+            if (Dns1TextBox != null)
+                ToolTipService.SetToolTip(Dns1TextBox, _lm.Lang("IPCONFIG_TOOLTIP_DNS1"));
+
+            if (Dns2TextBox != null)
+                ToolTipService.SetToolTip(Dns2TextBox, _lm.Lang("IPCONFIG_TOOLTIP_DNS2"));
+
+            if (IpAddressesRepeater != null && IpAddressesRepeater.ItemsSource is IEnumerable items)
+            {
+                int index = 0;
+
+                foreach (var element in items)
+                {
+                    var container = IpAddressesRepeater.TryGetElement(index);
+
+                    if (container != null)
+                    {
+                        var ipBox = FindChildByName(container, "IpAddressTextBox") as TextBox;
+                        if (ipBox != null)
+                            ToolTipService.SetToolTip(ipBox, _lm.Lang("IPCONFIG_TOOLTIP_IP"));
+
+                        var subnetBox = FindChildByName(container, "SubnetMaskTextBox") as TextBox;
+                        if (subnetBox != null)
+                            ToolTipService.SetToolTip(subnetBox, _lm.Lang("IPCONFIG_TOOLTIP_SUBNET"));
+
+                        var removeBtn = FindChildByName(container, "RemoveIpButton") as Button;
+                        if (removeBtn != null)
+                            ToolTipService.SetToolTip(removeBtn, _lm.Lang("IPCONFIG_TOOLTIP_REMOVE_IP"));
+                    }
+
+                    index++;
+                }
+            }
+
+            if (ApplyButton != null)
+                ToolTipService.SetToolTip(ApplyButton, _lm.Lang("IPCONFIG_TOOLTIP_APPLY"));
+
+            if (SaveButton != null)
+                ToolTipService.SetToolTip(SaveButton, _lm.Lang("IPCONFIG_TOOLTIP_SAVE"));
+        }
+
+        private FrameworkElement? FindChildByName(DependencyObject parent, string name)
+        {
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is FrameworkElement fe && fe.Name == name)
+                    return fe;
+
+                var result = FindChildByName(child, name);
+
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
 
         private async void ProfileListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isHandlingSelection || DataContext is not IpConfigViewModel viewModel)
-            {
                 return;
-            }
 
             var currentProfile = viewModel.SelectedProfile;
             var nextProfile = e.AddedItems.OfType<IpProfile>().FirstOrDefault();
 
             if (nextProfile == null || ReferenceEquals(nextProfile, currentProfile))
-            {
                 return;
-            }
 
             _isHandlingSelection = true;
+
             try
             {
                 if (currentProfile?.IsDirty == true)
@@ -225,10 +240,11 @@ namespace neTiPx.Views
                         PrimaryButtonText = _lm.Lang("IPCONFIG_SAVE"),
                         CloseButtonText = _lm.Lang("IPCONFIG_NO"),
                         DefaultButton = ContentDialogButton.Primary,
-                        XamlRoot = XamlRoot
+                        XamlRoot = this.XamlRoot
                     };
 
                     var result = await dialog.ShowAsync();
+
                     if (result == ContentDialogResult.Primary)
                     {
                         if (!viewModel.SaveCurrentProfileForProfileSwitch())
@@ -258,11 +274,10 @@ namespace neTiPx.Views
         private void RoutesButton_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not IpConfigViewModel viewModel || viewModel.SelectedProfile == null)
-            {
                 return;
-            }
 
             var routeWindow = new RouteConfigWindow(viewModel.SelectedProfile, viewModel);
+
             routeWindow.Activate();
         }
     }
