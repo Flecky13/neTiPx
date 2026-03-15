@@ -892,6 +892,7 @@ namespace neTiPx.Views
             if (LanguageCombo == null)
                 return;
 
+
             var items = new List<LanguageComboItem>
             {
                 new LanguageComboItem(_lm.Lang("SETTINGS_LANGUAGE_SYSTEM"), "System")
@@ -899,8 +900,15 @@ namespace neTiPx.Views
 
             foreach (var code in _lm.GetAvailableLanguages())
             {
-                var displayName = code.ToUpperInvariant();
+                // Temporär Sprache laden, um LANG_SELF korrekt aus der jeweiligen Datei zu lesen
+                var originalCode = _lm.CurrentLanguageCode;
+                _lm.LoadLanguage(code);
+                var langSelf = _lm.Lang("LANG_SELF");
+                // Optional: nur langSelf anzeigen, oder mit Code
+                var displayName = $"{langSelf}";
                 items.Add(new LanguageComboItem(displayName, code));
+                // Ursprüngliche Sprache wiederherstellen
+                _lm.LoadLanguage(originalCode);
             }
 
             LanguageCombo.ItemsSource      = items;
