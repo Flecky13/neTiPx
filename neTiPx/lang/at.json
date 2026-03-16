@@ -1,3 +1,4 @@
+{
 "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Dei primäre Netzwerkkartn",
 "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Dei sekundäre Netzwerkkartn",
 "SETTINGS_TOOLTIP_RESET_FOLDER": "Zruck auf Standard",
@@ -159,3 +160,4 @@
 "HOVER_IPV6": "IPv6:",
 "HOVER_GATEWAY6": "Gateway6:",
 "HOVER_DNS6": "DNS6:"
+}

@@ -1,3 +1,4 @@
+{
 "SETTINGS_TOOLTIP_PRIMARY_ADAPTER": "Dini primäri Netzwerkchorte",
 "SETTINGS_TOOLTIP_SECONDARY_ADAPTER": "Dini sekundäri Netzwerkchorte",
 "SETTINGS_TOOLTIP_RESET_FOLDER": "Zrugg uf Standard",
@@ -159,3 +160,4 @@
 "HOVER_IPV6": "IPv6:",
 "HOVER_GATEWAY6": "Gateway6:",
 "HOVER_DNS6": "DNS6:"
+}
