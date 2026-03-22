@@ -15,23 +15,57 @@ namespace neTiPx.Views
 {
     public sealed class RouteConfigWindow : Window
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private const int FixedWindowWidth = 690;
         private const int FixedWindowHeight = 900;
         private readonly IpProfile _profile;
         private readonly IpConfigViewModel _viewModel;
         private readonly NetworkConfigService _networkConfigService = new NetworkConfigService();
         private readonly RouteConfigDialogContent _content;
+        private Button? _cancelButton;
+        private Button? _applyButton;
 
         public RouteConfigWindow(IpProfile profile, IpConfigViewModel viewModel)
         {
             _profile = profile;
             _viewModel = viewModel;
             _content = new RouteConfigDialogContent(profile.Routes, DeleteRouteImmediately, AddRouteImmediately, ReloadSystemRoutes);
+            _lm.LanguageChanged += OnLanguageChanged;
+            Closed += RouteConfigWindow_Closed;
 
-            Title = "Routen konfigurieren";
             Content = CreateLayout();
+            UpdateLanguage();
 
             ConfigureWindow();
+        }
+
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void RouteConfigWindow_Closed(object sender, WindowEventArgs args)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void UpdateLanguage()
+        {
+            Title = T("ROUTECFG_WINDOW_TITLE");
+            if (_cancelButton != null)
+            {
+                _cancelButton.Content = T("ROUTECFG_BUTTON_CANCEL");
+            }
+
+            if (_applyButton != null)
+            {
+                _applyButton.Content = T("ROUTECFG_BUTTON_APPLY");
+            }
         }
 
         private (bool success, string? message) DeleteRouteImmediately(RouteEntry route)
@@ -130,24 +164,24 @@ namespace neTiPx.Views
                 Margin = new Thickness(16, 0, 16, 16)
             };
 
-            var cancelButton = new Button
+            _cancelButton = new Button
             {
-                Content = "Abbrechen",
+                Content = T("ROUTECFG_BUTTON_CANCEL"),
                 MinWidth = 120,
                 Style = GetStyle("PrimaryAction")
             };
-            cancelButton.Click += (_, _) => Close();
+            _cancelButton.Click += (_, _) => Close();
 
-            var applyButton = new Button
+            _applyButton = new Button
             {
-                Content = "Übernehmen",
+                Content = T("ROUTECFG_BUTTON_APPLY"),
                 MinWidth = 120,
                 Style = GetStyle("AccentButtonStyle")
             };
-            applyButton.Click += ApplyButton_Click;
+            _applyButton.Click += ApplyButton_Click;
 
-            buttonPanel.Children.Add(cancelButton);
-            buttonPanel.Children.Add(applyButton);
+            buttonPanel.Children.Add(_cancelButton);
+            buttonPanel.Children.Add(_applyButton);
 
             Grid.SetRow(buttonPanel, 1);
             root.Children.Add(buttonPanel);

@@ -8,15 +8,18 @@ using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using neTiPx.Models;
+using neTiPx.Services;
+using System.Globalization;
 
 namespace neTiPx.Views
 {
     public sealed partial class RouteConfigDialogContent : UserControl, INotifyPropertyChanged
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private readonly Func<RouteEntry, (bool success, string? message)>? _deleteRouteFromSystem;
         private readonly Func<RouteEntry, (bool success, string? message)>? _addRouteToSystem;
         private readonly Func<(bool success, List<RouteEntry> routes, string? error)>? _reloadSystemRoutes;
-        private string _systemRoutesStatus = "Noch nicht eingelesen.";
+        private string _systemRoutesStatus = string.Empty;
         private bool _isSystemRoutesLoading;
         private bool _isRefreshingMarkers;
 
@@ -24,6 +27,19 @@ namespace neTiPx.Views
         public ObservableCollection<RouteEntry> SystemRoutes { get; }
 
         private const int MaxRoutes = 8;
+
+        public string DeleteSystemRouteToolTip { get; private set; } = string.Empty;
+        public string ProfileBadgeText { get; private set; } = string.Empty;
+        public string AddDestinationPlaceholder { get; private set; } = string.Empty;
+        public string AddDestinationToolTip { get; private set; } = string.Empty;
+        public string AddSubnetPlaceholder { get; private set; } = string.Empty;
+        public string AddSubnetToolTip { get; private set; } = string.Empty;
+        public string AddGatewayPlaceholder { get; private set; } = string.Empty;
+        public string AddGatewayToolTip { get; private set; } = string.Empty;
+        public string AddMetricPlaceholder { get; private set; } = string.Empty;
+        public string AddMetricToolTip { get; private set; } = string.Empty;
+        public string RemoveProfileRouteToolTip { get; private set; } = string.Empty;
+        public string ApplyProfileRouteToolTip { get; private set; } = string.Empty;
 
         public bool CanAddRoute => Routes.Count < MaxRoutes;
 
@@ -53,7 +69,9 @@ namespace neTiPx.Views
             _deleteRouteFromSystem = deleteRouteFromSystem;
             _addRouteToSystem = addRouteToSystem;
             _reloadSystemRoutes = reloadSystemRoutes;
+            _lm.LanguageChanged += OnLanguageChanged;
             InitializeComponent();
+            UpdateLanguage();
 
             Routes.CollectionChanged += Routes_CollectionChanged;
             Routes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(CanAddRoute));
@@ -63,6 +81,97 @@ namespace neTiPx.Views
             }
 
             Loaded += RouteConfigDialogContent_Loaded;
+            Unloaded += RouteConfigDialogContent_Unloaded;
+        }
+
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void RouteConfigDialogContent_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+            RefreshLoadedStatusText();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (DialogTitleText != null) DialogTitleText.Text = T("ROUTECFG_TITLE");
+            if (DialogSubtitleText != null) DialogSubtitleText.Text = T("ROUTECFG_SUBTITLE");
+            if (SystemSectionTitleText != null) SystemSectionTitleText.Text = T("ROUTES_SECTION_SYSTEM");
+            if (ReloadSystemRoutesButtonText != null) ReloadSystemRoutesButtonText.Text = T("ROUTES_REFRESH");
+            if (ReloadSystemRoutesButton != null) ToolTipService.SetToolTip(ReloadSystemRoutesButton, T("ROUTES_TOOLTIP_REFRESH"));
+
+            if (SystemHeaderDestinationText != null) SystemHeaderDestinationText.Text = T("ROUTES_HEADER_DESTINATION");
+            if (SystemHeaderSubnetText != null) SystemHeaderSubnetText.Text = T("ROUTES_HEADER_SUBNET");
+            if (SystemHeaderGatewayText != null) SystemHeaderGatewayText.Text = T("ROUTES_HEADER_GATEWAY");
+            if (SystemHeaderMetricText != null) SystemHeaderMetricText.Text = T("ROUTES_HEADER_METRIC");
+            if (SystemHeaderActionText != null) SystemHeaderActionText.Text = T("ROUTES_HEADER_ACTION");
+
+            if (ProfileRoutesSectionTitleText != null) ProfileRoutesSectionTitleText.Text = T("ROUTECFG_SECTION_PROFILE_ROUTES");
+            if (AddRouteButtonText != null) AddRouteButtonText.Text = T("ROUTES_ADD_BUTTON");
+            if (AddRouteButton != null) ToolTipService.SetToolTip(AddRouteButton, T("ROUTES_ADD_BUTTON_TOOLTIP"));
+
+            if (ProfileHeaderDestinationText != null) ProfileHeaderDestinationText.Text = T("ROUTES_HEADER_DESTINATION");
+            if (ProfileHeaderSubnetText != null) ProfileHeaderSubnetText.Text = T("ROUTES_HEADER_SUBNET");
+            if (ProfileHeaderGatewayText != null) ProfileHeaderGatewayText.Text = T("ROUTES_HEADER_GATEWAY");
+            if (ProfileHeaderMetricText != null) ProfileHeaderMetricText.Text = T("ROUTES_HEADER_METRIC");
+            if (ProfileHeaderActionText != null) ProfileHeaderActionText.Text = T("ROUTES_HEADER_ACTION");
+
+            DeleteSystemRouteToolTip = T("ROUTECFG_TOOLTIP_DELETE_SYSTEM_ROUTE");
+            ProfileBadgeText = T("ROUTECFG_BADGE_PROFILE");
+            AddDestinationPlaceholder = T("ROUTES_ADD_DEST_PLACEHOLDER");
+            AddDestinationToolTip = T("ROUTES_ADD_DEST_TOOLTIP");
+            AddSubnetPlaceholder = T("ROUTES_ADD_SUBNET_PLACEHOLDER");
+            AddSubnetToolTip = T("ROUTES_ADD_SUBNET_TOOLTIP");
+            AddGatewayPlaceholder = T("ROUTES_ADD_GATEWAY_PLACEHOLDER");
+            AddGatewayToolTip = T("ROUTES_ADD_GATEWAY_TOOLTIP");
+            AddMetricPlaceholder = T("ROUTES_ADD_METRIC_PLACEHOLDER");
+            AddMetricToolTip = T("ROUTES_ADD_METRIC_TOOLTIP");
+            RemoveProfileRouteToolTip = T("ROUTECFG_TOOLTIP_REMOVE_PROFILE_ROUTE");
+            ApplyProfileRouteToolTip = T("ROUTECFG_TOOLTIP_APPLY_PROFILE_ROUTE");
+
+            OnPropertyChanged(nameof(DeleteSystemRouteToolTip));
+            OnPropertyChanged(nameof(ProfileBadgeText));
+            OnPropertyChanged(nameof(AddDestinationPlaceholder));
+            OnPropertyChanged(nameof(AddDestinationToolTip));
+            OnPropertyChanged(nameof(AddSubnetPlaceholder));
+            OnPropertyChanged(nameof(AddSubnetToolTip));
+            OnPropertyChanged(nameof(AddGatewayPlaceholder));
+            OnPropertyChanged(nameof(AddGatewayToolTip));
+            OnPropertyChanged(nameof(AddMetricPlaceholder));
+            OnPropertyChanged(nameof(AddMetricToolTip));
+            OnPropertyChanged(nameof(RemoveProfileRouteToolTip));
+            OnPropertyChanged(nameof(ApplyProfileRouteToolTip));
+
+            if (string.IsNullOrWhiteSpace(SystemRoutesStatus))
+            {
+                SystemRoutesStatus = T("ROUTECFG_STATUS_NOT_LOADED");
+            }
+        }
+
+        private void RefreshLoadedStatusText()
+        {
+            if (_isSystemRoutesLoading)
+            {
+                return;
+            }
+
+            if (_reloadSystemRoutes == null)
+            {
+                SystemRoutesStatus = T("ROUTECFG_STATUS_RELOAD_UNAVAILABLE");
+                return;
+            }
+
+            SystemRoutesStatus = SystemRoutes.Count == 0
+                ? T("ROUTECFG_STATUS_NONE_FOUND")
+                : string.Format(CultureInfo.CurrentCulture, T("ROUTECFG_STATUS_LOADED_COUNT"), SystemRoutes.Count);
         }
 
         public List<RouteEntry> GetRoutes()
@@ -116,8 +225,8 @@ namespace neTiPx.Views
                 {
                     var dialog = new ContentDialog
                     {
-                        Title = "Route konnte nicht gelöscht werden",
-                        Content = message ?? "Unbekannter Fehler beim Entfernen der Route aus dem System.",
+                        Title = T("ROUTECFG_DIALOG_REMOVE_FAILED_TITLE"),
+                        Content = message ?? T("ROUTECFG_DIALOG_REMOVE_FAILED_CONTENT"),
                         CloseButtonText = "OK",
                         DefaultButton = ContentDialogButton.Close,
                         XamlRoot = XamlRoot
@@ -131,7 +240,7 @@ namespace neTiPx.Views
                 {
                     var infoDialog = new ContentDialog
                     {
-                        Title = "Hinweis",
+                        Title = T("ROUTECFG_DIALOG_INFO_TITLE"),
                         Content = message,
                         CloseButtonText = "OK",
                         DefaultButton = ContentDialogButton.Close,
@@ -170,8 +279,8 @@ namespace neTiPx.Views
             {
                 var dialog = new ContentDialog
                 {
-                    Title = "Route konnte nicht angewendet werden",
-                    Content = message ?? "Unbekannter Fehler beim Hinzufuegen der Route.",
+                    Title = T("ROUTECFG_DIALOG_APPLY_FAILED_TITLE"),
+                    Content = message ?? T("ROUTECFG_DIALOG_APPLY_FAILED_CONTENT"),
                     CloseButtonText = "OK",
                     DefaultButton = ContentDialogButton.Close,
                     XamlRoot = XamlRoot
@@ -185,7 +294,7 @@ namespace neTiPx.Views
             {
                 var infoDialog = new ContentDialog
                 {
-                    Title = "Hinweis",
+                    Title = T("ROUTECFG_DIALOG_INFO_TITLE"),
                     Content = message,
                     CloseButtonText = "OK",
                     DefaultButton = ContentDialogButton.Close,
@@ -212,7 +321,7 @@ namespace neTiPx.Views
 
             if (_reloadSystemRoutes == null)
             {
-                SystemRoutesStatus = "Einlesen aktuell nicht verfuegbar.";
+                SystemRoutesStatus = T("ROUTECFG_STATUS_RELOAD_UNAVAILABLE");
                 return;
             }
 
@@ -225,8 +334,8 @@ namespace neTiPx.Views
                 {
                     var dialog = new ContentDialog
                     {
-                        Title = "Routen konnten nicht eingelesen werden",
-                        Content = result.error ?? "Unbekannter Fehler.",
+                        Title = T("ROUTECFG_DIALOG_RELOAD_FAILED_TITLE"),
+                        Content = result.error ?? T("ROUTECFG_DIALOG_UNKNOWN_ERROR"),
                         CloseButtonText = "OK",
                         DefaultButton = ContentDialogButton.Close,
                         XamlRoot = XamlRoot
@@ -248,8 +357,8 @@ namespace neTiPx.Views
             RefreshSystemRouteMarkers();
 
             SystemRoutesStatus = SystemRoutes.Count == 0
-                ? "Keine ständigen Routen im System gefunden."
-                : $"{SystemRoutes.Count} ständige Route(n) eingelesen.";
+                ? T("ROUTECFG_STATUS_NONE_FOUND")
+                : string.Format(CultureInfo.CurrentCulture, T("ROUTECFG_STATUS_LOADED_COUNT"), SystemRoutes.Count);
 
             _isSystemRoutesLoading = false;
         }
@@ -271,8 +380,8 @@ namespace neTiPx.Views
             {
                 var dialog = new ContentDialog
                 {
-                    Title = "Route konnte nicht geloescht werden",
-                    Content = message ?? "Unbekannter Fehler beim Entfernen der Route aus dem System.",
+                    Title = T("ROUTECFG_DIALOG_REMOVE_FAILED_TITLE"),
+                    Content = message ?? T("ROUTECFG_DIALOG_REMOVE_FAILED_CONTENT"),
                     CloseButtonText = "OK",
                     DefaultButton = ContentDialogButton.Close,
                     XamlRoot = XamlRoot
@@ -285,14 +394,14 @@ namespace neTiPx.Views
             SystemRoutes.Remove(route);
             RefreshSystemRouteMarkers();
             SystemRoutesStatus = SystemRoutes.Count == 0
-                ? "Keine ständigen Routen im System gefunden."
-                : $"{SystemRoutes.Count} ständige Route(n) geladen.";
+                ? T("ROUTECFG_STATUS_NONE_FOUND")
+                : string.Format(CultureInfo.CurrentCulture, T("ROUTECFG_STATUS_LOADED_COUNT"), SystemRoutes.Count);
 
             if (!string.IsNullOrWhiteSpace(message))
             {
                 var infoDialog = new ContentDialog
                 {
-                    Title = "Hinweis",
+                    Title = T("ROUTECFG_DIALOG_INFO_TITLE"),
                     Content = message,
                     CloseButtonText = "OK",
                     DefaultButton = ContentDialogButton.Close,
