@@ -36,7 +36,7 @@ namespace neTiPx.Views
             if (NavItemTools != null) NavItemTools.Content = _lm.Lang("NAV_TOOLS");
             if (NavItemInfo != null) NavItemInfo.Content = _lm.Lang("NAV_INFO");
             if (NavItemSettings != null) NavItemSettings.Content = _lm.Lang("NAV_SETTINGS");
-            if (CopyrightText != null) CopyrightText.Text = _lm.Lang("APP_COPYRIGHT");
+            if (CopyrightText != null) CopyrightText.Text = "© neTiPx by Pedro";
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)

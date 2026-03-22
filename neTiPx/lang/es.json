@@ -19,7 +19,6 @@
   "NAV_TOOLS": "Herramientas",
   "NAV_INFO": "Info",
   "NAV_SETTINGS": "Configuración",
-  "APP_COPYRIGHT": "© neTiPx by Pedro",
 
   "ADAPTER_TITLE": "Adaptadores",
   "ADAPTER_SUBTITLE": "Información sobre tus dos adaptadores.",
@@ -28,9 +27,8 @@
   "ADAPTER_STATUS_NIC1": "Estado NIC 1",
   "ADAPTER_STATUS_NIC2": "Estado NIC 2",
   "ADAPTER_LBL_NAME": "Nombre:",
-  "ADAPTER_LBL_MAC": "MAC:",
+
   "ADAPTER_LBL_IPV4_INFO": "Información IPv4:",
-  "ADAPTER_LBL_IPV4": "IPv4:",
   "ADAPTER_LBL_GATEWAY": "Puerta de enlace:",
   "ADAPTER_LBL_DNS4": "DNS4:",
   "ADAPTER_LBL_IPV6_INFO": "Información IPv6:",

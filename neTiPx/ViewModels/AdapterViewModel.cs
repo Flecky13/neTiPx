@@ -610,13 +610,13 @@ namespace neTiPx.ViewModels
                 }
                 if (PrimaryAdapterIpV4List.Count == 0)
                 {
-                    PrimaryAdapterIpV4List.Add("Keine IPv4 konfiguriert");
+                    PrimaryAdapterIpV4List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv4"));
                 }
 
                 // Add gateway IPv4
                 var gateway4 = ipProperties.GatewayAddresses.FirstOrDefault(g =>
                     g.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-                PrimaryAdapterGateway = gateway4?.Address.ToString() ?? "Keine Gateway konfiguriert";
+                PrimaryAdapterGateway = gateway4?.Address.ToString() ?? LanguageManager.Instance.Lang("ADAPTER_INFO_NoGateway");
 
                 // Add all DNS4 addresses
                 var dns4Addresses = ipProperties.DnsAddresses
@@ -627,7 +627,7 @@ namespace neTiPx.ViewModels
                 }
                 if (PrimaryAdapterDns4List.Count == 0)
                 {
-                    PrimaryAdapterDns4List.Add("Keine DNS konfiguriert");
+                    PrimaryAdapterDns4List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoDNS"));
                 }
 
                 // Notify DNS properties changed
@@ -646,15 +646,15 @@ namespace neTiPx.ViewModels
                 IsPrimaryIpv6Available = hasIpv6;
                 if (!hasIpv6)
                 {
-                    PrimaryAdapterIpV6List.Add("Keine IPv6 konfiguriert");
+                    PrimaryAdapterIpV6List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv6"));
                 }
 
                 // Add gateway IPv6
                 var gateway6 = ipProperties.GatewayAddresses.FirstOrDefault(g =>
                     g.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6);
                 PrimaryAdapterGateway6 = hasIpv6
-                    ? gateway6?.Address.ToString() ?? "Keine Gateway konfiguriert"
-                    : "Keine IPv6 konfiguriert";
+                    ? gateway6?.Address.ToString() ?? LanguageManager.Instance.Lang("ADAPTER_INFO_NoGateway")
+                    : LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv6");
 
                 // Add all DNS6 addresses
                 var dns6Addresses = ipProperties.DnsAddresses
@@ -666,7 +666,7 @@ namespace neTiPx.ViewModels
                 }
                 if (PrimaryAdapterDns6List.Count == 0)
                 {
-                    PrimaryAdapterDns6List.Add(hasIpv6 ? "Keine DNS konfiguriert" : "Keine IPv6 konfiguriert");
+                    PrimaryAdapterDns6List.Add(hasIpv6 ? LanguageManager.Instance.Lang("ADAPTER_INFO_NoDNS") : LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv6"));
                 }
                 OnPropertyChanged(nameof(PrimaryDns1AddressV6));
                 OnPropertyChanged(nameof(PrimaryDns2AddressV6));
@@ -716,13 +716,13 @@ namespace neTiPx.ViewModels
                 }
                 if (SecondaryAdapterIpV4List.Count == 0)
                 {
-                    SecondaryAdapterIpV4List.Add("Keine IPv4 konfiguriert");
+                    SecondaryAdapterIpV4List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv4"));
                 }
 
                 // Add gateway IPv4
                 var gateway4 = ipProperties.GatewayAddresses.FirstOrDefault(g =>
                     g.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
-                SecondaryAdapterGateway = gateway4?.Address.ToString() ?? "Keine Gateway konfiguriert";
+                SecondaryAdapterGateway = gateway4?.Address.ToString() ?? LanguageManager.Instance.Lang("ADAPTER_INFO_NoGateway");
 
                 // Add all DNS4 addresses
                 var dns4Addresses = ipProperties.DnsAddresses
@@ -733,7 +733,7 @@ namespace neTiPx.ViewModels
                 }
                 if (SecondaryAdapterDns4List.Count == 0)
                 {
-                    SecondaryAdapterDns4List.Add("Keine DNS konfiguriert");
+                    SecondaryAdapterDns4List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoDNS"));
                 }
 
                 OnPropertyChanged(nameof(SecondaryDns1Address));
@@ -751,15 +751,15 @@ namespace neTiPx.ViewModels
                 IsSecondaryIpv6Available = hasIpv6;
                 if (!hasIpv6)
                 {
-                    SecondaryAdapterIpV6List.Add("Keine IPv6 konfiguriert");
+                    SecondaryAdapterIpV6List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv6"));
                 }
 
                 // Add gateway IPv6
                 var gateway6 = ipProperties.GatewayAddresses.FirstOrDefault(g =>
                     g.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6);
                 SecondaryAdapterGateway6 = hasIpv6
-                    ? gateway6?.Address.ToString() ?? "Keine Gateway konfiguriert"
-                    : "Keine IPv6 konfiguriert";
+                    ? gateway6?.Address.ToString() ?? LanguageManager.Instance.Lang("ADAPTER_INFO_NoGateway")
+                    : LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv6");
 
                 // Add all DNS6 addresses
                 var dns6Addresses = ipProperties.DnsAddresses
@@ -771,7 +771,7 @@ namespace neTiPx.ViewModels
                 }
                 if (SecondaryAdapterDns6List.Count == 0)
                 {
-                    SecondaryAdapterDns6List.Add(hasIpv6 ? "Keine DNS konfiguriert" : "Keine IPv6 konfiguriert");
+                    SecondaryAdapterDns6List.Add(hasIpv6 ? LanguageManager.Instance.Lang("ADAPTER_INFO_NoDNS") : LanguageManager.Instance.Lang("ADAPTER_INFO_NoIPv6"));
                 }
                 OnPropertyChanged(nameof(SecondaryDns1AddressV6));
                 OnPropertyChanged(nameof(SecondaryDns2AddressV6));
@@ -887,12 +887,13 @@ namespace neTiPx.ViewModels
         {
             if (!isVisible)
             {
-                postGateway("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                postDns1("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                postDns2("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                postGatewayV6("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                postDns1V6("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                postDns2V6("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                var notConfigured = LanguageManager.Instance.Lang("ADAPTER_STA_NotConfigured");
+                postGateway(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
+                postDns1(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
+                postDns2(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
+                postGatewayV6(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
+                postDns1V6(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
+                postDns2V6(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
@@ -914,7 +915,8 @@ namespace neTiPx.ViewModels
             }
             else
             {
-                postGateway("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
+                postGateway(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
 
             if (checkDns1)
@@ -923,7 +925,8 @@ namespace neTiPx.ViewModels
             }
             else
             {
-                postDns1("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
+                postDns1(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
 
             if (checkDns2)
@@ -932,7 +935,8 @@ namespace neTiPx.ViewModels
             }
             else
             {
-                postDns2("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
+                postDns2(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
 
             if (checkGateway)
@@ -941,7 +945,8 @@ namespace neTiPx.ViewModels
             }
             else
             {
-                postGatewayV6("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
+                postGatewayV6(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
 
             if (checkDns1)
@@ -950,7 +955,8 @@ namespace neTiPx.ViewModels
             }
             else
             {
-                postDns1V6("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
+                postDns1V6(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
 
             if (checkDns2)
@@ -959,7 +965,8 @@ namespace neTiPx.ViewModels
             }
             else
             {
-                postDns2V6("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
+                postDns2V6(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
         }
 
@@ -993,7 +1000,8 @@ namespace neTiPx.ViewModels
             if (string.IsNullOrWhiteSpace(address))
             {
                 DebugLog($"Skip {targetKind}: address empty");
-                callback("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                var notConfigured = LanguageManager.Instance.Lang("ADAPTER_STA_NotConfigured");
+                callback(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
@@ -1001,7 +1009,9 @@ namespace neTiPx.ViewModels
             if (!IPAddress.TryParse(address, out var parsedAddress))
             {
                 DebugLog($"Skip {targetKind}: invalid ip '{address}'");
-                callback("Nicht erreichbar", "Ping: ungültige Adresse", GatewayStatusKind.Bad);
+                var notReachable = LanguageManager.Instance.Lang("ADAPTER_STA_NotReachable");
+                var pingInvalid = LanguageManager.Instance.Lang("ADAPTER_STA_PingInvalidAddress");
+                callback(notReachable, pingInvalid, GatewayStatusKind.Bad);
                 return;
             }
 
@@ -1018,27 +1028,48 @@ namespace neTiPx.ViewModels
                     int thresholdFast = _settingsService.GetPingThresholdFast();
                     int thresholdNormal = _settingsService.GetPingThresholdNormal();
 
-                    var statusText = ms <= thresholdFast ? "Erreichbar" : ms <= thresholdNormal ? "Langsam" : "Sehr langsam";
-                    var statusKind = ms <= thresholdFast ? GatewayStatusKind.Good :
-                                   ms <= thresholdNormal ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
+                    string statusText;
+                    GatewayStatusKind statusKind;
+                    if (ms <= thresholdFast)
+                    {
+                        statusText = LanguageManager.Instance.Lang("ADAPTER_STA_Reachable");
+                        statusKind = GatewayStatusKind.Good;
+                    }
+                    else if (ms <= thresholdNormal)
+                    {
+                        statusText = LanguageManager.Instance.Lang("ADAPTER_STA_Slow");
+                        statusKind = GatewayStatusKind.Warning;
+                    }
+                    else
+                    {
+                        statusText = LanguageManager.Instance.Lang("ADAPTER_STA_VerySlow");
+                        statusKind = GatewayStatusKind.Bad;
+                    }
                     DebugLog($"Ping ok {targetKind} -> {parsedAddress} ({ms} ms)");
-                    callback(statusText, $"Ping: {ms} ms", statusKind);
+                    var pingMs = $"Ping: {ms} ms";
+                    callback(statusText, pingMs, statusKind);
                 }
                 else
                 {
                     DebugLog($"Ping no-reply {targetKind} -> {parsedAddress} status={reply.Status}");
-                    callback("Nicht erreichbar", "Ping: timeout", GatewayStatusKind.Bad);
+                    var notReachable = LanguageManager.Instance.Lang("ADAPTER_STA_NotReachable");
+                    var pingTimeout = LanguageManager.Instance.Lang("ADAPTER_STA_PingTimeout");
+                    callback(notReachable, pingTimeout, GatewayStatusKind.Bad);
                 }
             }
             catch (PingException)
             {
                 DebugLog($"Ping exception {targetKind} -> {address}");
-                callback("Nicht erreichbar", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
+                var notReachable = LanguageManager.Instance.Lang("ADAPTER_STA_NotReachable");
+                var pingFailed = LanguageManager.Instance.Lang("ADAPTER_STA_PingFailed");
+                callback(notReachable, pingFailed, GatewayStatusKind.Bad);
             }
             catch
             {
                 DebugLog($"Ping error {targetKind} -> {address}");
-                callback("Fehler", "Ping: Fehler", GatewayStatusKind.Bad);
+                var error = LanguageManager.Instance.Lang("ADAPTER_STA_Error");
+                var pingError = LanguageManager.Instance.Lang("ADAPTER_STA_PingError");
+                callback(error, pingError, GatewayStatusKind.Bad);
             }
         }
 

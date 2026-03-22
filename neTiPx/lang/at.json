@@ -19,7 +19,6 @@
 "NAV_TOOLS": "Tools",
 "NAV_INFO": "Info",
 "NAV_SETTINGS": "Einstellungen",
-"APP_COPYRIGHT": "© neTiPx by Pedro",
 
 "ADAPTER_TITLE": "Adapter",
 "ADAPTER_SUBTITLE": "Infos zu deine zwoa Adapter.",
@@ -28,9 +27,8 @@
 "ADAPTER_STATUS_NIC1": "Status NIC 1",
 "ADAPTER_STATUS_NIC2": "Status NIC 2",
 "ADAPTER_LBL_NAME": "Nam:",
-"ADAPTER_LBL_MAC": "MAC:",
+
 "ADAPTER_LBL_IPV4_INFO": "IPv4 Informationen:",
-"ADAPTER_LBL_IPV4": "IPv4:",
 "ADAPTER_LBL_GATEWAY": "Gateway:",
 "ADAPTER_LBL_DNS4": "DNS4:",
 "ADAPTER_LBL_IPV6_INFO": "IPv6 Informationen:",
