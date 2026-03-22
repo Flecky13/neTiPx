@@ -18,6 +18,7 @@ namespace neTiPx.Views
 {
     public sealed partial class NetworkScannerPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private readonly SettingsService _settingsService = new SettingsService();
         private readonly AdapterStore _adapterStore = new AdapterStore();
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
@@ -39,14 +40,63 @@ namespace neTiPx.Views
             Unloaded += NetworkScannerPage_Unloaded;
         }
 
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+            UpdateNetworkScanHeaderLabels();
+            UpdateScanCountLabel();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (NetworkScanTitleText != null) NetworkScanTitleText.Text = T("TOOLS_NET_SCAN");
+            if (NetworkScanRangesLabelText != null) NetworkScanRangesLabelText.Text = T("NETSCAN_LABEL_RANGES");
+            if (NetworkScanRangesTextBox != null) NetworkScanRangesTextBox.PlaceholderText = T("NETSCAN_PLACEHOLDER_RANGES");
+            if (NetworkScanRangesHintText != null) NetworkScanRangesHintText.Text = T("NETSCAN_HINT_RANGES");
+            if (NetworkScanStartButton != null) NetworkScanStartButton.Content = T("NETSCAN_BUTTON_START");
+            if (NetworkScanFoundDevicesTitleText != null) NetworkScanFoundDevicesTitleText.Text = T("NETSCAN_FOUND_DEVICES");
+            if (NetworkScanDetailsTitleText != null) NetworkScanDetailsTitleText.Text = T("NETSCAN_DETAILS_TITLE");
+            if (NetworkScanDetailsPlaceholderText != null && NetworkScanDetailsPlaceholderText.Visibility == Visibility.Visible)
+            {
+                NetworkScanDetailsPlaceholderText.Text = T("NETSCAN_DETAILS_PLACEHOLDER");
+            }
+
+            if (DeviceDetailsIpLabelText != null) DeviceDetailsIpLabelText.Text = T("NETSCAN_LABEL_IP");
+            if (DeviceDetailsMacLabelText != null) DeviceDetailsMacLabelText.Text = T("NETSCAN_LABEL_MAC");
+            if (DeviceDetailsHostnameLabelText != null) DeviceDetailsHostnameLabelText.Text = T("NETSCAN_LABEL_HOSTNAME");
+            if (DeviceDetailsPortsLabelText != null) DeviceDetailsPortsLabelText.Text = T("NETSCAN_LABEL_OPEN_PORTS");
+            if (NetworkScanStatusTextBlock != null && string.IsNullOrWhiteSpace(NetworkScanStatusTextBlock.Text))
+            {
+                NetworkScanStatusTextBlock.Text = T("NETSCAN_STATUS_READY");
+            }
+        }
+
+        private void UpdateScanCountLabel()
+        {
+            if (NetworkScanCountTextBlock != null)
+            {
+                NetworkScanCountTextBlock.Text = string.Format(T("NETSCAN_COUNT_FORMAT"), NetworkDevices.Count);
+            }
+        }
+
         private void NetworkScannerPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
+            _lm.LanguageChanged += OnLanguageChanged;
+            UpdateLanguage();
             UpdateNetworkScanHeaderLabels();
+            UpdateScanCountLabel();
             LoadLastScanRanges();
         }
 
         private void NetworkScannerPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
             _networkScanCts?.Cancel();
             _detailsLoadCts?.Cancel();
         }
@@ -59,13 +109,13 @@ namespace neTiPx.Views
 
             if (string.IsNullOrWhiteSpace(rangeInput))
             {
-                ShowScanError("Bitte geben Sie mindestens einen IP-Bereich ein.");
+                ShowScanError(T("NETSCAN_ERROR_ENTER_RANGE"));
                 return;
             }
 
             if (!TryParseNetworkScanRanges(rangeInput, out var ipList, out var parseError))
             {
-                ShowScanError(parseError ?? "Ungültiger IP-Bereich.");
+                ShowScanError(parseError ?? T("NETSCAN_ERROR_INVALID_RANGE"));
                 return;
             }
 
@@ -81,9 +131,10 @@ namespace neTiPx.Views
             NetworkDevices.Clear();
             NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
             NetworkScanDetailsPlaceholderText.Visibility = Visibility.Visible;
+            NetworkScanDetailsPlaceholderText.Text = T("NETSCAN_DETAILS_PLACEHOLDER");
             NetworkScanStartButton.IsEnabled = false;
             NetworkScanProgressRing.IsActive = true;
-            NetworkScanStatusTextBlock.Text = $"Scanne {ipList.Count} Adressen...";
+            NetworkScanStatusTextBlock.Text = string.Format(T("NETSCAN_STATUS_SCANNING"), ipList.Count);
 
             try
             {
@@ -91,11 +142,11 @@ namespace neTiPx.Views
             }
             catch (OperationCanceledException)
             {
-                NetworkScanStatusTextBlock.Text = "Scan abgebrochen";
+                NetworkScanStatusTextBlock.Text = T("NETSCAN_STATUS_CANCELED");
             }
             catch (Exception ex)
             {
-                ShowScanError($"Fehler beim Scannen: {ex.Message}");
+                ShowScanError(string.Format(T("NETSCAN_ERROR_SCAN_FAILED"), ex.Message));
             }
             finally
             {
@@ -123,10 +174,10 @@ namespace neTiPx.Views
                     ApplyNetworkScanSorting();
                 }
 
-                NetworkScanCountTextBlock.Text = $"{NetworkDevices.Count} Gerät(e)";
+                UpdateScanCountLabel();
                 NetworkScanStatusTextBlock.Text = NetworkDevices.Count > 0
-                    ? $"Scan abgeschlossen - {NetworkDevices.Count} Gerät(e) gefunden (IP, MAC, Ports). Zusatzinfos beim Auswählen."
-                    : "Scan abgeschlossen - Keine Geräte gefunden";
+                    ? string.Format(T("NETSCAN_STATUS_FINISHED_FOUND"), NetworkDevices.Count)
+                    : T("NETSCAN_STATUS_FINISHED_NONE");
             });
         }
 
@@ -203,7 +254,7 @@ namespace neTiPx.Views
             var ranges = input.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (ranges.Length == 0)
             {
-                errorMessage = "Bitte geben Sie mindestens einen gültigen Bereich ein.";
+                errorMessage = T("NETSCAN_ERROR_ENTER_VALID_RANGE");
                 return false;
             }
 
@@ -223,13 +274,13 @@ namespace neTiPx.Views
 
             if (uniqueIps.Count == 0)
             {
-                errorMessage = "Es wurden keine IP-Adressen aus der Eingabe erkannt.";
+                errorMessage = T("NETSCAN_ERROR_NO_IPS");
                 return false;
             }
 
             if (uniqueIps.Count > 1024)
             {
-                errorMessage = "IP-Bereich zu groß. Maximal 1024 Adressen.";
+                errorMessage = T("NETSCAN_ERROR_RANGE_TOO_LARGE");
                 return false;
             }
 
@@ -245,7 +296,7 @@ namespace neTiPx.Views
 
             if (string.IsNullOrWhiteSpace(rangeText))
             {
-                errorMessage = "Leerer Bereich in der Eingabe gefunden.";
+                errorMessage = T("NETSCAN_ERROR_EMPTY_RANGE");
                 return false;
             }
 
@@ -259,20 +310,20 @@ namespace neTiPx.Views
                     return true;
                 }
 
-                errorMessage = $"Ungültige IP-Adresse: {rangeText}";
+                errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_IP"), rangeText);
                 return false;
             }
 
             var parts = normalized.Split('-', 2, StringSplitOptions.TrimEntries);
             if (parts.Length != 2)
             {
-                errorMessage = $"Ungültiger Bereich: {rangeText}";
+                errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_RANGE_VALUE"), rangeText);
                 return false;
             }
 
             if (!TryParseIpv4ToUint(parts[0], out var parsedStartIp))
             {
-                errorMessage = $"Ungültige Start-IP: {parts[0]}";
+                errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_START_IP"), parts[0]);
                 return false;
             }
 
@@ -281,7 +332,7 @@ namespace neTiPx.Views
             {
                 if (!TryParseIpv4ToUint(parts[1], out parsedEndIp))
                 {
-                    errorMessage = $"Ungültige End-IP: {parts[1]}";
+                    errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_END_IP"), parts[1]);
                     return false;
                 }
             }
@@ -290,7 +341,7 @@ namespace neTiPx.Views
                 var firstIpBytes = UintToIp(parsedStartIp).GetAddressBytes();
                 if (!byte.TryParse(parts[1], out var lastOctet))
                 {
-                    errorMessage = $"Ungültiger Endbereich: {parts[1]}";
+                    errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_END_RANGE"), parts[1]);
                     return false;
                 }
 
@@ -305,7 +356,7 @@ namespace neTiPx.Views
 
             if (parsedStartIp > parsedEndIp)
             {
-                errorMessage = $"Start-IP muss kleiner oder gleich End-IP sein: {rangeText}";
+                errorMessage = string.Format(T("NETSCAN_ERROR_START_GREATER_THAN_END"), rangeText);
                 return false;
             }
 
@@ -391,7 +442,7 @@ namespace neTiPx.Views
                 using var process = Process.Start(processStartInfo);
                 if (process == null)
                 {
-                    return "Anderes Subnetz";
+                    return T("NETSCAN_VALUE_OTHER_SUBNET");
                 }
 
                 var output = await process.StandardOutput.ReadToEndAsync();
@@ -417,7 +468,7 @@ namespace neTiPx.Views
             {
             }
 
-            return "Anderes Subnetz";
+            return T("NETSCAN_VALUE_OTHER_SUBNET");
         }
 
         private async Task<List<string>> ScanPortsAsync(IPAddress ipAddress, CancellationToken cancellationToken)
@@ -511,6 +562,7 @@ namespace neTiPx.Views
                 _detailsLoadCts?.Cancel();
                 NetworkScanDetailsPanel.Visibility = Visibility.Collapsed;
                 NetworkScanDetailsPlaceholderText.Visibility = Visibility.Visible;
+                NetworkScanDetailsPlaceholderText.Text = T("NETSCAN_DETAILS_PLACEHOLDER");
             }
         }
 
@@ -520,7 +572,7 @@ namespace neTiPx.Views
 
             var detailsLoaded = _detailsLoadedIps.Contains(device.IpAddress);
             DeviceDetailsMacTextBlock.Text = device.MacAddress;
-            DeviceDetailsHostnameTextBlock.Text = detailsLoaded ? device.Hostname : "Lade...";
+            DeviceDetailsHostnameTextBlock.Text = detailsLoaded ? device.Hostname : T("NETSCAN_VALUE_LOADING");
 
             if (device.OpenPorts != null && device.OpenPorts.Count > 0)
             {
@@ -681,7 +733,7 @@ namespace neTiPx.Views
 
         private void ShowScanError(string message)
         {
-            NetworkScanErrorBar.Title = "Fehler";
+            NetworkScanErrorBar.Title = T("NETSCAN_ERROR_TITLE");
             NetworkScanErrorBar.Message = message;
             NetworkScanErrorBar.IsOpen = true;
         }
@@ -762,7 +814,7 @@ namespace neTiPx.Views
                     }
                     catch
                     {
-                        ShowScanError($"SSH-Verbindung: ssh {ipAddress}");
+                        ShowScanError(string.Format(T("NETSCAN_ERROR_SSH_HINT"), ipAddress));
                     }
                 }
                 else if (normalized.StartsWith("SMB"))
@@ -774,17 +826,17 @@ namespace neTiPx.Views
                     var customPortText = new string(portInfo.Where(char.IsDigit).ToArray());
                     if (!string.IsNullOrWhiteSpace(customPortText) && int.TryParse(customPortText, out var customPort))
                     {
-                        ShowScanError($"Custom-Port offen: {ipAddress}:{customPort}");
+                        ShowScanError(string.Format(T("NETSCAN_ERROR_CUSTOM_PORT_OPEN"), ipAddress, customPort));
                     }
                 }
                 else
                 {
-                    ShowScanError($"Keine Startaktion definiert für: {portInfo}");
+                    ShowScanError(string.Format(T("NETSCAN_ERROR_NO_ACTION"), portInfo));
                 }
             }
             catch (Exception ex)
             {
-                ShowScanError($"Fehler beim Öffnen der Verbindung: {ex.Message}");
+                ShowScanError(string.Format(T("NETSCAN_ERROR_OPEN_CONNECTION"), ex.Message));
             }
         }
 
@@ -816,9 +868,9 @@ namespace neTiPx.Views
                 return;
             }
 
-            NetworkScanHeaderIp.Content = GetNetworkScanHeaderLabel("IP-Adresse", "ip");
-            NetworkScanHeaderMac.Content = GetNetworkScanHeaderLabel("MAC-Adresse", "mac");
-            NetworkScanHeaderPorts.Content = GetNetworkScanHeaderLabel("Open Ports", "ports");
+            NetworkScanHeaderIp.Content = GetNetworkScanHeaderLabel(T("NETSCAN_HEADER_IP"), "ip");
+            NetworkScanHeaderMac.Content = GetNetworkScanHeaderLabel(T("NETSCAN_HEADER_MAC"), "mac");
+            NetworkScanHeaderPorts.Content = GetNetworkScanHeaderLabel(T("NETSCAN_HEADER_PORTS"), "ports");
         }
 
         private string GetNetworkScanHeaderLabel(string label, string column)

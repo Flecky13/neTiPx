@@ -9,17 +9,18 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock x:Name="NetworkScanTitleText" Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
 
         <!-- Scan-Konfiguration -->
         <Border Style="{StaticResource CardBorder}" Padding="16">
             <StackPanel Spacing="12">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                     <StackPanel Grid.Column="0" Spacing="8">
-                        <TextBlock Text="IP-Bereiche" FontWeight="SemiBold" />
+                        <TextBlock x:Name="NetworkScanRangesLabelText" Text="IP-Bereiche" FontWeight="SemiBold" />
                         <TextBox x:Name="NetworkScanRangesTextBox"
                                  PlaceholderText="z.B. 192.168.1.1-254;192.168.2.10-50" />
-                        <TextBlock Text="Format: 192.168.1.1-254, mehrere Bereiche mit ; trennen"
+                        <TextBlock x:Name="NetworkScanRangesHintText"
+                                   Text="Format: 192.168.1.1-254, mehrere Bereiche mit ; trennen"
                                    FontSize="11"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    TextWrapping="Wrap" />
@@ -52,7 +53,7 @@
             <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
                 <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
                     <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                        <TextBlock Grid.Column="0" Text="Gefundene Geräte" FontWeight="SemiBold" FontSize="14" />
+                        <TextBlock x:Name="NetworkScanFoundDevicesTitleText" Grid.Column="0" Text="Gefundene Geräte" FontWeight="SemiBold" FontSize="14" />
                         <TextBlock Grid.Column="1" x:Name="NetworkScanCountTextBlock" Text="0 Geräte" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Grid>
 
@@ -87,7 +88,7 @@
             <!-- Rechter Bereich: Details -->
             <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="16">
                 <Grid RowDefinitions="Auto,*" RowSpacing="12">
-                    <TextBlock Grid.Row="0" Text="Geräte-Details" FontWeight="SemiBold" FontSize="14" />
+                    <TextBlock x:Name="NetworkScanDetailsTitleText" Grid.Row="0" Text="Geräte-Details" FontWeight="SemiBold" FontSize="14" />
 
                     <TextBlock x:Name="NetworkScanDetailsPlaceholderText"
                                Grid.Row="1"
@@ -98,22 +99,22 @@
 
                     <StackPanel x:Name="NetworkScanDetailsPanel" Grid.Row="1" Spacing="8" Visibility="Collapsed">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="IP-Adresse:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="DeviceDetailsIpLabelText" Text="IP-Adresse:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="DeviceDetailsIpTextBlock" FontSize="13" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="MAC-Adresse:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="DeviceDetailsMacLabelText" Text="MAC-Adresse:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="DeviceDetailsMacTextBlock" FontSize="13" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Hostname:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="DeviceDetailsHostnameLabelText" Text="Hostname:" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="DeviceDetailsHostnameTextBlock" FontSize="13" TextWrapping="Wrap" />
                         </StackPanel>
 
                         <StackPanel x:Name="DeviceDetailsPortsPanel" Spacing="4" Visibility="Collapsed">
-                            <TextBlock Text="Offene Ports (Doppelklick zum Öffnen):" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="DeviceDetailsPortsLabelText" Text="Offene Ports (Doppelklick zum Öffnen):" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <ListView x:Name="DeviceDetailsPortsListView"
                                       SelectionMode="Single"
                                       IsItemClickEnabled="False"

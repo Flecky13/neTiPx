@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.Services;
 using System;
 using System.Linq;
 using System.Net;
@@ -8,12 +9,80 @@ namespace neTiPx.Views
 {
     public sealed partial class NetworkCalculatorPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private bool _isSyncingNetworkCalcInputs;
         private bool _isIpv6Mode;
 
         public NetworkCalculatorPage()
         {
             InitializeComponent();
+            Loaded += NetworkCalculatorPage_Loaded;
+            Unloaded += NetworkCalculatorPage_Unloaded;
+        }
+
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void NetworkCalculatorPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+            _lm.LanguageChanged += OnLanguageChanged;
+            UpdateLanguage();
+        }
+
+        private void NetworkCalculatorPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (NetworkCalcTitleText != null) NetworkCalcTitleText.Text = T("TOOLS_NET_CALC");
+
+            if (NetworkCalcIpAddressLabelText != null) NetworkCalcIpAddressLabelText.Text = T("NETCALC_LABEL_IP_ADDRESS");
+            if (NetworkCalcSubnetLabelText != null) NetworkCalcSubnetLabelText.Text = T("NETCALC_LABEL_SUBNET_MASK");
+            if (NetworkCalcCidrLabelText != null) NetworkCalcCidrLabelText.Text = T("NETCALC_LABEL_CIDR_SUFFIX");
+            if (NetworkCalcMaxHostsLabelText != null) NetworkCalcMaxHostsLabelText.Text = T("NETCALC_LABEL_MAX_HOSTS");
+
+            if (NetworkCalcIpAddressTextBox != null) NetworkCalcIpAddressTextBox.PlaceholderText = T("NETCALC_PLACEHOLDER_IPV4_ADDRESS");
+            if (NetworkCalcSubnetTextBox != null) NetworkCalcSubnetTextBox.PlaceholderText = T("NETCALC_PLACEHOLDER_SUBNET_MASK");
+            if (NetworkCalcCidrTextBox != null) NetworkCalcCidrTextBox.PlaceholderText = T("NETCALC_PLACEHOLDER_CIDR_SUFFIX");
+            if (NetworkCalcMaxHostsTextBox != null) NetworkCalcMaxHostsTextBox.PlaceholderText = T("NETCALC_PLACEHOLDER_MAX_HOSTS");
+
+            if (NetworkCalcHostsMinusButton != null) ToolTipService.SetToolTip(NetworkCalcHostsMinusButton, T("NETCALC_TOOLTIP_HOSTS_MINUS"));
+            if (NetworkCalcHostsPlusButton != null) ToolTipService.SetToolTip(NetworkCalcHostsPlusButton, T("NETCALC_TOOLTIP_HOSTS_PLUS"));
+
+            if (NetworkCalcIpv6AddressLabelText != null) NetworkCalcIpv6AddressLabelText.Text = T("NETCALC_LABEL_IPV6_ADDRESS");
+            if (NetworkCalcIpv6PrefixLabelText != null) NetworkCalcIpv6PrefixLabelText.Text = T("NETCALC_LABEL_PREFIX_LENGTH");
+            if (NetworkCalcIpv6AddressTextBox != null) NetworkCalcIpv6AddressTextBox.PlaceholderText = T("NETCALC_PLACEHOLDER_IPV6_ADDRESS");
+            if (NetworkCalcIpv6PrefixTextBox != null) NetworkCalcIpv6PrefixTextBox.PlaceholderText = T("NETCALC_PLACEHOLDER_PREFIX_LENGTH");
+
+            if (NetworkCalcIpv4ResultsTitleText != null) NetworkCalcIpv4ResultsTitleText.Text = T("NETCALC_RESULTS_TITLE");
+            if (NetworkCalcIpv6ResultsTitleText != null) NetworkCalcIpv6ResultsTitleText.Text = T("NETCALC_RESULTS_TITLE");
+            if (NetworkCalcNetworkAddressLabelText != null) NetworkCalcNetworkAddressLabelText.Text = T("NETCALC_RESULT_NETWORK_ADDRESS");
+            if (NetworkCalcBroadcastAddressLabelText != null) NetworkCalcBroadcastAddressLabelText.Text = T("NETCALC_RESULT_BROADCAST_ADDRESS");
+            if (NetworkCalcFirstUsableIpLabelText != null) NetworkCalcFirstUsableIpLabelText.Text = T("NETCALC_RESULT_FIRST_USABLE");
+            if (NetworkCalcLastUsableIpLabelText != null) NetworkCalcLastUsableIpLabelText.Text = T("NETCALC_RESULT_LAST_USABLE");
+            if (NetworkCalcSubnetMaskResultLabelText != null) NetworkCalcSubnetMaskResultLabelText.Text = T("NETCALC_RESULT_SUBNET_MASK");
+            if (NetworkCalcCidrResultLabelText != null) NetworkCalcCidrResultLabelText.Text = T("NETCALC_RESULT_CIDR_SUFFIX");
+            if (NetworkCalcHostCountLabelText != null) NetworkCalcHostCountLabelText.Text = T("NETCALC_RESULT_HOST_COUNT");
+            if (NetworkCalcWildcardMaskLabelText != null) NetworkCalcWildcardMaskLabelText.Text = T("NETCALC_RESULT_WILDCARD_MASK");
+
+            if (NetworkCalcNetworkAddressIpv6LabelText != null) NetworkCalcNetworkAddressIpv6LabelText.Text = T("NETCALC_RESULT_NETWORK_ADDRESS");
+            if (NetworkCalcPrefixLengthIpv6LabelText != null) NetworkCalcPrefixLengthIpv6LabelText.Text = T("NETCALC_RESULT_PREFIX_LENGTH");
+            if (NetworkCalcFirstAddressIpv6LabelText != null) NetworkCalcFirstAddressIpv6LabelText.Text = T("NETCALC_RESULT_FIRST_ADDRESS");
+            if (NetworkCalcLastAddressIpv6LabelText != null) NetworkCalcLastAddressIpv6LabelText.Text = T("NETCALC_RESULT_LAST_ADDRESS");
+            if (NetworkCalcAddressCountIpv6LabelText != null) NetworkCalcAddressCountIpv6LabelText.Text = T("NETCALC_RESULT_ADDRESS_COUNT");
+
+            UpdateIpScopeIndicator();
+            UpdateIpv6ScopeIndicator();
         }
 
         private void NetworkCalcIpVersionRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -310,17 +379,17 @@ namespace neTiPx.Views
             var input = NetworkCalcIpv6AddressTextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(input))
             {
-                NetworkCalcIpv6ScopeTextBlock.Text = "IP-Bereich: -";
+                NetworkCalcIpv6ScopeTextBlock.Text = T("NETCALC_SCOPE_EMPTY");
                 return;
             }
 
             if (!IPAddress.TryParse(input, out var ip) || ip.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
             {
-                NetworkCalcIpv6ScopeTextBlock.Text = "IP-Bereich: ungültige IPv6-Adresse";
+                NetworkCalcIpv6ScopeTextBlock.Text = T("NETCALC_SCOPE_INVALID_IPV6");
                 return;
             }
 
-            NetworkCalcIpv6ScopeTextBlock.Text = $"IP-Bereich: {GetIpv6ScopeLabel(ip)}";
+            NetworkCalcIpv6ScopeTextBlock.Text = string.Format(T("NETCALC_SCOPE_FORMAT"), GetIpv6ScopeLabel(ip));
         }
 
         private void CalculateIpv6Network(IPAddress ipv6Address, int prefixLength)
@@ -360,7 +429,7 @@ namespace neTiPx.Views
             string addressCount;
             if (hostBits > 63)
             {
-                addressCount = $"2^{hostBits} (sehr groß)";
+                addressCount = string.Format(T("NETCALC_IPV6_ADDRESS_COUNT_LARGE"), hostBits);
             }
             else
             {
@@ -383,45 +452,45 @@ namespace neTiPx.Views
 
             if (bytes.All(b => b == 0))
             {
-                return "Unspecified";
+                return T("NETCALC_SCOPE_UNSPECIFIED");
             }
 
             if (bytes.Take(15).All(b => b == 0) && bytes[15] == 1)
             {
-                return "Loopback";
+                return T("NETCALC_SCOPE_LOOPBACK");
             }
 
             if (bytes[0] == 0xFE && (bytes[1] & 0xC0) == 0x80)
             {
-                return "Link-Local";
+                return T("NETCALC_SCOPE_LINK_LOCAL");
             }
 
             if ((bytes[0] & 0xFE) == 0xFC)
             {
-                return "Unique Local (ULA)";
+                return T("NETCALC_SCOPE_UNIQUE_LOCAL");
             }
 
             if (bytes[0] == 0xFF)
             {
-                return "Multicast";
+                return T("NETCALC_SCOPE_MULTICAST");
             }
 
             if (bytes.Take(10).All(b => b == 0) && bytes[10] == 0xFF && bytes[11] == 0xFF)
             {
-                return "IPv4-mapped";
+                return T("NETCALC_SCOPE_IPV4_MAPPED");
             }
 
             if (bytes[0] == 0x20 && bytes[1] == 0x01 && bytes[2] == 0x0D && bytes[3] == 0xB8)
             {
-                return "Dokumentationsbereich";
+                return T("NETCALC_SCOPE_DOCUMENTATION");
             }
 
             if ((bytes[0] & 0xE0) == 0x20)
             {
-                return "Global Unicast";
+                return T("NETCALC_SCOPE_GLOBAL_UNICAST");
             }
 
-            return "Reserviert";
+            return T("NETCALC_SCOPE_RESERVED");
         }
 
         private void UpdateIpScopeIndicator()
@@ -429,17 +498,17 @@ namespace neTiPx.Views
             var input = NetworkCalcIpAddressTextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(input))
             {
-                NetworkCalcIpScopeTextBlock.Text = "IP-Bereich: -";
+                NetworkCalcIpScopeTextBlock.Text = T("NETCALC_SCOPE_EMPTY");
                 return;
             }
 
             if (!IPAddress.TryParse(input, out var ip) || ip.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                NetworkCalcIpScopeTextBlock.Text = "IP-Bereich: ungültige IPv4-Adresse";
+                NetworkCalcIpScopeTextBlock.Text = T("NETCALC_SCOPE_INVALID_IPV4");
                 return;
             }
 
-            NetworkCalcIpScopeTextBlock.Text = $"IP-Bereich: {GetIpv4ScopeLabel(ip)}";
+            NetworkCalcIpScopeTextBlock.Text = string.Format(T("NETCALC_SCOPE_FORMAT"), GetIpv4ScopeLabel(ip));
         }
 
         private string GetIpv4ScopeLabel(IPAddress ipAddress)
@@ -449,54 +518,54 @@ namespace neTiPx.Views
 
             if (ip == 0xFFFFFFFFu)
             {
-                return "Broadcast";
+                return T("NETCALC_SCOPE_BROADCAST");
             }
 
             if (ip == 0u)
             {
-                return "Unspecified";
+                return T("NETCALC_SCOPE_UNSPECIFIED");
             }
 
             if (IsInIpv4Range(ip, 0x7F000000u, 8))
             {
-                return "Loopback";
+                return T("NETCALC_SCOPE_LOOPBACK");
             }
 
             if (IsInIpv4Range(ip, 0xA9FE0000u, 16))
             {
-                return "Zeroconf (Link-Local)";
+                return T("NETCALC_SCOPE_ZEROCONF");
             }
 
             if (IsInIpv4Range(ip, 0xE0000000u, 4))
             {
-                return "Multicast";
+                return T("NETCALC_SCOPE_MULTICAST");
             }
 
             if (IsInIpv4Range(ip, 0x0A000000u, 8) ||
                 IsInIpv4Range(ip, 0xAC100000u, 12) ||
                 IsInIpv4Range(ip, 0xC0A80000u, 16))
             {
-                return "Privater Bereich";
+                return T("NETCALC_SCOPE_PRIVATE");
             }
 
             if (IsInIpv4Range(ip, 0x64400000u, 10))
             {
-                return "Shared Address Space (CGNAT)";
+                return T("NETCALC_SCOPE_CGNAT");
             }
 
             if (IsInIpv4Range(ip, 0xC0000200u, 24) ||
                 IsInIpv4Range(ip, 0xC6336400u, 24) ||
                 IsInIpv4Range(ip, 0xCB007100u, 24))
             {
-                return "Dokumentationsbereich";
+                return T("NETCALC_SCOPE_DOCUMENTATION");
             }
 
             if (IsInIpv4Range(ip, 0xF0000000u, 4))
             {
-                return "Reserviert";
+                return T("NETCALC_SCOPE_RESERVED");
             }
 
-            return "Public Bereich";
+            return T("NETCALC_SCOPE_PUBLIC");
         }
 
         private bool IsInIpv4Range(uint ip, uint network, int prefixLength)
@@ -518,7 +587,7 @@ namespace neTiPx.Views
 
                 if (string.IsNullOrEmpty(ipAddressInput))
                 {
-                    ShowError("Bitte geben Sie eine IP-Adresse ein.");
+                    ShowError(T("NETCALC_ERROR_ENTER_IP"));
                     return;
                 }
 
@@ -532,23 +601,23 @@ namespace neTiPx.Views
                 }
                 else
                 {
-                    ShowError("Bitte geben Sie Subnetzmaske oder CIDR-Sufix ein.");
+                    ShowError(T("NETCALC_ERROR_ENTER_SUBNET_OR_CIDR"));
                     return;
                 }
             }
             catch (Exception ex)
             {
-                ShowError($"Fehler: {ex.Message}");
+                ShowError(string.Format(T("NETCALC_ERROR_PREFIX"), ex.Message));
             }
         }
 
         private void CalculateFromSuffix(string ipAddress, string cidrSuffix)
         {
             if (!IPAddress.TryParse(ipAddress, out var ip))
-                throw new ArgumentException("Ungültige IP-Adresse.");
+                throw new ArgumentException(T("NETCALC_ERROR_INVALID_IP"));
 
             if (!TryParseCidrSuffix(cidrSuffix, out var prefixLength))
-                throw new ArgumentException("Ungültiges Präfix. Muss zwischen 0 und 32 liegen.");
+                throw new ArgumentException(T("NETCALC_ERROR_INVALID_PREFIX"));
 
             uint mask = PrefixToMask(prefixLength);
             uint networkAddress = IpToUint(ip) & mask;
@@ -570,16 +639,16 @@ namespace neTiPx.Views
         private void CalculateFromSubnet(string ipAddress, string subnetMask)
         {
             if (!IPAddress.TryParse(ipAddress, out var ip))
-                throw new ArgumentException("Ungültige IP-Adresse.");
+                throw new ArgumentException(T("NETCALC_ERROR_INVALID_IP"));
 
             if (!IPAddress.TryParse(subnetMask, out var subnet))
-                throw new ArgumentException("Ungültige Subnetzmaske.");
+                throw new ArgumentException(T("NETCALC_ERROR_INVALID_SUBNET"));
 
             uint ipUint = IpToUint(ip);
             uint subnetUint = IpToUint(subnet);
             if (!IsValidSubnetMask(subnetUint))
             {
-                throw new ArgumentException("Ungültige Subnetzmaske. Die Bits müssen zusammenhängend sein.");
+                throw new ArgumentException(T("NETCALC_ERROR_INVALID_SUBNET_BITS"));
             }
 
             uint networkAddress = ipUint & subnetUint;
@@ -724,7 +793,7 @@ namespace neTiPx.Views
 
         private void ShowError(string message)
         {
-            NetworkCalcErrorBar.Title = "Fehler";
+            NetworkCalcErrorBar.Title = T("NETCALC_ERROR_TITLE");
             NetworkCalcErrorBar.Message = message;
             NetworkCalcErrorBar.IsOpen = true;
             NetworkCalcIpv4ResultsBorder.Visibility = Visibility.Collapsed;
