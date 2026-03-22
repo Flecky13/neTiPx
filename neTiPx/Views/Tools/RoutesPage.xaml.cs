@@ -8,11 +8,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using neTiPx.Models;
 using neTiPx.Services;
+using System.Globalization;
 
 namespace neTiPx.Views.Tools
 {
     public sealed partial class RoutesPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private readonly NetworkConfigService _networkConfigService = new NetworkConfigService();
         private readonly List<RouteEntry> _allRoutes = new List<RouteEntry>();
 
@@ -33,8 +35,80 @@ namespace neTiPx.Views.Tools
         public RoutesPage()
         {
             InitializeComponent();
+            _lm.LanguageChanged += OnLanguageChanged;
             UpdateSortIndicators();
+            UpdateLanguage();
             Loaded += RoutesPage_Loaded;
+            Unloaded += RoutesPage_Unloaded;
+        }
+
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void RoutesPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _lm.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+            ApplyFilterAndSort();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (SystemRoutesTitleText != null) SystemRoutesTitleText.Text = T("ROUTES_SECTION_SYSTEM");
+            if (RefreshRoutesButtonText != null) RefreshRoutesButtonText.Text = T("ROUTES_REFRESH");
+            if (RefreshRoutesButton != null) ToolTipService.SetToolTip(RefreshRoutesButton, T("ROUTES_TOOLTIP_REFRESH"));
+            if (DestinationFilterBox != null)
+            {
+                DestinationFilterBox.PlaceholderText = T("ROUTES_FILTER_PLACEHOLDER");
+                ToolTipService.SetToolTip(DestinationFilterBox, T("ROUTES_FILTER_TOOLTIP"));
+            }
+
+            if (ClearFilterButton != null) ToolTipService.SetToolTip(ClearFilterButton, T("ROUTES_FILTER_CLEAR_TOOLTIP"));
+
+            if (DestinationHeaderText != null) DestinationHeaderText.Text = T("ROUTES_HEADER_DESTINATION");
+            if (SubnetHeaderText != null) SubnetHeaderText.Text = T("ROUTES_HEADER_SUBNET");
+            if (GatewayHeaderText != null) GatewayHeaderText.Text = T("ROUTES_HEADER_GATEWAY");
+            if (MetricHeaderText != null) MetricHeaderText.Text = T("ROUTES_HEADER_METRIC");
+            if (ActionHeaderText != null) ActionHeaderText.Text = T("ROUTES_HEADER_ACTION");
+
+            if (AddRouteSectionTitleText != null) AddRouteSectionTitleText.Text = T("ROUTES_SECTION_ADD");
+            if (AddDestinationHeaderText != null) AddDestinationHeaderText.Text = T("ROUTES_HEADER_DESTINATION");
+            if (AddSubnetHeaderText != null) AddSubnetHeaderText.Text = T("ROUTES_HEADER_SUBNET");
+            if (AddGatewayHeaderText != null) AddGatewayHeaderText.Text = T("ROUTES_HEADER_GATEWAY");
+            if (AddMetricHeaderText != null) AddMetricHeaderText.Text = T("ROUTES_HEADER_METRIC");
+
+            if (AddDestinationBox != null)
+            {
+                AddDestinationBox.PlaceholderText = T("ROUTES_ADD_DEST_PLACEHOLDER");
+                ToolTipService.SetToolTip(AddDestinationBox, T("ROUTES_ADD_DEST_TOOLTIP"));
+            }
+
+            if (AddSubnetBox != null)
+            {
+                AddSubnetBox.PlaceholderText = T("ROUTES_ADD_SUBNET_PLACEHOLDER");
+                ToolTipService.SetToolTip(AddSubnetBox, T("ROUTES_ADD_SUBNET_TOOLTIP"));
+            }
+
+            if (AddGatewayBox != null)
+            {
+                AddGatewayBox.PlaceholderText = T("ROUTES_ADD_GATEWAY_PLACEHOLDER");
+                ToolTipService.SetToolTip(AddGatewayBox, T("ROUTES_ADD_GATEWAY_TOOLTIP"));
+            }
+
+            if (AddMetricBox != null)
+            {
+                AddMetricBox.PlaceholderText = T("ROUTES_ADD_METRIC_PLACEHOLDER");
+                ToolTipService.SetToolTip(AddMetricBox, T("ROUTES_ADD_METRIC_TOOLTIP"));
+            }
+
+            if (AddRouteButtonText != null) AddRouteButtonText.Text = T("ROUTES_ADD_BUTTON");
+            if (AddRouteButton != null) ToolTipService.SetToolTip(AddRouteButton, T("ROUTES_ADD_BUTTON_TOOLTIP"));
         }
 
         private async void RoutesPage_Loaded(object sender, RoutedEventArgs e)
@@ -44,7 +118,7 @@ namespace neTiPx.Views.Tools
 
         private async Task LoadRoutesAsync()
         {
-            RoutesStatusText.Text = "Wird eingelesen...";
+            RoutesStatusText.Text = T("ROUTES_STATUS_LOADING");
 
             await Task.Yield();
             var (success, routes, error) = _networkConfigService.ReadAllPersistentRoutes();
@@ -64,7 +138,7 @@ namespace neTiPx.Views.Tools
             }
             else
             {
-                RoutesStatusText.Text = error ?? "Fehler beim Einlesen.";
+                RoutesStatusText.Text = error ?? T("ROUTES_STATUS_LOAD_ERROR");
             }
         }
 
@@ -95,15 +169,15 @@ namespace neTiPx.Views.Tools
 
             if (string.IsNullOrWhiteSpace(filterText))
             {
-                RoutesStatusText.Text = $"{FilteredRoutes.Count} Eintrag/Einträge gefunden.";
+                RoutesStatusText.Text = string.Format(CultureInfo.CurrentCulture, T("ROUTES_STATUS_FOUND"), FilteredRoutes.Count);
             }
             else if (IPAddress.TryParse(filterText, out var parsed) && parsed.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                RoutesStatusText.Text = $"{FilteredRoutes.Count} passende Route(n) für Ziel {filterText}.";
+                RoutesStatusText.Text = string.Format(CultureInfo.CurrentCulture, T("ROUTES_STATUS_MATCHING"), FilteredRoutes.Count, filterText);
             }
             else
             {
-                RoutesStatusText.Text = "Ungültige Ziel-IP. Bitte eine gültige IPv4-Adresse eingeben.";
+                RoutesStatusText.Text = T("ROUTES_STATUS_INVALID_FILTER");
             }
         }
 
@@ -276,10 +350,10 @@ namespace neTiPx.Views.Tools
 
             var dialog = new ContentDialog
             {
-                Title = "Route löschen",
-                Content = $"Soll die Route '{route.Destination} / {route.SubnetMask} via {route.Gateway}' dauerhaft entfernt werden?",
-                PrimaryButtonText = "Löschen",
-                CloseButtonText = "Abbrechen",
+                Title = T("ROUTES_DIALOG_DELETE_TITLE"),
+                Content = string.Format(CultureInfo.CurrentCulture, T("ROUTES_DIALOG_DELETE_CONTENT"), route.Destination, route.SubnetMask, route.Gateway),
+                PrimaryButtonText = T("ROUTES_DIALOG_DELETE_CONFIRM"),
+                CloseButtonText = T("ROUTES_DIALOG_CANCEL"),
                 DefaultButton = ContentDialogButton.Close,
                 XamlRoot = XamlRoot
             };
@@ -293,8 +367,8 @@ namespace neTiPx.Views.Tools
             {
                 var errorDialog = new ContentDialog
                 {
-                    Title = "Fehler beim Löschen",
-                    Content = error ?? "Route konnte nicht entfernt werden.",
+                    Title = T("ROUTES_DIALOG_DELETE_ERROR_TITLE"),
+                    Content = error ?? T("ROUTES_DIALOG_DELETE_ERROR_CONTENT"),
                     CloseButtonText = "OK",
                     XamlRoot = XamlRoot
                 };
@@ -320,7 +394,7 @@ namespace neTiPx.Views.Tools
             var (success, error) = _networkConfigService.AddRouteStandalone(route);
             if (!success)
             {
-                AddStatusText.Text = error ?? "Route konnte nicht hinzugefügt werden.";
+                AddStatusText.Text = error ?? T("ROUTES_ADD_ERROR_CONTENT");
                 AddStatusText.Visibility = Visibility.Visible;
                 return;
             }
