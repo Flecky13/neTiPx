@@ -17,6 +17,7 @@ namespace neTiPx.ViewModels
 {
     public sealed class InfoViewModel : ObservableObject
     {
+        private static readonly LanguageManager Lm = LanguageManager.Instance;
         private const string ReleasesPageUrl = "https://github.com/Flecky13/neTiPx/releases";
         private const string LatestReleaseApiUrl = "https://api.github.com/repos/Flecky13/neTiPx/releases/latest";
         private const string ReadmeUrl = "https://github.com/Flecky13/neTiPx/blob/master/README.md";
@@ -27,9 +28,9 @@ namespace neTiPx.ViewModels
         private readonly RelayCommand _installUpdateCommand;
         private readonly SettingsService _settingsService = new SettingsService();
 
-        private string _latestVersion = "Noch nicht geprüft";
+        private string _latestVersion = string.Empty;
         private string _latestVersionRaw = string.Empty;
-        private string _updateStatus = "Noch nicht geprüft";
+        private string _updateStatus = string.Empty;
         private bool _isUpdateAvailable;
         private GatewayStatusKind _updateStatusKind = GatewayStatusKind.Unknown;
         private Uri _latestReleaseUrl = new Uri("https://github.com/Flecky13/neTiPx/releases/latest");
@@ -38,7 +39,9 @@ namespace neTiPx.ViewModels
         public InfoViewModel()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            AppVersion = version == null ? "Unknown" : version.ToString(4);
+            AppVersion = version == null ? T("INFO_UNKNOWN") : version.ToString(4);
+            _latestVersion = T("INFO_STATUS_NOT_CHECKED");
+            _updateStatus = T("INFO_STATUS_NOT_CHECKED");
 
             _checkForUpdateCommand = new RelayCommand(CheckForUpdate);
             _installUpdateCommand = new RelayCommand(InstallUpdate, CanInstallUpdate);
@@ -104,9 +107,14 @@ namespace neTiPx.ViewModels
         public ICommand ShowChangelogCommand { get; }
         public ICommand ShowHelpCommand { get; }
 
+        private static string T(string key)
+        {
+            return Lm.Lang(key);
+        }
+
         private async void CheckForUpdate()
         {
-            UpdateStatus = "Prüfe auf Updates...";
+            UpdateStatus = T("INFO_STATUS_CHECKING");
             UpdateStatusKind = GatewayStatusKind.Warning;
 
             try
@@ -115,7 +123,7 @@ namespace neTiPx.ViewModels
                 if (latestRelease == null)
                 {
                     IsUpdateAvailable = false;
-                    UpdateStatus = "Keine Release-Information von GitHub verfügbar.";
+                    UpdateStatus = T("INFO_STATUS_NO_RELEASE_INFO");
                     UpdateStatusKind = GatewayStatusKind.Bad;
                     return;
                 }
@@ -134,20 +142,20 @@ namespace neTiPx.ViewModels
                 if (latestVersion > currentVersion)
                 {
                     IsUpdateAvailable = true;
-                    UpdateStatus = "Update verfügbar.";
+                    UpdateStatus = T("INFO_STATUS_UPDATE_AVAILABLE");
                     UpdateStatusKind = GatewayStatusKind.Good;
                 }
                 else
                 {
                     IsUpdateAvailable = false;
-                    UpdateStatus = "Bereits auf dem neuesten Stand.";
+                    UpdateStatus = T("INFO_STATUS_UP_TO_DATE");
                     UpdateStatusKind = GatewayStatusKind.Good;
                 }
             }
             catch (Exception ex)
             {
                 IsUpdateAvailable = false;
-                UpdateStatus = "Update-Prüfung fehlgeschlagen.";
+                UpdateStatus = T("INFO_STATUS_CHECK_FAILED");
                 UpdateStatusKind = GatewayStatusKind.Bad;
                 Debug.WriteLine($"Update check failed: {ex}");
             }
@@ -169,7 +177,7 @@ namespace neTiPx.ViewModels
 
             try
             {
-                UpdateStatus = "Lade Update herunter...";
+                UpdateStatus = T("INFO_STATUS_DOWNLOADING");
                 UpdateStatusKind = GatewayStatusKind.Warning;
 
                 // Download Setup.exe
@@ -187,7 +195,7 @@ namespace neTiPx.ViewModels
                     }
                 }
 
-                UpdateStatus = "Starte Installation...";
+                UpdateStatus = T("INFO_STATUS_STARTING_INSTALL");
 
                 // Starte Setup.exe
                 Process.Start(new ProcessStartInfo
@@ -202,7 +210,7 @@ namespace neTiPx.ViewModels
             }
             catch (Exception ex)
             {
-                UpdateStatus = "Download fehlgeschlagen. Öffne Release-Seite...";
+                UpdateStatus = T("INFO_STATUS_DOWNLOAD_FAILED_OPENING_RELEASE");
                 UpdateStatusKind = GatewayStatusKind.Bad;
                 Debug.WriteLine($"Failed to download/install update: {ex}");
 
@@ -338,7 +346,7 @@ namespace neTiPx.ViewModels
                 return versionText;
             }
 
-            return $"{versionText} - zuletzt geprüft am {checkedAtLocal.Value:dd.MM.yyyy HH:mm}";
+            return string.Format(CultureInfo.CurrentCulture, T("INFO_LAST_CHECKED_FORMAT"), versionText, checkedAtLocal.Value);
         }
 
         private static HttpClient CreateHttpClient()

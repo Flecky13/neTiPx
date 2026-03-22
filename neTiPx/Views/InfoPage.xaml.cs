@@ -14,11 +14,12 @@ namespace neTiPx.Views
             InitializeComponent();
             Loaded += InfoPage_Loaded;
             Unloaded += InfoPage_Unloaded;
-            _lm.LanguageChanged += OnLanguageChanged;
         }
 
         private void InfoPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
+            _lm.LanguageChanged += OnLanguageChanged;
             UpdateLanguage();
         }
 

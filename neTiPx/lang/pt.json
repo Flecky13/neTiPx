@@ -254,6 +254,17 @@
   "INFO_LICENSE_TEXT": "Veja LICENSE no repositório. Para dúvidas sobre o código, utilize Issues/PR no repo.",
   "INFO_CONTACT": "Contato:",
   "INFO_SUPPORT": "Suporte:",
+  "INFO_UNKNOWN": "Unknown",
+  "INFO_STATUS_NOT_CHECKED": "Not checked yet",
+  "INFO_STATUS_CHECKING": "Checking for updates...",
+  "INFO_STATUS_NO_RELEASE_INFO": "No release information available from GitHub.",
+  "INFO_STATUS_UPDATE_AVAILABLE": "Update available.",
+  "INFO_STATUS_UP_TO_DATE": "Already up to date.",
+  "INFO_STATUS_CHECK_FAILED": "Update check failed.",
+  "INFO_STATUS_DOWNLOADING": "Downloading update...",
+  "INFO_STATUS_STARTING_INSTALL": "Starting installation...",
+  "INFO_STATUS_DOWNLOAD_FAILED_OPENING_RELEASE": "Download failed. Opening release page...",
+  "INFO_LAST_CHECKED_FORMAT": "{0} - last checked on {1:dd.MM.yyyy HH:mm}",
   "SETTINGS_TITLE": "Configurações",
   "SETTINGS_SUBTITLE_PRE": "Configure sua ferramenta de acordo com suas",
   "SETTINGS_SUBTITLE_LINK": "preferências",
@@ -375,4 +386,3 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
-
