@@ -9,11 +9,13 @@ using neTiPx.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage.Pickers;
@@ -21,8 +23,9 @@ using WinRT.Interop;
 
 namespace neTiPx.Views
 {
-    public sealed partial class PingPage : Page
+    public sealed partial class PingPage : Page, INotifyPropertyChanged
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private readonly PingTargetsStore _pingTargetsStore = new PingTargetsStore();
         private readonly PingLogService _pingLogService = new PingLogService();
         private readonly SettingsService _settingsService = new SettingsService();
@@ -36,6 +39,51 @@ namespace neTiPx.Views
         private AppWindow? _mainAppWindow;
         private readonly long _visibilityChangedToken;
 
+        private string _pingResponsePlaceholder = "-- ms";
+        private string _pingIpv4ReachabilityTooltip = "";
+        private string _pingIpv6ReachabilityTooltip = "";
+        private string _deletePingTooltip = "";
+        private string _openLogTooltip = "";
+        private string _pingEnabledTooltip = "";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string PingResponsePlaceholder
+        {
+            get => _pingResponsePlaceholder;
+            private set => SetField(ref _pingResponsePlaceholder, value);
+        }
+
+        public string PingIpv4ReachabilityTooltip
+        {
+            get => _pingIpv4ReachabilityTooltip;
+            private set => SetField(ref _pingIpv4ReachabilityTooltip, value);
+        }
+
+        public string PingIpv6ReachabilityTooltip
+        {
+            get => _pingIpv6ReachabilityTooltip;
+            private set => SetField(ref _pingIpv6ReachabilityTooltip, value);
+        }
+
+        public string DeletePingTooltip
+        {
+            get => _deletePingTooltip;
+            private set => SetField(ref _deletePingTooltip, value);
+        }
+
+        public string OpenLogTooltip
+        {
+            get => _openLogTooltip;
+            private set => SetField(ref _openLogTooltip, value);
+        }
+
+        public string PingEnabledTooltip
+        {
+            get => _pingEnabledTooltip;
+            private set => SetField(ref _pingEnabledTooltip, value);
+        }
+
         public ObservableCollection<PingTarget> PingTargets { get; } = new ObservableCollection<PingTarget>();
 
         public PingPage()
@@ -45,10 +93,24 @@ namespace neTiPx.Views
             Unloaded += PingPage_Unloaded;
             _visibilityChangedToken = RegisterPropertyChangedCallback(VisibilityProperty, PingPage_VisibilityChanged);
             LoadPingTargets();
+            UpdateLanguage();
+        }
+
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
         }
 
         private void PingPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
+            _lm.LanguageChanged += OnLanguageChanged;
+
             if (BackgroundActiveCheckBox != null)
             {
                 BackgroundActiveCheckBox.IsChecked = _settingsService.GetPingBackgroundActive();
@@ -71,6 +133,7 @@ namespace neTiPx.Views
         {
             _isPageLoaded = false;
             _isPingPageVisible = false;
+            _lm.LanguageChanged -= OnLanguageChanged;
 
             App.MainWindow.Activated -= MainWindow_Activated;
             if (_mainAppWindow != null)
@@ -79,6 +142,56 @@ namespace neTiPx.Views
             }
 
             UpdatePingingState();
+        }
+
+        private void UpdateLanguage()
+        {
+            if (PingTitleText != null) PingTitleText.Text = T("PING_TITLE");
+            if (ConfigTitleText != null) ConfigTitleText.Text = T("PING_CONFIG_TITLE");
+            if (BackgroundActiveText != null) BackgroundActiveText.Text = T("PING_CONFIG_BACKGROUND_ACTIVE");
+
+            if (NewPingTargetTextBox != null)
+            {
+                NewPingTargetTextBox.Header = T("PING_TARGET_HEADER");
+                NewPingTargetTextBox.PlaceholderText = T("PING_TARGET_PLACEHOLDER");
+            }
+
+            if (PingIntervalNumberBox != null)
+            {
+                PingIntervalNumberBox.Header = T("PING_INTERVAL_HEADER");
+            }
+
+            if (AddPingTargetButton != null)
+            {
+                AddPingTargetButton.Content = T("PING_ADD_BUTTON");
+            }
+
+            if (HeaderAddressText != null) HeaderAddressText.Text = T("PING_HEADER_ADDRESS");
+            if (HeaderIntervalText != null) HeaderIntervalText.Text = T("PING_HEADER_INTERVAL");
+            if (HeaderIpv4Text != null) HeaderIpv4Text.Text = "IPv4";
+            if (HeaderIpv6Text != null) HeaderIpv6Text.Text = "IPv6";
+            if (HeaderDeleteText != null) HeaderDeleteText.Text = T("PING_HEADER_DELETE");
+            if (HeaderLogText != null) HeaderLogText.Text = T("PING_HEADER_LOG");
+            if (HeaderActiveText != null) HeaderActiveText.Text = T("PING_HEADER_ACTIVE");
+
+            PingResponsePlaceholder = T("PING_RESPONSE_PLACEHOLDER");
+            PingIpv4ReachabilityTooltip = T("PING_TOOLTIP_IPV4_REACHABILITY");
+            PingIpv6ReachabilityTooltip = T("PING_TOOLTIP_IPV6_REACHABILITY");
+            DeletePingTooltip = T("PING_TOOLTIP_DELETE");
+            OpenLogTooltip = T("PING_TOOLTIP_OPEN_LOG");
+            PingEnabledTooltip = T("PING_TOOLTIP_ENABLED");
+        }
+
+        private bool SetField<TField>(ref TField field, TField value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<TField>.Default.Equals(field, value))
+            {
+                return false;
+            }
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
         }
 
         private void PingPage_VisibilityChanged(DependencyObject sender, DependencyProperty dependencyProperty)
@@ -199,11 +312,11 @@ namespace neTiPx.Views
 
             var dialog = new ContentDialog
             {
-                Title = "Log-Datei beim Löschen",
-                Content = "Soll die zugehörige Log-Datei ebenfalls gelöscht werden?",
-                PrimaryButtonText = "Ja",
-                SecondaryButtonText = "Nein",
-                CloseButtonText = "Abbrechen",
+                Title = T("PING_DIALOG_DELETE_LOG_TITLE"),
+                Content = T("PING_DIALOG_DELETE_LOG_CONTENT"),
+                PrimaryButtonText = T("PING_DIALOG_YES"),
+                SecondaryButtonText = T("PING_DIALOG_NO"),
+                CloseButtonText = T("PING_DIALOG_CANCEL"),
                 DefaultButton = ContentDialogButton.Secondary,
                 XamlRoot = XamlRoot
             };
@@ -237,7 +350,8 @@ namespace neTiPx.Views
                 SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
                 SuggestedFileName = Path.GetFileName(sourceLogPath)
             };
-            picker.FileTypeChoices.Add("Log-Datei", new List<string> { ".log" });
+            picker.FileTypeChoices.Clear();
+            picker.FileTypeChoices.Add(T("PING_LOG_FILETYPE"), new List<string> { ".log" });
 
             var hwnd = Helpers.WindowHelper.GetWindowHandle(App.MainWindow);
             InitializeWithWindow.Initialize(picker, hwnd);
@@ -341,9 +455,9 @@ namespace neTiPx.Views
                 _pingTimers.Remove(target);
             }
 
-            target.ResponseTimeIpv4 = "Deaktiviert";
+            target.ResponseTimeIpv4 = T("PING_STATUS_DISABLED");
             target.StatusColorIpv4 = new SolidColorBrush(Colors.Gray);
-            target.ResponseTimeIpv6 = "Deaktiviert";
+            target.ResponseTimeIpv6 = T("PING_STATUS_DISABLED");
             target.StatusColorIpv6 = new SolidColorBrush(Colors.Gray);
         }
 
@@ -449,16 +563,16 @@ namespace neTiPx.Views
                 {
                     if (target.ShowIPv4 == Visibility.Visible)
                     {
-                        target.ResponseTimeIpv4 = "Fehler";
+                        target.ResponseTimeIpv4 = T("PING_STATUS_ERROR");
                         target.StatusColorIpv4 = new SolidColorBrush(Colors.Red);
-                        _pingLogService.AppendPingResult(target.Target, "IPv4", "Fehler", target.ResolvedAddressIpv4);
+                        _pingLogService.AppendPingResult(target.Target, "IPv4", T("PING_STATUS_ERROR"), target.ResolvedAddressIpv4);
                     }
 
                     if (target.ShowIPv6 == Visibility.Visible)
                     {
-                        target.ResponseTimeIpv6 = "Fehler";
+                        target.ResponseTimeIpv6 = T("PING_STATUS_ERROR");
                         target.StatusColorIpv6 = new SolidColorBrush(Colors.Red);
-                        _pingLogService.AppendPingResult(target.Target, "IPv6", "Fehler", target.ResolvedAddressIpv6);
+                        _pingLogService.AppendPingResult(target.Target, "IPv6", T("PING_STATUS_ERROR"), target.ResolvedAddressIpv6);
                     }
                 });
             }
@@ -472,14 +586,14 @@ namespace neTiPx.Views
                 {
                     target.ShowIPv4 = Visibility.Visible;
                     target.ShowIPv6 = Visibility.Collapsed;
-                    target.ResponseTimeIpv6 = "ungültig";
+                    target.ResponseTimeIpv6 = T("PING_STATUS_INVALID");
                     target.StatusColorIpv6 = new SolidColorBrush(Colors.Gray);
                 }
                 else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
                     target.ShowIPv4 = Visibility.Collapsed;
                     target.ShowIPv6 = Visibility.Visible;
-                    target.ResponseTimeIpv4 = "ungültig";
+                    target.ResponseTimeIpv4 = T("PING_STATUS_INVALID");
                     target.StatusColorIpv4 = new SolidColorBrush(Colors.Gray);
                 }
             }
@@ -593,19 +707,19 @@ namespace neTiPx.Views
 
                 if (type == ResponseType.IPv4)
                 {
-                    target.ResponseTimeIpv4 = "Timeout";
+                    target.ResponseTimeIpv4 = T("PING_STATUS_TIMEOUT");
                     target.StatusColorIpv4 = statusColor;
                     target.PingCountIpv4++;
                     target.TimeoutCountIpv4++;
-                    _pingLogService.AppendPingResult(target.Target, "IPv4", "Timeout", result.ResolvedAddress);
+                    _pingLogService.AppendPingResult(target.Target, "IPv4", T("PING_STATUS_TIMEOUT"), result.ResolvedAddress);
                 }
                 else
                 {
-                    target.ResponseTimeIpv6 = "Timeout";
+                    target.ResponseTimeIpv6 = T("PING_STATUS_TIMEOUT");
                     target.StatusColorIpv6 = statusColor;
                     target.PingCountIpv6++;
                     target.TimeoutCountIpv6++;
-                    _pingLogService.AppendPingResult(target.Target, "IPv6", "Timeout", result.ResolvedAddress);
+                    _pingLogService.AppendPingResult(target.Target, "IPv6", T("PING_STATUS_TIMEOUT"), result.ResolvedAddress);
                 }
             }
         }

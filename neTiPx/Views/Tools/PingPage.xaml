@@ -9,15 +9,15 @@
     mc:Ignorable="d">
 
     <StackPanel Spacing="16" Padding="24">
-        <TextBlock Text="PING Tool" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock x:Name="PingTitleText" Text="PING Tool" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
 
         <!-- Konfiguration -->
         <Border Style="{StaticResource CardBorder}" Padding="16">
             <StackPanel Spacing="12">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <TextBlock Text="Konfiguration" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock x:Name="ConfigTitleText" Text="Konfiguration" FontWeight="SemiBold" VerticalAlignment="Center" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="im Hintergrund weiter aktiv" VerticalAlignment="Center" />
+                        <TextBlock x:Name="BackgroundActiveText" Text="im Hintergrund weiter aktiv" VerticalAlignment="Center" />
                         <CheckBox x:Name="BackgroundActiveCheckBox" Click="BackgroundActiveCheckBox_Click" />
                     </StackPanel>
                 </Grid>
@@ -39,6 +39,7 @@
                         SpinButtonPlacementMode="Compact"
                         VerticalAlignment="Center" />
                     <Button
+                        x:Name="AddPingTargetButton"
                         Grid.Column="2"
                         Content="Hinzufügen"
                         Click="AddPingTarget_Click"
@@ -53,15 +54,15 @@
             <StackPanel Spacing="8">
                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Padding="12">
                     <Grid ColumnDefinitions="*,80,84,20,84,20,Auto,Auto,44" ColumnSpacing="8">
-                        <TextBlock Text="Adresse" FontWeight="SemiBold" Grid.Column="0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                        <TextBlock Text="Intervall" FontWeight="SemiBold" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                        <TextBlock Text="IPv4" FontWeight="SemiBold" Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        <TextBlock x:Name="HeaderAddressText" Text="Adresse" FontWeight="SemiBold" Grid.Column="0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        <TextBlock x:Name="HeaderIntervalText" Text="Intervall" FontWeight="SemiBold" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        <TextBlock x:Name="HeaderIpv4Text" Text="IPv4" FontWeight="SemiBold" Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
                         <TextBlock Text="" Grid.Column="3" />
-                        <TextBlock Text="IPv6" FontWeight="SemiBold" Grid.Column="4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        <TextBlock x:Name="HeaderIpv6Text" Text="IPv6" FontWeight="SemiBold" Grid.Column="4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" />
                         <TextBlock Text="" Grid.Column="5" />
-                        <TextBlock Text="Löschen" FontWeight="SemiBold" Grid.Column="6" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                        <TextBlock Text="Log" FontWeight="SemiBold" Grid.Column="7" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                        <TextBlock Text="Aktiv" FontWeight="SemiBold" Grid.Column="8" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="HeaderDeleteText" Text="Löschen" FontWeight="SemiBold" Grid.Column="6" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="HeaderLogText" Text="Log" FontWeight="SemiBold" Grid.Column="7" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="HeaderActiveText" Text="Aktiv" FontWeight="SemiBold" Grid.Column="8" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
                     </Grid>
                 </Border>
 
@@ -74,23 +75,23 @@
 
                                     <NumberBox Grid.Row="0" Grid.Column="1" Value="{Binding IntervalSeconds, Mode=TwoWay}" Minimum="1" Maximum="3600" SmallChange="1" SpinButtonPlacementMode="Compact" Tag="{Binding}" ValueChanged="PingIntervalNumberBox_ValueChanged" MinWidth="80" MaxWidth="80" VerticalAlignment="Center" />
 
-                                    <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding ResponseTimeIpv4, Mode=OneWay}" IsReadOnly="True" PlaceholderText="-- ms" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding ResponseTimeIpv4, Mode=OneWay}" IsReadOnly="True" PlaceholderText="{Binding ElementName=PingPageRoot, Path=PingResponsePlaceholder, Mode=OneWay}" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
 
-                                    <Ellipse Grid.Row="0" Grid.Column="3" Width="12" Height="12" Fill="{Binding StatusColorIpv4}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="IPv4 Erreichbarkeit" />
+                                    <Ellipse Grid.Row="0" Grid.Column="3" Width="12" Height="12" Fill="{Binding StatusColorIpv4}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{Binding ElementName=PingPageRoot, Path=PingIpv4ReachabilityTooltip, Mode=OneWay}" />
 
-                                    <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding ResponseTimeIpv6, Mode=OneWay}" IsReadOnly="True" PlaceholderText="-- ms" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding ResponseTimeIpv6, Mode=OneWay}" IsReadOnly="True" PlaceholderText="{Binding ElementName=PingPageRoot, Path=PingResponsePlaceholder, Mode=OneWay}" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
 
-                                    <Ellipse Grid.Row="0" Grid.Column="5" Width="12" Height="12" Fill="{Binding StatusColorIpv6}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="IPv6 Erreichbarkeit" />
+                                    <Ellipse Grid.Row="0" Grid.Column="5" Width="12" Height="12" Fill="{Binding StatusColorIpv6}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{Binding ElementName=PingPageRoot, Path=PingIpv6ReachabilityTooltip, Mode=OneWay}" />
 
-                                    <Button Grid.Row="0" Grid.Column="6" Click="DeletePingTarget_Click" Tag="{Binding}" ToolTipService.ToolTip="Ping löschen" VerticalAlignment="Center" Padding="8" MinWidth="0">
+                                    <Button Grid.Row="0" Grid.Column="6" Click="DeletePingTarget_Click" Tag="{Binding}" ToolTipService.ToolTip="{Binding ElementName=PingPageRoot, Path=DeletePingTooltip, Mode=OneWay}" VerticalAlignment="Center" Padding="8" MinWidth="0">
                                         <FontIcon Glyph="&#xE74D;" FontSize="16" />
                                     </Button>
 
-                                    <Button Grid.Row="0" Grid.Column="7" Click="OpenPingLogButton_Click" Tag="{Binding}" ToolTipService.ToolTip="Log Datei Öffnen" VerticalAlignment="Center" Padding="8" MinWidth="0">
+                                    <Button Grid.Row="0" Grid.Column="7" Click="OpenPingLogButton_Click" Tag="{Binding}" ToolTipService.ToolTip="{Binding ElementName=PingPageRoot, Path=OpenLogTooltip, Mode=OneWay}" VerticalAlignment="Center" Padding="8" MinWidth="0">
                                         <FontIcon Glyph="&#xE8A5;" FontSize="16" />
                                     </Button>
 
-                                    <CheckBox Grid.Row="0" Grid.Column="8" IsChecked="{Binding IsPingEnabled, Mode=TwoWay}" Tag="{Binding}" Click="PingEnabledCheckBox_Click" ToolTipService.ToolTip="Aktiviert Ping " MinWidth="32" MinHeight="32" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <CheckBox Grid.Row="0" Grid.Column="8" IsChecked="{Binding IsPingEnabled, Mode=TwoWay}" Tag="{Binding}" Click="PingEnabledCheckBox_Click" ToolTipService.ToolTip="{Binding ElementName=PingPageRoot, Path=PingEnabledTooltip, Mode=OneWay}" MinWidth="32" MinHeight="32" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <CheckBox.Resources>
                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#7A7A7A" />
                                             <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="Transparent" />
