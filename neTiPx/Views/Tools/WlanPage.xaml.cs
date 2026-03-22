@@ -12,6 +12,7 @@ namespace neTiPx.Views
 {
     public sealed partial class WlanPage : Page
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
         private const int WifiListBaseHeight = 260;
         private const int MainWindowMinHeight = 950;
 
@@ -26,8 +27,23 @@ namespace neTiPx.Views
             Unloaded += WlanPage_Unloaded;
         }
 
+        private static string T(string key)
+        {
+            return _lm.Lang(key);
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            UpdateLanguage();
+            UpdateWifiHeaderLabels();
+            RefreshSelectedWifiDetails();
+        }
+
         private void WlanPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
+            _lm.LanguageChanged += OnLanguageChanged;
+
             _mainAppWindow = WindowHelper.GetAppWindow(App.MainWindow);
             if (_mainAppWindow != null)
             {
@@ -35,6 +51,7 @@ namespace neTiPx.Views
                 UpdateWifiListHeight();
             }
 
+            UpdateLanguage();
             UpdateWifiHeaderLabels();
 
             if (DataContext is ToolsViewModel vm)
@@ -45,9 +62,28 @@ namespace neTiPx.Views
 
         private void WlanPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
+
             if (_mainAppWindow != null)
             {
                 _mainAppWindow.Changed -= MainAppWindow_Changed;
+            }
+        }
+
+        private void UpdateLanguage()
+        {
+            if (WlanTitleText != null) WlanTitleText.Text = T("WLAN_TITLE");
+            if (WlanScanTitleText != null) WlanScanTitleText.Text = T("WLAN_SCAN_TITLE");
+            if (WlanScanButton != null) WlanScanButton.Content = T("WLAN_SCAN_BUTTON");
+
+            if (WlanDetailsTitleText != null) WlanDetailsTitleText.Text = T("WLAN_DETAILS_TITLE");
+            if (WifiDetailSignalSectionText != null) WifiDetailSignalSectionText.Text = T("WLAN_DETAILS_SECTION_SIGNAL");
+            if (WifiDetailFrequencySectionText != null) WifiDetailFrequencySectionText.Text = T("WLAN_DETAILS_SECTION_FREQUENCY");
+            if (WifiDetailSecuritySectionText != null) WifiDetailSecuritySectionText.Text = T("WLAN_DETAILS_SECTION_SECURITY");
+
+            if (WifiNetworksListBox?.SelectedItem is not WifiNetwork)
+            {
+                ResetWifiDetailsTexts();
             }
         }
 
@@ -101,9 +137,9 @@ namespace neTiPx.Views
 
             WifiHeaderStrength.Content = GetWifiHeaderLabel("📶", "strength");
             WifiHeaderSsid.Content = GetWifiHeaderLabel("SSID", "ssid");
-            WifiHeaderSignal.Content = GetWifiHeaderLabel("Signal", "signal");
-            WifiHeaderBand.Content = GetWifiHeaderLabel("Band", "band");
-            WifiHeaderBssid.Content = GetWifiHeaderLabel("BSSID", "bssid");
+            WifiHeaderSignal.Content = GetWifiHeaderLabel(T("WLAN_HEADER_SIGNAL"), "signal");
+            WifiHeaderBand.Content = GetWifiHeaderLabel(T("WLAN_HEADER_BAND"), "band");
+            WifiHeaderBssid.Content = GetWifiHeaderLabel(T("WLAN_HEADER_BSSID"), "bssid");
         }
 
         private string GetWifiHeaderLabel(string label, string column)
@@ -166,6 +202,11 @@ namespace neTiPx.Views
 
         private void WifiNetworksListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            UpdateWifiDetailsFromCurrentSelection();
+        }
+
+        private void UpdateWifiDetailsFromCurrentSelection()
+        {
             if (WifiDetailSignalStrength == null || WifiDetailQuality == null || WifiDetailRssi == null ||
                 WifiDetailBand == null || WifiDetailChannel == null || WifiDetailFrequency == null ||
                 WifiDetailSecurity == null || WifiDetailPhyType == null || WifiDetailNetworkType == null)
@@ -190,29 +231,46 @@ namespace neTiPx.Views
                 }
 
                 WifiDetailSignalStrength.Text = $"{selectedNetwork.SignalSymbol} {selectedNetwork.SignalStrengthPercent}%";
-                WifiDetailQuality.Text = $"Qualität: {selectedNetwork.LinkQuality}%";
+                WifiDetailQuality.Text = string.Format(T("WLAN_DETAILS_QUALITY_VALUE"), selectedNetwork.LinkQuality);
                 WifiDetailRssi.Text = $"RSSI: {selectedNetwork.SignalStrengthDbm} dBm";
 
-                WifiDetailBand.Text = $"Band: {selectedNetwork.Band}{band}";
-                WifiDetailChannel.Text = $"Kanal: {selectedNetwork.Channel}";
-                WifiDetailFrequency.Text = $"{selectedNetwork.Frequency} MHz";
+                WifiDetailBand.Text = string.Format(T("WLAN_DETAILS_BAND_VALUE"), selectedNetwork.Band, band);
+                WifiDetailChannel.Text = string.Format(T("WLAN_DETAILS_CHANNEL_VALUE"), selectedNetwork.Channel);
+                WifiDetailFrequency.Text = string.Format(T("WLAN_DETAILS_FREQUENCY_VALUE"), selectedNetwork.Frequency);
 
-                WifiDetailSecurity.Text = $"Verschlüsselung: {selectedNetwork.SecurityType}";
-                WifiDetailPhyType.Text = $"PHY: {selectedNetwork.PhyType}";
-                WifiDetailNetworkType.Text = $"{selectedNetwork.NetworkType}";
+                WifiDetailSecurity.Text = string.Format(T("WLAN_DETAILS_SECURITY_VALUE"), selectedNetwork.SecurityType);
+                WifiDetailPhyType.Text = $"PHY-Typ: {selectedNetwork.PhyType}";
+                WifiDetailNetworkType.Text = string.Format(T("WLAN_DETAILS_NETWORK_VALUE"), selectedNetwork.NetworkType);
             }
             else
             {
-                WifiDetailSignalStrength.Text = "Stärke: --";
-                WifiDetailQuality.Text = "Qualität: --";
-                WifiDetailRssi.Text = "RSSI: -- dBm";
-                WifiDetailBand.Text = "Band: --";
-                WifiDetailChannel.Text = "Kanal: --";
-                WifiDetailFrequency.Text = "Frequenz: --";
-                WifiDetailSecurity.Text = "Verschlüsselung: --";
-                WifiDetailPhyType.Text = "PHY-Typ: --";
-                WifiDetailNetworkType.Text = "Netzwerk: --";
+                ResetWifiDetailsTexts();
             }
+        }
+
+        private void RefreshSelectedWifiDetails()
+        {
+            UpdateWifiDetailsFromCurrentSelection();
+        }
+
+        private void ResetWifiDetailsTexts()
+        {
+            if (WifiDetailSignalStrength == null || WifiDetailQuality == null || WifiDetailRssi == null ||
+                WifiDetailBand == null || WifiDetailChannel == null || WifiDetailFrequency == null ||
+                WifiDetailSecurity == null || WifiDetailPhyType == null || WifiDetailNetworkType == null)
+            {
+                return;
+            }
+
+            WifiDetailSignalStrength.Text = T("WLAN_DETAILS_SIGNAL_EMPTY");
+            WifiDetailQuality.Text = T("WLAN_DETAILS_QUALITY_EMPTY");
+            WifiDetailRssi.Text = "RSSI: -- dBm";
+            WifiDetailBand.Text = T("WLAN_DETAILS_BAND_EMPTY");
+            WifiDetailChannel.Text = T("WLAN_DETAILS_CHANNEL_EMPTY");
+            WifiDetailFrequency.Text = T("WLAN_DETAILS_FREQUENCY_EMPTY");
+            WifiDetailSecurity.Text = T("WLAN_DETAILS_SECURITY_EMPTY");
+            WifiDetailPhyType.Text = "PHY-Typ: --";
+            WifiDetailNetworkType.Text = T("WLAN_DETAILS_NETWORK_EMPTY");
         }
     }
 }

@@ -14,7 +14,7 @@
     </Page.DataContext>
 
     <StackPanel Spacing="16" Padding="24">
-        <TextBlock Text="WLAN Scanner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock x:Name="WlanTitleText" Text="WLAN Scanner" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
 
         <!-- WLAN Layout: Oben Scan-Button, Mitte Netzwerk-Liste, unten Details -->
         <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*" RowSpacing="16">
@@ -25,8 +25,8 @@
                 Style="{StaticResource CardBorder}"
                 Padding="16">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <TextBlock Text="WLAN-Netzwerke scannen" FontWeight="SemiBold" VerticalAlignment="Center" />
-                    <Button Grid.Column="1" Content="Scan starten" Command="{Binding ScanWifiCommand}" Style="{StaticResource AccentButtonStyle}" />
+                    <TextBlock x:Name="WlanScanTitleText" Text="WLAN-Netzwerke scannen" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <Button x:Name="WlanScanButton" Grid.Column="1" Content="Scan starten" Command="{Binding ScanWifiCommand}" Style="{StaticResource AccentButtonStyle}" />
                 </Grid>
             </Border>
 
@@ -69,22 +69,22 @@
                 Style="{StaticResource CardBorder}"
                 Padding="16">
                 <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
-                    <TextBlock Grid.Row="0" Text="Netzwerk-Details" FontWeight="SemiBold" />
+                    <TextBlock x:Name="WlanDetailsTitleText" Grid.Row="0" Text="Netzwerk-Details" FontWeight="SemiBold" />
                     <Grid Grid.Row="1" x:Name="WifiDetailsGrid" ColumnDefinitions="*,*,*" ColumnSpacing="24" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
                         <!-- Spalte 1: Signal -->
-                        <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="SemiBold" Text="Signal" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock x:Name="WifiDetailSignalSectionText" Grid.Column="0" Grid.Row="0" FontWeight="SemiBold" Text="Signal" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         <TextBlock Grid.Column="0" Grid.Row="1" x:Name="WifiDetailSignalStrength" Text="Stärke: --" FontSize="12" />
                         <TextBlock Grid.Column="0" Grid.Row="2" x:Name="WifiDetailQuality" Text="Qualität: --" FontSize="12" />
                         <TextBlock Grid.Column="0" Grid.Row="3" x:Name="WifiDetailRssi" Text="RSSI: -- dBm" FontSize="12" />
 
                         <!-- Spalte 2: Frequenz -->
-                        <TextBlock Grid.Column="1" Grid.Row="0" FontWeight="SemiBold" Text="Frequenz" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock x:Name="WifiDetailFrequencySectionText" Grid.Column="1" Grid.Row="0" FontWeight="SemiBold" Text="Frequenz" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         <TextBlock Grid.Column="1" Grid.Row="1" x:Name="WifiDetailBand" Text="Band: --" FontSize="12" />
                         <TextBlock Grid.Column="1" Grid.Row="2" x:Name="WifiDetailChannel" Text="Kanal: --" FontSize="12" />
                         <TextBlock Grid.Column="1" Grid.Row="3" x:Name="WifiDetailFrequency" Text="Frequenz: --" FontSize="12" />
 
                         <!-- Spalte 3: Sicherheit & Standard -->
-                        <TextBlock Grid.Column="2" Grid.Row="0" FontWeight="SemiBold" Text="Sicherheit &amp; Standard" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock x:Name="WifiDetailSecuritySectionText" Grid.Column="2" Grid.Row="0" FontWeight="SemiBold" Text="Sicherheit &amp; Standard" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                         <TextBlock Grid.Column="2" Grid.Row="1" x:Name="WifiDetailSecurity" Text="Verschlüsselung: --" FontSize="12" />
                         <TextBlock Grid.Column="2" Grid.Row="2" x:Name="WifiDetailPhyType" Text="PHY-Typ: --" FontSize="12" />
                         <TextBlock Grid.Column="2" Grid.Row="3" x:Name="WifiDetailNetworkType" Text="Netzwerk: --" FontSize="12" />
