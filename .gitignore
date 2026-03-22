@@ -15,6 +15,9 @@ UpgradeLog*.htm
 [Oo]utakes/
 build_setup.bat
 
+## sprachdateien
+test.json
+
 ## installer
 [Ii]nstallation/
 
