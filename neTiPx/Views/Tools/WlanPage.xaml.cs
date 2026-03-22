@@ -231,16 +231,16 @@ namespace neTiPx.Views
                 }
 
                 WifiDetailSignalStrength.Text = $"{selectedNetwork.SignalSymbol} {selectedNetwork.SignalStrengthPercent}%";
-                WifiDetailQuality.Text = string.Format(T("WLAN_DETAILS_QUALITY_VALUE"), selectedNetwork.LinkQuality);
+                WifiDetailQuality.Text = $"{T("WLAN_DETAILS_QUALITY_VALUE")} {selectedNetwork.LinkQuality}%";
                 WifiDetailRssi.Text = $"RSSI: {selectedNetwork.SignalStrengthDbm} dBm";
 
-                WifiDetailBand.Text = string.Format(T("WLAN_DETAILS_BAND_VALUE"), selectedNetwork.Band, band);
-                WifiDetailChannel.Text = string.Format(T("WLAN_DETAILS_CHANNEL_VALUE"), selectedNetwork.Channel);
-                WifiDetailFrequency.Text = string.Format(T("WLAN_DETAILS_FREQUENCY_VALUE"), selectedNetwork.Frequency);
+                WifiDetailBand.Text = $"{T("WLAN_DETAILS_BAND_VALUE")} {selectedNetwork.Band}{band}";
+                WifiDetailChannel.Text = $"{T("WLAN_DETAILS_CHANNEL_VALUE")} {selectedNetwork.Channel}";
+                WifiDetailFrequency.Text = $"{T("WLAN_DETAILS_FREQUENCY_VALUE")} {selectedNetwork.Frequency} MHz";
 
-                WifiDetailSecurity.Text = string.Format(T("WLAN_DETAILS_SECURITY_VALUE"), selectedNetwork.SecurityType);
+                WifiDetailSecurity.Text = $"{T("WLAN_DETAILS_SECURITY_VALUE")} {selectedNetwork.SecurityType}";
                 WifiDetailPhyType.Text = $"PHY-Typ: {selectedNetwork.PhyType}";
-                WifiDetailNetworkType.Text = string.Format(T("WLAN_DETAILS_NETWORK_VALUE"), selectedNetwork.NetworkType);
+                WifiDetailNetworkType.Text = $"{T("WLAN_DETAILS_NETWORK_VALUE")} {selectedNetwork.NetworkType}";
             }
             else
             {

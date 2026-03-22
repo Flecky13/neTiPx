@@ -346,7 +346,8 @@ namespace neTiPx.ViewModels
                 return versionText;
             }
 
-            return string.Format(CultureInfo.CurrentCulture, T("INFO_LAST_CHECKED_FORMAT"), versionText, checkedAtLocal.Value);
+            var checkedAtText = checkedAtLocal.Value.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture);
+            return $"{versionText} - {T("INFO_LAST_CHECKED_FORMAT")} {checkedAtText}";
         }
 
         private static HttpClient CreateHttpClient()

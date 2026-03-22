@@ -169,11 +169,11 @@ namespace neTiPx.Views.Tools
 
             if (string.IsNullOrWhiteSpace(filterText))
             {
-                RoutesStatusText.Text = string.Format(CultureInfo.CurrentCulture, T("ROUTES_STATUS_FOUND"), FilteredRoutes.Count);
+                RoutesStatusText.Text = $"{FilteredRoutes.Count} {T("ROUTES_STATUS_FOUND")}";
             }
             else if (IPAddress.TryParse(filterText, out var parsed) && parsed.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                RoutesStatusText.Text = string.Format(CultureInfo.CurrentCulture, T("ROUTES_STATUS_MATCHING"), FilteredRoutes.Count, filterText);
+                RoutesStatusText.Text = $"{FilteredRoutes.Count} {T("ROUTES_STATUS_MATCHING")}: {filterText}";
             }
             else
             {
@@ -351,7 +351,7 @@ namespace neTiPx.Views.Tools
             var dialog = new ContentDialog
             {
                 Title = T("ROUTES_DIALOG_DELETE_TITLE"),
-                Content = string.Format(CultureInfo.CurrentCulture, T("ROUTES_DIALOG_DELETE_CONTENT"), route.Destination, route.SubnetMask, route.Gateway),
+                Content = $"{T("ROUTES_DIALOG_DELETE_CONTENT")}\n{route.Destination} / {route.SubnetMask} via {route.Gateway}",
                 PrimaryButtonText = T("ROUTES_DIALOG_DELETE_CONFIRM"),
                 CloseButtonText = T("ROUTES_DIALOG_CANCEL"),
                 DefaultButton = ContentDialogButton.Close,

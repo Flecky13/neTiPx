@@ -80,7 +80,7 @@ namespace neTiPx.Views
         {
             if (NetworkScanCountTextBlock != null)
             {
-                NetworkScanCountTextBlock.Text = string.Format(T("NETSCAN_COUNT_FORMAT"), NetworkDevices.Count);
+                NetworkScanCountTextBlock.Text = $"{T("NETSCAN_COUNT_FORMAT")}: {NetworkDevices.Count}";
             }
         }
 
@@ -134,7 +134,7 @@ namespace neTiPx.Views
             NetworkScanDetailsPlaceholderText.Text = T("NETSCAN_DETAILS_PLACEHOLDER");
             NetworkScanStartButton.IsEnabled = false;
             NetworkScanProgressRing.IsActive = true;
-            NetworkScanStatusTextBlock.Text = string.Format(T("NETSCAN_STATUS_SCANNING"), ipList.Count);
+            NetworkScanStatusTextBlock.Text = $"{T("NETSCAN_STATUS_SCANNING")}: {ipList.Count}";
 
             try
             {
@@ -146,7 +146,7 @@ namespace neTiPx.Views
             }
             catch (Exception ex)
             {
-                ShowScanError(string.Format(T("NETSCAN_ERROR_SCAN_FAILED"), ex.Message));
+                ShowScanError($"{T("NETSCAN_ERROR_SCAN_FAILED")}: {ex.Message}");
             }
             finally
             {
@@ -176,7 +176,7 @@ namespace neTiPx.Views
 
                 UpdateScanCountLabel();
                 NetworkScanStatusTextBlock.Text = NetworkDevices.Count > 0
-                    ? string.Format(T("NETSCAN_STATUS_FINISHED_FOUND"), NetworkDevices.Count)
+                    ? $"{T("NETSCAN_STATUS_FINISHED_FOUND")} ({NetworkDevices.Count})"
                     : T("NETSCAN_STATUS_FINISHED_NONE");
             });
         }
@@ -310,20 +310,20 @@ namespace neTiPx.Views
                     return true;
                 }
 
-                errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_IP"), rangeText);
+                errorMessage = $"{T("NETSCAN_ERROR_INVALID_IP")}: {rangeText}";
                 return false;
             }
 
             var parts = normalized.Split('-', 2, StringSplitOptions.TrimEntries);
             if (parts.Length != 2)
             {
-                errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_RANGE_VALUE"), rangeText);
+                errorMessage = $"{T("NETSCAN_ERROR_INVALID_RANGE_VALUE")}: {rangeText}";
                 return false;
             }
 
             if (!TryParseIpv4ToUint(parts[0], out var parsedStartIp))
             {
-                errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_START_IP"), parts[0]);
+                errorMessage = $"{T("NETSCAN_ERROR_INVALID_START_IP")}: {parts[0]}";
                 return false;
             }
 
@@ -332,7 +332,7 @@ namespace neTiPx.Views
             {
                 if (!TryParseIpv4ToUint(parts[1], out parsedEndIp))
                 {
-                    errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_END_IP"), parts[1]);
+                    errorMessage = $"{T("NETSCAN_ERROR_INVALID_END_IP")}: {parts[1]}";
                     return false;
                 }
             }
@@ -341,7 +341,7 @@ namespace neTiPx.Views
                 var firstIpBytes = UintToIp(parsedStartIp).GetAddressBytes();
                 if (!byte.TryParse(parts[1], out var lastOctet))
                 {
-                    errorMessage = string.Format(T("NETSCAN_ERROR_INVALID_END_RANGE"), parts[1]);
+                    errorMessage = $"{T("NETSCAN_ERROR_INVALID_END_RANGE")}: {parts[1]}";
                     return false;
                 }
 
@@ -356,7 +356,7 @@ namespace neTiPx.Views
 
             if (parsedStartIp > parsedEndIp)
             {
-                errorMessage = string.Format(T("NETSCAN_ERROR_START_GREATER_THAN_END"), rangeText);
+                errorMessage = $"{T("NETSCAN_ERROR_START_GREATER_THAN_END")}: {rangeText}";
                 return false;
             }
 
@@ -814,7 +814,7 @@ namespace neTiPx.Views
                     }
                     catch
                     {
-                        ShowScanError(string.Format(T("NETSCAN_ERROR_SSH_HINT"), ipAddress));
+                        ShowScanError($"{T("NETSCAN_ERROR_SSH_HINT")}: ssh {ipAddress}");
                     }
                 }
                 else if (normalized.StartsWith("SMB"))
@@ -826,17 +826,17 @@ namespace neTiPx.Views
                     var customPortText = new string(portInfo.Where(char.IsDigit).ToArray());
                     if (!string.IsNullOrWhiteSpace(customPortText) && int.TryParse(customPortText, out var customPort))
                     {
-                        ShowScanError(string.Format(T("NETSCAN_ERROR_CUSTOM_PORT_OPEN"), ipAddress, customPort));
+                        ShowScanError($"{T("NETSCAN_ERROR_CUSTOM_PORT_OPEN")}: {ipAddress}:{customPort}");
                     }
                 }
                 else
                 {
-                    ShowScanError(string.Format(T("NETSCAN_ERROR_NO_ACTION"), portInfo));
+                    ShowScanError($"{T("NETSCAN_ERROR_NO_ACTION")}: {portInfo}");
                 }
             }
             catch (Exception ex)
             {
-                ShowScanError(string.Format(T("NETSCAN_ERROR_OPEN_CONNECTION"), ex.Message));
+                ShowScanError($"{T("NETSCAN_ERROR_OPEN_CONNECTION")}: {ex.Message}");
             }
         }
 

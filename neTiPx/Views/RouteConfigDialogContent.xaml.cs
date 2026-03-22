@@ -171,7 +171,7 @@ namespace neTiPx.Views
 
             SystemRoutesStatus = SystemRoutes.Count == 0
                 ? T("ROUTECFG_STATUS_NONE_FOUND")
-                : string.Format(CultureInfo.CurrentCulture, T("ROUTECFG_STATUS_LOADED_COUNT"), SystemRoutes.Count);
+                : $"{SystemRoutes.Count} {T("ROUTECFG_STATUS_LOADED_COUNT")}";
         }
 
         public List<RouteEntry> GetRoutes()
@@ -358,7 +358,7 @@ namespace neTiPx.Views
 
             SystemRoutesStatus = SystemRoutes.Count == 0
                 ? T("ROUTECFG_STATUS_NONE_FOUND")
-                : string.Format(CultureInfo.CurrentCulture, T("ROUTECFG_STATUS_LOADED_COUNT"), SystemRoutes.Count);
+                : $"{SystemRoutes.Count} {T("ROUTECFG_STATUS_LOADED_COUNT")}";
 
             _isSystemRoutesLoading = false;
         }
@@ -395,7 +395,7 @@ namespace neTiPx.Views
             RefreshSystemRouteMarkers();
             SystemRoutesStatus = SystemRoutes.Count == 0
                 ? T("ROUTECFG_STATUS_NONE_FOUND")
-                : string.Format(CultureInfo.CurrentCulture, T("ROUTECFG_STATUS_LOADED_COUNT"), SystemRoutes.Count);
+                : $"{SystemRoutes.Count} {T("ROUTECFG_STATUS_LOADED_COUNT")}";
 
             if (!string.IsNullOrWhiteSpace(message))
             {

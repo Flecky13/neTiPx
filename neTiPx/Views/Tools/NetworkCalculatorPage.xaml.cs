@@ -389,7 +389,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            NetworkCalcIpv6ScopeTextBlock.Text = string.Format(T("NETCALC_SCOPE_FORMAT"), GetIpv6ScopeLabel(ip));
+            NetworkCalcIpv6ScopeTextBlock.Text = $"{T("NETCALC_SCOPE_FORMAT")}: {GetIpv6ScopeLabel(ip)}";
         }
 
         private void CalculateIpv6Network(IPAddress ipv6Address, int prefixLength)
@@ -429,7 +429,7 @@ namespace neTiPx.Views
             string addressCount;
             if (hostBits > 63)
             {
-                addressCount = string.Format(T("NETCALC_IPV6_ADDRESS_COUNT_LARGE"), hostBits);
+                addressCount = $"2^{hostBits} ({T("NETCALC_IPV6_ADDRESS_COUNT_LARGE")})";
             }
             else
             {
@@ -508,7 +508,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            NetworkCalcIpScopeTextBlock.Text = string.Format(T("NETCALC_SCOPE_FORMAT"), GetIpv4ScopeLabel(ip));
+            NetworkCalcIpScopeTextBlock.Text = $"{T("NETCALC_SCOPE_FORMAT")}: {GetIpv4ScopeLabel(ip)}";
         }
 
         private string GetIpv4ScopeLabel(IPAddress ipAddress)
@@ -607,7 +607,7 @@ namespace neTiPx.Views
             }
             catch (Exception ex)
             {
-                ShowError(string.Format(T("NETCALC_ERROR_PREFIX"), ex.Message));
+                ShowError($"{T("NETCALC_ERROR_PREFIX")}: {ex.Message}");
             }
         }
 
