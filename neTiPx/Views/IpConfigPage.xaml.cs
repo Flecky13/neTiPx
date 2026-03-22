@@ -45,6 +45,40 @@ namespace neTiPx.Views
             if (NewProfileButtonText != null) NewProfileButtonText.Text = _lm.Lang("IPCONFIG_NEW_PROFILE");
             if (ProfileSettingsTitle != null) ProfileSettingsTitle.Text = _lm.Lang("IPCONFIG_PROFILE_SETTINGS");
 
+            if (ProfileNameLabel != null) ProfileNameLabel.Text = _lm.Lang("IPCONFIG_PROFILE_NAME");
+            if (ProfileNameTextBox != null) ProfileNameTextBox.PlaceholderText = _lm.Lang("IPCONFIG_PLACEHOLDER_PROFILE");
+            if (AdapterLabel != null) AdapterLabel.Text = _lm.Lang("IPCONFIG_ADAPTER");
+            if (AdapterComboBox != null) AdapterComboBox.PlaceholderText = _lm.Lang("IPCONFIG_PLACEHOLDER_ADAPTER");
+            if (IpModeLabel != null) IpModeLabel.Text = _lm.Lang("IPCONFIG_IP_MODE");
+            if (DhcpModeRadio != null) DhcpModeRadio.Content = "DHCP";
+            if (ManualModeRadio != null) ManualModeRadio.Content = "Manual";
+            if (RoutesEnabledCheckBox != null) RoutesEnabledCheckBox.Content = _lm.Lang("IPCONFIG_ROUTES_ACTIVE");
+
+            if (GatewayLabel != null) GatewayLabel.Text = "Gateway";
+            if (GatewayTextBox != null) GatewayTextBox.PlaceholderText = "Gateway (z.B. 192.168.1.1)";
+            if (RouteSetLabel != null) RouteSetLabel.Text = _lm.Lang("IPCONFIG_ROUTE_SET");
+            if (RouteAddLabel != null) RouteAddLabel.Text = _lm.Lang("IPCONFIG_ROUTE_ADD");
+
+            if (DnsServerLabel != null) DnsServerLabel.Text = "DNS Server";
+            if (Dns1TextBox != null) Dns1TextBox.PlaceholderText = _lm.Lang("IPCONFIG_PLACEHOLDER_DNS1");
+            if (Dns2TextBox != null) Dns2TextBox.PlaceholderText = _lm.Lang("IPCONFIG_PLACEHOLDER_DNS2");
+
+            if (IpAddressesLabel != null) IpAddressesLabel.Text = _lm.Lang("IPCONFIG_IP_ADDRESSES");
+            if (IpAddressHeaderLabel != null) IpAddressHeaderLabel.Text = _lm.Lang("IPCONFIG_IP_ADDRESS");
+            if (SubnetMaskHeaderLabel != null) SubnetMaskHeaderLabel.Text = _lm.Lang("IPCONFIG_SUBNET_MASK");
+            if (ActionHeaderLabel != null) ActionHeaderLabel.Text = _lm.Lang("IPCONFIG_IP_ACTION");
+            if (AddIpButtonText != null) AddIpButtonText.Text = _lm.Lang("IPCONFIG_IP_ADD");
+
+            if (ActionsTitleText != null) ActionsTitleText.Text = _lm.Lang("IPCONFIG_ACTIONS");
+            if (ApplyButtonText != null) ApplyButtonText.Text = _lm.Lang("IPCONFIG_APPLY");
+            if (SaveButtonText != null) SaveButtonText.Text = _lm.Lang("IPCONFIG_SAVE");
+
+            if (ConnectionStatusTitleText != null) ConnectionStatusTitleText.Text = _lm.Lang("IPCONFIG_CONNECTION_STATUS");
+            if (GatewayStatusLabel != null) GatewayStatusLabel.Text = "Gateway";
+            if (Dns1StatusLabel != null) Dns1StatusLabel.Text = "DNS 1";
+            if (Dns2StatusLabel != null) Dns2StatusLabel.Text = "DNS 2";
+            if (ConnectionQualityLabel != null) ConnectionQualityLabel.Text = _lm.Lang("IPCONFIG_CONNECTION_QUALITY");
+
             SetToolTips();
         }
 
@@ -174,11 +208,17 @@ namespace neTiPx.Views
                     {
                         var ipBox = FindChildByName(container, "IpAddressTextBox") as TextBox;
                         if (ipBox != null)
+                        {
+                            ipBox.PlaceholderText = "z.B. 192.168.1.10";
                             ToolTipService.SetToolTip(ipBox, _lm.Lang("IPCONFIG_TOOLTIP_IP"));
+                        }
 
                         var subnetBox = FindChildByName(container, "SubnetMaskTextBox") as TextBox;
                         if (subnetBox != null)
+                        {
+                            subnetBox.PlaceholderText = "255.255.255.0 , /24";
                             ToolTipService.SetToolTip(subnetBox, _lm.Lang("IPCONFIG_TOOLTIP_SUBNET"));
+                        }
 
                         var removeBtn = FindChildByName(container, "RemoveIpButton") as Button;
                         if (removeBtn != null)

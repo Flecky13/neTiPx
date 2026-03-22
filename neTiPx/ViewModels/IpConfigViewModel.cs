@@ -19,6 +19,10 @@ namespace neTiPx.ViewModels
 {
     public sealed class IpConfigViewModel : ObservableObject
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
+
+        private static string T(string key) => _lm.Lang(key);
+
         private readonly ConfigStore _configStore = new ConfigStore();
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
@@ -29,14 +33,14 @@ namespace neTiPx.ViewModels
         private bool _isMonitoringActive;
 
         private IpProfile? _selectedProfile;
-        private string _gatewayStatusText = "Unbekannt";
-        private string _gatewayPingText = "Ping: -";
+        private string _gatewayStatusText = string.Empty;
+        private string _gatewayPingText = string.Empty;
         private GatewayStatusKind _gatewayStatusKind = GatewayStatusKind.Unknown;
-        private string _dns1StatusText = "Unbekannt";
-        private string _dns1PingText = "Ping: -";
+        private string _dns1StatusText = string.Empty;
+        private string _dns1PingText = string.Empty;
         private GatewayStatusKind _dns1StatusKind = GatewayStatusKind.Unknown;
-        private string _dns2StatusText = "Unbekannt";
-        private string _dns2PingText = "Ping: -";
+        private string _dns2StatusText = string.Empty;
+        private string _dns2PingText = string.Empty;
         private GatewayStatusKind _dns2StatusKind = GatewayStatusKind.Unknown;
         private string _validationMessage = string.Empty;
         private bool _hasValidationErrors = false;
@@ -64,6 +68,15 @@ namespace neTiPx.ViewModels
                 AutoReset = true
             };
             _pingTimer.Elapsed += async (_, _) => await UpdateStatusAsync();
+
+            var initialStatus = T("IPCONFIG_STATUS_UNKNOWN");
+            var initialPing = "Ping: -";
+            _gatewayStatusText = initialStatus;
+            _dns1StatusText = initialStatus;
+            _dns2StatusText = initialStatus;
+            _gatewayPingText = initialPing;
+            _dns1PingText = initialPing;
+            _dns2PingText = initialPing;
         }
 
         public ObservableCollection<string> AdapterList { get; }
@@ -250,7 +263,7 @@ namespace neTiPx.ViewModels
 
             _ipProfileStore.SaveProfile(SelectedProfile);
             SelectedProfile.IsDirty = false;
-            ValidationMessage = "Profil gespeichert";
+            ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             return true;
         }
 
@@ -300,7 +313,7 @@ namespace neTiPx.ViewModels
                 if (string.Equals(storedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
                 {
                     var nicLoaded = LoadProfileFromNic(SelectedProfile);
-                    ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
+                    ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
                     HasValidationErrors = false;
                     SelectedProfile.IsDirty = false;
                     return Task.CompletedTask;
@@ -326,7 +339,7 @@ namespace neTiPx.ViewModels
                     SelectedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
                 }
 
-                ValidationMessage = "Configuration gelesen";
+                ValidationMessage = T("IPCONFIG_MSG_CONFIGURATION_READ");
                 HasValidationErrors = false;
                 SelectedProfile.IsDirty = false;
                 return Task.CompletedTask;
@@ -350,7 +363,7 @@ namespace neTiPx.ViewModels
 
                 // After apply: Load fresh settings from NIC
                 var nicLoaded = LoadProfileFromNic(SelectedProfile);
-                ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
+                ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
                 HasValidationErrors = false;
                 return Task.CompletedTask;
             }
@@ -374,7 +387,7 @@ namespace neTiPx.ViewModels
                 if (string.Equals(SelectedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
                 {
                     var loaded = LoadProfileFromNic(SelectedProfile);
-                    ValidationMessage = loaded ? "Settings gelesen" : "Keine Settings vorhanden";
+                    ValidationMessage = loaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
                     HasValidationErrors = false;
                     return Task.CompletedTask;
                 }
@@ -384,13 +397,13 @@ namespace neTiPx.ViewModels
                 if (hasConfigSettings && _ipProfileStore.TryGetProfile(SelectedProfile.Name, out var storedProfile))
                 {
                     LoadProfileFromStore(storedProfile, SelectedProfile);
-                    ValidationMessage = "Configuration gelesen";
+                    ValidationMessage = T("IPCONFIG_MSG_CONFIGURATION_READ");
                     HasValidationErrors = false;
                     return Task.CompletedTask;
                 }
 
                 var nicLoaded = LoadProfileFromNic(SelectedProfile);
-                ValidationMessage = nicLoaded ? "Settings gelesen" : "Keine Settings vorhanden";
+                ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
                 HasValidationErrors = false;
                 return Task.CompletedTask;
             }
@@ -503,9 +516,9 @@ namespace neTiPx.ViewModels
         public bool IsManual => SelectedProfile != null &&
                                 string.Equals(SelectedProfile.Mode, "Manual", StringComparison.OrdinalIgnoreCase);
 
-        public string ConfiguredRoutesText => $"{SelectedProfile?.Routes.Count ?? 0} Ständige Routen";
+        public string ConfiguredRoutesText => $"{SelectedProfile?.Routes.Count ?? 0}{T("IPCONFIG_ROUTES_COUNT_SUFFIX")}";
 
-        public string RouteApplicationModeText => SelectedProfile?.AddRoutesOnApply == true ? "hinzufügen" : "setzen";
+        public string RouteApplicationModeText => SelectedProfile?.AddRoutesOnApply == true ? T("IPCONFIG_ROUTE_ADD") : T("IPCONFIG_ROUTE_SET");
 
         public string ValidationMessage
         {
@@ -752,7 +765,7 @@ namespace neTiPx.ViewModels
 
             _ipProfileStore.SaveProfile(SelectedProfile);
 
-            ValidationMessage = "Profil gespeichert";
+            ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             SelectedProfile.IsDirty = false;
         }
 
@@ -777,9 +790,9 @@ namespace neTiPx.ViewModels
             var (success, error) = _networkService.ApplyProfile(SelectedProfile);
             if (!success)
             {
-                ValidationMessage = error ?? "Fehler beim Anwenden.";
+                ValidationMessage = error ?? T("IPCONFIG_MSG_APPLY_ERROR");
                 HasValidationErrors = true;
-                GatewayStatusText = "Fehler";
+                GatewayStatusText = T("ADAPTER_STA_Error");
                 GatewayStatusKind = GatewayStatusKind.Bad;
                 return;
             }
@@ -787,7 +800,7 @@ namespace neTiPx.ViewModels
             // After apply: load fresh settings from NIC and save to INI
             ReloadProfileFromNicAsync().ConfigureAwait(false);
             SaveProfile();
-            ValidationMessage = "Profil angewendet";
+            ValidationMessage = T("IPCONFIG_MSG_PROFILE_APPLIED");
             SelectedProfile.IsDirty = false;
         }
 
@@ -1020,13 +1033,13 @@ namespace neTiPx.ViewModels
             // Validate profile name
             if (string.IsNullOrWhiteSpace(SelectedProfile.Name))
             {
-                errors.Add("Profilname erforderlich");
+                errors.Add(T("IPCONFIG_ERR_PROFILE_NAME_REQUIRED"));
             }
 
             // Validate adapter
             if (string.IsNullOrWhiteSpace(SelectedProfile.AdapterName))
             {
-                errors.Add("Netzwerkkarte erforderlich");
+                errors.Add(T("IPCONFIG_ERR_ADAPTER_REQUIRED"));
             }
 
             // Validate manual mode settings
@@ -1035,19 +1048,19 @@ namespace neTiPx.ViewModels
                 // Validate Gateway
                 if (!string.IsNullOrWhiteSpace(SelectedProfile.Gateway) && !IsValidIpAddress(SelectedProfile.Gateway))
                 {
-                    errors.Add("Gateway-Adresse ungültig");
+                    errors.Add(T("IPCONFIG_ERR_GATEWAY_INVALID"));
                 }
 
                 // Validate DNS1
                 if (!string.IsNullOrWhiteSpace(SelectedProfile.Dns1) && !IsValidIpAddress(SelectedProfile.Dns1))
                 {
-                    errors.Add("DNS1-Adresse ungültig");
+                    errors.Add(T("IPCONFIG_ERR_DNS1_INVALID"));
                 }
 
                 // Validate DNS2
                 if (!string.IsNullOrWhiteSpace(SelectedProfile.Dns2) && !IsValidIpAddress(SelectedProfile.Dns2))
                 {
-                    errors.Add("DNS2-Adresse ungültig");
+                    errors.Add(T("IPCONFIG_ERR_DNS2_INVALID"));
                 }
 
                 // Validate IP Addresses
@@ -1057,12 +1070,12 @@ namespace neTiPx.ViewModels
                     {
                         if (!IsValidIpAddress(entry.IpAddress))
                         {
-                            errors.Add($"IP-Adresse ungültig: {entry.IpAddress}");
+                            errors.Add($"{T("IPCONFIG_ERR_IP_INVALID_PREFIX")}{entry.IpAddress}");
                         }
 
                         if (!string.IsNullOrWhiteSpace(entry.SubnetMask) && !IsValidSubnetMask(entry.SubnetMask))
                         {
-                            errors.Add($"Subnetzmaske ungültig: {entry.SubnetMask}");
+                            errors.Add($"{T("IPCONFIG_ERR_SUBNET_INVALID_PREFIX")}{entry.SubnetMask}");
                         }
                     }
                 }
@@ -1083,34 +1096,34 @@ namespace neTiPx.ViewModels
 
                     if (!IsValidIpAddress(route.Destination))
                     {
-                        errors.Add($"Route #{i + 1}: Zieladresse ungültig");
+                        errors.Add($"{T("IPCONFIG_ROUTE_PREFIX")}{i + 1}{T("IPCONFIG_ERR_ROUTE_DEST_INVALID_SUFFIX")}");
                     }
 
                     if (!IsValidSubnetMask(route.SubnetMask))
                     {
-                        errors.Add($"Route #{i + 1}: Subnetzmaske ungültig");
+                        errors.Add($"{T("IPCONFIG_ROUTE_PREFIX")}{i + 1}{T("IPCONFIG_ERR_ROUTE_SUBNET_INVALID_SUFFIX")}");
                     }
 
                     if (!IsValidIpAddress(route.Gateway))
                     {
-                        errors.Add($"Route #{i + 1}: Gateway ungültig");
+                        errors.Add($"{T("IPCONFIG_ROUTE_PREFIX")}{i + 1}{T("IPCONFIG_ERR_ROUTE_GATEWAY_INVALID_SUFFIX")}");
                     }
 
                     if (route.Metric <= 0)
                     {
-                        errors.Add($"Route #{i + 1}: Metrik muss > 0 sein");
+                        errors.Add($"{T("IPCONFIG_ROUTE_PREFIX")}{i + 1}{T("IPCONFIG_ERR_ROUTE_METRIC_INVALID_SUFFIX")}");
                     }
 
                     if (IsValidIpAddress(route.Destination) && IsValidSubnetMask(route.SubnetMask) &&
                         !IsNetworkAddress(route.Destination, route.SubnetMask))
                     {
-                        errors.Add($"Route #{i + 1}: Ziel muss eine Netzadresse sein");
+                        errors.Add($"{T("IPCONFIG_ROUTE_PREFIX")}{i + 1}{T("IPCONFIG_ERR_ROUTE_DEST_NETWORK_SUFFIX")}");
                     }
                 }
             }
 
             HasValidationErrors = errors.Count > 0;
-            ValidationMessage = HasValidationErrors ? string.Join(", ", errors) : "Validierung erfolgreich";
+            ValidationMessage = HasValidationErrors ? string.Join(", ", errors) : T("IPCONFIG_MSG_VALIDATION_OK");
         }
 
         public void RevalidateProfile()
@@ -1195,9 +1208,11 @@ namespace neTiPx.ViewModels
                 var selectedProfile = SelectedProfile;
                 if (selectedProfile == null)
                 {
-                    PostGatewayStatus("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                    PostDns1Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
-                    PostDns2Status("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                    var status = T("ADAPTER_STA_NotConfigured");
+                    var ping = "Ping: -";
+                    PostGatewayStatus(status, ping, GatewayStatusKind.Unknown);
+                    PostDns1Status(status, ping, GatewayStatusKind.Unknown);
+                    PostDns2Status(status, ping, GatewayStatusKind.Unknown);
                     return;
                 }
 
@@ -1212,7 +1227,7 @@ namespace neTiPx.ViewModels
                 }
                 else
                 {
-                    PostGatewayStatus("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostGatewayStatus(T("ADAPTER_STA_Disabled"), "Ping: -", GatewayStatusKind.Unknown);
                 }
 
                 if (_settingsService.GetCheckConnectionDns1())
@@ -1221,7 +1236,7 @@ namespace neTiPx.ViewModels
                 }
                 else
                 {
-                    PostDns1Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns1Status(T("ADAPTER_STA_Disabled"), "Ping: -", GatewayStatusKind.Unknown);
                 }
 
                 if (_settingsService.GetCheckConnectionDns2())
@@ -1230,7 +1245,7 @@ namespace neTiPx.ViewModels
                 }
                 else
                 {
-                    PostDns2Status("Deaktiviert", "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns2Status(T("ADAPTER_STA_Disabled"), "Ping: -", GatewayStatusKind.Unknown);
                 }
             }
             catch (Exception ex)
@@ -1269,7 +1284,7 @@ namespace neTiPx.ViewModels
             if (string.IsNullOrWhiteSpace(address))
             {
                 Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Skip ping: address empty");
-                callback("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown);
+                callback(T("ADAPTER_STA_NotConfigured"), "Ping: -", GatewayStatusKind.Unknown);
                 return;
             }
 
@@ -1277,7 +1292,7 @@ namespace neTiPx.ViewModels
             if (!IPAddress.TryParse(address, out var parsedAddress))
             {
                 Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Skip ping: invalid ip '{address}'");
-                callback("Nicht erreichbar", "Ping: ungültige Adresse", GatewayStatusKind.Bad);
+                callback(T("ADAPTER_STA_NotReachable"), T("ADAPTER_STA_PingInvalidAddress"), GatewayStatusKind.Bad);
                 return;
             }
 
@@ -1294,25 +1309,25 @@ namespace neTiPx.ViewModels
                     int thresholdFast = _settingsService.GetPingThresholdFast();
                     int thresholdNormal = _settingsService.GetPingThresholdNormal();
 
-                    var statusText = ms <= thresholdFast ? "Erreichbar" : ms <= thresholdNormal ? "Langsam" : "Sehr langsam";
+                    var statusText = ms <= thresholdFast ? T("ADAPTER_STA_Reachable") : ms <= thresholdNormal ? T("ADAPTER_STA_Slow") : T("ADAPTER_STA_VerySlow");
                     var statusKind = ms <= thresholdFast ? GatewayStatusKind.Good :
                                    ms <= thresholdNormal ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
                     callback(statusText, $"Ping: {ms} ms", statusKind);
                 }
                 else
                 {
-                    callback("Nicht erreichbar", "Ping: timeout", GatewayStatusKind.Bad);
+                    callback(T("ADAPTER_STA_NotReachable"), T("ADAPTER_STA_PingTimeout"), GatewayStatusKind.Bad);
                 }
             }
             catch (PingException)
             {
                 Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] PingException -> {address}");
-                callback("Nicht erreichbar", "Ping: fehlgeschlagen", GatewayStatusKind.Bad);
+                callback(T("ADAPTER_STA_NotReachable"), T("ADAPTER_STA_PingFailed"), GatewayStatusKind.Bad);
             }
             catch
             {
                 Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] Ping error -> {address}");
-                callback("Fehler", "Ping: Fehler", GatewayStatusKind.Bad);
+                callback(T("ADAPTER_STA_Error"), T("ADAPTER_STA_PingError"), GatewayStatusKind.Bad);
             }
         }
 

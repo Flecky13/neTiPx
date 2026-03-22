@@ -91,8 +91,9 @@
 
                             <!-- Profilname -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Profilname" FontWeight="SemiBold" />
+                                <TextBlock x:Name="ProfileNameLabel" Text="Profilname" FontWeight="SemiBold" />
                                 <TextBox
+                                    x:Name="ProfileNameTextBox"
                                     Text="{Binding SelectedProfile.Name, Mode=TwoWay}"
                                     PlaceholderText="z.B. Büro, Heimnetzwerk..."
                                     IsEnabled="{Binding IsProfileSelected}" />
@@ -100,8 +101,9 @@
 
                             <!-- Netzwerkkarte -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Netzwerkkarte" FontWeight="SemiBold" />
+                                <TextBlock x:Name="AdapterLabel" Text="Netzwerkkarte" FontWeight="SemiBold" />
                                 <ComboBox
+                                    x:Name="AdapterComboBox"
                                     ItemsSource="{Binding AdapterList}"
                                     SelectedItem="{Binding SelectedProfile.AdapterName, Mode=TwoWay}"
                                     PlaceholderText="Adapter wählen..."
@@ -111,21 +113,24 @@
 
                             <!-- IP Modus -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="IP Modus" FontWeight="SemiBold" />
+                                <TextBlock x:Name="IpModeLabel" Text="IP Modus" FontWeight="SemiBold" />
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <RadioButton
+                                        x:Name="DhcpModeRadio"
                                         Content="DHCP"
                                         GroupName="IpMode"
                                         Margin="0"
                                         IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=DHCP}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <RadioButton
+                                        x:Name="ManualModeRadio"
                                         Content="Manual"
                                         GroupName="IpMode"
                                         Margin="0"
                                         IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=Manual}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <CheckBox
+                                        x:Name="RoutesEnabledCheckBox"
                                         Content="Routen Aktivieren"
                                         Margin="0"
                                         IsChecked="{Binding SelectedProfile.RoutesEnabled, Mode=TwoWay}"
@@ -148,7 +153,7 @@
                             <!-- Gateway -->
                             <StackPanel Spacing="4">
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
-                                    <TextBlock Text="Gateway" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="GatewayLabel" Text="Gateway" FontWeight="SemiBold" />
                                     <TextBlock Grid.Column="1" Text="{Binding ConfiguredRoutesText}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=count}" />
                                 </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
@@ -163,9 +168,11 @@
                                             IsEnabled="{Binding SelectedProfile.RoutesEnabled}">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock
+                                                    x:Name="RouteSetLabel"
                                                     Text="setzen"
                                                     Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=set}" />
                                                 <TextBlock
+                                                    x:Name="RouteAddLabel"
                                                     Text="hinzufügen"
                                                     Foreground="{Binding SelectedProfile, Converter={StaticResource RouteModeToBrushConverter}, ConverterParameter=add}" />
                                             </StackPanel>
@@ -176,7 +183,7 @@
 
                             <!-- DNS Server -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="DNS Server" FontWeight="SemiBold" />
+                                <TextBlock x:Name="DnsServerLabel" Text="DNS Server" FontWeight="SemiBold" />
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
                                     <TextBox x:Name="Dns1TextBox"
                                         Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
@@ -195,12 +202,13 @@
                             <!-- IP Adressen -->
                             <StackPanel Spacing="8">
                                 <TextBlock
+                                    x:Name="IpAddressesLabel"
                                     Text="IP Adressen" FontWeight="SemiBold"/>
 
                                 <Grid ColumnDefinitions="170,170,90" ColumnSpacing="6" Margin="0,2,0,0">
-                                    <TextBlock Text="IP Adresse" FontWeight="SemiBold" FontSize="12" />
-                                    <TextBlock Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" />
-                                    <TextBlock Grid.Column="2" Text="Aktion" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock x:Name="IpAddressHeaderLabel" Text="IP Adresse" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock x:Name="SubnetMaskHeaderLabel" Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock x:Name="ActionHeaderLabel" Grid.Column="2" Text="Aktion" FontWeight="SemiBold" FontSize="12" />
                                 </Grid>
 
                                 <ScrollViewer
@@ -248,7 +256,7 @@
                                     IsEnabled="{Binding IsManual}">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <FontIcon Glyph="&#xE710;" FontSize="14" />
-                                        <TextBlock Text="IP Adresse hinzufügen" />
+                                        <TextBlock x:Name="AddIpButtonText" Text="IP Adresse hinzufügen" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -261,7 +269,7 @@
                     <!-- Aktions-Buttons -->
                     <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="16">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Aktionen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+                            <TextBlock x:Name="ActionsTitleText" Text="Aktionen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
                             <Button x:Name="ApplyButton"
                                 Command="{Binding ApplyCommand}"
@@ -270,7 +278,7 @@
                                 Style="{StaticResource AccentButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE73E;" FontSize="16" />
-                                    <TextBlock Text="Anwenden" />
+                                    <TextBlock x:Name="ApplyButtonText" Text="Anwenden" />
                                 </StackPanel>
                             </Button>
 
@@ -280,7 +288,7 @@
                                 HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE74E;" FontSize="16" />
-                                    <TextBlock Text="Speichern" />
+                                    <TextBlock x:Name="SaveButtonText" Text="Speichern" />
                                 </StackPanel>
                             </Button>
 
@@ -301,11 +309,11 @@
                     <!-- Status-Bereich -->
                     <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16" VerticalAlignment="Stretch" Visibility="{Binding ShowConnectionQualityIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Spacing="16">
-                            <TextBlock Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+                            <TextBlock x:Name="ConnectionStatusTitleText" Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
                             <!-- Gateway Status -->
                             <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock x:Name="GatewayStatusLabel" Text="Gateway" FontWeight="SemiBold" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse
                                         Width="12"
@@ -320,7 +328,7 @@
 
                             <!-- DNS1 Status -->
                             <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock x:Name="Dns1StatusLabel" Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse
                                         Width="12"
@@ -335,7 +343,7 @@
 
                             <!-- DNS2 Status -->
                             <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock x:Name="Dns2StatusLabel" Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse
                                         Width="12"
@@ -350,7 +358,7 @@
 
                             <!-- Qualitäts-Ampel -->
                             <StackPanel Spacing="8" Visibility="{Binding ShowConnectionQualityIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="Verbindungsqualität" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock x:Name="ConnectionQualityLabel" Text="Verbindungsqualität" FontWeight="SemiBold" FontSize="12" />
                                 <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="12" HorizontalAlignment="Center">
                                     <Ellipse
                                         Width="20"
