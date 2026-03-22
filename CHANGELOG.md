@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [1.6.2.0]
+
+### Changed
+- **Lokalisierung**: Korrektur und vervollständigung der Lokalisierung.
 
 ## [1.6.0.0]
 
