@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "neTiPx (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "neTiPx (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

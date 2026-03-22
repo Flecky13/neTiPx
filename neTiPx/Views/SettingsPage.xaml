@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Class="neTiPx.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" Padding="24">
+            <!-- Header mit Image -->
+            <Border Style="{StaticResource CardBorder}" Padding="24">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="8">
+                        <TextBlock x:Name="SettingsTitleText" Text="Einstellungen" Style="{StaticResource SectionTitle}" FontSize="24" FontWeight="Bold" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock x:Name="SettingsSubtitlePreText" Text="Konfiguriere dein Tool nach deinen" VerticalAlignment="Center" />
+                            <TextBlock x:Name="SettingsSubtitleLinkText" Text="Wünschen"
+                                       VerticalAlignment="Center"
+                                       Tapped="OpenPagesVisibilityConfigText_Tapped" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Image
+                        Grid.Column="1"
+                        Source="ms-appx:///Assets/toolicon.png"
+                        Width="120"
+                        Height="120"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right" />
+                </Grid>
+            </Border>
+
+            <!-- 3x3 Grid für Konfigurationsbereiche -->
+            <Grid RowSpacing="16" ColumnSpacing="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+
+
+                <!-- Oben Links: Netzwerkadapter -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="0">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="AdapterCardTitle" Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="AdaptersSettingsContent" Spacing="12">
+                        <TextBlock x:Name="AdapterCardDesc" Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <!-- Primärer Adapter -->
+                        <StackPanel Spacing="4">
+                            <TextBlock x:Name="PrimaryAdapterLabel" Text="Primärer Adapter (NIC 1):" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox
+                                x:Name="PrimaryAdapterCombo"
+                                HorizontalAlignment="Stretch"
+                                PlaceholderText="Adapter wählen..."
+                                ToolTipService.ToolTip="Ihre primäre Netzwerkkarte"
+                                SelectionChanged="PrimaryAdapterCombo_SelectionChanged" />
+                        </StackPanel>
+
+                        <!-- Sekundärer Adapter -->
+                        <StackPanel Spacing="4">
+                            <TextBlock x:Name="SecondaryAdapterLabel" Text="Sekundärer Adapter (NIC 2):" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox
+                                x:Name="SecondaryAdapterCombo"
+                                HorizontalAlignment="Stretch"
+                                PlaceholderText="Adapter wählen..."
+                                ToolTipService.ToolTip="Ihre sekundäre Netzwerkkarte"
+                                SelectionChanged="SecondaryAdapterCombo_SelectionChanged" />
+                        </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="AdaptersSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Oben Mitte: Ping-Logging -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="1">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="PingLogCardTitle" Text="Ping-Logging" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="PingSettingsContent" Spacing="12">
+                        <TextBlock x:Name="PingLogCardDesc" Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock x:Name="PingLogFolderLabel" Text="Log-Ordner" FontWeight="SemiBold" FontSize="12" />
+                            <Border
+                                x:Name="PingLogFolderPathContainer"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10,8"
+                                SizeChanged="PingLogFolderPathContainer_SizeChanged">
+                                <TextBlock
+                                    x:Name="PingLogFolderPathTextBlock"
+                                    TextWrapping="NoWrap"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Content="Ordner wählen"
+                                Click="SelectPingLogFolderButton_Click" />
+                            <Button
+                                Content="Standard"
+                                Click="ResetPingLogFolderButton_Click"
+                                ToolTipService.ToolTip="Auf Standart zurücksetzen" />
+                        </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="PingSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Oben Rechts: Maus Over Info Fenster -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="0" Grid.Column="2">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="HoverWindowCardTitle" Text="Maus Over Info Fenster" Style="{StaticResource SectionTitle}" />
+
+                        <StackPanel Spacing="8">
+
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock x:Name="HoverDisplayLabel" Text="Anzeige" FontWeight="SemiBold" FontSize="12" />
+                                    <ComboBox
+                                        x:Name="HoverWindowStateCombo"
+                                        HorizontalAlignment="Stretch"
+                                        SelectionChanged="HoverWindowStateCombo_SelectionChanged"
+                                        ToolTipService.ToolTip="Aktiviert die Maus Over funktion im Systray "
+                                        PlaceholderText="Wählen...">
+                                        <ComboBoxItem>Aktiv</ComboBoxItem>
+                                        <ComboBoxItem>Inaktiv</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock x:Name="HoverDelayLabel" Text="Verzögert" FontWeight="SemiBold" FontSize="12" />
+                                    <ComboBox
+                                        x:Name="HoverWindowDelayCombo"
+                                        HorizontalAlignment="Stretch"
+                                        SelectionChanged="HoverWindowDelayCombo_SelectionChanged"
+                                        ToolTipService.ToolTip="Anzahl sekunden bis Info fenster erscheint"
+                                        PlaceholderText="Wählen...">
+                                        <ComboBoxItem>1 Sek.</ComboBoxItem>
+                                        <ComboBoxItem>2 Sek.</ComboBoxItem>
+                                        <ComboBoxItem>3 Sek.</ComboBoxItem>
+                                        <ComboBoxItem>4 Sek.</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock x:Name="HoverPositionLabel" Text="Position" FontWeight="SemiBold" FontSize="12" />
+                                <ComboBox
+                                    x:Name="HoverWindowVerticalAnchorCombo"
+                                    HorizontalAlignment="Stretch"
+                                    SelectionChanged="HoverWindowVerticalAnchorCombo_SelectionChanged"
+                                    ToolTipService.ToolTip="Position Infofenster"
+                                    PlaceholderText="Wählen...">
+                                    <ComboBoxItem>Oben</ComboBoxItem>
+                                    <ComboBoxItem>Unten</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock x:Name="HoverRightOffsetLabel" Text="Abstand rechts (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <NumberBox
+                                        x:Name="HoverWindowRightOffsetNumberBox"
+                                        Minimum="0"
+                                        Maximum="5000"
+                                        SmallChange="1"
+                                        SpinButtonPlacementMode="Compact"
+                                        ValueChanged="HoverWindowRightOffsetNumberBox_ValueChanged" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock x:Name="HoverWindowVerticalOffsetLabel" Text="Abstand unten (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <NumberBox
+                                        x:Name="HoverWindowVerticalOffsetNumberBox"
+                                        Minimum="0"
+                                        Maximum="5000"
+                                        SmallChange="1"
+                                        SpinButtonPlacementMode="Compact"
+                                        ValueChanged="HoverWindowVerticalOffsetNumberBox_ValueChanged" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Links: Verbindungsstatus -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="0">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="ConnectionStatusCardTitle" Text="Verbindungsstatus" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="ConnectionStatusSettingsContent" Spacing="12">
+
+                        <!-- Ping-Schwellenwerte: zweizeilig -->
+                        <StackPanel Spacing="8">
+                            <!-- Zeile 1: Labels -->
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock x:Name="PingFastLabel" Text="Schnell (ms):" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="&lt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PingNormalLabel" Text="Normal:" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="&gt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PingSlowLabel" Text="Langsam (ms)" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Zeile 2: TextBoxes mit Normal in der Mitte -->
+                            <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                                <!-- Schnell TextBox -->
+                                <TextBox
+                                    x:Name="PingThresholdFastTextBox"
+                                    InputScope="Number"
+                                    MaxLength="3"
+                                    Width="60"
+                                    ToolTipService.ToolTip="Verbindungsqualität Gut wenn kleiner "
+                                    TextChanged="PingThresholdFastTextBox_TextChanged" />
+
+                                <!-- Operator < -->
+                                <TextBlock Text="&lt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+
+                                <!-- Normal Text -->
+                                <TextBlock Text="Normal" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" MinWidth="60" TextAlignment="Center" />
+
+                                <!-- Operator > -->
+                                <TextBlock Text="&gt;" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+
+                                <!-- Normal TextBox -->
+                                <TextBox
+                                    x:Name="PingThresholdNormalTextBox"
+                                    InputScope="Number"
+                                    MaxLength="3"
+                                    Width="60"
+                                    ToolTipService.ToolTip="Normale Geschwindigkeit"
+                                    TextChanged="PingThresholdNormalTextBox_TextChanged" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Drei Checkboxen für Gateway/DNS -->
+                        <StackPanel Spacing="6">
+                            <CheckBox x:Name="CheckGatewayCheckBox" Content="Gateway" IsChecked="True" ToolTipService.ToolTip="Verbindungsqualität Schlecht wenn grösser" Checked="CheckGatewayCheckBox_Checked" Unchecked="CheckGatewayCheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns1CheckBox" Content="DNS 1" IsChecked="True" ToolTipService.ToolTip="Erreichbarkeit für DNS 1 aktiv" Checked="CheckDns1CheckBox_Checked" Unchecked="CheckDns1CheckBox_Unchecked" />
+                            <CheckBox x:Name="CheckDns2CheckBox" Content="DNS 2" IsChecked="True" ToolTipService.ToolTip="Erreichbarkeit für DNS 2 Aktiv" Checked="CheckDns2CheckBox_Checked" Unchecked="CheckDns2CheckBox_Unchecked" />
+                        </StackPanel>
+                        </StackPanel>
+                        <TextBlock x:Name="ConnectionStatusSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Mitte: Netzwerkscanner -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="1">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="NetScannerCardTitle" Text="Netzwerkscanner" Style="{StaticResource SectionTitle}" />
+                        <StackPanel x:Name="NetworkScannerSettingsContent" Spacing="12">
+                        <TextBlock x:Name="NetScannerCardDesc" Text="Port-Scanning Einstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <!-- 3x3 Grid für Protokolle und Ports -->
+                        <Grid RowSpacing="8" ColumnSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Zeile 1: HTTP, HTTPS, FTP -->
+                            <CheckBox x:Name="ScanPortHttpCheckBox" Grid.Row="0" Grid.Column="0"
+                                      Content="HTTP (80)" FontSize="10"
+                                      Checked="ScanPortHttpCheckBox_Checked"
+                                      Unchecked="ScanPortHttpCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortHttpsCheckBox" Grid.Row="0" Grid.Column="1"
+                                      Content="HTTPS (443)" FontSize="10"
+                                      Checked="ScanPortHttpsCheckBox_Checked"
+                                      Unchecked="ScanPortHttpsCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortFtpCheckBox" Grid.Row="0" Grid.Column="2"
+                                      Content="FTP (21)" FontSize="10"
+                                      Checked="ScanPortFtpCheckBox_Checked"
+                                      Unchecked="ScanPortFtpCheckBox_Unchecked" />
+
+                            <!-- Zeile 2: SSH, SMB, RDP -->
+                            <CheckBox x:Name="ScanPortSshCheckBox" Grid.Row="1" Grid.Column="0"
+                                      Content="SSH (22)" FontSize="10"
+                                      Checked="ScanPortSshCheckBox_Checked"
+                                      Unchecked="ScanPortSshCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortSmbCheckBox" Grid.Row="1" Grid.Column="1"
+                                      Content="SMB (445)" FontSize="10"
+                                      Checked="ScanPortSmbCheckBox_Checked"
+                                      Unchecked="ScanPortSmbCheckBox_Unchecked" />
+                            <CheckBox x:Name="ScanPortRdpCheckBox" Grid.Row="1" Grid.Column="2"
+                                      Content="RDP (3389)" FontSize="10"
+                                      Checked="ScanPortRdpCheckBox_Checked"
+                                      Unchecked="ScanPortRdpCheckBox_Unchecked" />
+
+                            <!-- Zeile 3: Benutzerdefinierte Ports -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Port 1:" FontWeight="SemiBold" FontSize="11" />
+                                <NumberBox x:Name="CustomPort1NumberBox"
+                                           Minimum="0" Maximum="65535"
+                                           ValueChanged="CustomPort1NumberBox_ValueChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Port 2:" FontWeight="SemiBold" FontSize="11" />
+                                <NumberBox x:Name="CustomPort2NumberBox"
+                                           Minimum="0" Maximum="65535"
+                                           ValueChanged="CustomPort2NumberBox_ValueChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="2" Spacing="4">
+                                <TextBlock Text="Port 3:" FontWeight="SemiBold" FontSize="11" />
+                                <NumberBox x:Name="CustomPort3NumberBox"
+                                           Minimum="0" Maximum="65535"
+                                           ValueChanged="CustomPort3NumberBox_ValueChanged" />
+                            </StackPanel>
+                        </Grid>
+                        </StackPanel>
+                        <TextBlock x:Name="NetworkScannerSettingsUnavailable" Text="Keine Settings vorhanden" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Rechts: Platzhalter -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="1" Grid.Column="2">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="PlaceholderMidRightTitle" Text="Platzhalter" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="PlaceholderMidRightDesc" Text="Zukünftige Konfiguration" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Rechts: Farbschema -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="2">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="ColorSchemeCardTitle" Text="Farbschema" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="ColorSchemeCardDesc" Text="Wählen Sie die Akzentfarbe" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <ComboBox
+                            x:Name="ColorSchemeCombo"
+                            HorizontalAlignment="Stretch"
+                            DisplayMemberPath="DisplayName"
+                            ToolTipService.ToolTip="Themenlayout auswählen"
+                            SelectionChanged="ColorSchemeCombo_SelectionChanged" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Links: Sprache -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="0">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="LanguageCardTitle" Text="Sprache" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="LanguageCardDesc" Text="Anzeigesprache der Anwendung" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <ComboBox
+                            x:Name="LanguageCombo"
+                            HorizontalAlignment="Stretch"
+                            PlaceholderText="Sprache wählen..."
+                            ToolTipService.ToolTip="Anzeigesprache auswählen"
+                            SelectionChanged="LanguageCombo_SelectionChanged" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Mitte: Platzhalter -->
+                <Border Style="{StaticResource CardBorder}" Grid.Row="2" Grid.Column="1">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="AutostartCardTitle" Text="Autostart" Style="{StaticResource SectionTitle}" />
+                        <CheckBox
+                            x:Name="AutostartCheckBox"
+                            Content="..."
+                            ToolTipService.ToolTip="..."
+                            Checked="AutostartCheckBox_Checked"
+                            Unchecked="AutostartCheckBox_Unchecked" />
+                        <CheckBox
+                            x:Name="CloseToTrayCheckBox"
+                            Content="..."
+                            ToolTipService.ToolTip="..."
+                            Checked="CloseToTrayCheckBox_Checked"
+                            Unchecked="CloseToTrayCheckBox_Unchecked" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
