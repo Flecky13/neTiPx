@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [1.6.3.0]
+
+### Changed
+- **Einstellungen / Adapter**: Die zweite Netzwerkkarte (`NIC 2`) kann in den Einstellungen jetzt optional leer bleiben (`Keine Auswahl`).
+- **Lokalisierung / Einstellungen**: Neuer Sprachschlüssel für die optionale Auswahl der zweiten Netzwerkkarte in allen Dateien unter `lang` synchronisiert und übersetzt.
+
 ## [1.6.2.0]
 
 ### Changed
