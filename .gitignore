@@ -45,6 +45,7 @@ bld/
 .idea/
 .rider/
 .gradle/
+.dotnet/
 
 ## Code Analysis and Tools
 _ReSharper*/

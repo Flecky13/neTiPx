@@ -328,6 +328,7 @@
   "SETTINGS_PRIMARY_ADAPTER": "Primary Adapter (NIC 1):",
   "SETTINGS_SECONDARY_ADAPTER": "Secondary Adapter (NIC 2):",
   "SETTINGS_ADAPTER_PLACEHOLDER": "Choose adapter...",
+  "SETTINGS_ADAPTER_NONE": "No selection",
   "SETTINGS_NO_SETTINGS": "No settings available",
   "SETTINGS_PING_LOG": "Ping Logging",
   "SETTINGS_PING_LOG_DESC": "Storage location for ping log files",

@@ -39,6 +39,18 @@ namespace neTiPx.Views
         public ColorTheme Theme { get; }
     }
 
+    public sealed class AdapterComboItem
+    {
+        public AdapterComboItem(string displayName, string? adapterName)
+        {
+            DisplayName = displayName;
+            AdapterName = adapterName;
+        }
+
+        public string DisplayName { get; }
+        public string? AdapterName { get; }
+    }
+
     public partial class SettingsPage : Page
     {
         private readonly ThemeSettingsService _themeService;
@@ -129,12 +141,9 @@ namespace neTiPx.Views
             var adapterSettings = _adapterStore.ReadAdapters();
             if (!string.IsNullOrWhiteSpace(adapterSettings.PrimaryAdapter))
             {
-                PrimaryAdapterCombo.SelectedItem = adapterSettings.PrimaryAdapter;
+                SelectAdapterItem(PrimaryAdapterCombo, adapterSettings.PrimaryAdapter);
             }
-            if (!string.IsNullOrWhiteSpace(adapterSettings.SecondaryAdapter))
-            {
-                SecondaryAdapterCombo.SelectedItem = adapterSettings.SecondaryAdapter;
-            }
+            SelectAdapterItem(SecondaryAdapterCombo, adapterSettings.SecondaryAdapter);
 
             // Hover Window Einstellungen laden
             if (HoverWindowStateCombo != null
@@ -536,6 +545,9 @@ namespace neTiPx.Views
 
         private void LoadAdapters()
         {
+            var selectedPrimary = GetSelectedAdapterName(PrimaryAdapterCombo);
+            var selectedSecondary = GetSelectedAdapterName(SecondaryAdapterCombo);
+
             _adapterList = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
                 .Where(n => n.GetPhysicalAddress() != null && n.GetPhysicalAddress().GetAddressBytes().Length > 0)
@@ -544,8 +556,23 @@ namespace neTiPx.Views
                 .OrderBy(n => n)
                 .ToList();
 
-            PrimaryAdapterCombo.ItemsSource = _adapterList;
-            SecondaryAdapterCombo.ItemsSource = _adapterList;
+            var primaryItems = _adapterList
+                .Select(adapter => new AdapterComboItem(adapter, adapter))
+                .ToList();
+
+            var secondaryItems = new List<AdapterComboItem>
+            {
+                new AdapterComboItem(_lm.Lang("SETTINGS_ADAPTER_NONE"), null)
+            };
+            secondaryItems.AddRange(primaryItems);
+
+            PrimaryAdapterCombo.DisplayMemberPath = nameof(AdapterComboItem.DisplayName);
+            SecondaryAdapterCombo.DisplayMemberPath = nameof(AdapterComboItem.DisplayName);
+            PrimaryAdapterCombo.ItemsSource = primaryItems;
+            SecondaryAdapterCombo.ItemsSource = secondaryItems;
+
+            SelectAdapterItem(PrimaryAdapterCombo, selectedPrimary);
+            SelectAdapterItem(SecondaryAdapterCombo, selectedSecondary);
         }
 
         private void PrimaryAdapterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -554,7 +581,7 @@ namespace neTiPx.Views
                 return;
 
             var settings = _adapterStore.ReadAdapters();
-            settings.PrimaryAdapter = (string?)PrimaryAdapterCombo.SelectedItem ?? string.Empty;
+            settings.PrimaryAdapter = GetSelectedAdapterName(PrimaryAdapterCombo) ?? string.Empty;
             _adapterStore.WriteAdapters(settings);
         }
 
@@ -564,8 +591,29 @@ namespace neTiPx.Views
                 return;
 
             var settings = _adapterStore.ReadAdapters();
-            settings.SecondaryAdapter = (string?)SecondaryAdapterCombo.SelectedItem ?? string.Empty;
+            settings.SecondaryAdapter = GetSelectedAdapterName(SecondaryAdapterCombo) ?? string.Empty;
             _adapterStore.WriteAdapters(settings);
+        }
+
+        private static string? GetSelectedAdapterName(ComboBox? comboBox)
+        {
+            return comboBox?.SelectedItem switch
+            {
+                AdapterComboItem item => item.AdapterName,
+                string adapterName => adapterName,
+                _ => null
+            };
+        }
+
+        private static void SelectAdapterItem(ComboBox? comboBox, string? adapterName)
+        {
+            if (comboBox?.ItemsSource is not IEnumerable<AdapterComboItem> items)
+            {
+                return;
+            }
+
+            comboBox.SelectedItem = items.FirstOrDefault(item =>
+                string.Equals(item.AdapterName, adapterName, StringComparison.Ordinal));
         }
 
         private void HoverWindowStateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -940,6 +988,16 @@ namespace neTiPx.Views
             if (AdapterCardDesc != null) AdapterCardDesc.Text = _lm.Lang("SETTINGS_ADAPTER_DESC");
             if (PrimaryAdapterLabel != null) PrimaryAdapterLabel.Text = _lm.Lang("SETTINGS_PRIMARY_ADAPTER");
             if (SecondaryAdapterLabel != null) SecondaryAdapterLabel.Text = _lm.Lang("SETTINGS_SECONDARY_ADAPTER");
+            if (PrimaryAdapterCombo != null)
+            {
+                PrimaryAdapterCombo.PlaceholderText = _lm.Lang("SETTINGS_ADAPTER_PLACEHOLDER");
+                ToolTipService.SetToolTip(PrimaryAdapterCombo, _lm.Lang("SETTINGS_TOOLTIP_PRIMARY_ADAPTER"));
+            }
+            if (SecondaryAdapterCombo != null)
+            {
+                SecondaryAdapterCombo.PlaceholderText = _lm.Lang("SETTINGS_ADAPTER_PLACEHOLDER");
+                ToolTipService.SetToolTip(SecondaryAdapterCombo, _lm.Lang("SETTINGS_TOOLTIP_SECONDARY_ADAPTER"));
+            }
             if (AdaptersSettingsUnavailable != null) AdaptersSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
             if (PingLogCardTitle != null) PingLogCardTitle.Text = _lm.Lang("SETTINGS_PING_LOG");
             if (PingLogCardDesc != null) PingLogCardDesc.Text = _lm.Lang("SETTINGS_PING_LOG_DESC");
@@ -976,6 +1034,7 @@ namespace neTiPx.Views
             if (LanguageCardTitle != null) LanguageCardTitle.Text = _lm.Lang("SETTINGS_LANGUAGE");
             if (LanguageCardDesc != null) LanguageCardDesc.Text = _lm.Lang("SETTINGS_LANGUAGE_DESC");
             UpdateHoverWindowVerticalOffsetLabel();
+            LoadAdapters();
             // Sprach-Combo-Beschriftung aktualisieren
             if (LanguageCombo?.ItemsSource is List<LanguageComboItem> items && items.Count > 0)
             {
