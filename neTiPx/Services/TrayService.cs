@@ -135,6 +135,12 @@ namespace neTiPx.Services
 
         private IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
         {
+            if (msg == App.ActivateWindowMessageId)
+            {
+                ShowMainWindow();
+                return IntPtr.Zero;
+            }
+
             if (msg == CallbackMessageId)
             {
                 int mouseMessage = lParam.ToInt32();

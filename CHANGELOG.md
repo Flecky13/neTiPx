@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [1.6.4.0]
+
+### Added
+- **Anwendungsstart**: Die App läuft jetzt als Single-Instance-Anwendung. Ein zweiter Start aktiviert stattdessen das bereits laufende Hauptfenster.
+
+### Changed
+- **Fensteraktivierung**: Minimierte Hauptfenster werden beim Reaktivieren aus dem Tray oder durch einen erneuten App-Start korrekt wiederhergestellt.
+
 ## [1.6.3.0]
 
 ### Changed

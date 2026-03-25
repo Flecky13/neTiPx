@@ -10,6 +10,7 @@ namespace neTiPx.Helpers
     {
         private const int SwHide = 0;
         private const int SwShownormal = 1;
+        private const int SwRestore = 9;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct POINT
@@ -30,6 +31,9 @@ namespace neTiPx.Helpers
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
+
         private const int GwlExstyle = -20;
         private const int WsExNoactivate = 0x08000000;
         private const int WsExToolwindow = 0x00000080;
@@ -49,7 +53,7 @@ namespace neTiPx.Helpers
         public static void Show(Window window)
         {
             var handle = GetWindowHandle(window);
-            ShowWindow(handle, SwShownormal);
+            ShowWindow(handle, IsIconic(handle) ? SwRestore : SwShownormal);
             SetForegroundWindow(handle);
         }
 

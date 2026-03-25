@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -17,11 +18,17 @@ namespace neTiPx
     /// </summary>
     public partial class App : Application
     {
+        private const string SingleInstanceMutexName = @"Local\neTiPx.SingleInstance";
+        private const string ActivateWindowMessageName = "neTiPx.ActivateMainWindow";
+
         public static Window MainWindow { get; private set; } = null!;
         public static HoverWindow HoverWindow { get; private set; } = null!;
         public static ThemeService ThemeService { get; } = new ThemeService();
+        public static uint ActivateWindowMessageId { get; } = RegisterWindowMessage(ActivateWindowMessageName);
 
         private TrayService? _trayService;
+        private readonly Mutex _singleInstanceMutex;
+        private readonly bool _isFirstInstance;
         private static int MIN_WIDTH = 1280;
         private const int MIN_HEIGHT = 950;
         private const int MIN_WIDTH_PANE_OPEN = 1280;
@@ -34,6 +41,17 @@ namespace neTiPx
         /// </summary>
         public App()
         {
+            _singleInstanceMutex = new Mutex(true, SingleInstanceMutexName, out _isFirstInstance);
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+            {
+                if (_isFirstInstance)
+                {
+                    _singleInstanceMutex.ReleaseMutex();
+                }
+
+                _singleInstanceMutex.Dispose();
+            };
+
             // Setup exception handling for XmlSerializer loading issue
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
@@ -68,6 +86,13 @@ namespace neTiPx
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            if (!_isFirstInstance)
+            {
+                SignalRunningInstance();
+                Exit();
+                return;
+            }
+
             MainWindow = new Window();
             HoverWindow = new HoverWindow();
 
@@ -193,5 +218,16 @@ namespace neTiPx
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
+
+        private static void SignalRunningInstance()
+        {
+            PostMessage(new IntPtr(0xffff), ActivateWindowMessageId, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern uint RegisterWindowMessage(string lpString);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
     }
 }
