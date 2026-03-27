@@ -37,6 +37,7 @@ namespace neTiPx.Services
         private const int GwlpWndproc = -4;
 
         private readonly TimersTimer _leaveTimer;
+        private readonly TimersTimer _autoHideTimer;
         private readonly HoverWindow _hoverWindow;
         private readonly DispatcherQueue _dispatcherQueue;
 
@@ -57,6 +58,9 @@ namespace neTiPx.Services
             _leaveTimer = new TimersTimer(800) { AutoReset = false };
             _leaveTimer.Elapsed += LeaveTimer_Elapsed;
 
+            _autoHideTimer = new TimersTimer(5000) { AutoReset = false };
+            _autoHideTimer.Elapsed += AutoHideTimer_Elapsed;
+
             InitializeTrayIcon();
         }
 
@@ -64,6 +68,7 @@ namespace neTiPx.Services
         {
             RemoveTrayIcon();
             _leaveTimer.Dispose();
+            _autoHideTimer.Dispose();
         }
 
         private void InitializeTrayIcon()
@@ -236,12 +241,25 @@ namespace neTiPx.Services
                         settingsService.GetHoverWindowVerticalAnchor(),
                         settingsService.GetHoverWindowRightOffsetPixels(),
                         settingsService.GetHoverWindowVerticalOffsetPixels());
+
+                    // Sicherheits-Timer: Fenster nach 5s ausblenden wenn Maus weg
+                    _autoHideTimer.Stop();
+                    _autoHideTimer.Start();
                 }
             });
         }
 
+        private void AutoHideTimer_Elapsed(object? sender, ElapsedEventArgs e)
+        {
+            if (!_isMouseOver)
+            {
+                HideHoverWindow();
+            }
+        }
+
         private void HideHoverWindow()
         {
+            _autoHideTimer.Stop();
             _dispatcherQueue.TryEnqueue(() => WindowHelper.Hide(_hoverWindow));
         }
 
