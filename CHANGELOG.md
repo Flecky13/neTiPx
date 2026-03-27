@@ -8,6 +8,7 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 - **Adapter / IPv4**: IP-Adressen werden jetzt in CIDR-Notation angezeigt (z. B. `192.168.1.10/24`).
 - **Adapter / IPv6**: IPv6-Adressen werden ebenfalls mit Präfixlänge angezeigt (z. B. `2001:db8::1/64`).
+- **Systray / Hover-Fenster**: IP-Adressen werden auch im Mausover-Infofenster in CIDR-Notation angezeigt.
 
 ## [1.6.4.0]
 

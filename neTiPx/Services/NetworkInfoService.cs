@@ -64,7 +64,7 @@ namespace neTiPx.Services
 
                 var ipv4 = props.UnicastAddresses
                     .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
-                    .Select(a => a.Address.ToString())
+                    .Select(a => $"{a.Address}/{GetCidrPrefix(a.IPv4Mask)}")
                     .ToList();
                 infos[index, 0] = "IPv4";
                 infos[index++, 1] = ipv4.Any() ? string.Join(Environment.NewLine, ipv4) : "-";
@@ -85,7 +85,7 @@ namespace neTiPx.Services
 
                 var ipv6 = props.UnicastAddresses
                     .Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6)
-                    .Select(a => a.Address.ToString())
+                    .Select(a => $"{a.Address}/{a.PrefixLength}")
                     .ToList();
                 infos[index, 0] = "IPv6";
                 infos[index++, 1] = ipv6.Any() ? string.Join(Environment.NewLine, ipv6) : "-";
@@ -111,6 +111,17 @@ namespace neTiPx.Services
             {
                 return null;
             }
+        }
+
+        private static int GetCidrPrefix(System.Net.IPAddress mask)
+        {
+            int bits = 0;
+            foreach (byte b in mask.GetAddressBytes())
+            {
+                int v = b;
+                while (v != 0) { bits += v & 1; v >>= 1; }
+            }
+            return bits;
         }
 
         public class Ipv4Config
