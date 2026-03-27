@@ -10,6 +10,9 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Adapter / IPv6**: IPv6-Adressen werden ebenfalls mit Präfixlänge angezeigt (z. B. `2001:db8::1/64`).
 - **Systray / Hover-Fenster**: IP-Adressen werden auch im Mausover-Infofenster in CIDR-Notation angezeigt.
 
+### Fixed
+- **Systray / Hover-Fenster**: Wenn die Maus das Tray-Icon verlässt, wird ein versehentlich geöffnetes Mausover-Infofenster nach 5 Sekunden automatisch ausgeblendet.
+
 ## [1.6.4.0]
 
 ### Added
