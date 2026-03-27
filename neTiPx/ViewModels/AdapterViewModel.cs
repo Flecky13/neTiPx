@@ -606,7 +606,8 @@ namespace neTiPx.ViewModels
                     .Where(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
                 foreach (var addr in ipv4Addresses)
                 {
-                    PrimaryAdapterIpV4List.Add(addr.Address.ToString());
+                    int prefix4 = GetCidrPrefix(addr.IPv4Mask);
+                    PrimaryAdapterIpV4List.Add($"{addr.Address}/{prefix4}");
                 }
                 if (PrimaryAdapterIpV4List.Count == 0)
                 {
@@ -640,7 +641,7 @@ namespace neTiPx.ViewModels
                         && !a.Address.IsIPv6LinkLocal);
                 foreach (var addr in ipv6Addresses)
                 {
-                    PrimaryAdapterIpV6List.Add(addr.Address.ToString());
+                    PrimaryAdapterIpV6List.Add($"{addr.Address}/{addr.PrefixLength}");
                 }
                 var hasIpv6 = PrimaryAdapterIpV6List.Count > 0;
                 IsPrimaryIpv6Available = hasIpv6;
@@ -712,7 +713,8 @@ namespace neTiPx.ViewModels
                     .Where(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
                 foreach (var addr in ipv4Addresses)
                 {
-                    SecondaryAdapterIpV4List.Add(addr.Address.ToString());
+                    int prefix4 = GetCidrPrefix(addr.IPv4Mask);
+                    SecondaryAdapterIpV4List.Add($"{addr.Address}/{prefix4}");
                 }
                 if (SecondaryAdapterIpV4List.Count == 0)
                 {
@@ -745,7 +747,7 @@ namespace neTiPx.ViewModels
                         && !a.Address.IsIPv6LinkLocal);
                 foreach (var addr in ipv6Addresses)
                 {
-                    SecondaryAdapterIpV6List.Add(addr.Address.ToString());
+                    SecondaryAdapterIpV6List.Add($"{addr.Address}/{addr.PrefixLength}");
                 }
                 var hasIpv6 = SecondaryAdapterIpV6List.Count > 0;
                 IsSecondaryIpv6Available = hasIpv6;
@@ -803,6 +805,17 @@ namespace neTiPx.ViewModels
             OnPropertyChanged(nameof(PrimaryDns2Address));
             OnPropertyChanged(nameof(PrimaryDns1AddressV6));
             OnPropertyChanged(nameof(PrimaryDns2AddressV6));
+        }
+
+        private static int GetCidrPrefix(System.Net.IPAddress mask)
+        {
+            int bits = 0;
+            foreach (byte b in mask.GetAddressBytes())
+            {
+                int v = b;
+                while (v != 0) { bits += v & 1; v >>= 1; }
+            }
+            return bits;
         }
 
         private void ClearSecondaryAdapterInfo()
