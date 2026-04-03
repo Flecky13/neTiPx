@@ -40,6 +40,7 @@
   "IPCONFIG_IP_MODE": "Modalità IP",
   "IPCONFIG_IP_ADDRESSES": "Indirizzi IP",
   "IPCONFIG_IP_ADDRESS": "Indirizzo IP",
+  "IPCONFIG_SUBNET_MASK": "Subnet Mask",
   "IPCONFIG_IP_ACTION": "Azione",
   "IPCONFIG_IP_ADD": "Aggiungi indirizzo IP",
   "IPCONFIG_ROUTES_ACTIVE": "Attiva Rotte",
@@ -389,3 +390,5 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
+
+

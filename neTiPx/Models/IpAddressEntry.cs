@@ -9,6 +9,7 @@ namespace neTiPx.Models
         private string _subnetMask = string.Empty;
         private bool _hasIpAddressError;
         private bool _hasSubnetMaskError;
+        private bool _canRemove;
 
         public string IpAddress
         {
@@ -37,6 +38,12 @@ namespace neTiPx.Models
         {
             get => _hasSubnetMaskError;
             set => SetProperty(ref _hasSubnetMaskError, value);
+        }
+
+        public bool CanRemove
+        {
+            get => _canRemove;
+            set => SetProperty(ref _canRemove, value);
         }
 
         private static string NormalizeSubnetMask(string input)

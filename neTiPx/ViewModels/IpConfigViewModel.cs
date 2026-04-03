@@ -46,6 +46,8 @@ namespace neTiPx.ViewModels
         private bool _hasValidationErrors = false;
         private bool _showInputValidationErrors;
         private bool _gatewayHasValidationError;
+        private bool _dns1HasValidationError;
+        private bool _dns2HasValidationError;
 
         public IpConfigViewModel()
         {
@@ -57,7 +59,7 @@ namespace neTiPx.ViewModels
             LoadProfilesFromConfig();
 
             AddIpCommand = new RelayCommand(AddIpAddress);
-            RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress);
+            RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress, CanRemoveIpAddress);
             AddProfileCommand = new RelayCommand(AddProfile);
             DeleteProfileCommand = new RelayCommand<IpProfile>(DeleteProfile);
             ApplyCommand = new RelayCommand(ApplyProfile, CanApplyProfile);
@@ -101,7 +103,10 @@ namespace neTiPx.ViewModels
                     {
                         _showInputValidationErrors = false;
                         GatewayHasValidationError = false;
+                        Dns1HasValidationError = false;
+                        Dns2HasValidationError = false;
                         ClearIpAddressValidationFlags(_selectedProfile);
+                        UpdateIpAddressRemoveState(_selectedProfile);
                         AttachProfileHandlers(_selectedProfile);
                         LoadProfileSettingsOnProfileChangeAsync().ConfigureAwait(false);
                     }
@@ -111,6 +116,7 @@ namespace neTiPx.ViewModels
                     OnPropertyChanged(nameof(ConfiguredRoutesText));
                     OnPropertyChanged(nameof(RouteApplicationModeText));
                     RefreshActionButtonsState();
+                    RemoveIpCommand?.RaiseCanExecuteChanged();
                     UpdateStatusAsync().ConfigureAwait(false);
                 }
             }
@@ -167,6 +173,7 @@ namespace neTiPx.ViewModels
             if (e.PropertyName == nameof(IpProfile.Mode))
             {
                 OnPropertyChanged(nameof(IsManual));
+                RemoveIpCommand?.RaiseCanExecuteChanged();
                 ValidateProfile();
             }
             else if (e.PropertyName == nameof(IpProfile.AdapterName))
@@ -211,6 +218,13 @@ namespace neTiPx.ViewModels
                 }
             }
 
+            if (SelectedProfile != null)
+            {
+                UpdateIpAddressRemoveState(SelectedProfile);
+            }
+
+            RemoveIpCommand?.RaiseCanExecuteChanged();
+
             ValidateProfile();
             MarkSelectedProfileDirty();
         }
@@ -218,7 +232,8 @@ namespace neTiPx.ViewModels
         private void IpAddressEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(IpAddressEntry.HasIpAddressError) ||
-                e.PropertyName == nameof(IpAddressEntry.HasSubnetMaskError))
+                e.PropertyName == nameof(IpAddressEntry.HasSubnetMaskError) ||
+                e.PropertyName == nameof(IpAddressEntry.CanRemove))
             {
                 return;
             }
@@ -570,6 +585,18 @@ namespace neTiPx.ViewModels
             set => SetProperty(ref _gatewayHasValidationError, value);
         }
 
+        public bool Dns1HasValidationError
+        {
+            get => _dns1HasValidationError;
+            set => SetProperty(ref _dns1HasValidationError, value);
+        }
+
+        public bool Dns2HasValidationError
+        {
+            get => _dns2HasValidationError;
+            set => SetProperty(ref _dns2HasValidationError, value);
+        }
+
         public string GatewayStatusText
         {
             get => _gatewayStatusText;
@@ -763,9 +790,29 @@ namespace neTiPx.ViewModels
             }
         }
 
+        private bool CanRemoveIpAddress(IpAddressEntry? entry)
+        {
+            if (!IsManual || entry == null || SelectedProfile == null)
+            {
+                return false;
+            }
+
+            if (SelectedProfile.IpAddresses.Count <= 1)
+            {
+                return false;
+            }
+
+            return !ReferenceEquals(SelectedProfile.IpAddresses[0], entry);
+        }
+
         private void RemoveIpAddress(IpAddressEntry? entry)
         {
             if (entry == null || SelectedProfile == null)
+            {
+                return;
+            }
+
+            if (SelectedProfile.IpAddresses.Count <= 1)
             {
                 return;
             }
@@ -1076,11 +1123,15 @@ namespace neTiPx.ViewModels
                 ValidationMessage = string.Empty;
                 HasValidationErrors = false;
                 GatewayHasValidationError = false;
+                Dns1HasValidationError = false;
+                Dns2HasValidationError = false;
                 return;
             }
 
             var errors = new List<string>();
             GatewayHasValidationError = false;
+            Dns1HasValidationError = false;
+            Dns2HasValidationError = false;
             ClearIpAddressValidationFlags(SelectedProfile);
 
             // Validate profile name
@@ -1112,12 +1163,20 @@ namespace neTiPx.ViewModels
                 if (!string.IsNullOrWhiteSpace(SelectedProfile.Dns1) && !IsValidIpAddress(SelectedProfile.Dns1))
                 {
                     errors.Add(T("IPCONFIG_ERR_DNS1_INVALID"));
+                    if (markFieldErrors)
+                    {
+                        Dns1HasValidationError = true;
+                    }
                 }
 
                 // Validate DNS2
                 if (!string.IsNullOrWhiteSpace(SelectedProfile.Dns2) && !IsValidIpAddress(SelectedProfile.Dns2))
                 {
                     errors.Add(T("IPCONFIG_ERR_DNS2_INVALID"));
+                    if (markFieldErrors)
+                    {
+                        Dns2HasValidationError = true;
+                    }
                 }
 
                 // Validate IP Addresses: first line also checks gateway relation; additional lines only syntax.
@@ -1221,6 +1280,14 @@ namespace neTiPx.ViewModels
             }
         }
 
+        private static void UpdateIpAddressRemoveState(IpProfile profile)
+        {
+            for (int i = 0; i < profile.IpAddresses.Count; i++)
+            {
+                profile.IpAddresses[i].CanRemove = i > 0;
+            }
+        }
+
         public void RevalidateProfile()
         {
             ValidateProfile();
@@ -1230,7 +1297,37 @@ namespace neTiPx.ViewModels
 
         private static bool IsValidIpAddress(string ipAddress)
         {
-            return IPAddress.TryParse(ipAddress, out _);
+            if (string.IsNullOrWhiteSpace(ipAddress))
+            {
+                return false;
+            }
+
+            var input = ipAddress.Trim();
+            var parts = input.Split('.');
+            if (parts.Length != 4)
+            {
+                return false;
+            }
+
+            foreach (var part in parts)
+            {
+                if (part.Length == 0)
+                {
+                    return false;
+                }
+
+                if (!part.All(char.IsDigit))
+                {
+                    return false;
+                }
+
+                if (!byte.TryParse(part, out _))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static bool IsValidSubnetMask(string subnetMask)

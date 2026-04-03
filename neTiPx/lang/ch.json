@@ -1,4 +1,4 @@
-﻿{
+{
   "LANG_SELF": "Schwiizerdütsch",
   "NAV_ADAPTERS": "Adapter Infos",
   "NAV_IPCONFIG": "IP Konfiguration",
@@ -40,6 +40,7 @@
   "IPCONFIG_IP_MODE": "IP Modus",
   "IPCONFIG_IP_ADDRESSES": "IP Adresse",
   "IPCONFIG_IP_ADDRESS": "IP Adresse",
+  "IPCONFIG_SUBNET_MASK": "Subnet Mask",
   "IPCONFIG_IP_ACTION": "Aktion",
   "IPCONFIG_IP_ADD": "IP Adresse hinzufügen",
   "IPCONFIG_ROUTES_ACTIVE": "Route Aktiviere",
@@ -388,5 +389,7 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
+
+
 
 

@@ -40,6 +40,7 @@
   "IPCONFIG_IP_MODE": "IP Mode",
   "IPCONFIG_IP_ADDRESSES": "IP Addresses",
   "IPCONFIG_IP_ADDRESS": "IP Address",
+  "IPCONFIG_SUBNET_MASK": "Subnet Mask",
   "IPCONFIG_IP_ACTION": "Action",
   "IPCONFIG_IP_ADD": "Add IP Address",
   "IPCONFIG_ROUTES_ACTIVE": "Enable Routes",
@@ -389,3 +390,5 @@
   "HOVER_GATEWAY6": "Gateway6:",
   "HOVER_DNS6": "DNS6:"
 }
+
+

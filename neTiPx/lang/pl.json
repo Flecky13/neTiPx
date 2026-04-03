@@ -40,6 +40,7 @@
   "IPCONFIG_IP_MODE": "Tryb IP",
   "IPCONFIG_IP_ADDRESSES": "Adresy IP",
   "IPCONFIG_IP_ADDRESS": "Adres IP",
+  "IPCONFIG_SUBNET_MASK": "Subnet Mask",
   "IPCONFIG_IP_ACTION": "Akcja",
   "IPCONFIG_IP_ADD": "Dodaj adres IP",
   "IPCONFIG_ROUTES_ACTIVE": "Aktywuj trasy",
@@ -389,3 +390,5 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
+
+

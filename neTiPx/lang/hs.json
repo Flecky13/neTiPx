@@ -1,4 +1,4 @@
-﻿{
+{
   "LANG_SELF": "Hessisch",
   "NAV_ADAPTERS": "Adapter-Sach",
   "NAV_IPCONFIG": "IP-Gemurkse",
@@ -49,7 +49,8 @@
     "IPCONFIG_IP_MODE": "IP-Modus",
     "IPCONFIG_IP_ADDRESSES": "IP-Adresse",
     "IPCONFIG_IP_ADDRESS": "IP Adresse",
-    "IPCONFIG_IP_ACTION": "Aktion",
+  "IPCONFIG_SUBNET_MASK": "Subnet Mask",
+  "IPCONFIG_IP_ACTION": "Aktion",
     "IPCONFIG_IP_ADD": "IP Adresse hinzufügen",
     "IPCONFIG_ROUTES_ACTIVE": "Routen an",
     "IPCONFIG_ACTIONS": "Aktionen",
@@ -397,3 +398,5 @@
     "WLAN_SCAN_BUTTON": "Start Scan",
     "WLAN_SCAN_TITLE": "Scan WLAN Networks"
   }
+
+
