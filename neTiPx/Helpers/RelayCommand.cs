@@ -36,9 +36,48 @@ namespace neTiPx.Helpers
 
         public event EventHandler? CanExecuteChanged;
 
-        public bool CanExecute(object? parameter) => _canExecute?.Invoke((T?)parameter) ?? true;
+        public bool CanExecute(object? parameter)
+        {
+            if (_canExecute == null)
+            {
+                return true;
+            }
 
-        public void Execute(object? parameter) => _execute((T?)parameter);
+            if (!TryGetParameter(parameter, out var typedParameter))
+            {
+                return false;
+            }
+
+            return _canExecute(typedParameter);
+        }
+
+        public void Execute(object? parameter)
+        {
+            if (!TryGetParameter(parameter, out var typedParameter))
+            {
+                typedParameter = default;
+            }
+
+            _execute(typedParameter);
+        }
+
+        private static bool TryGetParameter(object? parameter, out T? typedParameter)
+        {
+            if (parameter is null)
+            {
+                typedParameter = default;
+                return true;
+            }
+
+            if (parameter is T casted)
+            {
+                typedParameter = casted;
+                return true;
+            }
+
+            typedParameter = default;
+            return false;
+        }
 
         public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }

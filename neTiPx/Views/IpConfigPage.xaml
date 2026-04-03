@@ -235,7 +235,7 @@
                                                         <Button x:Name="RemoveIpButton"
                                                             Grid.Column="2"
                                                             Command="{Binding DataContext.RemoveIpCommand, ElementName=PageRoot}"
-                                                            CommandParameter="{Binding}"
+                                                            CommandParameter="{x:Bind}"
                                                             ToolTipService.ToolTip="{x:Null}"
                                                             VerticalAlignment="Center"
                                                             Padding="8"

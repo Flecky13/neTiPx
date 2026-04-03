@@ -738,10 +738,9 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            SelectedProfile.IpAddresses.Remove(entry);
-            if (SelectedProfile.IpAddresses.Count == 0)
+            if (SelectedProfile.IpAddresses.Contains(entry))
             {
-                SelectedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+                SelectedProfile.IpAddresses.Remove(entry);
             }
         }
 
