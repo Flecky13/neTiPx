@@ -8,6 +8,7 @@ namespace neTiPx.Views
     public partial class MainPage : Page
     {
         private readonly PagesVisibilityService _pagesVisibilityService = new PagesVisibilityService();
+        private bool _isSelectingInitialItem;
 
         private static readonly LanguageManager _lm = LanguageManager.Instance;
 
@@ -55,7 +56,13 @@ namespace neTiPx.Views
 
             if (firstVisible != null)
             {
+                var firstTag = firstVisible.Tag?.ToString();
+
+                _isSelectingInitialItem = true;
                 RootNavView.SelectedItem = firstVisible;
+                _isSelectingInitialItem = false;
+
+                NavigateByTag(firstTag);
             }
 
             // Set initial min width based on pane state
@@ -98,12 +105,22 @@ namespace neTiPx.Views
 
         private void RootNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
+            if (_isSelectingInitialItem)
+            {
+                return;
+            }
+
             if (args.SelectedItem is not NavigationViewItem selectedItem)
             {
                 return;
             }
 
             var tag = selectedItem.Tag?.ToString();
+            NavigateByTag(tag);
+        }
+
+        private void NavigateByTag(string? tag)
+        {
             switch (tag)
             {
                 case "Adapters":

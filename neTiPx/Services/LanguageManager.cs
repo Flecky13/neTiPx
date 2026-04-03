@@ -93,6 +93,19 @@ namespace neTiPx.Services
                 .ToList();
         }
 
+        public string GetLanguageSelfName(string languageCode)
+        {
+            var code = ResolveLanguageCode(languageCode);
+            var dict = LoadFile(code);
+
+            if (dict != null && dict.TryGetValue("LANG_SELF", out var displayName) && !string.IsNullOrWhiteSpace(displayName))
+            {
+                return displayName;
+            }
+
+            return code;
+        }
+
         // ── Hilfsmethoden ─────────────────────────────────────────────────────
 
         private string ResolveLanguageCode(string codeOrSystem)

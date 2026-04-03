@@ -73,7 +73,7 @@
             </NavigationView.PaneFooter>
 
             <NavigationView.Content>
-                <Frame x:Name="ContentFrame" />
+                <Frame x:Name="ContentFrame" CacheSize="10" />
             </NavigationView.Content>
         </NavigationView>
     </Grid>

@@ -64,6 +64,7 @@ namespace neTiPx.Views
         private List<string> _adapterList = new();
         private string _pingLogFolderPath = string.Empty;
         private bool _isLoading = true;
+        private bool _isInitialized;
         private static readonly LanguageManager _lm = LanguageManager.Instance;
         private bool _isUpdatingLanguageCombo = false;
 
@@ -72,7 +73,6 @@ namespace neTiPx.Views
             InitializeComponent();
             Loaded += SettingsPage_Loaded;
             Unloaded += SettingsPage_Unloaded;
-            _lm.LanguageChanged += OnLanguageChanged;
             _themeService = new ThemeSettingsService();
             _settingsService = new SettingsService();
             _colorThemeApplier = new ColorThemeApplier();
@@ -89,17 +89,45 @@ namespace neTiPx.Views
         private void OnLanguageChanged(object? sender, EventArgs e)
         {
             UpdateLanguage();
+            LoadAdapters();
         }
 
-        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _lm.LanguageChanged -= OnLanguageChanged;
+            _lm.LanguageChanged += OnLanguageChanged;
+
+            var settingsLoadStopwatch = Stopwatch.StartNew();
+            Debug.WriteLine($"[SettingsWarmup][Page] SettingsPage_Loaded start initialized={_isInitialized}");
             _isLoading = true;
 
             // Apply settings sections visibility based on page visibility
             ApplySettingsSectionsVisibility();
 
+            if (_isInitialized)
+            {
+                LoadAdapters();
+                var adapterSettingsRefresh = _adapterStore.ReadAdapters();
+                SelectAdapterItem(PrimaryAdapterCombo, adapterSettingsRefresh.PrimaryAdapter);
+                SelectAdapterItem(SecondaryAdapterCombo, adapterSettingsRefresh.SecondaryAdapter);
+                UpdateLanguage();
+                _isLoading = false;
+                settingsLoadStopwatch.Stop();
+                Debug.WriteLine($"[SettingsWarmup][Page] SettingsPage_Loaded fast-path done after {settingsLoadStopwatch.ElapsedMilliseconds} ms");
+                return;
+            }
+
+            var hadWarmSnapshot = App.SettingsPageWarmupService.TryGetSnapshot(out var warmSnapshot);
+            Debug.WriteLine($"[SettingsWarmup][Page] Snapshot available immediately={hadWarmSnapshot}");
+
+            var snapshot = hadWarmSnapshot
+                ? warmSnapshot!
+                : await App.SettingsPageWarmupService.GetSnapshotAsync();
+
+            var userSettings = snapshot.UserSettings;
+
             // Color Themes laden
-            _colorThemes = _themeService.LoadThemes();
+            _colorThemes = snapshot.Themes;
             var colorSchemeItems = new List<ColorSchemeItem>();
             foreach (var theme in _colorThemes)
             {
@@ -107,7 +135,7 @@ namespace neTiPx.Views
             }
             ColorSchemeCombo.ItemsSource = colorSchemeItems;
 
-            var savedColorTheme = _settingsService.GetColorTheme();
+            var savedColorTheme = userSettings.ColorTheme;
             ColorSchemeItem? selectedColor = null;
 
             if (savedColorTheme != null)
@@ -119,7 +147,6 @@ namespace neTiPx.Views
             if (selectedColor != null)
             {
                 ColorSchemeCombo.SelectedItem = selectedColor;
-                _colorThemeApplier.Apply(selectedColor.Theme);
             }
             else
             {
@@ -135,10 +162,10 @@ namespace neTiPx.Views
             }
 
             // Adapter-Liste laden
-            LoadAdapters();
+            LoadAdapters(snapshot.AdapterNames);
 
             // Gespeicherte Adapter laden
-            var adapterSettings = _adapterStore.ReadAdapters();
+            var adapterSettings = snapshot.AdapterSettings;
             if (!string.IsNullOrWhiteSpace(adapterSettings.PrimaryAdapter))
             {
                 SelectAdapterItem(PrimaryAdapterCombo, adapterSettings.PrimaryAdapter);
@@ -152,11 +179,11 @@ namespace neTiPx.Views
                 && HoverWindowRightOffsetNumberBox != null
                 && HoverWindowVerticalOffsetNumberBox != null)
             {
-                bool hoverEnabled = _settingsService.GetHoverWindowEnabled();
-                int hoverDelay = _settingsService.GetHoverWindowDelaySeconds();
-                string hoverVerticalAnchor = _settingsService.GetHoverWindowVerticalAnchor();
-                int hoverRightOffset = _settingsService.GetHoverWindowRightOffsetPixels();
-                int hoverVerticalOffset = _settingsService.GetHoverWindowVerticalOffsetPixels();
+                bool hoverEnabled = userSettings.HoverWindowEnabled;
+                int hoverDelay = userSettings.HoverWindowDelaySeconds;
+                string hoverVerticalAnchor = string.Equals(userSettings.HoverWindowVerticalAnchor, "Top", StringComparison.OrdinalIgnoreCase) ? "Top" : "Bottom";
+                int hoverRightOffset = Math.Max(0, userSettings.HoverWindowRightOffsetPixels);
+                int hoverVerticalOffset = Math.Max(0, userSettings.HoverWindowVerticalOffsetPixels);
 
                 HoverWindowStateCombo.SelectedIndex = hoverEnabled ? 0 : 1;
 
@@ -181,78 +208,81 @@ namespace neTiPx.Views
             // Verbindungsstatus-Einstellungen laden
             if (CheckGatewayCheckBox != null && CheckDns1CheckBox != null && CheckDns2CheckBox != null)
             {
-                CheckGatewayCheckBox.IsChecked = _settingsService.GetCheckConnectionGateway();
-                CheckDns1CheckBox.IsChecked = _settingsService.GetCheckConnectionDns1();
-                CheckDns2CheckBox.IsChecked = _settingsService.GetCheckConnectionDns2();
+                CheckGatewayCheckBox.IsChecked = userSettings.CheckConnectionGateway;
+                CheckDns1CheckBox.IsChecked = userSettings.CheckConnectionDns1;
+                CheckDns2CheckBox.IsChecked = userSettings.CheckConnectionDns2;
             }
 
             // Ping-Schwellwert-Einstellungen laden
             if (PingThresholdFastTextBox != null)
             {
-                PingThresholdFastTextBox.Text = _settingsService.GetPingThresholdFast().ToString();
+                PingThresholdFastTextBox.Text = userSettings.PingThresholdFast.ToString();
             }
             if (PingThresholdNormalTextBox != null)
             {
-                PingThresholdNormalTextBox.Text = _settingsService.GetPingThresholdNormal().ToString();
+                PingThresholdNormalTextBox.Text = userSettings.PingThresholdNormal.ToString();
             }
 
             if (AutostartCheckBox != null)
             {
-                AutostartCheckBox.IsChecked = _autostartService.IsEnabled();
+                AutostartCheckBox.IsChecked = snapshot.AutostartEnabled;
             }
 
             if (CloseToTrayCheckBox != null)
             {
-                CloseToTrayCheckBox.IsChecked = _settingsService.GetCloseToTrayOnClose();
+                CloseToTrayCheckBox.IsChecked = userSettings.CloseToTrayOnClose;
             }
 
-            _pingLogFolderPath = _pingLogService.GetLogFolderPath();
+            _pingLogFolderPath = snapshot.PingLogFolderPath;
             UpdatePingLogFolderPathDisplay();
 
             // Netzwerkscanner-Einstellungen laden
             if (ScanPortHttpCheckBox != null)
             {
-                ScanPortHttpCheckBox.IsChecked = _settingsService.GetScanPortHttp();
+                ScanPortHttpCheckBox.IsChecked = userSettings.ScanPortHttp;
             }
             if (ScanPortHttpsCheckBox != null)
             {
-                ScanPortHttpsCheckBox.IsChecked = _settingsService.GetScanPortHttps();
+                ScanPortHttpsCheckBox.IsChecked = userSettings.ScanPortHttps;
             }
             if (ScanPortFtpCheckBox != null)
             {
-                ScanPortFtpCheckBox.IsChecked = _settingsService.GetScanPortFtp();
+                ScanPortFtpCheckBox.IsChecked = userSettings.ScanPortFtp;
             }
             if (ScanPortSshCheckBox != null)
             {
-                ScanPortSshCheckBox.IsChecked = _settingsService.GetScanPortSsh();
+                ScanPortSshCheckBox.IsChecked = userSettings.ScanPortSsh;
             }
             if (ScanPortSmbCheckBox != null)
             {
-                ScanPortSmbCheckBox.IsChecked = _settingsService.GetScanPortSmb();
+                ScanPortSmbCheckBox.IsChecked = userSettings.ScanPortSmb;
             }
             if (ScanPortRdpCheckBox != null)
             {
-                ScanPortRdpCheckBox.IsChecked = _settingsService.GetScanPortRdp();
+                ScanPortRdpCheckBox.IsChecked = userSettings.ScanPortRdp;
             }
             if (CustomPort1NumberBox != null)
             {
-                CustomPort1NumberBox.Value = _settingsService.GetCustomPort1();
+                CustomPort1NumberBox.Value = userSettings.CustomPort1;
             }
             if (CustomPort2NumberBox != null)
             {
-                CustomPort2NumberBox.Value = _settingsService.GetCustomPort2();
+                CustomPort2NumberBox.Value = userSettings.CustomPort2;
             }
             if (CustomPort3NumberBox != null)
             {
-                CustomPort3NumberBox.Value = _settingsService.GetCustomPort3();
+                CustomPort3NumberBox.Value = userSettings.CustomPort3;
             }
 
             // Sprache laden
             LoadLanguageCombo();
 
             _isLoading = false;
+            _isInitialized = true;
 
             UpdateLanguage();
+            settingsLoadStopwatch.Stop();
+            Debug.WriteLine($"[SettingsWarmup][Page] SettingsPage_Loaded cold-path done after {settingsLoadStopwatch.ElapsedMilliseconds} ms");
         }
 
         private async void SelectPingLogFolderButton_Click(object sender, RoutedEventArgs e)
@@ -543,18 +573,19 @@ namespace neTiPx.Views
             }
         }
 
-        private void LoadAdapters()
+        private void LoadAdapters(IEnumerable<string>? adapterNames = null)
         {
             var selectedPrimary = GetSelectedAdapterName(PrimaryAdapterCombo);
             var selectedSecondary = GetSelectedAdapterName(SecondaryAdapterCombo);
 
-            _adapterList = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .Where(n => n.GetPhysicalAddress() != null && n.GetPhysicalAddress().GetAddressBytes().Length > 0)
-                .Select(n => n.Name)
-                .Distinct()
-                .OrderBy(n => n)
-                .ToList();
+            _adapterList = adapterNames?.ToList()
+                ?? NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                    .Where(n => n.GetPhysicalAddress() != null && n.GetPhysicalAddress().GetAddressBytes().Length > 0)
+                    .Select(n => n.Name)
+                    .Distinct()
+                    .OrderBy(n => n)
+                    .ToList();
 
             var primaryItems = _adapterList
                 .Select(adapter => new AdapterComboItem(adapter, adapter))
@@ -940,7 +971,6 @@ namespace neTiPx.Views
             if (LanguageCombo == null)
                 return;
 
-
             var items = new List<LanguageComboItem>
             {
                 new LanguageComboItem(_lm.Lang("SETTINGS_LANGUAGE_SYSTEM"), "System")
@@ -948,18 +978,11 @@ namespace neTiPx.Views
 
             foreach (var code in _lm.GetAvailableLanguages())
             {
-                // Temporär Sprache laden, um LANG_SELF korrekt aus der jeweiligen Datei zu lesen
-                var originalCode = _lm.CurrentLanguageCode;
-                _lm.LoadLanguage(code);
-                var langSelf = _lm.Lang("LANG_SELF");
-                // Optional: nur langSelf anzeigen, oder mit Code
-                var displayName = $"{langSelf}";
+                var displayName = _lm.GetLanguageSelfName(code);
                 items.Add(new LanguageComboItem(displayName, code));
-                // Ursprüngliche Sprache wiederherstellen
-                _lm.LoadLanguage(originalCode);
             }
 
-            LanguageCombo.ItemsSource      = items;
+            LanguageCombo.ItemsSource = items;
             LanguageCombo.DisplayMemberPath = nameof(LanguageComboItem.DisplayName);
 
             var saved = _settingsService.GetLanguageCode();
@@ -1034,7 +1057,6 @@ namespace neTiPx.Views
             if (LanguageCardTitle != null) LanguageCardTitle.Text = _lm.Lang("SETTINGS_LANGUAGE");
             if (LanguageCardDesc != null) LanguageCardDesc.Text = _lm.Lang("SETTINGS_LANGUAGE_DESC");
             UpdateHoverWindowVerticalOffsetLabel();
-            LoadAdapters();
             // Sprach-Combo-Beschriftung aktualisieren
             if (LanguageCombo?.ItemsSource is List<LanguageComboItem> items && items.Count > 0)
             {

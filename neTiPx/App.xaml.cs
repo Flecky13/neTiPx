@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -24,6 +25,7 @@ namespace neTiPx
         public static Window MainWindow { get; private set; } = null!;
         public static HoverWindow HoverWindow { get; private set; } = null!;
         public static ThemeService ThemeService { get; } = new ThemeService();
+        public static SettingsPageWarmupService SettingsPageWarmupService { get; } = new SettingsPageWarmupService();
         public static uint ActivateWindowMessageId { get; } = RegisterWindowMessage(ActivateWindowMessageName);
 
         private TrayService? _trayService;
@@ -139,6 +141,13 @@ namespace neTiPx
             // Sprache laden (vor dem ersten Navigieren, damit alle Pages lokalisiert starten)
             var langCode = settingsService.GetLanguageCode();
             LanguageManager.Instance.LoadLanguage(langCode);
+
+            // Settings-Daten bereits beim App-Start vollständig laden, auch wenn die App im Tray startet.
+            var settingsWarmupStopwatch = Stopwatch.StartNew();
+            Debug.WriteLine("[SettingsWarmup][App] PreloadNow start");
+            SettingsPageWarmupService.PreloadNow();
+            settingsWarmupStopwatch.Stop();
+            Debug.WriteLine($"[SettingsWarmup][App] PreloadNow done after {settingsWarmupStopwatch.ElapsedMilliseconds} ms");
 
             _ = rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
             MainWindow.Activate();

@@ -12,6 +12,11 @@ namespace neTiPx.Services
 
         private readonly UserSettingsStore _userSettingsStore = new UserSettingsStore();
 
+        public UserSettingsStore.UserSettings GetUserSettings()
+        {
+            return _userSettingsStore.ReadUserSettings();
+        }
+
         public ThemeOption GetThemeOption()
         {
             var path = ConfigFileHelper.GetConfigIniPath();
