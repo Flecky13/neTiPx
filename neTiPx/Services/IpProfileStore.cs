@@ -45,7 +45,21 @@ namespace neTiPx.Services
 
         public void SaveProfile(IpProfile profile)
         {
+            SaveProfile(profile, null);
+        }
+
+        public void SaveProfile(IpProfile profile, string? previousName)
+        {
             var profiles = ReadAllProfiles();
+
+            if (!string.IsNullOrWhiteSpace(previousName) &&
+                !string.Equals(previousName, profile.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                profiles = profiles
+                    .Where(p => !string.Equals(p.Name, previousName, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
             var index = profiles.FindIndex(p => string.Equals(p.Name, profile.Name, StringComparison.OrdinalIgnoreCase));
             var clone = CloneProfile(profile);
 

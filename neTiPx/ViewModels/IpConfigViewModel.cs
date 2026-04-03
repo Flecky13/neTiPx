@@ -48,6 +48,7 @@ namespace neTiPx.ViewModels
         private bool _gatewayHasValidationError;
         private bool _dns1HasValidationError;
         private bool _dns2HasValidationError;
+        private string? _selectedProfilePersistedName;
 
         public IpConfigViewModel()
         {
@@ -101,6 +102,7 @@ namespace neTiPx.ViewModels
                 {
                     if (_selectedProfile != null)
                     {
+                        _selectedProfilePersistedName = _selectedProfile.Name;
                         _showInputValidationErrors = false;
                         GatewayHasValidationError = false;
                         Dns1HasValidationError = false;
@@ -294,7 +296,8 @@ namespace neTiPx.ViewModels
                 return false;
             }
 
-            _ipProfileStore.SaveProfile(SelectedProfile);
+            _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
+            _selectedProfilePersistedName = SelectedProfile.Name;
             SelectedProfile.IsDirty = false;
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             return true;
@@ -846,7 +849,8 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            _ipProfileStore.SaveProfile(SelectedProfile);
+            _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
+            _selectedProfilePersistedName = SelectedProfile.Name;
 
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             SelectedProfile.IsDirty = false;
