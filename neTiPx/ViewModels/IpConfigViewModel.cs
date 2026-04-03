@@ -50,6 +50,8 @@ namespace neTiPx.ViewModels
         private bool _dns2HasValidationError;
         private string? _selectedProfilePersistedName;
 
+        public event Action<int>? IpAddressAdded;
+
         public IpConfigViewModel()
         {
             AdapterList = new ObservableCollection<string>();
@@ -59,7 +61,7 @@ namespace neTiPx.ViewModels
             LoadAdapters();
             LoadProfilesFromConfig();
 
-            AddIpCommand = new RelayCommand(AddIpAddress);
+            AddIpCommand = new RelayCommand(AddIpAddress, CanAddIpAddress);
             RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress, CanRemoveIpAddress);
             AddProfileCommand = new RelayCommand(AddProfile);
             DeleteProfileCommand = new RelayCommand<IpProfile>(DeleteProfile);
@@ -118,6 +120,7 @@ namespace neTiPx.ViewModels
                     OnPropertyChanged(nameof(ConfiguredRoutesText));
                     OnPropertyChanged(nameof(RouteApplicationModeText));
                     RefreshActionButtonsState();
+                    AddIpCommand?.RaiseCanExecuteChanged();
                     RemoveIpCommand?.RaiseCanExecuteChanged();
                     UpdateStatusAsync().ConfigureAwait(false);
                 }
@@ -175,6 +178,7 @@ namespace neTiPx.ViewModels
             if (e.PropertyName == nameof(IpProfile.Mode))
             {
                 OnPropertyChanged(nameof(IsManual));
+                AddIpCommand?.RaiseCanExecuteChanged();
                 RemoveIpCommand?.RaiseCanExecuteChanged();
                 ValidateProfile();
             }
@@ -226,6 +230,7 @@ namespace neTiPx.ViewModels
             }
 
             RemoveIpCommand?.RaiseCanExecuteChanged();
+            AddIpCommand?.RaiseCanExecuteChanged();
 
             ValidateProfile();
             MarkSelectedProfileDirty();
@@ -241,6 +246,7 @@ namespace neTiPx.ViewModels
             }
 
             ValidateProfile();
+            AddIpCommand?.RaiseCanExecuteChanged();
             MarkSelectedProfileDirty();
         }
 
@@ -786,11 +792,42 @@ namespace neTiPx.ViewModels
                 return;
             }
 
+            if (!CanAddIpAddress())
+            {
+                _showInputValidationErrors = true;
+                ValidateProfile(true);
+                return;
+            }
+
             SelectedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+            IpAddressAdded?.Invoke(SelectedProfile.IpAddresses.Count - 1);
             if (_showInputValidationErrors)
             {
                 ValidateProfile(true);
             }
+        }
+
+        private bool CanAddIpAddress()
+        {
+            if (SelectedProfile == null || !IsManual)
+            {
+                return false;
+            }
+
+            foreach (var entry in SelectedProfile.IpAddresses)
+            {
+                if (string.IsNullOrWhiteSpace(entry.IpAddress) || string.IsNullOrWhiteSpace(entry.SubnetMask))
+                {
+                    return false;
+                }
+
+                if (!IsValidIpAddress(entry.IpAddress) || !IsValidSubnetMask(entry.SubnetMask))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private bool CanRemoveIpAddress(IpAddressEntry? entry)

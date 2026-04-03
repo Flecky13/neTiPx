@@ -78,6 +78,7 @@
             <converters:RouteModeToBrushConverter x:Key="RouteModeToBrushConverter" />
             <converters:BooleanToValidationBorderBrushConverter x:Key="BooleanToValidationBorderBrushConverter" />
             <converters:BooleanToButtonStyleConverter x:Key="BooleanToButtonStyleConverter" />
+            <converters:BooleanToEnabledContentBrushConverter x:Key="BooleanToEnabledContentBrushConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

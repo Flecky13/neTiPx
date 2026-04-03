@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Collections;
+using System.Threading.Tasks;
 
 namespace neTiPx.Views
 {
@@ -21,6 +22,7 @@ namespace neTiPx.Views
         private bool _isPageLoaded;
         private bool _isWindowActive;
         private AppWindow? _mainAppWindow;
+        private bool _focusNewIpAddressRequested;
 
         public IpConfigPage()
         {
@@ -103,6 +105,7 @@ namespace neTiPx.Views
             if (DataContext is IpConfigViewModel viewModel)
             {
                 ProfileListView.SelectedItem = viewModel.SelectedProfile;
+                viewModel.IpAddressAdded += ViewModel_IpAddressAdded;
             }
 
             UpdateMonitoringState();
@@ -125,6 +128,7 @@ namespace neTiPx.Views
 
             if (DataContext is IpConfigViewModel viewModel)
             {
+                viewModel.IpAddressAdded -= ViewModel_IpAddressAdded;
                 viewModel.StopConnectionMonitoring();
             }
         }
@@ -319,6 +323,46 @@ namespace neTiPx.Views
             var routeWindow = new RouteConfigWindow(viewModel.SelectedProfile, viewModel);
 
             routeWindow.Activate();
+        }
+
+        private void AddIpButton_Click(object sender, RoutedEventArgs e)
+        {
+            _focusNewIpAddressRequested = true;
+        }
+
+        private void ViewModel_IpAddressAdded(int index)
+        {
+            if (!_focusNewIpAddressRequested)
+            {
+                return;
+            }
+
+            _focusNewIpAddressRequested = false;
+
+            _ = DispatcherQueue.TryEnqueue(() =>
+            {
+                _ = FocusNewIpAddressAsync(index);
+            });
+        }
+
+        private async Task FocusNewIpAddressAsync(int index)
+        {
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                var container = IpAddressesRepeater.TryGetElement(index);
+                if (container != null)
+                {
+                    var ipBox = FindChildByName(container, "IpAddressTextBox") as TextBox;
+                    if (ipBox != null)
+                    {
+                        ipBox.Focus(FocusState.Programmatic);
+                        ipBox.SelectAll();
+                        return;
+                    }
+                }
+
+                await Task.Delay(30);
+            }
         }
     }
 }

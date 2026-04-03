@@ -1,12 +1,3 @@
-{
-  "LANG_SELF": "Hessisch",
-  "NAV_ADAPTERS": "Adapter-Sach",
-  "NAV_IPCONFIG": "IP-Gemurkse",
-  "NAV_TOOLS": "Werkzeuch",
-  "NAV_INFO": "Info",
-  "NAV_SETTINGS": "Gemurkse",
-  "ADAPTER_TITLE": "Adapter",
-  "ADAPTER_SUBTITLE": "Was zu deine zwei Adaptere",
   {
     "LANG_SELF": "Hessisch",
     "NAV_ADAPTERS": "Adapter-Sach",
@@ -398,5 +389,3 @@
     "WLAN_SCAN_BUTTON": "Start Scan",
     "WLAN_SCAN_TITLE": "Scan WLAN Networks"
   }
-
-
