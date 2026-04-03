@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -23,6 +23,7 @@ namespace neTiPx.ViewModels
         private readonly string _debugInstanceId = Guid.NewGuid().ToString("N").Substring(0, 8);
         private long _debugTickCounter;
         private bool _isMonitoringActive;
+        private CancellationTokenSource? _networkChangeCts;
         private string? _selectedAdapterPrimary;
         private string? _selectedAdapterSecondary;
 
@@ -1403,35 +1404,98 @@ namespace neTiPx.ViewModels
             }, null);
         }
 
-            public void StartConnectionMonitoring()
+        public void StartConnectionMonitoring()
+        {
+            _isMonitoringActive = true;
+
+            if (_pingTimer != null && !_pingTimer.Enabled)
             {
-                _isMonitoringActive = true;
-
-                if (_pingTimer != null && !_pingTimer.Enabled)
-                {
-                    DebugLog("StartConnectionMonitoring");
-                    _pingTimer.Start();
-                    UpdateStatusAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    DebugLog("StartConnectionMonitoring ignored (timer already active)");
-                }
+                DebugLog("StartConnectionMonitoring");
+                _pingTimer.Start();
+                UpdateStatusAsync().ConfigureAwait(false);
             }
-
-            public void StopConnectionMonitoring()
+            else
             {
-                _isMonitoringActive = false;
-
-                if (_pingTimer != null && _pingTimer.Enabled)
-                {
-                    DebugLog("StopConnectionMonitoring");
-                    _pingTimer.Stop();
-                }
-                else
-                {
-                    DebugLog("StopConnectionMonitoring ignored (timer already stopped)");
-                }
+                DebugLog("StartConnectionMonitoring ignored (timer already active)");
             }
+        }
+
+        public void StopConnectionMonitoring()
+        {
+            _isMonitoringActive = false;
+
+            if (_pingTimer != null && _pingTimer.Enabled)
+            {
+                DebugLog("StopConnectionMonitoring");
+                _pingTimer.Stop();
+            }
+            else
+            {
+                DebugLog("StopConnectionMonitoring ignored (timer already stopped)");
+            }
+        }
+
+        public void RegisterNetworkChangeEvents()
+        {
+            NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
+            NetworkChange.NetworkAvailabilityChanged += OnNetworkAvailabilityChanged;
+            DebugLog("NetworkChange events registered");
+        }
+
+        public void UnregisterNetworkChangeEvents()
+        {
+            NetworkChange.NetworkAddressChanged -= OnNetworkAddressChanged;
+            NetworkChange.NetworkAvailabilityChanged -= OnNetworkAvailabilityChanged;
+            _networkChangeCts?.Cancel();
+            _networkChangeCts = null;
+            DebugLog("NetworkChange events unregistered");
+        }
+
+        private void OnNetworkAddressChanged(object? sender, EventArgs e)
+        {
+            DebugLog("NetworkAddressChanged fired");
+            ScheduleAdapterInfoRefresh();
+        }
+
+        private void OnNetworkAvailabilityChanged(object? sender, NetworkAvailabilityEventArgs e)
+        {
+            DebugLog($"NetworkAvailabilityChanged fired available={e.IsAvailable}");
+            ScheduleAdapterInfoRefresh();
+        }
+
+        private void ScheduleAdapterInfoRefresh()
+        {
+            _networkChangeCts?.Cancel();
+            _networkChangeCts = new CancellationTokenSource();
+            var token = _networkChangeCts.Token;
+            Task.Delay(400, token).ContinueWith(t =>
+            {
+                if (t.IsCompletedSuccessfully)
+                {
+                    PostRefreshAdapterInfo();
+                }
+            }, TaskScheduler.Default);
+        }
+
+        private void PostRefreshAdapterInfo()
+        {
+            if (_uiContext != null)
+            {
+                _uiContext.Post(_ =>
+                {
+                    if (!string.IsNullOrEmpty(SelectedAdapterPrimary))
+                        UpdatePrimaryAdapterInfo();
+                    if (!string.IsNullOrEmpty(SelectedAdapterSecondary))
+                        UpdateSecondaryAdapterInfo();
+                }, null);
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(SelectedAdapterPrimary))
+                    UpdatePrimaryAdapterInfo();
+                if (!string.IsNullOrEmpty(SelectedAdapterSecondary))
+                    UpdateSecondaryAdapterInfo();
+            }
+        }
     }
 }

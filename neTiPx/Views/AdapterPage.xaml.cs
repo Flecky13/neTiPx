@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
 using neTiPx.Helpers;
@@ -74,6 +74,11 @@ namespace neTiPx.Views
             App.MainWindow.Activated += MainWindow_Activated;
             _isWindowActive = _mainAppWindow?.IsVisible == true;
             UpdateMonitoringState();
+
+            if (DataContext is AdapterViewModel vm)
+            {
+                vm.RegisterNetworkChangeEvents();
+            }
         }
 
         private void AdapterPage_Unloaded(object sender, RoutedEventArgs e)
@@ -92,6 +97,7 @@ namespace neTiPx.Views
             if (DataContext is AdapterViewModel viewModel)
             {
                 viewModel.StopConnectionMonitoring();
+                viewModel.UnregisterNetworkChangeEvents();
             }
         }
 
