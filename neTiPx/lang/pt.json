@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Gerencie múltiplos perfis de IP e configurações de rede",
   "IPCONFIG_IP_PROFILES": "Perfis de IP",
   "IPCONFIG_NEW_PROFILE": "Novo Perfil",
+  "IPCONFIG_COPY_PROFILE": "Criar cópia",
   "IPCONFIG_PROFILE_SETTINGS": "Configurações do Perfil",
   "IPCONFIG_PROFILE_NAME": "Nome do Perfil",
   "IPCONFIG_ADAPTER": "Placa de Rede",

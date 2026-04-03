@@ -64,6 +64,7 @@ namespace neTiPx.ViewModels
             AddIpCommand = new RelayCommand(AddIpAddress, CanAddIpAddress);
             RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress, CanRemoveIpAddress);
             AddProfileCommand = new RelayCommand(AddProfile);
+            CopyProfileCommand = new RelayCommand(CopyProfile, CanCopyProfile);
             DeleteProfileCommand = new RelayCommand<IpProfile>(DeleteProfile);
             ApplyCommand = new RelayCommand(ApplyProfile, CanApplyProfile);
             SaveCommand = new RelayCommand(SaveProfile, CanSaveProfile);
@@ -120,6 +121,7 @@ namespace neTiPx.ViewModels
                     OnPropertyChanged(nameof(ConfiguredRoutesText));
                     OnPropertyChanged(nameof(RouteApplicationModeText));
                     RefreshActionButtonsState();
+                    CopyProfileCommand?.RaiseCanExecuteChanged();
                     AddIpCommand?.RaiseCanExecuteChanged();
                     RemoveIpCommand?.RaiseCanExecuteChanged();
                     UpdateStatusAsync().ConfigureAwait(false);
@@ -686,6 +688,7 @@ namespace neTiPx.ViewModels
         public RelayCommand AddIpCommand { get; }
         public RelayCommand<IpAddressEntry> RemoveIpCommand { get; }
         public RelayCommand AddProfileCommand { get; }
+        public RelayCommand CopyProfileCommand { get; }
         public RelayCommand<IpProfile> DeleteProfileCommand { get; }
         public RelayCommand ApplyCommand { get; }
         public RelayCommand SaveCommand { get; }
@@ -762,6 +765,77 @@ namespace neTiPx.ViewModels
 
             IpProfiles.Add(newProfile);
             SelectedProfile = newProfile;
+        }
+
+        private bool CanCopyProfile()
+        {
+            return SelectedProfile != null;
+        }
+
+        private void CopyProfile()
+        {
+            if (SelectedProfile == null)
+            {
+                return;
+            }
+
+            var source = SelectedProfile;
+            var copiedProfile = new IpProfile
+            {
+                Name = BuildUniqueCopyProfileName(source.Name),
+                AdapterName = source.AdapterName,
+                Mode = source.Mode,
+                Gateway = source.Gateway,
+                Dns1 = source.Dns1,
+                Dns2 = source.Dns2,
+                RoutesEnabled = source.RoutesEnabled,
+                AddRoutesOnApply = source.AddRoutesOnApply,
+                IsDirty = false
+            };
+
+            foreach (var entry in source.IpAddresses)
+            {
+                copiedProfile.IpAddresses.Add(new IpAddressEntry
+                {
+                    IpAddress = entry.IpAddress,
+                    SubnetMask = entry.SubnetMask
+                });
+            }
+
+            foreach (var route in source.Routes)
+            {
+                copiedProfile.Routes.Add(new RouteEntry
+                {
+                    Destination = route.Destination,
+                    SubnetMask = route.SubnetMask,
+                    Gateway = route.Gateway,
+                    Metric = route.Metric
+                });
+            }
+
+            if (copiedProfile.IpAddresses.Count == 0)
+            {
+                copiedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+            }
+
+            IpProfiles.Add(copiedProfile);
+            SelectedProfile = copiedProfile;
+        }
+
+        private string BuildUniqueCopyProfileName(string sourceName)
+        {
+            var baseName = string.IsNullOrWhiteSpace(sourceName) ? "IP" : sourceName.Trim();
+            var copyBase = $"{baseName} Copy";
+            var candidate = copyBase;
+            var suffix = 2;
+
+            while (IpProfiles.Any(p => string.Equals(p.Name, candidate, StringComparison.OrdinalIgnoreCase)))
+            {
+                candidate = $"{copyBase} {suffix}";
+                suffix++;
+            }
+
+            return candidate;
         }
 
         private void DeleteProfile(IpProfile? profile)

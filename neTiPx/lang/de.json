@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Verwalte mehrere IP-Profile und Netzwerkeinstellungen",
   "IPCONFIG_IP_PROFILES": "IP Profile",
   "IPCONFIG_NEW_PROFILE": "Neues Profil",
+  "IPCONFIG_COPY_PROFILE": "Copy erstellen",
   "IPCONFIG_PROFILE_SETTINGS": "Profil-Einstellungen",
   "IPCONFIG_PROFILE_NAME": "Profilname",
   "IPCONFIG_ADAPTER": "Netzwerkkarte",
@@ -390,7 +391,3 @@
   "HOVER_GATEWAY6": "Gateway6:",
   "HOVER_DNS6": "DNS6:"
 }
-
-
-
-

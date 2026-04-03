@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Gestisci più profili IP e impostazioni di rete",
   "IPCONFIG_IP_PROFILES": "Profili IP",
   "IPCONFIG_NEW_PROFILE": "Nuovo Profilo",
+  "IPCONFIG_COPY_PROFILE": "Crea copia",
   "IPCONFIG_PROFILE_SETTINGS": "Impostazioni Profilo",
   "IPCONFIG_PROFILE_NAME": "Nome Profilo",
   "IPCONFIG_ADAPTER": "Scheda di Rete",
@@ -390,5 +391,3 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
-
-

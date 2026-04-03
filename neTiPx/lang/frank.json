@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Verwalt mehri IP-Profile un Netz-Zeuch",
   "IPCONFIG_IP_PROFILES": "IP-Profile",
   "IPCONFIG_NEW_PROFILE": "Neis Profil",
+  "IPCONFIG_COPY_PROFILE": "Copy erstelle",
   "IPCONFIG_PROFILE_SETTINGS": "Profil-Zeuch",
   "IPCONFIG_PROFILE_NAME": "Profil-Name",
   "IPCONFIG_ADAPTER": "Netzwerkkart",
@@ -390,5 +391,3 @@
   "WLAN_SCAN_BUTTON": "Scan startn",
   "WLAN_SCAN_TITLE": "WLAN scanne"
 }
-
-

@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Verwoit mehrere IP-Profile und Netzwerkeinstellungen",
   "IPCONFIG_IP_PROFILES": "IP Profile",
   "IPCONFIG_NEW_PROFILE": "Neis Profil",
+  "IPCONFIG_COPY_PROFILE": "Copy erstellen",
   "IPCONFIG_PROFILE_SETTINGS": "Profil-Einstellungen",
   "IPCONFIG_PROFILE_NAME": "Profilnam",
   "IPCONFIG_ADAPTER": "Netzwerkkartn",
@@ -389,7 +390,3 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
-
-
-
-

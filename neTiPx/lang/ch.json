@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Verwalte mehreri IP-Profile und Netzwerkiistellige",
   "IPCONFIG_IP_PROFILES": "IP Profile",
   "IPCONFIG_NEW_PROFILE": "Nües Profil",
+  "IPCONFIG_COPY_PROFILE": "Copy erstelle",
   "IPCONFIG_PROFILE_SETTINGS": "Profil-Iistellige",
   "IPCONFIG_PROFILE_NAME": "Profilname",
   "IPCONFIG_ADAPTER": "Netzwerkchorte",
@@ -389,7 +390,3 @@
   "WLAN_SCAN_BUTTON": "Start Scan",
   "WLAN_SCAN_TITLE": "Scan WLAN Networks"
 }
-
-
-
-

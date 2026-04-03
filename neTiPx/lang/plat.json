@@ -34,6 +34,7 @@
   "IPCONFIG_SUBTITLE": "Verwalt meer IP-Profile un Netwark-Sach",
   "IPCONFIG_IP_PROFILES": "IP-Profile",
   "IPCONFIG_NEW_PROFILE": "Neet Profil",
+  "IPCONFIG_COPY_PROFILE": "Copy erstellen",
   "IPCONFIG_PROFILE_SETTINGS": "Profil-Einstellunge",
   "IPCONFIG_PROFILE_NAME": "Profil-Naam",
   "IPCONFIG_ADAPTER": "Netwarkkaart",
@@ -390,5 +391,3 @@
   "WLAN_SCAN_BUTTON": "Scan starten",
   "WLAN_SCAN_TITLE": "WLAN scannen"
 }
-
-

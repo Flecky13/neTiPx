@@ -45,6 +45,7 @@ namespace neTiPx.Views
             if (IpConfigSubtitleText != null) IpConfigSubtitleText.Text = _lm.Lang("IPCONFIG_SUBTITLE");
             if (IpProfilesTitle != null) IpProfilesTitle.Text = _lm.Lang("IPCONFIG_IP_PROFILES");
             if (NewProfileButtonText != null) NewProfileButtonText.Text = _lm.Lang("IPCONFIG_NEW_PROFILE");
+            if (CopyProfileButtonText != null) CopyProfileButtonText.Text = _lm.Lang("IPCONFIG_COPY_PROFILE");
             if (ProfileSettingsTitle != null) ProfileSettingsTitle.Text = _lm.Lang("IPCONFIG_PROFILE_SETTINGS");
 
             if (ProfileNameLabel != null) ProfileNameLabel.Text = _lm.Lang("IPCONFIG_PROFILE_NAME");
