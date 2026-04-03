@@ -71,6 +71,7 @@
 
             <converters:GatewayStatusToBrushConverter x:Key="GatewayStatusToBrushConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <converters:StringFormatConverter x:Key="StringFormatConverter" />
             <converters:StringToModeConverter x:Key="StringToModeConverter" />

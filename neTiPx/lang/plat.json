@@ -1,4 +1,4 @@
-{
+﻿{
   "LANG_SELF": "Plattdeutsch",
   "NAV_ADAPTERS": "Adapter-Sach",
   "NAV_IPCONFIG": "IP-Einstellunge",
@@ -29,6 +29,7 @@
   "ADAPTER_INFO_NoGateway": "Kein Gateway konfiguriert",
   "ADAPTER_INFO_NoDNS": "Keine DNS konfiguriert",
   "ADAPTER_INFO_NoIPv6": "Keine IPv6 konfiguriert",
+  "ADAPTER_INFO_NoLink": "Kein Link",
   "IPCONFIG_TITLE": "IP-Einstellunge",
   "IPCONFIG_SUBTITLE": "Verwalt meer IP-Profile un Netwark-Sach",
   "IPCONFIG_IP_PROFILES": "IP-Profile",

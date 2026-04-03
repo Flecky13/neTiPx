@@ -42,6 +42,10 @@ namespace neTiPx.ViewModels
         private Visibility _isSecondaryAdapterSelected = Visibility.Collapsed;
         private bool _isSecondaryIpv6Available;
 
+        // Adapter Down State
+        private bool _isPrimaryAdapterDown;
+        private bool _isSecondaryAdapterDown;
+
         // Connection Status Properties
         private string _gatewayStatusText = "Unbekannt";
         private string _gatewayPingText = "Ping: -";
@@ -171,6 +175,18 @@ namespace neTiPx.ViewModels
         {
             get => _isSecondaryIpv6Available;
             set => SetProperty(ref _isSecondaryIpv6Available, value);
+        }
+
+        public bool IsPrimaryAdapterDown
+        {
+            get => _isPrimaryAdapterDown;
+            set => SetProperty(ref _isPrimaryAdapterDown, value);
+        }
+
+        public bool IsSecondaryAdapterDown
+        {
+            get => _isSecondaryAdapterDown;
+            set => SetProperty(ref _isSecondaryAdapterDown, value);
         }
 
         // Primary Adapter Info Properties
@@ -593,6 +609,34 @@ namespace neTiPx.ViewModels
                 PrimaryAdapterName = adapter.Name;
                 PrimaryAdapterMac = adapter.GetPhysicalAddress().ToString();
 
+                // Adapter Down: nur Name und MAC anzeigen, Rest auf "Kein Link"
+                if (adapter.OperationalStatus != OperationalStatus.Up)
+                {
+                    IsPrimaryAdapterDown = true;
+                    IsPrimaryIpv6Available = true;
+                    PrimaryAdapterIpV4List.Clear();
+                    PrimaryAdapterIpV4List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink"));
+                    PrimaryAdapterGateway = string.Empty;
+                    PrimaryAdapterDns4List.Clear();
+                    PrimaryAdapterIpV6List.Clear();
+                    PrimaryAdapterIpV6List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink"));
+                    PrimaryAdapterGateway6 = string.Empty;
+                    PrimaryAdapterDns6List.Clear();
+                    OnPropertyChanged(nameof(PrimaryDns1Address));
+                    OnPropertyChanged(nameof(PrimaryDns2Address));
+                    OnPropertyChanged(nameof(PrimaryDns1AddressV6));
+                    OnPropertyChanged(nameof(PrimaryDns2AddressV6));
+                    var noLink = LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink");
+                    PostGatewayStatus(noLink, noLink, GatewayStatusKind.Bad);
+                    PostDns1Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostDns2Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostGatewayV6Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostDns1V6Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostDns2V6Status(noLink, noLink, GatewayStatusKind.Bad);
+                    return;
+                }
+
+                IsPrimaryAdapterDown = false;
                 var ipProperties = adapter.GetIPProperties();
 
                 // Clear collections
@@ -700,6 +744,34 @@ namespace neTiPx.ViewModels
                 SecondaryAdapterName = adapter.Name;
                 SecondaryAdapterMac = adapter.GetPhysicalAddress().ToString();
 
+                // Adapter Down: nur Name und MAC anzeigen, Rest auf "Kein Link"
+                if (adapter.OperationalStatus != OperationalStatus.Up)
+                {
+                    IsSecondaryAdapterDown = true;
+                    IsSecondaryIpv6Available = true;
+                    SecondaryAdapterIpV4List.Clear();
+                    SecondaryAdapterIpV4List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink"));
+                    SecondaryAdapterGateway = string.Empty;
+                    SecondaryAdapterDns4List.Clear();
+                    SecondaryAdapterIpV6List.Clear();
+                    SecondaryAdapterIpV6List.Add(LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink"));
+                    SecondaryAdapterGateway6 = string.Empty;
+                    SecondaryAdapterDns6List.Clear();
+                    OnPropertyChanged(nameof(SecondaryDns1Address));
+                    OnPropertyChanged(nameof(SecondaryDns2Address));
+                    OnPropertyChanged(nameof(SecondaryDns1AddressV6));
+                    OnPropertyChanged(nameof(SecondaryDns2AddressV6));
+                    var noLink = LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink");
+                    PostSecondaryGatewayStatus(noLink, noLink, GatewayStatusKind.Bad);
+                    PostSecondaryDns1Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostSecondaryDns2Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostSecondaryGatewayV6Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostSecondaryDns1V6Status(noLink, noLink, GatewayStatusKind.Bad);
+                    PostSecondaryDns2V6Status(noLink, noLink, GatewayStatusKind.Bad);
+                    return;
+                }
+
+                IsSecondaryAdapterDown = false;
                 var ipProperties = adapter.GetIPProperties();
 
                 // Clear collections
@@ -853,6 +925,7 @@ namespace neTiPx.ViewModels
                 await UpdateAdapterStatusAsync(
                     adapterKey: "NIC1",
                     isVisible: IsPrimaryAdapterSelected == Visibility.Visible,
+                    isAdapterDown: IsAdapterOperationallyDown(SelectedAdapterPrimary),
                     gatewayAddress: PrimaryAdapterGateway,
                     dnsAddresses: PrimaryAdapterDns4List?.ToList(),
                     gatewayAddressV6: PrimaryAdapterGateway6,
@@ -867,6 +940,7 @@ namespace neTiPx.ViewModels
                 await UpdateAdapterStatusAsync(
                     adapterKey: "NIC2",
                     isVisible: IsSecondaryAdapterSelected == Visibility.Visible,
+                    isAdapterDown: IsAdapterOperationallyDown(SelectedAdapterSecondary),
                     gatewayAddress: SecondaryAdapterGateway,
                     dnsAddresses: SecondaryAdapterDns4List?.ToList(),
                     gatewayAddressV6: SecondaryAdapterGateway6,
@@ -887,6 +961,7 @@ namespace neTiPx.ViewModels
         private async Task UpdateAdapterStatusAsync(
             string adapterKey,
             bool isVisible,
+            bool isAdapterDown,
             string? gatewayAddress,
             System.Collections.Generic.List<string>? dnsAddresses,
             System.Action<string, string, GatewayStatusKind> postGateway,
@@ -907,6 +982,18 @@ namespace neTiPx.ViewModels
                 postGatewayV6(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
                 postDns1V6(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
                 postDns2V6(notConfigured, "Ping: -", GatewayStatusKind.Unknown);
+                return;
+            }
+
+            if (isAdapterDown)
+            {
+                var noLink = LanguageManager.Instance.Lang("ADAPTER_INFO_NoLink");
+                postGateway(noLink, noLink, GatewayStatusKind.Bad);
+                postDns1(noLink, noLink, GatewayStatusKind.Bad);
+                postDns2(noLink, noLink, GatewayStatusKind.Bad);
+                postGatewayV6(noLink, noLink, GatewayStatusKind.Bad);
+                postDns1V6(noLink, noLink, GatewayStatusKind.Bad);
+                postDns2V6(noLink, noLink, GatewayStatusKind.Bad);
                 return;
             }
 
@@ -981,6 +1068,15 @@ namespace neTiPx.ViewModels
                 var disabled = LanguageManager.Instance.Lang("ADAPTER_STA_Disabled");
                 postDns2V6(disabled, "Ping: -", GatewayStatusKind.Unknown);
             }
+        }
+
+        private static bool IsAdapterOperationallyDown(string? adapterName)
+        {
+            if (string.IsNullOrEmpty(adapterName))
+                return false;
+            var adapter = NetworkInterface.GetAllNetworkInterfaces()
+                .FirstOrDefault(n => n.Name == adapterName);
+            return adapter != null && adapter.OperationalStatus != OperationalStatus.Up;
         }
 
         private static string NormalizeHostAddress(string? address)

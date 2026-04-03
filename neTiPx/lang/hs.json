@@ -1,4 +1,4 @@
-{
+﻿{
   "LANG_SELF": "Hessisch",
   "NAV_ADAPTERS": "Adapter-Sach",
   "NAV_IPCONFIG": "IP-Gemurkse",
@@ -29,6 +29,7 @@
   "ADAPTER_INFO_NoGateway": "Kein Gateway konfiguriert",
   "ADAPTER_INFO_NoDNS": "Keine DNS konfiguriert",
   "ADAPTER_INFO_NoIPv6": "Keine IPv6 konfiguriert",
+  "ADAPTER_INFO_NoLink": "Kein Link",
   "IPCONFIG_TITLE": "IP-Gemurkse",
   "IPCONFIG_SUBTITLE": "Verwalt mehri IP-Profile un Netz-Gemurkse",
   "IPCONFIG_IP_PROFILES": "IP-Profile",

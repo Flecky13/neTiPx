@@ -54,7 +54,8 @@
                         </Grid>
 
                         <!-- IPv4 Informationen Header -->
-                        <TextBlock x:Name="LblIpv4Info1" Text="IPv4 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" />
+                        <TextBlock x:Name="LblIpv4Info1" Text="IPv4 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0"
+                                   Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" />
 
                         <!-- IPv4 -->
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
@@ -71,13 +72,15 @@
                         </Grid>
 
                         <!-- Gateway -->
-                        <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                        <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                              Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <TextBlock x:Name="LblGateway1" Grid.Row="0" Grid.Column="0" Text="Gateway:" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrimaryAdapterGateway}" TextWrapping="Wrap" />
                         </Grid>
 
                         <!-- DNS4 -->
-                        <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                        <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                              Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <TextBlock x:Name="LblDns4_1" Grid.Row="0" Grid.Column="0" Text="DNS4:" FontWeight="SemiBold" VerticalAlignment="Top" />
                             <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                                 <ItemsRepeater ItemsSource="{Binding PrimaryAdapterDns4List}">
@@ -92,7 +95,8 @@
 
                         <StackPanel Visibility="{Binding IsPrimaryIpv6Available, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <!-- IPv6 Informationen Header -->
-                            <TextBlock x:Name="LblIpv6Info1" Text="IPv6 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" />
+                            <TextBlock x:Name="LblIpv6Info1" Text="IPv6 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0"
+                                       Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" />
 
                             <!-- IPv6 -->
                             <Grid ColumnDefinitions="140,*" RowSpacing="6">
@@ -109,13 +113,15 @@
                             </Grid>
 
                             <!-- Gateway6 -->
-                            <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                            <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                                  Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                                 <TextBlock x:Name="LblGateway6_1" Grid.Row="0" Grid.Column="0" Text="Gateway6:" FontWeight="SemiBold" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrimaryAdapterGateway6}" TextWrapping="Wrap" />
                             </Grid>
 
                             <!-- DNS6 -->
-                            <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                            <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                                  Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                                 <TextBlock x:Name="LblDns6_1" Grid.Row="0" Grid.Column="0" Text="DNS6:" FontWeight="SemiBold" VerticalAlignment="Top" />
                                 <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                                     <ItemsRepeater ItemsSource="{Binding PrimaryAdapterDns6List}">
@@ -152,7 +158,8 @@
                         </Grid>
 
                         <!-- IPv4 Informationen Header -->
-                        <TextBlock x:Name="LblIpv4Info2" Text="IPv4 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" />
+                        <TextBlock x:Name="LblIpv4Info2" Text="IPv4 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0"
+                                   Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" />
 
                         <!-- IPv4 -->
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
@@ -169,13 +176,15 @@
                         </Grid>
 
                         <!-- Gateway -->
-                        <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                        <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                              Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <TextBlock x:Name="LblGateway2" Grid.Row="0" Grid.Column="0" Text="Gateway:" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SecondaryAdapterGateway}" TextWrapping="Wrap" />
                         </Grid>
 
                         <!-- DNS4 -->
-                        <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                        <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                              Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <TextBlock x:Name="LblDns4_2" Grid.Row="0" Grid.Column="0" Text="DNS4:" FontWeight="SemiBold" VerticalAlignment="Top" />
                             <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                                 <ItemsRepeater ItemsSource="{Binding SecondaryAdapterDns4List}">
@@ -190,7 +199,8 @@
 
                         <StackPanel Visibility="{Binding IsSecondaryIpv6Available, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <!-- IPv6 Informationen Header -->
-                            <TextBlock x:Name="LblIpv6Info2" Text="IPv6 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" />
+                            <TextBlock x:Name="LblIpv6Info2" Text="IPv6 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0"
+                                       Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" />
 
                             <!-- IPv6 -->
                             <Grid ColumnDefinitions="140,*" RowSpacing="6">
@@ -207,13 +217,15 @@
                             </Grid>
 
                             <!-- Gateway6 -->
-                            <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                            <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                                  Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                                 <TextBlock x:Name="LblGateway6_2" Grid.Row="0" Grid.Column="0" Text="Gateway6:" FontWeight="SemiBold" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SecondaryAdapterGateway6}" TextWrapping="Wrap" />
                             </Grid>
 
                             <!-- DNS6 -->
-                            <Grid ColumnDefinitions="140,*" RowSpacing="6">
+                            <Grid ColumnDefinitions="140,*" RowSpacing="6"
+                                  Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                                 <TextBlock x:Name="LblDns6_2" Grid.Row="0" Grid.Column="0" Text="DNS6:" FontWeight="SemiBold" VerticalAlignment="Top" />
                                 <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
                                     <ItemsRepeater ItemsSource="{Binding SecondaryAdapterDns6List}">
@@ -233,7 +245,15 @@
                     <StackPanel Spacing="8">
                         <TextBlock x:Name="StatusNic1" Text="Status NIC 1" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <!-- Kein Link Banner (nur bei Adapter Down) -->
+                        <StackPanel Orientation="Horizontal" Spacing="8"
+                                    Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Ellipse Width="12" Height="12" Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding GatewayStatusText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12"
+                              Visibility="{Binding IsPrimaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <StackPanel Grid.Column="0" Spacing="8">
                                 <TextBlock Text="IPv4" FontWeight="SemiBold" FontSize="12" />
 
@@ -309,7 +329,15 @@
                     <StackPanel Spacing="8">
                         <TextBlock x:Name="StatusNic2" Text="Status NIC 2" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <!-- Kein Link Banner (nur bei Adapter Down) -->
+                        <StackPanel Orientation="Horizontal" Spacing="8"
+                                    Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding SecondaryGatewayStatusText}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12"
+                              Visibility="{Binding IsSecondaryAdapterDown, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <StackPanel Grid.Column="0" Spacing="8">
                                 <TextBlock Text="IPv4" FontWeight="SemiBold" FontSize="12" />
 

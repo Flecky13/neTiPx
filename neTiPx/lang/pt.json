@@ -1,4 +1,4 @@
-{
+﻿{
   "LANG_SELF": "Português",
   "NAV_ADAPTERS": "Informações do Adaptador",
   "NAV_IPCONFIG": "Configuração IP",
@@ -29,6 +29,7 @@
   "ADAPTER_INFO_NoGateway": "Kein Gateway konfiguriert",
   "ADAPTER_INFO_NoDNS": "Keine DNS konfiguriert",
   "ADAPTER_INFO_NoIPv6": "Keine IPv6 konfiguriert",
+  "ADAPTER_INFO_NoLink": "Kein Link",
   "IPCONFIG_TITLE": "Configuração IP",
   "IPCONFIG_SUBTITLE": "Gerencie múltiplos perfis de IP e configurações de rede",
   "IPCONFIG_IP_PROFILES": "Perfis de IP",
