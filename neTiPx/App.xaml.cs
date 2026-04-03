@@ -46,12 +46,21 @@ namespace neTiPx
             _singleInstanceMutex = new Mutex(true, SingleInstanceMutexName, out _isFirstInstance);
             AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
-                if (_isFirstInstance)
+                try
                 {
-                    _singleInstanceMutex.ReleaseMutex();
+                    if (_isFirstInstance)
+                    {
+                        _singleInstanceMutex.ReleaseMutex();
+                    }
                 }
-
-                _singleInstanceMutex.Dispose();
+                catch (ApplicationException)
+                {
+                    // Mutex may be released on different thread during shutdown
+                }
+                finally
+                {
+                    _singleInstanceMutex.Dispose();
+                }
             };
 
             // Setup exception handling for XmlSerializer loading issue
