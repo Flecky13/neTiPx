@@ -94,7 +94,7 @@
                                 <TextBlock x:Name="ProfileNameLabel" Text="Profilname" FontWeight="SemiBold" />
                                 <TextBox
                                     x:Name="ProfileNameTextBox"
-                                    Text="{Binding SelectedProfile.Name, Mode=TwoWay}"
+                                    Text="{Binding SelectedProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     PlaceholderText="z.B. Büro, Heimnetzwerk..."
                                     IsEnabled="{Binding IsProfileSelected}" />
                             </StackPanel>
@@ -158,7 +158,7 @@
                                 </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
                                     <TextBox x:Name="GatewayTextBox"
-                                        Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
+                                        Text="{Binding SelectedProfile.Gateway, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         PlaceholderText="Gateway (z.B. 192.168.1.1)"
                                         ToolTipService.ToolTip="{x:Null}"
                                         BorderBrush="{Binding GatewayHasValidationError, Converter={StaticResource BooleanToValidationBorderBrushConverter}}"
@@ -188,13 +188,13 @@
                                 <TextBlock x:Name="DnsServerLabel" Text="DNS Server" FontWeight="SemiBold" />
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
                                     <TextBox x:Name="Dns1TextBox"
-                                        Text="{Binding SelectedProfile.Dns1, Mode=TwoWay}"
+                                        Text="{Binding SelectedProfile.Dns1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         PlaceholderText="DNS 1 (z.B. 8.8.8.8)"
                                         ToolTipService.ToolTip="{x:Null}"
                                         IsEnabled="{Binding IsManual}" />
                                     <TextBox x:Name="Dns2TextBox"
                                         Grid.Column="1"
-                                        Text="{Binding SelectedProfile.Dns2, Mode=TwoWay}"
+                                        Text="{Binding SelectedProfile.Dns2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         PlaceholderText="DNS 2 (z.B. 8.8.4.4)"
                                         ToolTipService.ToolTip="{x:Null}"
                                         IsEnabled="{Binding IsManual}" />
@@ -222,7 +222,7 @@
                                                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="2" Margin="0,0,0,1">
                                                     <Grid ColumnDefinitions="170,170,90" ColumnSpacing="6">
                                                         <TextBox x:Name="IpAddressTextBox"
-                                                            Text="{x:Bind IpAddress, Mode=TwoWay}"
+                                                            Text="{x:Bind IpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                             PlaceholderText="z.B. 192.168.1.10"
                                                             ToolTipService.ToolTip="{x:Null}"
                                                             Margin="1,0"
@@ -231,7 +231,7 @@
                                                             IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
                                                         <TextBox x:Name="SubnetMaskTextBox"
                                                             Grid.Column="1"
-                                                            Text="{x:Bind SubnetMask, Mode=TwoWay}"
+                                                            Text="{x:Bind SubnetMask, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                             PlaceholderText="255.255.255.0 , /24"
                                                             ToolTipService.ToolTip="{x:Null}"
                                                             Margin="1,0"
@@ -281,7 +281,7 @@
                                 Command="{Binding ApplyCommand}"
                                 ToolTipService.ToolTip="{x:Null}"
                                 HorizontalAlignment="Stretch"
-                                Style="{StaticResource AccentButtonStyle}">
+                                Style="{Binding IsApplyHighlighted, Converter={StaticResource BooleanToButtonStyleConverter}, ConverterParameter=AccentButtonStyle}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE73E;" FontSize="16" />
                                     <TextBlock x:Name="ApplyButtonText" Text="Anwenden" />
@@ -291,6 +291,7 @@
                             <Button x:Name="SaveButton"
                                 Command="{Binding SaveCommand}"
                                 ToolTipService.ToolTip="{x:Null}"
+                                Style="{Binding IsSaveHighlighted, Converter={StaticResource BooleanToButtonStyleConverter}, ConverterParameter=AccentButtonStyle}"
                                 HorizontalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xE74E;" FontSize="16" />

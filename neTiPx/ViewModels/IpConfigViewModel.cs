@@ -110,6 +110,7 @@ namespace neTiPx.ViewModels
                     OnPropertyChanged(nameof(IsManual));
                     OnPropertyChanged(nameof(ConfiguredRoutesText));
                     OnPropertyChanged(nameof(RouteApplicationModeText));
+                    RefreshActionButtonsState();
                     UpdateStatusAsync().ConfigureAwait(false);
                 }
             }
@@ -151,8 +152,14 @@ namespace neTiPx.ViewModels
 
         private void SelectedProfile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            // Skip IsDirty and DisplayName changes to prevent feedback loops
-            if (e.PropertyName == nameof(IpProfile.IsDirty) || e.PropertyName == nameof(IpProfile.DisplayName))
+            if (e.PropertyName == nameof(IpProfile.IsDirty))
+            {
+                RefreshActionButtonsState();
+                return;
+            }
+
+            // Skip DisplayName changes to prevent feedback loops
+            if (e.PropertyName == nameof(IpProfile.DisplayName))
             {
                 return;
             }
@@ -628,6 +635,10 @@ namespace neTiPx.ViewModels
             _settingsService.GetCheckConnectionDns1() ||
             _settingsService.GetCheckConnectionDns2();
 
+        public bool IsSaveHighlighted => SelectedProfile?.IsDirty == true;
+
+        public bool IsApplyHighlighted => SelectedProfile != null && SelectedProfile.IsDirty == false;
+
         public void RefreshConnectionStatusVisibility()
         {
             OnPropertyChanged(nameof(ShowGatewayStatus));
@@ -771,7 +782,7 @@ namespace neTiPx.ViewModels
 
         private bool CanSaveProfile()
         {
-            return SelectedProfile != null && !HasValidationErrors;
+            return SelectedProfile != null && SelectedProfile.IsDirty && !HasValidationErrors;
         }
 
         private void SaveProfile()
@@ -796,7 +807,15 @@ namespace neTiPx.ViewModels
 
         private bool CanApplyProfile()
         {
-            return SelectedProfile != null && !HasValidationErrors;
+            return SelectedProfile != null && !SelectedProfile.IsDirty && !HasValidationErrors;
+        }
+
+        private void RefreshActionButtonsState()
+        {
+            OnPropertyChanged(nameof(IsSaveHighlighted));
+            OnPropertyChanged(nameof(IsApplyHighlighted));
+            ApplyCommand?.RaiseCanExecuteChanged();
+            SaveCommand?.RaiseCanExecuteChanged();
         }
 
         private void ApplyProfile()
