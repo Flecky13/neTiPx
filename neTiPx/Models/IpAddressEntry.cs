@@ -7,6 +7,8 @@ namespace neTiPx.Models
     {
         private string _ipAddress = string.Empty;
         private string _subnetMask = string.Empty;
+        private bool _hasIpAddressError;
+        private bool _hasSubnetMaskError;
 
         public string IpAddress
         {
@@ -23,6 +25,18 @@ namespace neTiPx.Models
                 var normalized = NormalizeSubnetMask(value);
                 SetProperty(ref _subnetMask, normalized);
             }
+        }
+
+        public bool HasIpAddressError
+        {
+            get => _hasIpAddressError;
+            set => SetProperty(ref _hasIpAddressError, value);
+        }
+
+        public bool HasSubnetMaskError
+        {
+            get => _hasSubnetMaskError;
+            set => SetProperty(ref _hasSubnetMaskError, value);
         }
 
         private static string NormalizeSubnetMask(string input)

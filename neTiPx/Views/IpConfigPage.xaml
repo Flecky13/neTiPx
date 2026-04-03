@@ -161,6 +161,8 @@
                                         Text="{Binding SelectedProfile.Gateway, Mode=TwoWay}"
                                         PlaceholderText="Gateway (z.B. 192.168.1.1)"
                                         ToolTipService.ToolTip="{x:Null}"
+                                        BorderBrush="{Binding GatewayHasValidationError, Converter={StaticResource BooleanToValidationBorderBrushConverter}}"
+                                        BorderThickness="2"
                                         IsEnabled="{Binding IsManual}" />
                                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <CheckBox
@@ -224,6 +226,8 @@
                                                             PlaceholderText="z.B. 192.168.1.10"
                                                             ToolTipService.ToolTip="{x:Null}"
                                                             Margin="1,0"
+                                                            BorderBrush="{Binding HasIpAddressError, Converter={StaticResource BooleanToValidationBorderBrushConverter}}"
+                                                            BorderThickness="2"
                                                             IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
                                                         <TextBox x:Name="SubnetMaskTextBox"
                                                             Grid.Column="1"
@@ -231,6 +235,8 @@
                                                             PlaceholderText="255.255.255.0 , /24"
                                                             ToolTipService.ToolTip="{x:Null}"
                                                             Margin="1,0"
+                                                            BorderBrush="{Binding HasSubnetMaskError, Converter={StaticResource BooleanToValidationBorderBrushConverter}}"
+                                                            BorderThickness="2"
                                                             IsEnabled="{Binding DataContext.IsManual, ElementName=PageRoot}" />
                                                         <Button x:Name="RemoveIpButton"
                                                             Grid.Column="2"

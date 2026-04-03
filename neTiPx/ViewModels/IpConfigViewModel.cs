@@ -44,6 +44,8 @@ namespace neTiPx.ViewModels
         private GatewayStatusKind _dns2StatusKind = GatewayStatusKind.Unknown;
         private string _validationMessage = string.Empty;
         private bool _hasValidationErrors = false;
+        private bool _showInputValidationErrors;
+        private bool _gatewayHasValidationError;
 
         public IpConfigViewModel()
         {
@@ -97,6 +99,9 @@ namespace neTiPx.ViewModels
                 {
                     if (_selectedProfile != null)
                     {
+                        _showInputValidationErrors = false;
+                        GatewayHasValidationError = false;
+                        ClearIpAddressValidationFlags(_selectedProfile);
                         AttachProfileHandlers(_selectedProfile);
                         LoadProfileSettingsOnProfileChangeAsync().ConfigureAwait(false);
                     }
@@ -205,6 +210,12 @@ namespace neTiPx.ViewModels
 
         private void IpAddressEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(IpAddressEntry.HasIpAddressError) ||
+                e.PropertyName == nameof(IpAddressEntry.HasSubnetMaskError))
+            {
+                return;
+            }
+
             ValidateProfile();
             MarkSelectedProfileDirty();
         }
@@ -546,6 +557,12 @@ namespace neTiPx.ViewModels
             }
         }
 
+        public bool GatewayHasValidationError
+        {
+            get => _gatewayHasValidationError;
+            set => SetProperty(ref _gatewayHasValidationError, value);
+        }
+
         public string GatewayStatusText
         {
             get => _gatewayStatusText;
@@ -729,6 +746,10 @@ namespace neTiPx.ViewModels
             }
 
             SelectedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+            if (_showInputValidationErrors)
+            {
+                ValidateProfile(true);
+            }
         }
 
         private void RemoveIpAddress(IpAddressEntry? entry)
@@ -741,6 +762,10 @@ namespace neTiPx.ViewModels
             if (SelectedProfile.IpAddresses.Contains(entry))
             {
                 SelectedProfile.IpAddresses.Remove(entry);
+                if (_showInputValidationErrors)
+                {
+                    ValidateProfile(true);
+                }
             }
         }
 
@@ -756,7 +781,8 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            ValidateProfile();
+            _showInputValidationErrors = true;
+            ValidateProfile(true);
             if (HasValidationErrors)
             {
                 return;
@@ -780,7 +806,8 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            ValidateProfile();
+            _showInputValidationErrors = true;
+            ValidateProfile(true);
             if (HasValidationErrors)
             {
                 return;
@@ -1020,14 +1047,22 @@ namespace neTiPx.ViewModels
 
         private void ValidateProfile()
         {
+            ValidateProfile(_showInputValidationErrors);
+        }
+
+        private void ValidateProfile(bool markFieldErrors)
+        {
             if (SelectedProfile == null)
             {
                 ValidationMessage = string.Empty;
                 HasValidationErrors = false;
+                GatewayHasValidationError = false;
                 return;
             }
 
             var errors = new List<string>();
+            GatewayHasValidationError = false;
+            ClearIpAddressValidationFlags(SelectedProfile);
 
             // Validate profile name
             if (string.IsNullOrWhiteSpace(SelectedProfile.Name))
@@ -1048,6 +1083,10 @@ namespace neTiPx.ViewModels
                 if (!string.IsNullOrWhiteSpace(SelectedProfile.Gateway) && !IsValidIpAddress(SelectedProfile.Gateway))
                 {
                     errors.Add(T("IPCONFIG_ERR_GATEWAY_INVALID"));
+                    if (markFieldErrors)
+                    {
+                        GatewayHasValidationError = true;
+                    }
                 }
 
                 // Validate DNS1
@@ -1062,19 +1101,48 @@ namespace neTiPx.ViewModels
                     errors.Add(T("IPCONFIG_ERR_DNS2_INVALID"));
                 }
 
-                // Validate IP Addresses
-                foreach (var entry in SelectedProfile.IpAddresses)
+                // Validate IP Addresses: first line also checks gateway relation; additional lines only syntax.
+                for (int i = 0; i < SelectedProfile.IpAddresses.Count; i++)
                 {
-                    if (!string.IsNullOrWhiteSpace(entry.IpAddress))
-                    {
-                        if (!IsValidIpAddress(entry.IpAddress))
-                        {
-                            errors.Add($"{T("IPCONFIG_ERR_IP_INVALID_PREFIX")}{entry.IpAddress}");
-                        }
+                    var entry = SelectedProfile.IpAddresses[i];
+                    var hasIp = !string.IsNullOrWhiteSpace(entry.IpAddress);
+                    var hasSubnet = !string.IsNullOrWhiteSpace(entry.SubnetMask);
 
-                        if (!string.IsNullOrWhiteSpace(entry.SubnetMask) && !IsValidSubnetMask(entry.SubnetMask))
+                    if (!hasIp && !hasSubnet)
+                    {
+                        continue;
+                    }
+
+                    var ipValid = hasIp && IsValidIpAddress(entry.IpAddress);
+                    var subnetValid = hasSubnet && IsValidSubnetMask(entry.SubnetMask);
+
+                    if (!ipValid)
+                    {
+                        errors.Add($"{T("IPCONFIG_ERR_IP_INVALID_PREFIX")}{entry.IpAddress}");
+                        if (markFieldErrors)
                         {
-                            errors.Add($"{T("IPCONFIG_ERR_SUBNET_INVALID_PREFIX")}{entry.SubnetMask}");
+                            entry.HasIpAddressError = true;
+                        }
+                    }
+
+                    if (!subnetValid)
+                    {
+                        errors.Add($"{T("IPCONFIG_ERR_SUBNET_INVALID_PREFIX")}{entry.SubnetMask}");
+                        if (markFieldErrors)
+                        {
+                            entry.HasSubnetMaskError = true;
+                        }
+                    }
+
+                    if (i == 0 && ipValid && subnetValid && !string.IsNullOrWhiteSpace(SelectedProfile.Gateway) && IsValidIpAddress(SelectedProfile.Gateway))
+                    {
+                        if (!IsIpInSubnet(entry.IpAddress, SelectedProfile.Gateway, entry.SubnetMask))
+                        {
+                            errors.Add(T("IPCONFIG_ERR_GATEWAY_INVALID"));
+                            if (markFieldErrors)
+                            {
+                                GatewayHasValidationError = true;
+                            }
                         }
                     }
                 }
@@ -1123,6 +1191,15 @@ namespace neTiPx.ViewModels
 
             HasValidationErrors = errors.Count > 0;
             ValidationMessage = HasValidationErrors ? string.Join(", ", errors) : T("IPCONFIG_MSG_VALIDATION_OK");
+        }
+
+        private static void ClearIpAddressValidationFlags(IpProfile profile)
+        {
+            foreach (var entry in profile.IpAddresses)
+            {
+                entry.HasIpAddressError = false;
+                entry.HasSubnetMaskError = false;
+            }
         }
 
         public void RevalidateProfile()
@@ -1190,6 +1267,41 @@ namespace neTiPx.ViewModels
                        subnetBytes[3];
 
             return (destinationValue & mask) == destinationValue;
+        }
+
+        private static bool IsIpInSubnet(string ip, string testIp, string subnet)
+        {
+            try
+            {
+                if (!IPAddress.TryParse(ip, out var ipAddr) ||
+                    !IPAddress.TryParse(testIp, out var testAddr) ||
+                    !IPAddress.TryParse(subnet, out var subnetAddr))
+                {
+                    return false;
+                }
+
+                var ipBytes = ipAddr.GetAddressBytes();
+                var testBytes = testAddr.GetAddressBytes();
+                var subnetBytes = subnetAddr.GetAddressBytes();
+
+                if (ipBytes.Length != 4 || testBytes.Length != 4 || subnetBytes.Length != 4)
+                {
+                    return false;
+                }
+
+                uint ipUint = ((uint)ipBytes[0] << 24) | ((uint)ipBytes[1] << 16) | ((uint)ipBytes[2] << 8) | ipBytes[3];
+                uint testUint = ((uint)testBytes[0] << 24) | ((uint)testBytes[1] << 16) | ((uint)testBytes[2] << 8) | testBytes[3];
+                uint subnetUint = ((uint)subnetBytes[0] << 24) | ((uint)subnetBytes[1] << 16) | ((uint)subnetBytes[2] << 8) | subnetBytes[3];
+
+                uint ipNetwork = ipUint & subnetUint;
+                uint testNetwork = testUint & subnetUint;
+
+                return ipNetwork == testNetwork;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private async Task UpdateStatusAsync()

@@ -76,6 +76,7 @@
             <converters:StringFormatConverter x:Key="StringFormatConverter" />
             <converters:StringToModeConverter x:Key="StringToModeConverter" />
             <converters:RouteModeToBrushConverter x:Key="RouteModeToBrushConverter" />
+            <converters:BooleanToValidationBorderBrushConverter x:Key="BooleanToValidationBorderBrushConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
