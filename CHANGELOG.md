@@ -3,6 +3,21 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [1.6.6.0]
+
+### Changed
+- **IP-Profile / Validierung**: IPv4-Syntaxprüfung für IP-, Gateway- und DNS-Felder auf striktes IPv4-Format vereinheitlicht (leer bleibt weiterhin erlaubt).
+- **IP-Profile / UX**: Änderungen in Textfeldern werden sofort erkannt (Live-Update bei Eingabe, nicht erst beim Verlassen des Felds).
+- **IP-Profile / Aktionen**: Statuslogik für `Speichern`/`Anwenden` auf Änderungszustand (`IsDirty`) umgestellt.
+
+### Fixed
+- **IP-Profile / Stabilität**: Absturz beim Löschen einer Manual-IP-Zeile behoben.
+- **IP-Profile / Stabilität**: Absturz beim Hinzufügen weiterer IP-Zeilen nach vorherigem Speichern behoben (Rekursionsschutz in Validierungsfluss).
+- **IP-Profile / Löschen**: Letzte IP-Zeile kann nicht mehr gelöscht werden; erste Zeile ist nicht löschbar.
+- **IP-Profile / Profilname**: Umbenennen eines Profils erzeugt keinen zusätzlichen Profil-Eintrag mehr, sondern führt ein echtes Rename durch.
+- **Lokalisierung**: Sprachschlüssel `IPCONFIG_SUBNET_MASK` in allen Sprachdateien ergänzt.
+
 ## [1.6.5.0]
 
 ### Changed
