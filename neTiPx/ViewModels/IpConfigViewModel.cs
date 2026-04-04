@@ -10,7 +10,6 @@ using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using TimersTimer = System.Timers.Timer;
 using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
@@ -20,14 +19,16 @@ namespace neTiPx.ViewModels
     public sealed class IpConfigViewModel : ObservableObject
     {
         private static readonly LanguageManager _lm = LanguageManager.Instance;
+        private static readonly TimeSpan ConnectionMonitoringInterval = TimeSpan.FromSeconds(5);
 
         private static string T(string key) => _lm.Lang(key);
 
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
         private readonly SettingsService _settingsService = new SettingsService();
-        private readonly TimersTimer _pingTimer;
         private readonly SynchronizationContext? _uiContext;
+        private readonly SemaphoreSlim _statusUpdateLock = new SemaphoreSlim(1, 1);
+        private CancellationTokenSource? _monitoringCts;
         private bool _isLoadingProfile = false;
         private bool _isMonitoringActive;
 
@@ -70,11 +71,6 @@ namespace neTiPx.ViewModels
             CloseCommand = new RelayCommand(() => App.MainWindow.Close());
 
             _uiContext = SynchronizationContext.Current;
-            _pingTimer = new TimersTimer(TimeSpan.FromSeconds(5))
-            {
-                AutoReset = true
-            };
-            _pingTimer.Elapsed += async (_, _) => await UpdateStatusAsync();
 
             var initialStatus = T("IPCONFIG_STATUS_UNKNOWN");
             var initialPing = "Ping: -";
@@ -1417,10 +1413,10 @@ namespace neTiPx.ViewModels
 
         private async Task UpdateStatusAsync()
         {
+            await _statusUpdateLock.WaitAsync();
             try
             {
-                var timerEnabled = _pingTimer?.Enabled == true;
-                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] UpdateStatusAsync tick (timerEnabled={timerEnabled}, monitoringActive={_isMonitoringActive})");
+                Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] UpdateStatusAsync tick (monitoringActive={_isMonitoringActive})");
 
                 if (!_isMonitoringActive)
                 {
@@ -1473,6 +1469,27 @@ namespace neTiPx.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"[ReachabilityDebug][IpConfigPage] UpdateStatusAsync error: {ex.GetType().Name}: {ex.Message}");
+            }
+            finally
+            {
+                _statusUpdateLock.Release();
+            }
+        }
+
+        private async Task RunConnectionMonitoringLoopAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await UpdateStatusAsync();
+
+                try
+                {
+                    await Task.Delay(ConnectionMonitoringInterval, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
         }
 
@@ -1609,25 +1626,34 @@ namespace neTiPx.ViewModels
 
         public void StartConnectionMonitoring()
         {
-            _isMonitoringActive = true;
-
-            if (!_pingTimer.Enabled)
+            if (_isMonitoringActive)
             {
-                Debug.WriteLine("[ReachabilityDebug][IpConfigPage] StartConnectionMonitoring");
-                _pingTimer.Start();
-                UpdateStatusAsync().ConfigureAwait(false);
+                return;
             }
+
+            _isMonitoringActive = true;
+            Debug.WriteLine("[ReachabilityDebug][IpConfigPage] StartConnectionMonitoring");
+
+            _monitoringCts?.Cancel();
+            _monitoringCts?.Dispose();
+
+            _monitoringCts = new CancellationTokenSource();
+            _ = RunConnectionMonitoringLoopAsync(_monitoringCts.Token);
         }
 
         public void StopConnectionMonitoring()
         {
-            _isMonitoringActive = false;
-
-            if (_pingTimer.Enabled)
+            if (!_isMonitoringActive)
             {
-                Debug.WriteLine("[ReachabilityDebug][IpConfigPage] StopConnectionMonitoring");
-                _pingTimer.Stop();
+                return;
             }
+
+            _isMonitoringActive = false;
+            Debug.WriteLine("[ReachabilityDebug][IpConfigPage] StopConnectionMonitoring");
+
+            _monitoringCts?.Cancel();
+            _monitoringCts?.Dispose();
+            _monitoringCts = null;
         }
     }
 }
