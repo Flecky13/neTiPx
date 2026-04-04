@@ -6,6 +6,7 @@
 *.sln.docstates
 *.userprefs
 *_UpgradeReport_Files/
+.tmp*
 Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm

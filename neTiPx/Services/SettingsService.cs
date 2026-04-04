@@ -8,7 +8,9 @@ namespace neTiPx.Services
     {
         private const string SectionName = "AppSettings";
         private const string ThemeKey = "Theme";
+        /*
         private const string ColorSchemeKey = "ColorScheme";
+        */
 
         private readonly UserSettingsStore _userSettingsStore = new UserSettingsStore();
 

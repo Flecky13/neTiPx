@@ -23,7 +23,9 @@ namespace neTiPx.ViewModels
 
         private static string T(string key) => _lm.Lang(key);
 
+        /*
         private readonly ConfigStore _configStore = new ConfigStore();
+        */
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
         private readonly SettingsService _settingsService = new SettingsService();
@@ -679,6 +681,7 @@ namespace neTiPx.ViewModels
 
         public bool IsApplyHighlighted => SelectedProfile != null && SelectedProfile.IsDirty == false;
 
+        /*
         public void RefreshConnectionStatusVisibility()
         {
             OnPropertyChanged(nameof(ShowGatewayStatus));
@@ -686,6 +689,7 @@ namespace neTiPx.ViewModels
             OnPropertyChanged(nameof(ShowDns2Status));
             OnPropertyChanged(nameof(ShowConnectionQualityIndicator));
         }
+        */
 
         public RelayCommand AddIpCommand { get; }
         public RelayCommand<IpAddressEntry> RemoveIpCommand { get; }
