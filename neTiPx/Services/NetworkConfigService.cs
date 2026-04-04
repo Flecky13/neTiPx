@@ -12,6 +12,15 @@ namespace neTiPx.Services
 {
     public sealed class NetworkConfigService
     {
+        private sealed class RouteReadSnapshot
+        {
+            public string RoutePrintOutput { get; init; } = string.Empty;
+            public (bool success, List<RouteEntry> routes, string? error) CimResult { get; init; }
+                = (false, new List<RouteEntry>(), null);
+            public (bool success, List<RouteEntry> routes, string? error) NetRouteResult { get; init; }
+                = (false, new List<RouteEntry>(), null);
+        }
+
         public (bool success, string? error) ApplyProfile(IpProfile profile)
         {
             if (string.IsNullOrWhiteSpace(profile.AdapterName))
@@ -86,10 +95,8 @@ namespace neTiPx.Services
             {
                 if (!profile.AddRoutesOnApply)
                 {
-                    var clearRoutesResult = TryReadPersistentRoutesFromCim();
-                    var persistentRoutes = clearRoutesResult.success
-                        ? clearRoutesResult.routes
-                        : ParseRoutePrintRoutes(ReadRoutePrintOutput(), includeActiveRoutes: false, includePersistentRoutes: true);
+                    var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: false);
+                    var persistentRoutes = GetPersistentRoutesFromSnapshot(routeSnapshot);
 
                     foreach (var persistentRoute in persistentRoutes)
                     {
@@ -133,25 +140,23 @@ namespace neTiPx.Services
         {
             try
             {
-                var routePrintOutput = ReadRoutePrintOutput();
-                var allRoutes = ParseRoutePrintRoutes(routePrintOutput, includeActiveRoutes: true, includePersistentRoutes: true);
-                var cimResult = TryReadPersistentRoutesFromCim();
-                var netRouteResult = TryReadNetRoutesFromPowerShell();
+                var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: true);
+                var allRoutes = ParseRoutePrintRoutes(routeSnapshot.RoutePrintOutput, includeActiveRoutes: true, includePersistentRoutes: true);
 
                 if (allRoutes.Count == 0)
                 {
-                    if (cimResult.success)
+                    if (routeSnapshot.CimResult.success)
                     {
-                        allRoutes = cimResult.routes;
+                        allRoutes = routeSnapshot.CimResult.routes;
                     }
                 }
 
                 var persistentRouteKeys = new HashSet<string>(
-                    cimResult.routes.Select(route => BuildRouteKey(route.Destination, route.SubnetMask, route.Gateway)),
+                    routeSnapshot.CimResult.routes.Select(route => BuildRouteKey(route.Destination, route.SubnetMask, route.Gateway)),
                     StringComparer.OrdinalIgnoreCase);
 
                 var userRouteKeys = new HashSet<string>(
-                    netRouteResult.routes
+                    routeSnapshot.NetRouteResult.routes
                         .Where(route => route.CanDeleteFromSystem)
                         .Select(route => BuildRouteKey(route.Destination, route.SubnetMask, route.Gateway)),
                     StringComparer.OrdinalIgnoreCase);
@@ -245,7 +250,8 @@ namespace neTiPx.Services
 
             var prefix = $"{destination}/{prefixLength}";
 
-            if (!PersistentRouteExists(destination, subnetMask, route.Gateway))
+            var persistentRoutes = GetPersistentRoutesForLookup();
+            if (!PersistentRouteExists(destination, subnetMask, route.Gateway, persistentRoutes))
             {
                 return (true, "Route nicht vorhanden.");
             }
@@ -285,7 +291,8 @@ namespace neTiPx.Services
                 return (false, validationError);
             }
 
-            if (PersistentRouteExists(sanitizedRoute.Destination, sanitizedRoute.SubnetMask, sanitizedRoute.Gateway))
+            var persistentRoutes = GetPersistentRoutesForLookup();
+            if (PersistentRouteExists(sanitizedRoute.Destination, sanitizedRoute.SubnetMask, sanitizedRoute.Gateway, persistentRoutes))
             {
                 return (true, "Route bereits vorhanden.");
             }
@@ -317,23 +324,22 @@ namespace neTiPx.Services
                 debug.AppendLine($"AdapterKey: {profile.AdapterName}");
                 debug.AppendLine($"Resolved Adapter: {ni.Name}");
 
-                var cimResult = TryReadPersistentRoutesFromCim();
-                if (cimResult.success)
+                var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: false);
+                if (routeSnapshot.CimResult.success)
                 {
                     debug.AppendLine($"CIM source: Win32_IP4PersistedRouteTable");
-                    debug.AppendLine($"parsed persistent routes via CIM: {cimResult.routes.Count}");
-                    return (true, cimResult.routes, null, debug.ToString());
+                    debug.AppendLine($"parsed persistent routes via CIM: {routeSnapshot.CimResult.routes.Count}");
+                    return (true, routeSnapshot.CimResult.routes, null, debug.ToString());
                 }
 
-                debug.AppendLine($"CIM read failed: {cimResult.error ?? "unknown error"}");
+                debug.AppendLine($"CIM read failed: {routeSnapshot.CimResult.error ?? "unknown error"}");
 
-                var persistentOutput = ReadRoutePrintOutput();
-                debug.AppendLine($"route print output chars: {persistentOutput.Length}");
+                debug.AppendLine($"route print output chars: {routeSnapshot.RoutePrintOutput.Length}");
 
-                var routes = ParseRoutePrintRoutes(persistentOutput, includeActiveRoutes: false, includePersistentRoutes: true);
+                var routes = ParseRoutePrintRoutes(routeSnapshot.RoutePrintOutput, includeActiveRoutes: false, includePersistentRoutes: true);
                 debug.AppendLine($"parsed persistent routes via route print fallback: {routes.Count}");
                 debug.AppendLine("route print preview:");
-                debug.AppendLine(CreatePreview(persistentOutput));
+                debug.AppendLine(CreatePreview(routeSnapshot.RoutePrintOutput));
 
                 return (true, routes, null, debug.ToString());
             }
@@ -585,17 +591,44 @@ namespace neTiPx.Services
             }
         }
 
-        private static bool PersistentRouteExists(string destination, string subnetMask, string gateway)
+        private static bool PersistentRouteExists(string destination, string subnetMask, string gateway, List<RouteEntry>? persistentRoutes = null)
         {
-            var cimResult = TryReadPersistentRoutesFromCim();
-            var routes = cimResult.success
-                ? cimResult.routes
-                : ParseRoutePrintRoutes(ReadRoutePrintOutput(), includeActiveRoutes: false, includePersistentRoutes: true);
+            var routes = persistentRoutes ?? GetPersistentRoutesForLookup();
 
             return routes.Any(route =>
                 string.Equals(route.Destination, destination, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(route.SubnetMask, subnetMask, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(route.Gateway, gateway, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static List<RouteEntry> GetPersistentRoutesForLookup()
+        {
+            var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: false);
+            return GetPersistentRoutesFromSnapshot(routeSnapshot);
+        }
+
+        private static List<RouteEntry> GetPersistentRoutesFromSnapshot(RouteReadSnapshot routeSnapshot)
+        {
+            if (routeSnapshot.CimResult.success)
+            {
+                return routeSnapshot.CimResult.routes;
+            }
+
+            return ParseRoutePrintRoutes(routeSnapshot.RoutePrintOutput, includeActiveRoutes: false, includePersistentRoutes: true);
+        }
+
+        private static RouteReadSnapshot ReadRouteSnapshot(bool includeRoutePrint, bool includeCim, bool includeNetRoutes)
+        {
+            return new RouteReadSnapshot
+            {
+                RoutePrintOutput = includeRoutePrint ? ReadRoutePrintOutput() : string.Empty,
+                CimResult = includeCim
+                    ? TryReadPersistentRoutesFromCim()
+                    : (false, new List<RouteEntry>(), null),
+                NetRouteResult = includeNetRoutes
+                    ? TryReadNetRoutesFromPowerShell()
+                    : (false, new List<RouteEntry>(), null)
+            };
         }
 
         private static (bool success, List<RouteEntry> routes, string? error) TryReadPersistentRoutesFromCim()
