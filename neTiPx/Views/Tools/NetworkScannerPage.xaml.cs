@@ -278,9 +278,10 @@ namespace neTiPx.Views
                 return false;
             }
 
-            if (uniqueIps.Count > 1024)
+            int maxScanHosts = _settingsService.GetNetworkScanMaxHosts();
+            if (uniqueIps.Count > maxScanHosts)
             {
-                errorMessage = T("NETSCAN_ERROR_RANGE_TOO_LARGE");
+                errorMessage = string.Format(T("NETSCAN_ERROR_HOST_LIMIT"), maxScanHosts);
                 return false;
             }
 

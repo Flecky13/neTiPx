@@ -302,6 +302,8 @@
   "SETTINGS_SLOW_MS": "Lento (ms)",
   "SETTINGS_NET_SCANNER": "Escáner de Red",
   "SETTINGS_PORT_SCANNING": "Configuración de Escaneo de Puertos",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS": "Máx. hosts por escaneo",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING": "Los valores superiores a 1024 pueden tardar mucho tiempo y cargar bastante el equipo.",
   "SETTINGS_PLACEHOLDER": "Placeholder",
   "SETTINGS_PLACEHOLDER_DESC": "Configuración futura",
   "SETTINGS_COLORSCHEME": "Tema de Color",

@@ -301,6 +301,8 @@
     "SETTINGS_SLOW_MS": "längssch (ms)",
     "SETTINGS_NET_SCANNER": "Netzscanner",
     "SETTINGS_PORT_SCANNING": "Port-Scan Gemurkse",
+    "SETTINGS_NET_SCANNER_MAX_HOSTS": "Max. Hosts pro Scan",
+    "SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING": "Werte über 1024 könne ewig dauern und die Kiste ordentlich belaste.",
     "SETTINGS_PLACEHOLDER": "Platzholler",
     "SETTINGS_PLACEHOLDER_DESC": "Für zukunft",
     "SETTINGS_COLORSCHEME": "Färbchen-Schnäma",

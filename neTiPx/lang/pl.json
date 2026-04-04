@@ -302,6 +302,8 @@
   "SETTINGS_SLOW_MS": "Wolno (ms)",
   "SETTINGS_NET_SCANNER": "Skaner sieci",
   "SETTINGS_PORT_SCANNING": "Ustawienia skanowania portów",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS": "Maks. hostów na skan",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING": "Wartości powyżej 1024 mogą działać bardzo długo i mocno obciążać komputer.",
   "SETTINGS_PLACEHOLDER": "Placeholder",
   "SETTINGS_PLACEHOLDER_DESC": "Konfiguracja przyszła",
   "SETTINGS_COLORSCHEME": "Schemat kolorów",

@@ -273,6 +273,11 @@ namespace neTiPx.Views
             {
                 CustomPort3NumberBox.Value = userSettings.CustomPort3;
             }
+            if (NetworkScannerMaxHostsNumberBox != null)
+            {
+                NetworkScannerMaxHostsNumberBox.Value = userSettings.NetworkScanMaxHosts;
+                UpdateNetworkScannerMaxHostsWarning(userSettings.NetworkScanMaxHosts);
+            }
 
             // Sprache laden
             LoadLanguageCombo();
@@ -966,6 +971,28 @@ namespace neTiPx.Views
             }
         }
 
+        private void NetworkScannerMaxHostsNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            if (_isLoading || _settingsService == null || double.IsNaN(args.NewValue))
+                return;
+
+            int value = Math.Max(1, (int)Math.Round(args.NewValue));
+            _settingsService.SetNetworkScanMaxHosts(value);
+            UpdateNetworkScannerMaxHostsWarning(value);
+        }
+
+        private void UpdateNetworkScannerMaxHostsWarning(int maxHosts)
+        {
+            if (NetworkScannerMaxHostsWarningText == null)
+            {
+                return;
+            }
+
+            NetworkScannerMaxHostsWarningText.Visibility = maxHosts > 1024
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
         private void LoadLanguageCombo()
         {
             if (LanguageCombo == null)
@@ -1038,6 +1065,8 @@ namespace neTiPx.Views
             if (ConnectionStatusSettingsUnavailable != null) ConnectionStatusSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
             if (NetScannerCardTitle != null) NetScannerCardTitle.Text = _lm.Lang("SETTINGS_NET_SCANNER");
             if (NetScannerCardDesc != null) NetScannerCardDesc.Text = _lm.Lang("SETTINGS_PORT_SCANNING");
+            if (NetworkScannerMaxHostsLabel != null) NetworkScannerMaxHostsLabel.Text = _lm.Lang("SETTINGS_NET_SCANNER_MAX_HOSTS");
+            if (NetworkScannerMaxHostsWarningText != null) NetworkScannerMaxHostsWarningText.Text = _lm.Lang("SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING");
             if (NetworkScannerSettingsUnavailable != null) NetworkScannerSettingsUnavailable.Text = _lm.Lang("SETTINGS_NO_SETTINGS");
             if (PlaceholderMidRightTitle != null) PlaceholderMidRightTitle.Text = _lm.Lang("SETTINGS_PLACEHOLDER");
             if (PlaceholderMidRightDesc != null) PlaceholderMidRightDesc.Text = _lm.Lang("SETTINGS_PLACEHOLDER_DESC");

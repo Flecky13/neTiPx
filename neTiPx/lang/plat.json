@@ -302,6 +302,8 @@
   "SETTINGS_SLOW_MS": "langsam (ms)",
   "SETTINGS_NET_SCANNER": "Netwarkscanner",
   "SETTINGS_PORT_SCANNING": "Port-Scan Einstellunge",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS": "Max. Hosts pro Scan",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING": "Werte över 1024 köönt sehr lang dauern und den Rechner stark belasten.",
   "SETTINGS_PLACEHOLDER": "Platzhalter",
   "SETTINGS_PLACEHOLDER_DESC": "För Zukunft",
   "SETTINGS_COLORSCHEME": "Farbschema",

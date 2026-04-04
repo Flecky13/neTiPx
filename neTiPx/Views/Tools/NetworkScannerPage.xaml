@@ -36,7 +36,7 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <TextBlock x:Name="NetworkScanStatusTextBlock"
-                               Text="Bereit zum Scannen"
+                               Text=""
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                VerticalAlignment="Center" />
                     <ProgressRing x:Name="NetworkScanProgressRing"

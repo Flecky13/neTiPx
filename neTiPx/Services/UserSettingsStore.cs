@@ -37,6 +37,7 @@ namespace neTiPx.Services
             public int CustomPort1 { get; set; } = 0;
             public int CustomPort2 { get; set; } = 0;
             public int CustomPort3 { get; set; } = 0;
+            public int NetworkScanMaxHosts { get; set; } = 512;
 
             // Language
             public string LanguageCode { get; set; } = "System";
@@ -166,7 +167,8 @@ namespace neTiPx.Services
                 new XAttribute("scanPortRdp", settings.ScanPortRdp),
                 new XAttribute("customPort1", settings.CustomPort1),
                 new XAttribute("customPort2", settings.CustomPort2),
-                new XAttribute("customPort3", settings.CustomPort3)
+                new XAttribute("customPort3", settings.CustomPort3),
+                new XAttribute("maxHosts", Math.Max(1, settings.NetworkScanMaxHosts))
             );
 
             var languageElement = new XElement("language",
@@ -317,6 +319,8 @@ namespace neTiPx.Services
                         settings.CustomPort2 = customPort2;
                     if (int.TryParse((string?)networkScannerElement.Attribute("customPort3"), out var customPort3))
                         settings.CustomPort3 = customPort3;
+                    if (int.TryParse((string?)networkScannerElement.Attribute("maxHosts"), out var maxHosts))
+                        settings.NetworkScanMaxHosts = Math.Max(1, maxHosts);
                 }
 
                 var languageElement = root.Element("language");

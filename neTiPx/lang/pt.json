@@ -302,6 +302,8 @@
   "SETTINGS_SLOW_MS": "Lento (ms)",
   "SETTINGS_NET_SCANNER": "Scanner de Rede",
   "SETTINGS_PORT_SCANNING": "Configurações de Scanner de Portas",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS": "Máx. hosts por varredura",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING": "Valores acima de 1024 podem demorar bastante e sobrecarregar o computador.",
   "SETTINGS_PLACEHOLDER": "Placeholder",
   "SETTINGS_PLACEHOLDER_DESC": "Configuração futura",
   "SETTINGS_COLORSCHEME": "Esquema de Cores",

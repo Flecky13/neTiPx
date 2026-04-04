@@ -351,6 +351,17 @@ namespace neTiPx.Services
             UpdateUserSettings(settings => settings.CustomPort3 = port);
         }
 
+        public int GetNetworkScanMaxHosts()
+        {
+            var settings = LoadUserSettings();
+            return Math.Max(1, settings.NetworkScanMaxHosts);
+        }
+
+        public void SetNetworkScanMaxHosts(int maxHosts)
+        {
+            UpdateUserSettings(settings => settings.NetworkScanMaxHosts = Math.Max(1, maxHosts));
+        }
+
         // Language Settings
         public string GetLanguageCode()
         {

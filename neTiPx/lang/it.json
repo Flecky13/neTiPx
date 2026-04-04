@@ -302,6 +302,8 @@
   "SETTINGS_SLOW_MS": "Lento (ms)",
   "SETTINGS_NET_SCANNER": "Scanner di Rete",
   "SETTINGS_PORT_SCANNING": "Impostazioni scansione porte",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS": "Max. host per scansione",
+  "SETTINGS_NET_SCANNER_MAX_HOSTS_WARNING": "Valori superiori a 1024 possono richiedere molto tempo e gravare pesantemente sul computer.",
   "SETTINGS_PLACEHOLDER": "Segnaposto",
   "SETTINGS_PLACEHOLDER_DESC": "Configurazione futura",
   "SETTINGS_COLORSCHEME": "Tema Colore",

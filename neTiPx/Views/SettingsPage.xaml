@@ -270,6 +270,25 @@
                         <StackPanel x:Name="NetworkScannerSettingsContent" Spacing="12">
                         <TextBlock x:Name="NetScannerCardDesc" Text="Port-Scanning Einstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
+                        <StackPanel Spacing="4">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock x:Name="NetworkScannerMaxHostsLabel" Text="Max. Hosts pro Scan" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <NumberBox x:Name="NetworkScannerMaxHostsNumberBox"
+                                           Width="110"
+                                           Minimum="1"
+                                           Maximum="65535"
+                                           SmallChange="1"
+                                           SpinButtonPlacementMode="Compact"
+                                           ValueChanged="NetworkScannerMaxHostsNumberBox_ValueChanged" />
+                            </StackPanel>
+                            <TextBlock x:Name="NetworkScannerMaxHostsWarningText"
+                                       Text="Hohe Werte koennen sehr lange dauern und den Rechner stark belasten."
+                                       Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Visibility="Collapsed" />
+                        </StackPanel>
+
                         <!-- 3x3 Grid für Protokolle und Ports -->
                         <Grid RowSpacing="8" ColumnSpacing="12">
                             <Grid.RowDefinitions>
