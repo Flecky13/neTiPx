@@ -272,42 +272,5 @@ namespace neTiPx.Services
             {
             }
         }
-
-        /*
-        public void UpdatePageVisibility(string pageName, bool visible)
-        {
-            try
-            {
-                if (_alwaysVisiblePages.Any(p => string.Equals(p, pageName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return;
-                }
-
-                if (!File.Exists(_configPath))
-                {
-                    EnsureConfigExists();
-                }
-
-                var doc = XDocument.Load(_configPath);
-                var root = doc.Root;
-                if (root == null)
-                {
-                    return;
-                }
-
-                var pageElement = root.Elements("page")
-                    .FirstOrDefault(p => p.Attribute("name")?.Value == pageName);
-
-                if (pageElement != null)
-                {
-                    pageElement.SetAttributeValue("visible", visible.ToString().ToLower());
-                    doc.Save(_configPath);
-                }
-            }
-            catch
-            {
-            }
-        }
-        */
     }
 }

@@ -174,13 +174,6 @@ namespace neTiPx.Views
                 : $"{SystemRoutes.Count} {T("ROUTECFG_STATUS_LOADED_COUNT")}";
         }
 
-        /*
-        public List<RouteEntry> GetRoutes()
-        {
-            return Routes.Select(CloneRoute).ToList();
-        }
-        */
-
         public List<RouteEntry> GetSanitizedRoutes()
         {
             return Routes

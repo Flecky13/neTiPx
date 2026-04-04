@@ -23,9 +23,6 @@ namespace neTiPx.ViewModels
 
         private static string T(string key) => _lm.Lang(key);
 
-        /*
-        private readonly ConfigStore _configStore = new ConfigStore();
-        */
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
         private readonly SettingsService _settingsService = new SettingsService();
@@ -419,48 +416,6 @@ namespace neTiPx.ViewModels
             }
         }
 
-        /*
-        private Task ReloadSelectedProfileSettingsAsync()
-        {
-            if (SelectedProfile == null)
-            {
-                return Task.CompletedTask;
-            }
-
-            try
-            {
-                _isLoadingProfile = true;
-
-                if (string.Equals(SelectedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
-                {
-                    var loaded = LoadProfileFromNic(SelectedProfile);
-                    ValidationMessage = loaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
-                    HasValidationErrors = false;
-                    return Task.CompletedTask;
-                }
-
-                var hasConfigSettings = _ipProfileStore.HasPersistedProfileSettings(SelectedProfile.Name);
-
-                if (hasConfigSettings && _ipProfileStore.TryGetProfile(SelectedProfile.Name, out var storedProfile))
-                {
-                    LoadProfileFromStore(storedProfile, SelectedProfile);
-                    ValidationMessage = T("IPCONFIG_MSG_CONFIGURATION_READ");
-                    HasValidationErrors = false;
-                    return Task.CompletedTask;
-                }
-
-                var nicLoaded = LoadProfileFromNic(SelectedProfile);
-                ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
-                HasValidationErrors = false;
-                return Task.CompletedTask;
-            }
-            finally
-            {
-                _isLoadingProfile = false;
-            }
-        }
-        */
-
         private static void LoadProfileFromStore(IpProfile sourceProfile, IpProfile targetProfile)
         {
             targetProfile.Mode = sourceProfile.Mode;
@@ -680,16 +635,6 @@ namespace neTiPx.ViewModels
         public bool IsSaveHighlighted => SelectedProfile?.IsDirty == true;
 
         public bool IsApplyHighlighted => SelectedProfile != null && SelectedProfile.IsDirty == false;
-
-        /*
-        public void RefreshConnectionStatusVisibility()
-        {
-            OnPropertyChanged(nameof(ShowGatewayStatus));
-            OnPropertyChanged(nameof(ShowDns1Status));
-            OnPropertyChanged(nameof(ShowDns2Status));
-            OnPropertyChanged(nameof(ShowConnectionQualityIndicator));
-        }
-        */
 
         public RelayCommand AddIpCommand { get; }
         public RelayCommand<IpAddressEntry> RemoveIpCommand { get; }
@@ -1160,81 +1105,6 @@ namespace neTiPx.ViewModels
 
             return match?.Name ?? adapter;
         }
-
-        /*
-        private void UpdateProfile(Dictionary<string, string> values, IpProfile profile)
-        {
-            var names = new List<string>();
-            if (values.TryGetValue("IpProfileNames", out var list) && !string.IsNullOrWhiteSpace(list))
-            {
-                names = list.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(n => n.Trim())
-                    .Where(n => n.Length > 0)
-                    .ToList();
-            }
-
-            if (!names.Contains(profile.Name, StringComparer.OrdinalIgnoreCase))
-            {
-                names.Add(profile.Name);
-            }
-
-            values[$"{profile.Name}.Adapter"] = profile.AdapterName ?? string.Empty;
-            values[$"{profile.Name}.Mode"] = profile.Mode;
-            values[$"{profile.Name}.GW"] = profile.Gateway;
-            values[$"{profile.Name}.DNS"] = profile.Dns;
-            values[$"{profile.Name}.DNS1"] = profile.Dns1;
-            values[$"{profile.Name}.DNS2"] = profile.Dns2;
-
-            var existingKeys = values.Keys.Where(k => k.StartsWith(profile.Name + ".IP_", StringComparison.OrdinalIgnoreCase)
-                || k.StartsWith(profile.Name + ".Subnet_", StringComparison.OrdinalIgnoreCase)).ToList();
-            foreach (var key in existingKeys)
-            {
-                values.Remove(key);
-            }
-
-            int index = 1;
-            foreach (var entry in profile.IpAddresses)
-            {
-                if (string.IsNullOrWhiteSpace(entry.IpAddress))
-                {
-                    continue;
-                }
-
-                values[$"{profile.Name}.IP_{index}"] = entry.IpAddress;
-                values[$"{profile.Name}.Subnet_{index}"] = entry.SubnetMask;
-                index++;
-            }
-
-            values["IpProfileNames"] = string.Join(",", names);
-        }
-        */
-
-        /*
-        private void RemoveProfileFromConfig(Dictionary<string, string> values, string profileName)
-        {
-            // Remove profile from list
-            var names = new List<string>();
-            if (values.TryGetValue("IpProfileNames", out var list) && !string.IsNullOrWhiteSpace(list))
-            {
-                names = list.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(n => n.Trim())
-                    .Where(n => n.Length > 0 && !string.Equals(n, profileName, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-            values["IpProfileNames"] = string.Join(",", names);
-
-            // Remove profile keys
-            var keysToRemove = values.Keys
-                .Where(k => k.StartsWith(profileName + ".", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            foreach (var key in keysToRemove)
-            {
-                values.Remove(key);
-            }
-        }
-        */
 
         private void ValidateProfile()
         {

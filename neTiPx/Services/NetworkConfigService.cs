@@ -585,41 +585,6 @@ namespace neTiPx.Services
             }
         }
 
-        /*
-        private static bool RouteExists(string interfaceName, string prefix)
-        {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c netsh interface ipv4 show route interface=\"{interfaceName}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    StandardErrorEncoding = Encoding.UTF8
-                };
-
-                using var process = Process.Start(psi);
-                if (process == null)
-                {
-                    return false;
-                }
-
-                var output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-
-                return output.IndexOf(prefix, StringComparison.OrdinalIgnoreCase) >= 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        */
-
         private static bool PersistentRouteExists(string destination, string subnetMask, string gateway)
         {
             var cimResult = TryReadPersistentRoutesFromCim();

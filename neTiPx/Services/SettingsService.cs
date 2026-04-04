@@ -8,9 +8,6 @@ namespace neTiPx.Services
     {
         private const string SectionName = "AppSettings";
         private const string ThemeKey = "Theme";
-        /*
-        private const string ColorSchemeKey = "ColorScheme";
-        */
 
         private readonly UserSettingsStore _userSettingsStore = new UserSettingsStore();
 
@@ -63,14 +60,6 @@ namespace neTiPx.Services
             var colorTheme = GetColorTheme();
             return colorTheme?.Name ?? "Blau";
         }
-
-        /*
-        public void SetColorSchemeName(string colorSchemeName)
-        {
-            // Diese Methode wird jetzt nicht mehr verwendet,
-            // aber für Rückwärtskompatibilität erhalten wir sie
-        }
-        */
 
         public bool GetHoverWindowEnabled()
         {
