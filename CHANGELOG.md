@@ -4,6 +4,16 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.8.0]
+
+### Added
+- **Netzwerkscanner / Einstellungen**: Maximale Anzahl Hosts pro Scan ist jetzt in den Einstellungen konfigurierbar und wird in den Benutzereinstellungen gespeichert.
+
+### Changed
+- **Netzwerkscanner / Begrenzung**: Die bisher feste Host-Obergrenze wurde durch einen konfigurierbaren Grenzwert ersetzt; bei Überschreitung erscheint eine passende Fehlermeldung mit dem aktuell erlaubten Limit.
+- **Routen / Einlesen**: Einlesen persistenter und statischer Routen intern optimiert und robuster zusammengeführt.
+- **IP-Profile / Monitoring**: Verbindungsüberwachung für Gateway und DNS intern überarbeitet, um überlappende Statusprüfungen zu vermeiden und den Monitoring-Ablauf stabiler zu machen.
+
 ## [1.6.7.0]
 
 ### Changed
