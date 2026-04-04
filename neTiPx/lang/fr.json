@@ -58,6 +58,7 @@
   "IPCONFIG_ROUTE_PREFIX": "Route #",
   "IPCONFIG_MSG_PROFILE_SAVED": "Profil enregistré",
   "IPCONFIG_MSG_SETTINGS_READ": "Paramètres lus",
+  "IPCONFIG_MSG_NO_SETTINGS": "Aucun parametre disponible",
   "IPCONFIG_MSG_CONFIGURATION_READ": "Configuration lue",
   "IPCONFIG_MSG_APPLY_ERROR": "Erreur lors de l'application.",
   "IPCONFIG_MSG_PROFILE_APPLIED": "Profil appliqué",

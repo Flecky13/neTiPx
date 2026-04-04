@@ -58,6 +58,7 @@
   "IPCONFIG_ROUTE_PREFIX": "Rota #",
   "IPCONFIG_MSG_PROFILE_SAVED": "Perfil guardado",
   "IPCONFIG_MSG_SETTINGS_READ": "Definições lidas",
+  "IPCONFIG_MSG_NO_SETTINGS": "Nenhuma configuracao disponivel",
   "IPCONFIG_MSG_CONFIGURATION_READ": "Configuração lida",
   "IPCONFIG_MSG_APPLY_ERROR": "Erro ao aplicar.",
   "IPCONFIG_MSG_PROFILE_APPLIED": "Perfil aplicado",
