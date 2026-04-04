@@ -73,27 +73,37 @@
                         <FontIcon Glyph="&#xE8CE;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="ToolsNavLogViewer" Content="Log Viewer" Tag="LogViewer">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8A5;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.Content>
-                <ScrollViewer>
-                    <Grid>
-                        <!-- PING Unterseite -->
-                        <Frame x:Name="PingPanel" Visibility="Collapsed" />
+                <Grid>
+                    <ScrollViewer x:Name="ToolsContentScrollViewer">
+                        <Grid>
+                            <!-- PING Unterseite -->
+                            <Frame x:Name="PingPanel" Visibility="Collapsed" />
 
-                        <!-- WLAN Unterseite -->
-                        <Frame x:Name="WlanPanel" Visibility="Collapsed" />
+                            <!-- WLAN Unterseite -->
+                            <Frame x:Name="WlanPanel" Visibility="Collapsed" />
 
-                        <!-- Netzwerk-Rechner Unterseite -->
-                        <Frame x:Name="NetworkCalculatorPanel" Visibility="Collapsed" />
+                            <!-- Netzwerk-Rechner Unterseite -->
+                            <Frame x:Name="NetworkCalculatorPanel" Visibility="Collapsed" />
 
-                        <!-- Netzwerkscanner Unterseite -->
-                        <Frame x:Name="NetworkScannerPanel" Padding="24" Visibility="Collapsed" />
+                            <!-- Netzwerkscanner Unterseite -->
+                            <Frame x:Name="NetworkScannerPanel" Padding="24" Visibility="Collapsed" />
 
-                        <!-- Routen Unterseite -->
-                        <Frame x:Name="RoutesPanel" Visibility="Collapsed" />
-                    </Grid>
-                </ScrollViewer>
+                            <!-- Routen Unterseite -->
+                            <Frame x:Name="RoutesPanel" Visibility="Collapsed" />
+                        </Grid>
+                    </ScrollViewer>
+
+                    <!-- Log Viewer Unterseite ohne äußeren Scrollbereich -->
+                    <Frame x:Name="LogViewerPanel" Visibility="Collapsed" />
+                </Grid>
             </NavigationView.Content>
         </NavigationView>
     </Grid>

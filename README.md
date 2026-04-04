@@ -18,11 +18,13 @@
   - [WLAN Scanner](#wlan-scanner)
   - [Netzwerk-Rechner](#netzwerk-rechner)
   - [Netzwerkscanner](#netzwerkscanner)
+  - [Log Viewer](#log-viewer)
   - [Routen Tool](#routen-tool)
   - [Einstellungen](#einstellungen)
 - [Funktionen im Detail](#-funktionen-im-detail)
   - [PING Tool](#ping-tool-1)
   - [Ping-Logging](#ping-logging)
+  - [Log Viewer](#log-viewer-1)
   - [WLAN Scanner - Technische Details](#wlan-scanner---technische-details)
   - [Netzwerkscanner - Technische Details](#netzwerkscanner---technische-details)
   - [Routenverwaltung und Routing-Analyse](#routenverwaltung-und-routing-analyse)
@@ -46,8 +48,9 @@
 - 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
 - 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
 - 🔎 **Netzwerkscanner**: Scan von IP-Bereichen mit Port-Prüfung und Detailansicht gefundener Geräte
+- 📄 **Log Viewer**: Öffnen und Live-Anzeigen von Logdateien mit Filter, Treffer-Navigation und optionalem Auto-Scroll
 - 🛣️ **Routen Tool**: Anzeige aktueller IPv4-Routen inkl. Löschfunktion für benutzerseitige/persistente Routen und direktem Hinzufügen neuer Routen
-- 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner, Netzwerkscanner und Routen als eigene Unterseiten mit Lazy-Loading
+- 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner, Netzwerkscanner, Log Viewer und Routen als eigene Unterseiten mit Lazy-Loading
 - 🗂️ **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
 - 🛠️ **Versteckte Admin-Konfiguration**: Auf der Settings-Seite öffnet das Wort `Wünschen` einen Dialog zur Pflege der Seiten-Sichtbarkeit
 
@@ -166,6 +169,17 @@ Der Netzwerkscanner durchsucht lokale IP-Bereiche und zeigt erkannte Geräte ink
 - **Geräteliste mit Details**: Übersicht erkannter Hosts mit Detailbereich zur schnellen Auswertung
 - **Direktaktionen**: Offene Ports können per Doppelklick mit der Standardanwendung geöffnet werden
 
+### Log Viewer
+
+Der Log Viewer öffnet vorhandene Logdateien und zeigt neue Einträge live in einer separaten Tool-Unterseite an.
+
+**Funktionen:**
+- **Dateiauswahl und Verlauf**: Zuletzt verwendete Logdateien lassen sich direkt erneut öffnen
+- **Live-Anzeige**: Neue Einträge werden automatisch an die bestehende Ansicht angehängt
+- **Filter und Suche**: Freitextfilter mit Trefferzähler sowie Vor/Zurück-Navigation zwischen Treffern
+- **Automatisches Weiterscrollen**: Optionales Mitscrollen ans Dateiende während neue Einträge eintreffen
+- **Robustes Nachladen**: Auch während die Datei von einem anderen Prozess beschrieben wird, bleibt die Anzeige lesbar
+
 ### Routen Tool
 
 Das Routen Tool zeigt die aktuelle IPv4-Routing-Tabelle und unterstützt die gezielte Analyse für ein konkretes Ziel.
@@ -252,6 +266,14 @@ zurück zum
   - Beim Löschen wahlweise mitlöschen
   - Vor dem Löschen optional per `Speichern unter` exportieren
 - **Protokollspezifisches Logging**: Nur relevante IPv4/IPv6-Einträge werden geschrieben
+
+### Log Viewer
+
+- **Unterstützte Formate**: Öffnet Log-, Text-, CSV- und JSON-Dateien zur schnellen Sichtprüfung
+- **Live-Append statt Voll-Reload**: Neue Daten werden an die bestehende Anzeige angehängt, ohne die ganze Datei jedes Mal neu aufzubauen
+- **Filter mit Treffer-Navigation**: Textsuche mit Hervorhebung, Trefferzähler und Navigation zwischen den Fundstellen
+- **Auto-Scroll optional**: Bei aktivierter Option bleibt die Ansicht am Ende der Datei; deaktiviert bleibt die aktuelle Position erhalten
+- **Fehlertolerantes Lesen**: Datei wird mit gemeinsamem Zugriff geöffnet, damit auch aktiv beschriebene Logs beobachtet werden können
 
 ### WLAN Scanner - Technische Details
 

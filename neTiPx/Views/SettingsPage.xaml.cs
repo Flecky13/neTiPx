@@ -318,7 +318,7 @@ namespace neTiPx.Views
             var checkBoxes = new Dictionary<string, CheckBox>(StringComparer.OrdinalIgnoreCase);
 
             var mainPageKeys = new[] { "IpConfig", "Tools" };
-            var toolPageKeys = new[] { "Ping", "Wlan", "NetworkCalculator", "NetworkScanner" };
+            var toolPageKeys = new[] { "Ping", "Wlan", "NetworkCalculator", "NetworkScanner", "Routes", "LogViewer" };
 
             AddVisibilityGroup(editorsPanel, _lm.Lang("DIALOG_MAIN_PAGES"), mainPageKeys, entries, checkBoxes);
             AddVisibilityGroup(editorsPanel, _lm.Lang("DIALOG_TOOLS"), toolPageKeys, entries, checkBoxes);
@@ -504,6 +504,8 @@ namespace neTiPx.Views
                 "Wlan" => "Tool: WLAN",
                 "NetworkCalculator" => "Tool: Netzwerk-Rechner",
                 "NetworkScanner" => "Tool: Netzwerkscanner",
+                "Routes" => "Tool: Routen",
+                "LogViewer" => "Tool: Log Viewer",
                 _ => pageKey
             };
         }

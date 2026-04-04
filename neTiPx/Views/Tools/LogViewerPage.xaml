@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Name="LogViewerPageRoot"
+    x:Class="neTiPx.Views.LogViewerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:neTiPx.Models"
+    mc:Ignorable="d">
+
+    <Grid Padding="0" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="LogViewerTitleText" Text="Log Viewer" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="16">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Button x:Name="LogViewerOpenButton"
+                            Grid.Column="0"
+                            Content="Datei öffnen"
+                            Click="LogViewerOpenButton_Click"
+                            Style="{StaticResource AccentButtonStyle}"
+                            MinWidth="140" />
+
+                    <ComboBox x:Name="LogViewerFileComboBox"
+                              Grid.Column="1"
+                              PlaceholderText="Keine Datei ausgewählt"
+                              DisplayMemberPath="DisplayText"
+                              SelectionChanged="LogViewerFileComboBox_SelectionChanged"
+                              SizeChanged="LogViewerFileComboBox_SizeChanged"
+                              HorizontalAlignment="Stretch"
+                              Width="Auto"
+                              VerticalAlignment="Center" />
+
+                    <Button x:Name="LogViewerReloadButton"
+                            Grid.Column="2"
+                            Click="LogViewerReloadButton_Click"
+                            MinWidth="36"
+                            Padding="8,6"
+                            IsEnabled="False">
+                        <FontIcon Glyph="&#xE72C;" />
+                    </Button>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="12">
+                    <TextBox x:Name="LogViewerFilterTextBox"
+                             Grid.Column="0"
+                             Header="Filter"
+                             PlaceholderText="Text enthalten..."
+                             TextChanged="LogViewerFilterTextBox_TextChanged" />
+
+                    <CheckBox x:Name="LogViewerAutoRefreshCheckBox"
+                              Grid.Column="1"
+                              Content="Auto aktualisieren"
+                              IsChecked="True"
+                              Click="LogViewerAutoRefreshCheckBox_Click"
+                              VerticalAlignment="Bottom" />
+
+                    <TextBlock x:Name="LogViewerMatchesText"
+                               Grid.Column="2"
+                               Text="0 Treffer"
+                               VerticalAlignment="Bottom"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <Button x:Name="LogViewerPrevButton"
+                            Grid.Column="3"
+                            Click="LogViewerPrevButton_Click"
+                            MinWidth="36"
+                            Padding="8,6"
+                            VerticalAlignment="Bottom"
+                            IsEnabled="False">
+                        <FontIcon Glyph="&#xE76B;" />
+                    </Button>
+
+                    <Button x:Name="LogViewerNextButton"
+                            Grid.Column="4"
+                            Click="LogViewerNextButton_Click"
+                            MinWidth="36"
+                            Padding="8,6"
+                            VerticalAlignment="Bottom"
+                            IsEnabled="False">
+                        <FontIcon Glyph="&#xE76C;" />
+                    </Button>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <TextBlock x:Name="LogViewerStatusText"
+                               Grid.Column="0"
+                               Text="Bereit"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap" />
+
+                    <ProgressRing x:Name="LogViewerProgressRing"
+                                  Grid.Column="1"
+                                  Width="20"
+                                  Height="20"
+                                  IsActive="False" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="90,*" ColumnSpacing="12" Padding="16,12" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                    <TextBlock x:Name="LogViewerHeaderLineText" Text="Zeile" FontWeight="SemiBold" />
+                    <TextBlock x:Name="LogViewerHeaderContentText" Grid.Column="1" Text="Inhalt" FontWeight="SemiBold" />
+                </Grid>
+
+                <ListView Grid.Row="1"
+                          x:Name="LogViewerListView"
+                          ItemsSource="{x:Bind Lines, Mode=OneWay}"
+                          SelectionMode="None"
+                          IsItemClickEnabled="False">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:LogViewerLine">
+                            <Border Background="{x:Bind BackgroundBrush, Mode=OneWay}" Padding="12,6">
+                                <Grid ColumnDefinitions="90,*" ColumnSpacing="12">
+                                    <TextBlock Text="{x:Bind LineNumber, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{x:Bind Text, Mode=OneWay}"
+                                               Foreground="{x:Bind ForegroundBrush, Mode=OneWay}"
+                                               TextWrapping="NoWrap"
+                                               TextTrimming="None"
+                                               FontFamily="Consolas" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

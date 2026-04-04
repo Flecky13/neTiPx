@@ -65,6 +65,7 @@ namespace neTiPx.Views
             if (ToolsNavCalculator != null) ToolsNavCalculator.Content = _lm.Lang("TOOLS_NET_CALC");
             if (ToolsNavScanner != null) ToolsNavScanner.Content = _lm.Lang("TOOLS_NET_SCAN");
             if (ToolsNavRoutes != null) ToolsNavRoutes.Content = _lm.Lang("TOOLS_ROUTES");
+            if (ToolsNavLogViewer != null) ToolsNavLogViewer.Content = _lm.Lang("TOOLS_LOG_VIEWER");
         }
 
         public void RefreshVisibilityConfiguration()
@@ -124,7 +125,9 @@ namespace neTiPx.Views
                 if (WlanPanel != null) WlanPanel.Visibility = Visibility.Collapsed;
                 if (NetworkCalculatorPanel != null) NetworkCalculatorPanel.Visibility = Visibility.Collapsed;
                 if (NetworkScannerPanel != null) NetworkScannerPanel.Visibility = Visibility.Collapsed;
-                   if (RoutesPanel != null) RoutesPanel.Visibility = Visibility.Collapsed;
+                if (RoutesPanel != null) RoutesPanel.Visibility = Visibility.Collapsed;
+                if (LogViewerPanel != null) LogViewerPanel.Visibility = Visibility.Collapsed;
+                if (ToolsContentScrollViewer != null) ToolsContentScrollViewer.Visibility = Visibility.Visible;
 
                 // Ausgewähltes Panel anzeigen
                 switch (tag)
@@ -173,17 +176,32 @@ namespace neTiPx.Views
                         }
                         SetPingPageHostActiveState(false);
                         break;
-                       case "Routes":
-                           if (RoutesPanel != null)
-                           {
-                               RoutesPanel.Visibility = Visibility.Visible;
-                               if (RoutesPanel.Content == null)
-                               {
-                                   RoutesPanel.Navigate(typeof(RoutesPage));
-                               }
-                           }
-                           SetPingPageHostActiveState(false);
-                           break;
+                    case "Routes":
+                        if (RoutesPanel != null)
+                        {
+                            RoutesPanel.Visibility = Visibility.Visible;
+                            if (RoutesPanel.Content == null)
+                            {
+                                RoutesPanel.Navigate(typeof(RoutesPage));
+                            }
+                        }
+                        SetPingPageHostActiveState(false);
+                        break;
+                    case "LogViewer":
+                        if (ToolsContentScrollViewer != null)
+                        {
+                            ToolsContentScrollViewer.Visibility = Visibility.Collapsed;
+                        }
+                        if (LogViewerPanel != null)
+                        {
+                            LogViewerPanel.Visibility = Visibility.Visible;
+                            if (LogViewerPanel.Content == null)
+                            {
+                                LogViewerPanel.Navigate(typeof(LogViewerPage));
+                            }
+                        }
+                        SetPingPageHostActiveState(false);
+                        break;
                 }
             }
         }

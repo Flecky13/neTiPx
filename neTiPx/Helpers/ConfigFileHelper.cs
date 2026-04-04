@@ -150,5 +150,24 @@ namespace neTiPx.Helpers
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NetworkScanRanges.xml");
             }
         }
+
+        public static string GetLogViewerRecentFilesXmlPath()
+        {
+            try
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var dir = Path.Combine(appData, "neTiPx");
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                return Path.Combine(dir, "LogViewerRecentFiles.xml");
+            }
+            catch
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LogViewerRecentFiles.xml");
+            }
+        }
     }
 }

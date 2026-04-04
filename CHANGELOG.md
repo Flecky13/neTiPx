@@ -4,6 +4,17 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0.0]
+
+### Added
+- **Tools / Log Viewer**: Neue Unterseite `Log Viewer` zum Öffnen, Anzeigen und Durchsuchen von Logdateien mit Dateiauswahl, Filter und Live-Anzeige.
+
+### Changed
+- **Log Viewer / Live-Update**: Nachladen neuer Logeinträge auf inkrementelles Anhängen umgestellt; Auto-Scroll lässt sich separat steuern und bleibt bei deaktivierter Option auf der aktuellen Position stehen.
+
+### Fixed
+- **Log Viewer / Filter**: Live-Updates mit aktivem Filter bewerten nur noch neu hinzugekommene bzw. geänderte Zeilen, statt die gesamte Ansicht sichtbar neu aufzubauen.
+
 ## [1.6.8.0]
 
 ### Added
