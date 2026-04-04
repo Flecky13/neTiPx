@@ -574,6 +574,7 @@ namespace neTiPx.Views
             return (ip & mask) == (network & mask);
         }
 
+        /*
         private void CalculateNetwork_Click(object sender, RoutedEventArgs e)
         {
             NetworkCalcErrorBar.IsOpen = false;
@@ -610,6 +611,7 @@ namespace neTiPx.Views
                 ShowError($"{T("NETCALC_ERROR_PREFIX")}: {ex.Message}");
             }
         }
+        */
 
         private void CalculateFromSuffix(string ipAddress, string cidrSuffix)
         {

@@ -62,11 +62,13 @@ namespace neTiPx.Services
             return colorTheme?.Name ?? "Blau";
         }
 
+        /*
         public void SetColorSchemeName(string colorSchemeName)
         {
             // Diese Methode wird jetzt nicht mehr verwendet,
             // aber für Rückwärtskompatibilität erhalten wir sie
         }
+        */
 
         public bool GetHoverWindowEnabled()
         {

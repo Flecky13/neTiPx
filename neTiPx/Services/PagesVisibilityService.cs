@@ -273,6 +273,7 @@ namespace neTiPx.Services
             }
         }
 
+        /*
         public void UpdatePageVisibility(string pageName, bool visible)
         {
             try
@@ -307,5 +308,6 @@ namespace neTiPx.Services
             {
             }
         }
+        */
     }
 }

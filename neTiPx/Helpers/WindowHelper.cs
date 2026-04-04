@@ -28,15 +28,19 @@ namespace neTiPx.Helpers
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+        /*
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        */
 
         [DllImport("user32.dll")]
         private static extern bool IsIconic(IntPtr hWnd);
 
+        /*
         private const int GwlExstyle = -20;
         private const int WsExNoactivate = 0x08000000;
         private const int WsExToolwindow = 0x00000080;
+        */
 
         public static IntPtr GetWindowHandle(Window window)
         {

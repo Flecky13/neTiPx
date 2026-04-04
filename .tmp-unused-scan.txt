@@ -1,0 +1,17 @@
+
+Kind   Name                               Count File                                                                           Line
+----   ----                               ----- ----                                                                           ----
+method CalculateNetwork_Click              1,00 D:\github\VisualStudio\neTiPx\neTiPx\Views\Tools\NetworkCalculatorPage.xaml.cs  577
+method GetRoutes                           1,00 D:\github\VisualStudio\neTiPx\neTiPx\Views\RouteConfigDialogContent.xaml.cs     177
+method GetWindowLong                       1,00 D:\github\VisualStudio\neTiPx\neTiPx\Helpers\WindowHelper.cs                     32
+method OnLaunched                          1,00 D:\github\VisualStudio\neTiPx\neTiPx\App.xaml.cs                                 98
+method ReadProfile                         1,00 D:\github\VisualStudio\neTiPx\neTiPx\ViewModels\IpConfigViewModel.cs           1033
+method RefreshConnectionStatusVisibility   1,00 D:\github\VisualStudio\neTiPx\neTiPx\ViewModels\IpConfigViewModel.cs            680
+method ReloadSelectedProfileSettingsAsync  1,00 D:\github\VisualStudio\neTiPx\neTiPx\ViewModels\IpConfigViewModel.cs            420
+method RemoveProfileFromConfig             1,00 D:\github\VisualStudio\neTiPx\neTiPx\ViewModels\IpConfigViewModel.cs           1204
+method RouteExists                         1,00 D:\github\VisualStudio\neTiPx\neTiPx\Services\NetworkConfigService.cs           588
+method SetColorSchemeName                  1,00 D:\github\VisualStudio\neTiPx\neTiPx\Services\SettingsService.cs                 65
+method UpdatePageVisibility                1,00 D:\github\VisualStudio\neTiPx\neTiPx\Services\PagesVisibilityService.cs         276
+method UpdateProfile                       1,00 D:\github\VisualStudio\neTiPx\neTiPx\ViewModels\IpConfigViewModel.cs           1158
+
+

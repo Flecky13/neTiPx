@@ -417,6 +417,7 @@ namespace neTiPx.ViewModels
             }
         }
 
+        /*
         private Task ReloadSelectedProfileSettingsAsync()
         {
             if (SelectedProfile == null)
@@ -456,6 +457,7 @@ namespace neTiPx.ViewModels
                 _isLoadingProfile = false;
             }
         }
+        */
 
         private static void LoadProfileFromStore(IpProfile sourceProfile, IpProfile targetProfile)
         {
@@ -1155,6 +1157,7 @@ namespace neTiPx.ViewModels
             return match?.Name ?? adapter;
         }
 
+        /*
         private void UpdateProfile(Dictionary<string, string> values, IpProfile profile)
         {
             var names = new List<string>();
@@ -1200,7 +1203,9 @@ namespace neTiPx.ViewModels
 
             values["IpProfileNames"] = string.Join(",", names);
         }
+        */
 
+        /*
         private void RemoveProfileFromConfig(Dictionary<string, string> values, string profileName)
         {
             // Remove profile from list
@@ -1225,6 +1230,7 @@ namespace neTiPx.ViewModels
                 values.Remove(key);
             }
         }
+        */
 
         private void ValidateProfile()
         {

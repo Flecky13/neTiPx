@@ -4,6 +4,7 @@ using System;
 
 namespace neTiPx.Converters
 {
+#if false
     public sealed class InvertedVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -24,4 +25,5 @@ namespace neTiPx.Converters
             return Visibility.Collapsed;
         }
     }
+#endif
 }

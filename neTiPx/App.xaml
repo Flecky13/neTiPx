@@ -73,7 +73,7 @@
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-            <converters:StringFormatConverter x:Key="StringFormatConverter" />
+            <!-- <converters:StringFormatConverter x:Key="StringFormatConverter" /> -->
             <converters:StringToModeConverter x:Key="StringToModeConverter" />
             <converters:RouteModeToBrushConverter x:Key="RouteModeToBrushConverter" />
             <converters:BooleanToValidationBorderBrushConverter x:Key="BooleanToValidationBorderBrushConverter" />

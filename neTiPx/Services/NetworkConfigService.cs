@@ -585,6 +585,7 @@ namespace neTiPx.Services
             }
         }
 
+        /*
         private static bool RouteExists(string interfaceName, string prefix)
         {
             try
@@ -617,6 +618,7 @@ namespace neTiPx.Services
                 return false;
             }
         }
+        */
 
         private static bool PersistentRouteExists(string destination, string subnetMask, string gateway)
         {

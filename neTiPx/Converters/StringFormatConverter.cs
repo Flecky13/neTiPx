@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Data;
 
 namespace neTiPx.Converters
 {
+#if false
     public sealed class StringFormatConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -27,4 +28,5 @@ namespace neTiPx.Converters
             throw new NotSupportedException();
         }
     }
+#endif
 }
