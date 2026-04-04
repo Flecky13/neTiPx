@@ -10,10 +10,29 @@ namespace neTiPx.Services
         private const string ThemeKey = "Theme";
 
         private readonly UserSettingsStore _userSettingsStore = new UserSettingsStore();
+        private UserSettingsStore.UserSettings? _cachedSettings;
+
+        private UserSettingsStore.UserSettings LoadUserSettings(bool forceReload = false)
+        {
+            if (forceReload || _cachedSettings == null)
+            {
+                _cachedSettings = _userSettingsStore.ReadUserSettings();
+            }
+
+            return _cachedSettings;
+        }
+
+        private void UpdateUserSettings(Action<UserSettingsStore.UserSettings> update)
+        {
+            var settings = LoadUserSettings(forceReload: true);
+            update(settings);
+            _userSettingsStore.WriteUserSettings(settings);
+            _cachedSettings = settings;
+        }
 
         public UserSettingsStore.UserSettings GetUserSettings()
         {
-            return _userSettingsStore.ReadUserSettings();
+            return LoadUserSettings();
         }
 
         public ThemeOption GetThemeOption()
@@ -44,15 +63,13 @@ namespace neTiPx.Services
 
         public ColorTheme? GetColorTheme()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ColorTheme;
         }
 
         public void SetColorTheme(ColorTheme colorTheme)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ColorTheme = colorTheme;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ColorTheme = colorTheme);
         }
 
         public string GetColorSchemeName()
@@ -63,67 +80,57 @@ namespace neTiPx.Services
 
         public bool GetHoverWindowEnabled()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.HoverWindowEnabled;
         }
 
         public void SetHoverWindowEnabled(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.HoverWindowEnabled = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.HoverWindowEnabled = enabled);
         }
 
         public int GetHoverWindowDelaySeconds()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.HoverWindowDelaySeconds;
         }
 
         public void SetHoverWindowDelaySeconds(int delaySeconds)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.HoverWindowDelaySeconds = delaySeconds;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.HoverWindowDelaySeconds = delaySeconds);
         }
 
         public string GetHoverWindowVerticalAnchor()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return NormalizeHoverWindowVerticalAnchor(settings.HoverWindowVerticalAnchor);
         }
 
         public void SetHoverWindowVerticalAnchor(string verticalAnchor)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.HoverWindowVerticalAnchor = NormalizeHoverWindowVerticalAnchor(verticalAnchor);
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.HoverWindowVerticalAnchor = NormalizeHoverWindowVerticalAnchor(verticalAnchor));
         }
 
         public int GetHoverWindowRightOffsetPixels()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return Math.Max(0, settings.HoverWindowRightOffsetPixels);
         }
 
         public void SetHoverWindowRightOffsetPixels(int pixels)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.HoverWindowRightOffsetPixels = Math.Max(0, pixels);
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.HoverWindowRightOffsetPixels = Math.Max(0, pixels));
         }
 
         public int GetHoverWindowVerticalOffsetPixels()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return Math.Max(0, settings.HoverWindowVerticalOffsetPixels);
         }
 
         public void SetHoverWindowVerticalOffsetPixels(int pixels)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.HoverWindowVerticalOffsetPixels = Math.Max(0, pixels);
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.HoverWindowVerticalOffsetPixels = Math.Max(0, pixels));
         }
 
         private static string NormalizeHoverWindowVerticalAnchor(string? verticalAnchor)
@@ -135,260 +142,225 @@ namespace neTiPx.Services
 
         public bool GetCheckConnectionGateway()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CheckConnectionGateway;
         }
 
         public void SetCheckConnectionGateway(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CheckConnectionGateway = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CheckConnectionGateway = enabled);
         }
 
         public bool GetCheckConnectionDns1()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CheckConnectionDns1;
         }
 
         public void SetCheckConnectionDns1(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CheckConnectionDns1 = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CheckConnectionDns1 = enabled);
         }
 
         public bool GetCheckConnectionDns2()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CheckConnectionDns2;
         }
 
         public void SetCheckConnectionDns2(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CheckConnectionDns2 = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CheckConnectionDns2 = enabled);
         }
 
         public int GetPingThresholdFast()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.PingThresholdFast;
         }
 
         public void SetPingThresholdFast(int value)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.PingThresholdFast = value;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.PingThresholdFast = value);
         }
 
         public int GetPingThresholdNormal()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.PingThresholdNormal;
         }
 
         public void SetPingThresholdNormal(int value)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.PingThresholdNormal = value;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.PingThresholdNormal = value);
         }
 
         public bool GetCloseToTrayOnClose()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CloseToTrayOnClose;
         }
 
         public void SetCloseToTrayOnClose(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CloseToTrayOnClose = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CloseToTrayOnClose = enabled);
         }
 
         public string? GetLastCheckedLatestVersion()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.LastCheckedLatestVersion;
         }
 
         public DateTime? GetLastCheckedAtLocal()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.LastCheckedAt?.ToLocalTime();
         }
 
         public void SetLastUpdateCheck(string latestVersion, DateTime lastCheckedLocal)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.LastCheckedLatestVersion = latestVersion;
-            settings.LastCheckedAt = lastCheckedLocal.Kind == DateTimeKind.Utc
-                ? lastCheckedLocal
-                : lastCheckedLocal.ToUniversalTime();
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings =>
+            {
+                settings.LastCheckedLatestVersion = latestVersion;
+                settings.LastCheckedAt = lastCheckedLocal.Kind == DateTimeKind.Utc
+                    ? lastCheckedLocal
+                    : lastCheckedLocal.ToUniversalTime();
+            });
         }
 
         public string GetPingLogFolderPath()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.PingLogFolderPath ?? string.Empty;
         }
 
         public void SetPingLogFolderPath(string folderPath)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.PingLogFolderPath = folderPath ?? string.Empty;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.PingLogFolderPath = folderPath ?? string.Empty);
         }
 
         public bool GetPingBackgroundActive()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.PingBackgroundActive;
         }
 
         public void SetPingBackgroundActive(bool active)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.PingBackgroundActive = active;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.PingBackgroundActive = active);
         }
 
         // Network Scanner Port Settings
         public bool GetScanPortHttp()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ScanPortHttp;
         }
 
         public void SetScanPortHttp(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ScanPortHttp = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ScanPortHttp = enabled);
         }
 
         public bool GetScanPortHttps()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ScanPortHttps;
         }
 
         public void SetScanPortHttps(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ScanPortHttps = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ScanPortHttps = enabled);
         }
 
         public bool GetScanPortFtp()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ScanPortFtp;
         }
 
         public void SetScanPortFtp(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ScanPortFtp = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ScanPortFtp = enabled);
         }
 
         public bool GetScanPortSsh()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ScanPortSsh;
         }
 
         public void SetScanPortSsh(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ScanPortSsh = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ScanPortSsh = enabled);
         }
 
         public bool GetScanPortSmb()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ScanPortSmb;
         }
 
         public void SetScanPortSmb(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ScanPortSmb = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ScanPortSmb = enabled);
         }
 
         public bool GetScanPortRdp()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.ScanPortRdp;
         }
 
         public void SetScanPortRdp(bool enabled)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.ScanPortRdp = enabled;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.ScanPortRdp = enabled);
         }
 
         public int GetCustomPort1()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CustomPort1;
         }
 
         public void SetCustomPort1(int port)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CustomPort1 = port;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CustomPort1 = port);
         }
 
         public int GetCustomPort2()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CustomPort2;
         }
 
         public void SetCustomPort2(int port)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CustomPort2 = port;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CustomPort2 = port);
         }
 
         public int GetCustomPort3()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.CustomPort3;
         }
 
         public void SetCustomPort3(int port)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.CustomPort3 = port;
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.CustomPort3 = port);
         }
 
         // Language Settings
         public string GetLanguageCode()
         {
-            var settings = _userSettingsStore.ReadUserSettings();
+            var settings = LoadUserSettings();
             return settings.LanguageCode ?? "System";
         }
 
         public void SetLanguageCode(string languageCode)
         {
-            var settings = _userSettingsStore.ReadUserSettings();
-            settings.LanguageCode = languageCode ?? "System";
-            _userSettingsStore.WriteUserSettings(settings);
+            UpdateUserSettings(settings => settings.LanguageCode = languageCode ?? "System");
         }
 
     }
