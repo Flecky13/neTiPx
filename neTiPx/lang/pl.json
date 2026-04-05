@@ -178,6 +178,7 @@
   "NETSCAN_ERROR_ENTER_VALID_RANGE": "Please enter at least one valid range.",
   "NETSCAN_ERROR_NO_IPS": "No IP addresses were recognized from the input.",
   "NETSCAN_ERROR_RANGE_TOO_LARGE": "IP range is too large. Maximum is 1024 addresses.",
+  "NETSCAN_ERROR_HOST_LIMIT": "Zbyt wiele hostów dla jednego skanowania. Dozwolone jest maksymalnie {0} hostów. Zmniejsz wybrane sieci lub zakresy.",
   "NETSCAN_ERROR_EMPTY_RANGE": "Empty range found in the input.",
   "NETSCAN_ERROR_INVALID_IP": "Nieprawidłowy adres IP",
   "NETSCAN_ERROR_INVALID_RANGE_VALUE": "Nieprawidłowy zakres",
@@ -191,6 +192,7 @@
   "NETSCAN_ERROR_CUSTOM_PORT_OPEN": "Niestandardowy port otwarty",
   "NETSCAN_ERROR_NO_ACTION": "Brak zdefiniowanej akcji startowej dla",
   "NETSCAN_ERROR_OPEN_CONNECTION": "Błąd podczas otwierania połączenia",
+  "TOOLS_LOG_VIEWER": "Podgląd logów",
   "TOOLS_ROUTES": "Trasy",
   "ROUTECFG_TITLE": "Konfiguruj trasy",
   "ROUTECFG_SUBTITLE": "Konfiguruj statyczne trasy IPv4, które są dodatkowo stosowane podczas zastosowania profilu.",
@@ -426,3 +428,6 @@
   "LOGVIEWER_MATCHES_NONE": "0 dopasowań",
   "LOGVIEWER_MATCHES_FORMAT": "Dopasowanie {0} / {1}"
 }
+
+
+
