@@ -169,5 +169,24 @@ namespace neTiPx.Helpers
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LogViewerRecentFiles.xml");
             }
         }
+
+        public static string GetLogViewerHighlightsJsonPath()
+        {
+            try
+            {
+                var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                var dir = Path.Combine(appData, "neTiPx");
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                return Path.Combine(dir, "LogViewerHighlights.json");
+            }
+            catch
+            {
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LogViewerHighlights.json");
+            }
+        }
     }
 }

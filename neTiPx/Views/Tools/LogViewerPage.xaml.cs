@@ -13,8 +13,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.UI;
 using Windows.Storage.Pickers;
+using Windows.UI;
 using WinRT.Interop;
 
 namespace neTiPx.Views
@@ -22,33 +22,34 @@ namespace neTiPx.Views
     public sealed partial class LogViewerPage : Page
     {
         private static readonly LanguageManager _lm = LanguageManager.Instance;
-        private readonly SolidColorBrush _matchForegroundBrush = new SolidColorBrush(Colors.Black);
-        private readonly SolidColorBrush _matchBackgroundBrush = new SolidColorBrush(Color.FromArgb(255, 255, 232, 153));
-        private readonly SolidColorBrush _activeMatchBackgroundBrush = new SolidColorBrush(Color.FromArgb(255, 255, 196, 37));
         private readonly SolidColorBrush _defaultBackgroundBrush = new SolidColorBrush(Colors.Transparent);
-        private readonly Brush _defaultForegroundBrush;
+        private readonly SolidColorBrush _defaultForegroundBrush = new SolidColorBrush(Colors.White);
         private readonly SemaphoreSlim _loadLock = new SemaphoreSlim(1, 1);
-        private readonly List<int> _matchIndices = new List<int>();
+        private readonly List<LogViewerLine> _allLines = new List<LogViewerLine>();
         private readonly LogViewerStore _logViewerStore = new LogViewerStore();
+        private readonly LogViewerHighlightStore _highlightStore = new LogViewerHighlightStore();
         private FileSystemWatcher? _fileWatcher;
-        private CancellationTokenSource? _reloadDebounceCts;
+        private readonly Timer _reloadDebounceTimer;
         private string _currentFilePath = string.Empty;
-        private int _currentMatchPointer = -1;
         private bool _suppressFileSelectionChange;
         private bool _autoScrollEnabled = true;
         private long _lastKnownFileLength;
+        private DateTime _lastKnownFileWriteTimeUtc = DateTime.MinValue;
         private bool _lastLoadEndedWithLineBreak;
         private ScrollViewer? _logListScrollViewer;
         private bool _isPinnedToBottom = true;
+        private DateTimeOffset _lastLiveReloadAt = DateTimeOffset.MinValue;
 
         public ObservableCollection<LogViewerLine> Lines { get; } = new ObservableCollection<LogViewerLine>();
         public ObservableCollection<RecentFileEntry> RecentFiles { get; } = new ObservableCollection<RecentFileEntry>();
+        public ObservableCollection<LogViewerHighlightRule> HighlightRules { get; } = new ObservableCollection<LogViewerHighlightRule>();
+        public ObservableCollection<HighlightColorOptionItem> HighlightColorOptions { get; } = new ObservableCollection<HighlightColorOptionItem>();
 
         public LogViewerPage()
         {
             InitializeComponent();
-            _defaultForegroundBrush = Application.Current.Resources["AppTextBrush"] as Brush
-                ?? new SolidColorBrush(Colors.White);
+            _reloadDebounceTimer = new Timer(OnReloadDebounceTimerTick, null, Timeout.Infinite, Timeout.Infinite);
+            InitializeHighlightColors();
             Loaded += LogViewerPage_Loaded;
             Unloaded += LogViewerPage_Unloaded;
         }
@@ -60,6 +61,7 @@ namespace neTiPx.Views
             _lm.LanguageChanged -= OnLanguageChanged;
             _lm.LanguageChanged += OnLanguageChanged;
             EnsureLogListScrollViewer();
+            LoadHighlightRules();
             LoadRecentFiles();
             UpdateLanguage();
             UpdateMatchInfo();
@@ -70,9 +72,7 @@ namespace neTiPx.Views
             _lm.LanguageChanged -= OnLanguageChanged;
             DetachLogListScrollViewer();
             DisposeWatcher();
-            _reloadDebounceCts?.Cancel();
-            _reloadDebounceCts?.Dispose();
-            _reloadDebounceCts = null;
+            _reloadDebounceTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         private void OnLanguageChanged(object? sender, EventArgs e)
@@ -85,29 +85,24 @@ namespace neTiPx.Views
         {
             if (LogViewerTitleText != null) LogViewerTitleText.Text = T("TOOLS_LOG_VIEWER");
             if (LogViewerOpenButton != null) LogViewerOpenButton.Content = T("LOGVIEWER_BUTTON_OPEN");
-            if (LogViewerHeaderLineText != null) LogViewerHeaderLineText.Text = T("LOGVIEWER_HEADER_LINE");
-            if (LogViewerHeaderContentText != null) LogViewerHeaderContentText.Text = T("LOGVIEWER_HEADER_CONTENT");
+            if (LogViewerHighlightConfigButton != null) LogViewerHighlightConfigButton.Content = T("LOGVIEWER_HIGHLIGHT_CONFIG_BUTTON");
+            if (LogViewerAutoRefreshCheckBox != null) LogViewerAutoRefreshCheckBox.Content = T("LOGVIEWER_AUTO_REFRESH");
             if (LogViewerFilterTextBox != null)
             {
                 LogViewerFilterTextBox.Header = T("LOGVIEWER_FILTER_HEADER");
                 LogViewerFilterTextBox.PlaceholderText = T("LOGVIEWER_FILTER_PLACEHOLDER");
             }
-            if (LogViewerAutoRefreshCheckBox != null) LogViewerAutoRefreshCheckBox.Content = T("LOGVIEWER_AUTO_REFRESH");
 
             if (LogViewerFileComboBox != null && string.IsNullOrWhiteSpace(_currentFilePath))
             {
                 LogViewerFileComboBox.PlaceholderText = T("LOGVIEWER_NO_FILE");
             }
 
-            if (LogViewerStatusText != null && string.IsNullOrWhiteSpace(LogViewerStatusText.Text))
-            {
-                LogViewerStatusText.Text = T("LOGVIEWER_STATUS_READY");
-            }
-
             if (LogViewerReloadButton != null) ToolTipService.SetToolTip(LogViewerReloadButton, T("LOGVIEWER_BUTTON_RELOAD"));
-            if (LogViewerPrevButton != null) ToolTipService.SetToolTip(LogViewerPrevButton, T("LOGVIEWER_BUTTON_PREV"));
-            if (LogViewerNextButton != null) ToolTipService.SetToolTip(LogViewerNextButton, T("LOGVIEWER_BUTTON_NEXT"));
             if (LogViewerAutoRefreshCheckBox != null) ToolTipService.SetToolTip(LogViewerAutoRefreshCheckBox, T("LOGVIEWER_AUTO_REFRESH"));
+            if (LogViewerHighlightConfigButton != null) ToolTipService.SetToolTip(LogViewerHighlightConfigButton, T("LOGVIEWER_HIGHLIGHT_CONFIG_BUTTON"));
+
+            InitializeHighlightColors();
         }
 
         private async void LogViewerOpenButton_Click(object sender, RoutedEventArgs e)
@@ -175,17 +170,36 @@ namespace neTiPx.Views
 
         private void LogViewerFilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ApplyFilterAndRefreshMatches();
+            RefreshVisibleLines();
         }
 
-        private void LogViewerPrevButton_Click(object sender, RoutedEventArgs e)
+        private async void LogViewerHighlightConfigButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigateToMatch(-1);
-        }
+            var dialogContent = new LogViewerHighlightConfigDialog(HighlightRules, HighlightColorOptions);
+            var dialog = new ContentDialog
+            {
+                Title = T("LOGVIEWER_HIGHLIGHT_CONFIG_TITLE"),
+                Content = dialogContent,
+                PrimaryButtonText = T("LOGVIEWER_HIGHLIGHT_CONFIG_SAVE"),
+                CloseButtonText = T("ROUTES_DIALOG_CANCEL"),
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = XamlRoot
+            };
 
-        private void LogViewerNextButton_Click(object sender, RoutedEventArgs e)
-        {
-            NavigateToMatch(1);
+            var result = await dialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            HighlightRules.Clear();
+            foreach (var rule in dialogContent.GetRules())
+            {
+                HighlightRules.Add(rule);
+            }
+
+            _highlightStore.WriteRules(HighlightRules);
+            RefreshVisibleLines();
         }
 
         private async Task LoadFileAsync(string filePath, bool forceStatusMessage, bool scrollToEnd = false)
@@ -194,43 +208,44 @@ namespace neTiPx.Views
             try
             {
                 SetLoadingState(true);
-                UpdateStatus(T("LOGVIEWER_STATUS_LOADING"));
                 var fileSnapshot = await ReadAllLinesWithRetryAsync(filePath);
 
                 _currentFilePath = filePath;
                 _lastKnownFileLength = fileSnapshot.FileLength;
+                _lastKnownFileWriteTimeUtc = fileSnapshot.LastWriteTimeUtc;
                 _lastLoadEndedWithLineBreak = fileSnapshot.EndsWithLineBreak;
                 SelectRecentFile(filePath);
                 ToolTipService.SetToolTip(LogViewerFileComboBox, filePath);
 
+                _allLines.Clear();
                 Lines.Clear();
                 for (int i = 0; i < fileSnapshot.Lines.Count; i++)
                 {
-                    Lines.Add(new LogViewerLine
+                    var line = new LogViewerLine
                     {
                         LineNumber = i + 1,
                         Text = fileSnapshot.Lines[i],
                         BackgroundBrush = _defaultBackgroundBrush,
                         ForegroundBrush = _defaultForegroundBrush
-                    });
+                    };
+                    _allLines.Add(line);
                 }
 
                 EnsureWatcher(filePath);
-                ApplyFilterAndRefreshMatches();
+                RefreshVisibleLines();
 
                 if (scrollToEnd)
                 {
                     ScrollToLatestLine(force: true);
                 }
-
-                if (forceStatusMessage)
+                else if (_autoScrollEnabled && _isPinnedToBottom)
                 {
-                    UpdateStatus(string.Format(T("LOGVIEWER_STATUS_LINES_LOADED"), fileSnapshot.Lines.Count));
+                    ScrollToLatestLine(force: true);
                 }
+
             }
             catch (Exception ex)
             {
-                UpdateStatus($"{T("LOGVIEWER_STATUS_ERROR")}: {ex.Message}");
             }
             finally
             {
@@ -256,11 +271,12 @@ namespace neTiPx.Views
                 else
                 {
                     var currentLength = fileInfo.Length;
+                    var currentWriteTimeUtc = fileInfo.LastWriteTimeUtc;
                     if (currentLength < _lastKnownFileLength)
                     {
                         requiresFullReload = true;
                     }
-                    else if (currentLength == _lastKnownFileLength)
+                    else if (currentLength == _lastKnownFileLength && currentWriteTimeUtc <= _lastKnownFileWriteTimeUtc)
                     {
                         return;
                     }
@@ -277,19 +293,10 @@ namespace neTiPx.Views
                         var changedLineIndices = AppendParsedChunk(parsedChunk);
 
                         _lastKnownFileLength = currentLength;
+                        _lastKnownFileWriteTimeUtc = currentWriteTimeUtc;
                         _lastLoadEndedWithLineBreak = parsedChunk.EndsWithLineBreak;
 
-                        if (string.IsNullOrWhiteSpace(LogViewerFilterTextBox?.Text))
-                        {
-                            _matchIndices.Clear();
-                            _currentMatchPointer = -1;
-                            UpdateMatchInfo();
-                        }
-                        else
-                        {
-                            ApplyIncrementalFilterUpdate(changedLineIndices);
-                        }
-
+                        ApplyIncrementalVisibleUpdate(changedLineIndices);
                         ScrollToLatestLine();
                     }
                 }
@@ -318,7 +325,8 @@ namespace neTiPx.Views
                     using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
                     var content = await reader.ReadToEndAsync();
                     var parsedContent = ParseLogContent(content);
-                    return new LogFileSnapshot(parsedContent.Lines, stream.Length, parsedContent.EndsWithLineBreak);
+                    var lastWriteTimeUtc = File.GetLastWriteTimeUtc(filePath);
+                    return new LogFileSnapshot(parsedContent.Lines, stream.Length, lastWriteTimeUtc, parsedContent.EndsWithLineBreak);
                 }
                 catch (Exception ex)
                 {
@@ -374,148 +382,233 @@ namespace neTiPx.Views
 
         private List<int> AppendParsedChunk(ParsedLogContent parsedChunk)
         {
-            var changedIndices = new List<int>();
+            var changedLineIndices = new List<int>();
             if (parsedChunk.Lines.Count == 0)
             {
-                return changedIndices;
+                return changedLineIndices;
             }
 
             var appendStartIndex = 0;
 
-            if (!_lastLoadEndedWithLineBreak && Lines.Count > 0)
+            if (!_lastLoadEndedWithLineBreak && _allLines.Count > 0)
             {
-                var lastLine = Lines[^1];
+                var lastLine = _allLines[^1];
                 lastLine.Text += parsedChunk.Lines[0];
-                changedIndices.Add(Lines.Count - 1);
+                changedLineIndices.Add(_allLines.Count - 1);
                 appendStartIndex = 1;
             }
 
             for (int i = appendStartIndex; i < parsedChunk.Lines.Count; i++)
             {
-                Lines.Add(new LogViewerLine
+                _allLines.Add(new LogViewerLine
                 {
-                    LineNumber = Lines.Count + 1,
-                    Text = parsedChunk.Lines[i],
-                    BackgroundBrush = _defaultBackgroundBrush,
-                    ForegroundBrush = _defaultForegroundBrush
+                    LineNumber = _allLines.Count + 1,
+                    Text = parsedChunk.Lines[i]
                 });
-                changedIndices.Add(Lines.Count - 1);
+                changedLineIndices.Add(_allLines.Count - 1);
             }
 
-            return changedIndices;
+            return changedLineIndices;
         }
 
-        private void ApplyFilterAndRefreshMatches()
+        private void BuildSegmentsForLine(LogViewerLine line, int lineIndex)
         {
-            var filter = LogViewerFilterTextBox?.Text?.Trim() ?? string.Empty;
-            _matchIndices.Clear();
-
-            for (int i = 0; i < Lines.Count; i++)
-            {
-                var line = Lines[i];
-                var isMatch = !string.IsNullOrWhiteSpace(filter)
-                    && line.Text.Contains(filter, StringComparison.OrdinalIgnoreCase);
-
-                line.IsMatch = isMatch;
-                line.IsActiveMatch = false;
-                ApplyLineVisualState(line);
-
-                if (isMatch)
-                {
-                    _matchIndices.Add(i);
-                }
-            }
-
-            SetActiveMatchPointer(_matchIndices.Count > 0 ? 0 : -1, scrollIntoView: true);
+            var matches = GetLineMatches(line.Text, lineIndex);
+            line.IsMatch = matches.Count > 0;
+            line.IsActiveMatch = false;
+            line.BackgroundBrush = _defaultBackgroundBrush;
+            line.ForegroundBrush = _defaultForegroundBrush;
+            line.Segments = new ObservableCollection<LogViewerTextSegment>(CreateSegments(line.Text, matches));
         }
 
-        private void ApplyIncrementalFilterUpdate(IReadOnlyList<int> changedLineIndices)
+        private List<HighlightMatch> GetLineMatches(string text, int lineIndex)
         {
-            var filter = LogViewerFilterTextBox?.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(filter) || changedLineIndices.Count == 0)
+            var lineMatches = new List<HighlightMatch>();
+            if (string.IsNullOrEmpty(text))
             {
-                UpdateMatchInfo();
-                return;
+                return lineMatches;
             }
 
-            var firstMatchAppeared = _matchIndices.Count == 0;
+            var occupied = new bool[text.Length];
 
-            foreach (var index in changedLineIndices.Distinct().OrderBy(index => index))
+            for (int ruleIndex = 0; ruleIndex < HighlightRules.Count; ruleIndex++)
             {
-                if (index < 0 || index >= Lines.Count)
+                var rule = HighlightRules[ruleIndex];
+                if (string.IsNullOrWhiteSpace(rule.SearchText))
                 {
                     continue;
                 }
 
-                var line = Lines[index];
-                var isMatch = line.Text.Contains(filter, StringComparison.OrdinalIgnoreCase);
-                var existingMatchPosition = _matchIndices.IndexOf(index);
-
-                if (existingMatchPosition >= 0 && !isMatch)
+                var searchText = rule.SearchText.Trim();
+                var searchStart = 0;
+                while (searchStart < text.Length)
                 {
-                    _matchIndices.RemoveAt(existingMatchPosition);
-                    if (_currentMatchPointer > existingMatchPosition)
+                    var matchIndex = text.IndexOf(searchText, searchStart, StringComparison.OrdinalIgnoreCase);
+                    if (matchIndex < 0)
                     {
-                        _currentMatchPointer--;
+                        break;
                     }
-                    else if (_currentMatchPointer == existingMatchPosition)
+
+                    var overlaps = false;
+                    for (int i = 0; i < searchText.Length; i++)
                     {
-                        _currentMatchPointer = Math.Min(_currentMatchPointer, _matchIndices.Count - 1);
+                        if (matchIndex + i < occupied.Length && occupied[matchIndex + i])
+                        {
+                            overlaps = true;
+                            break;
+                        }
                     }
+
+                    if (!overlaps)
+                    {
+                        for (int i = 0; i < searchText.Length && matchIndex + i < occupied.Length; i++)
+                        {
+                            occupied[matchIndex + i] = true;
+                        }
+
+                        var match = new HighlightMatch(lineIndex, matchIndex, searchText.Length, ruleIndex);
+                        lineMatches.Add(match);
+                    }
+
+                    searchStart = matchIndex + Math.Max(1, searchText.Length);
                 }
-                else if (existingMatchPosition < 0 && isMatch)
+            }
+
+            return lineMatches.OrderBy(match => match.Start).ToList();
+        }
+
+        private IReadOnlyList<LogViewerTextSegment> CreateSegments(string text, IReadOnlyList<HighlightMatch> matches)
+        {
+            var segments = new List<LogViewerTextSegment>();
+            if (matches.Count == 0)
+            {
+                segments.Add(new LogViewerTextSegment
                 {
-                    _matchIndices.Add(index);
-                }
-
-                line.IsMatch = isMatch;
-                line.IsActiveMatch = false;
-                ApplyLineVisualState(line);
+                    Text = text,
+                    BackgroundBrush = _defaultBackgroundBrush,
+                    ForegroundBrush = _defaultForegroundBrush
+                });
+                return segments;
             }
 
-            if (firstMatchAppeared && _matchIndices.Count > 0)
+            var position = 0;
+            foreach (var match in matches)
             {
-                SetActiveMatchPointer(0, scrollIntoView: true);
-                return;
-            }
-
-            if (_currentMatchPointer >= _matchIndices.Count)
-            {
-                SetActiveMatchPointer(_matchIndices.Count - 1, scrollIntoView: false);
-                return;
-            }
-
-            if (_currentMatchPointer >= 0 && _currentMatchPointer < _matchIndices.Count)
-            {
-                var activeIndex = _matchIndices[_currentMatchPointer];
-                if (activeIndex >= 0 && activeIndex < Lines.Count)
+                if (match.Start > position)
                 {
-                    var activeLine = Lines[activeIndex];
-                    activeLine.IsActiveMatch = true;
-                    ApplyLineVisualState(activeLine);
+                    segments.Add(new LogViewerTextSegment
+                    {
+                        Text = text.Substring(position, match.Start - position),
+                        BackgroundBrush = _defaultBackgroundBrush,
+                        ForegroundBrush = _defaultForegroundBrush
+                    });
                 }
+
+                var rule = match.RuleIndex >= 0 && match.RuleIndex < HighlightRules.Count
+                    ? HighlightRules[match.RuleIndex]
+                    : null;
+                var colors = GetRuleBrushes(rule?.ColorKey ?? "red");
+
+                segments.Add(new LogViewerTextSegment
+                {
+                    Text = text.Substring(match.Start, match.Length),
+                    BackgroundBrush = colors.BackgroundBrush,
+                    ForegroundBrush = colors.ForegroundBrush
+                });
+
+                position = match.Start + match.Length;
+            }
+
+            if (position < text.Length)
+            {
+                segments.Add(new LogViewerTextSegment
+                {
+                    Text = text.Substring(position),
+                    BackgroundBrush = _defaultBackgroundBrush,
+                    ForegroundBrush = _defaultForegroundBrush
+                });
+            }
+
+            return segments;
+        }
+
+        private void RefreshVisibleLines()
+        {
+            var filterText = LogViewerFilterTextBox?.Text?.Trim() ?? string.Empty;
+            var filteredLines = string.IsNullOrWhiteSpace(filterText)
+                ? _allLines
+                : _allLines.Where(line => line.Text.Contains(filterText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            Lines.Clear();
+            for (int i = 0; i < filteredLines.Count; i++)
+            {
+                BuildSegmentsForLine(filteredLines[i], i);
+                Lines.Add(filteredLines[i]);
             }
 
             UpdateMatchInfo();
+
+            if (_autoScrollEnabled)
+            {
+                ScrollToLatestLine(force: true);
+            }
         }
 
-        private void NavigateToMatch(int direction)
+        private void ApplyIncrementalVisibleUpdate(IReadOnlyList<int> changedLineIndices)
         {
-            if (_matchIndices.Count == 0)
+            if (changedLineIndices.Count == 0)
             {
                 return;
             }
 
-            if (_currentMatchPointer < 0)
+            var filterText = LogViewerFilterTextBox?.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(filterText))
             {
-                _currentMatchPointer = 0;
-            }
-            else
-            {
-                _currentMatchPointer = (_currentMatchPointer + direction + _matchIndices.Count) % _matchIndices.Count;
+                foreach (var lineIndex in changedLineIndices.Distinct().OrderBy(index => index))
+                {
+                    if (lineIndex < 0 || lineIndex >= _allLines.Count)
+                    {
+                        continue;
+                    }
+
+                    var line = _allLines[lineIndex];
+                    BuildSegmentsForLine(line, lineIndex);
+
+                    if (!Lines.Contains(line))
+                    {
+                        Lines.Add(line);
+                    }
+                }
+
+                UpdateMatchInfo();
+                return;
             }
 
-            SetActiveMatchPointer(_currentMatchPointer, scrollIntoView: true);
+            var requiresVisibleRefresh = false;
+            foreach (var lineIndex in changedLineIndices.Distinct())
+            {
+                if (lineIndex < 0 || lineIndex >= _allLines.Count)
+                {
+                    continue;
+                }
+
+                var line = _allLines[lineIndex];
+                var affectsVisibleList =
+                    Lines.Contains(line) ||
+                    line.Text.Contains(filterText, StringComparison.OrdinalIgnoreCase);
+
+                if (affectsVisibleList)
+                {
+                    requiresVisibleRefresh = true;
+                    break;
+                }
+            }
+
+            if (requiresVisibleRefresh)
+            {
+                RefreshVisibleLines();
+            }
+            UpdateMatchInfo();
         }
 
         private void UpdateMatchInfo()
@@ -525,78 +618,13 @@ namespace neTiPx.Views
                 return;
             }
 
-            if (_matchIndices.Count == 0)
-            {
-                LogViewerMatchesText.Text = T("LOGVIEWER_MATCHES_NONE");
-            }
-            else
-            {
-                LogViewerMatchesText.Text = string.Format(T("LOGVIEWER_MATCHES_FORMAT"), _currentMatchPointer + 1, _matchIndices.Count);
-            }
+            LogViewerMatchesText.Text = string.Format(T("LOGVIEWER_FILTER_COUNT_FORMAT"), Lines.Count, _allLines.Count);
 
             UpdateNavigationButtons();
         }
 
-        private void SetActiveMatchPointer(int pointer, bool scrollIntoView)
-        {
-            var previousPointer = _currentMatchPointer;
-            if (previousPointer >= 0 && previousPointer < _matchIndices.Count)
-            {
-                var previousIndex = _matchIndices[previousPointer];
-                if (previousIndex >= 0 && previousIndex < Lines.Count)
-                {
-                    var previousLine = Lines[previousIndex];
-                    previousLine.IsActiveMatch = false;
-                    ApplyLineVisualState(previousLine);
-                }
-            }
-
-            _currentMatchPointer = pointer >= 0 && pointer < _matchIndices.Count ? pointer : -1;
-
-            if (_currentMatchPointer >= 0)
-            {
-                var targetIndex = _matchIndices[_currentMatchPointer];
-                if (targetIndex >= 0 && targetIndex < Lines.Count)
-                {
-                    var targetLine = Lines[targetIndex];
-                    targetLine.IsActiveMatch = true;
-                    ApplyLineVisualState(targetLine);
-
-                    if (scrollIntoView)
-                    {
-                        LogViewerListView.ScrollIntoView(targetLine, ScrollIntoViewAlignment.Leading);
-                    }
-                }
-            }
-
-            UpdateMatchInfo();
-        }
-
-        private void ApplyLineVisualState(LogViewerLine line)
-        {
-            if (line.IsActiveMatch)
-            {
-                line.BackgroundBrush = _activeMatchBackgroundBrush;
-                line.ForegroundBrush = _matchForegroundBrush;
-            }
-            else if (line.IsMatch)
-            {
-                line.BackgroundBrush = _matchBackgroundBrush;
-                line.ForegroundBrush = _matchForegroundBrush;
-            }
-            else
-            {
-                line.BackgroundBrush = _defaultBackgroundBrush;
-                line.ForegroundBrush = _defaultForegroundBrush;
-            }
-        }
-
         private void UpdateNavigationButtons()
         {
-            var hasMatches = _matchIndices.Count > 0;
-
-            if (LogViewerPrevButton != null) LogViewerPrevButton.IsEnabled = hasMatches;
-            if (LogViewerNextButton != null) LogViewerNextButton.IsEnabled = hasMatches;
             if (LogViewerReloadButton != null) LogViewerReloadButton.IsEnabled = !string.IsNullOrWhiteSpace(_currentFilePath);
         }
 
@@ -612,18 +640,14 @@ namespace neTiPx.Views
                 return;
             }
 
-            var lastLine = Lines[Lines.Count - 1];
             _ = DispatcherQueue.TryEnqueue(() =>
             {
-                LogViewerListView?.UpdateLayout();
                 EnsureLogListScrollViewer();
-
                 if (_logListScrollViewer != null)
                 {
+                    _isPinnedToBottom = true;
                     _logListScrollViewer.ChangeView(null, _logListScrollViewer.ScrollableHeight, null, disableAnimation: true);
                 }
-
-                LogViewerListView.ScrollIntoView(lastLine, ScrollIntoViewAlignment.Leading);
             });
         }
 
@@ -654,7 +678,7 @@ namespace neTiPx.Views
             _logListScrollViewer = null;
         }
 
-        private void LogListScrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        private void LogListScrollViewer_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
         {
             UpdatePinnedToBottomState();
         }
@@ -662,6 +686,12 @@ namespace neTiPx.Views
         private void UpdatePinnedToBottomState()
         {
             if (_logListScrollViewer == null)
+            {
+                _isPinnedToBottom = true;
+                return;
+            }
+
+            if (_autoScrollEnabled)
             {
                 _isPinnedToBottom = true;
                 return;
@@ -698,17 +728,8 @@ namespace neTiPx.Views
             return null;
         }
 
-        private void UpdateStatus(string text)
-        {
-            if (LogViewerStatusText != null)
-            {
-                LogViewerStatusText.Text = text;
-            }
-        }
-
         private void SetLoadingState(bool isLoading)
         {
-            if (LogViewerProgressRing != null) LogViewerProgressRing.IsActive = isLoading;
             if (LogViewerReloadButton != null) LogViewerReloadButton.IsEnabled = !isLoading && !string.IsNullOrWhiteSpace(_currentFilePath);
         }
 
@@ -726,6 +747,15 @@ namespace neTiPx.Views
             }
 
             RefreshRecentFileDisplayTexts();
+        }
+
+        private void LoadHighlightRules()
+        {
+            HighlightRules.Clear();
+            foreach (var rule in _highlightStore.ReadRules())
+            {
+                HighlightRules.Add(rule);
+            }
         }
 
         private void AddRecentFile(string filePath)
@@ -857,13 +887,11 @@ namespace neTiPx.Views
 
             _fileWatcher = new FileSystemWatcher(directory, fileName)
             {
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size,
                 EnableRaisingEvents = true
             };
 
             _fileWatcher.Changed += OnWatchedFileChanged;
-            _fileWatcher.Created += OnWatchedFileChanged;
-            _fileWatcher.Renamed += OnWatchedFileChanged;
         }
 
         private void DisposeWatcher()
@@ -875,8 +903,6 @@ namespace neTiPx.Views
 
             _fileWatcher.EnableRaisingEvents = false;
             _fileWatcher.Changed -= OnWatchedFileChanged;
-            _fileWatcher.Created -= OnWatchedFileChanged;
-            _fileWatcher.Renamed -= OnWatchedFileChanged;
             _fileWatcher.Dispose();
             _fileWatcher = null;
         }
@@ -888,36 +914,74 @@ namespace neTiPx.Views
                 return;
             }
 
-            _reloadDebounceCts?.Cancel();
-            _reloadDebounceCts?.Dispose();
-            _reloadDebounceCts = new CancellationTokenSource();
-            var token = _reloadDebounceCts.Token;
-
-            _ = Task.Run(async () =>
+            try
             {
-                try
+                var info = new FileInfo(_currentFilePath);
+                if (!info.Exists)
                 {
-                    await Task.Delay(250, token);
-                    if (token.IsCancellationRequested)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    DispatcherQueue.TryEnqueue(async () =>
-                    {
-                        UpdateStatus(T("LOGVIEWER_STATUS_LIVE_RELOADING"));
-                        await AppendLatestChangesAsync(_currentFilePath);
-                        UpdateStatus(T("LOGVIEWER_STATUS_LIVE_UPDATED"));
-                    });
-                }
-                catch (OperationCanceledException)
+                if (info.Length == _lastKnownFileLength && info.LastWriteTimeUtc <= _lastKnownFileWriteTimeUtc)
                 {
+                    return;
                 }
-            }, token);
+            }
+            catch
+            {
+            }
+
+            _reloadDebounceTimer.Change(450, Timeout.Infinite);
+        }
+
+        private void OnReloadDebounceTimerTick(object? state)
+        {
+            if (string.IsNullOrWhiteSpace(_currentFilePath))
+            {
+                return;
+            }
+
+            DispatcherQueue.TryEnqueue(async () =>
+            {
+                var now = DateTimeOffset.UtcNow;
+                if (now - _lastLiveReloadAt < TimeSpan.FromMilliseconds(500))
+                {
+                    return;
+                }
+
+                _lastLiveReloadAt = now;
+                await AppendLatestChangesAsync(_currentFilePath);
+            });
+        }
+
+        private void InitializeHighlightColors()
+        {
+            HighlightColorOptions.Clear();
+            HighlightColorOptions.Add(new HighlightColorOptionItem("red", T("LOGVIEWER_HIGHLIGHT_COLOR_RED")));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("yellow", T("LOGVIEWER_HIGHLIGHT_COLOR_YELLOW")));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("green", T("LOGVIEWER_HIGHLIGHT_COLOR_GREEN")));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("orange", T("LOGVIEWER_HIGHLIGHT_COLOR_ORANGE")));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("blue", T("LOGVIEWER_HIGHLIGHT_COLOR_BLUE")));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("purple", T("LOGVIEWER_HIGHLIGHT_COLOR_PURPLE")));
+        }
+
+        private (Brush BackgroundBrush, Brush ForegroundBrush) GetRuleBrushes(string colorKey)
+        {
+            var baseColor = colorKey.ToLowerInvariant() switch
+            {
+                "yellow" => Color.FromArgb(255, 147, 116, 0),
+                "green" => Color.FromArgb(255, 0, 78, 0),
+                "orange" => Color.FromArgb(255, 161, 64, 0),
+                "blue" => Color.FromArgb(255, 0, 49, 98),
+                "purple" => Color.FromArgb(255, 89, 0, 89),
+                _ => Color.FromArgb(255, 140, 0, 0)
+            };
+
+            return (new SolidColorBrush(baseColor), new SolidColorBrush(Colors.White));
         }
 
         private sealed record ParsedLogContent(IReadOnlyList<string> Lines, bool EndsWithLineBreak);
-
-        private sealed record LogFileSnapshot(IReadOnlyList<string> Lines, long FileLength, bool EndsWithLineBreak);
+        private sealed record LogFileSnapshot(IReadOnlyList<string> Lines, long FileLength, DateTime LastWriteTimeUtc, bool EndsWithLineBreak);
+        private sealed record HighlightMatch(int LineIndex, int Start, int Length, int RuleIndex);
     }
 }

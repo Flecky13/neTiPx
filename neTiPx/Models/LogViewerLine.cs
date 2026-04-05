@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
+using System.Collections.ObjectModel;
 
 namespace neTiPx.Models
 {
@@ -10,6 +11,7 @@ namespace neTiPx.Models
         private bool _isActiveMatch;
         private Brush? _backgroundBrush;
         private Brush? _foregroundBrush;
+        private ObservableCollection<LogViewerTextSegment> _segments = new ObservableCollection<LogViewerTextSegment>();
 
         public int LineNumber { get; set; }
 
@@ -41,6 +43,12 @@ namespace neTiPx.Models
         {
             get => _foregroundBrush;
             set => SetProperty(ref _foregroundBrush, value);
+        }
+
+        public ObservableCollection<LogViewerTextSegment> Segments
+        {
+            get => _segments;
+            set => SetProperty(ref _segments, value);
         }
     }
 }
