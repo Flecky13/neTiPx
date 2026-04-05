@@ -957,23 +957,43 @@ namespace neTiPx.Views
         private void InitializeHighlightColors()
         {
             HighlightColorOptions.Clear();
-            HighlightColorOptions.Add(new HighlightColorOptionItem("red", T("LOGVIEWER_HIGHLIGHT_COLOR_RED")));
-            HighlightColorOptions.Add(new HighlightColorOptionItem("yellow", T("LOGVIEWER_HIGHLIGHT_COLOR_YELLOW")));
-            HighlightColorOptions.Add(new HighlightColorOptionItem("green", T("LOGVIEWER_HIGHLIGHT_COLOR_GREEN")));
-            HighlightColorOptions.Add(new HighlightColorOptionItem("orange", T("LOGVIEWER_HIGHLIGHT_COLOR_ORANGE")));
-            HighlightColorOptions.Add(new HighlightColorOptionItem("blue", T("LOGVIEWER_HIGHLIGHT_COLOR_BLUE")));
-            HighlightColorOptions.Add(new HighlightColorOptionItem("purple", T("LOGVIEWER_HIGHLIGHT_COLOR_PURPLE")));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("red", new SolidColorBrush(Color.FromArgb(255, 140, 0, 0))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("orange", new SolidColorBrush(Color.FromArgb(255, 161, 64, 0))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("amber", new SolidColorBrush(Color.FromArgb(255, 156, 94, 0))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("yellow", new SolidColorBrush(Color.FromArgb(255, 147, 116, 0))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("lime", new SolidColorBrush(Color.FromArgb(255, 84, 110, 0))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("green", new SolidColorBrush(Color.FromArgb(255, 0, 78, 0))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("mint", new SolidColorBrush(Color.FromArgb(255, 0, 96, 66))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("teal", new SolidColorBrush(Color.FromArgb(255, 0, 89, 96))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("cyan", new SolidColorBrush(Color.FromArgb(255, 0, 86, 122))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("sky", new SolidColorBrush(Color.FromArgb(255, 0, 72, 132))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("blue", new SolidColorBrush(Color.FromArgb(255, 0, 49, 98))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("indigo", new SolidColorBrush(Color.FromArgb(255, 42, 47, 122))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("violet", new SolidColorBrush(Color.FromArgb(255, 75, 45, 130))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("purple", new SolidColorBrush(Color.FromArgb(255, 89, 0, 89))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("magenta", new SolidColorBrush(Color.FromArgb(255, 124, 0, 88))));
+            HighlightColorOptions.Add(new HighlightColorOptionItem("pink", new SolidColorBrush(Color.FromArgb(255, 132, 24, 80))));
         }
 
         private (Brush BackgroundBrush, Brush ForegroundBrush) GetRuleBrushes(string colorKey)
         {
             var baseColor = colorKey.ToLowerInvariant() switch
             {
-                "yellow" => Color.FromArgb(255, 147, 116, 0),
-                "green" => Color.FromArgb(255, 0, 78, 0),
                 "orange" => Color.FromArgb(255, 161, 64, 0),
+                "amber" => Color.FromArgb(255, 156, 94, 0),
+                "yellow" => Color.FromArgb(255, 147, 116, 0),
+                "lime" => Color.FromArgb(255, 84, 110, 0),
+                "green" => Color.FromArgb(255, 0, 78, 0),
+                "mint" => Color.FromArgb(255, 0, 96, 66),
+                "teal" => Color.FromArgb(255, 0, 89, 96),
+                "cyan" => Color.FromArgb(255, 0, 86, 122),
+                "sky" => Color.FromArgb(255, 0, 72, 132),
                 "blue" => Color.FromArgb(255, 0, 49, 98),
+                "indigo" => Color.FromArgb(255, 42, 47, 122),
+                "violet" => Color.FromArgb(255, 75, 45, 130),
                 "purple" => Color.FromArgb(255, 89, 0, 89),
+                "magenta" => Color.FromArgb(255, 124, 0, 88),
+                "pink" => Color.FromArgb(255, 132, 24, 80),
                 _ => Color.FromArgb(255, 140, 0, 0)
             };
 

@@ -1,7 +1,9 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
 using neTiPx.Models;
+using neTiPx.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,6 +16,8 @@ namespace neTiPx.Views
 {
     public sealed partial class LogViewerHighlightConfigDialog : UserControl
     {
+        private static readonly LanguageManager _lm = LanguageManager.Instance;
+
         public ObservableCollection<LogViewerHighlightRule> Rules { get; } = new ObservableCollection<LogViewerHighlightRule>();
 
         public IReadOnlyList<HighlightColorOptionItem> ColorOptions { get; }
@@ -23,6 +27,7 @@ namespace neTiPx.Views
             InitializeComponent();
             ColorOptions = colorOptions.ToList();
             RulesListView.Tag = ColorOptions;
+            UpdateLanguage();
 
             foreach (var rule in rules)
             {
@@ -32,6 +37,16 @@ namespace neTiPx.Views
                     ColorKey = rule.ColorKey
                 });
             }
+        }
+
+        private static string T(string key) => _lm.Lang(key);
+
+        private void UpdateLanguage()
+        {
+            if (AddRuleButton != null) AddRuleButton.Content = T("LOGVIEWER_HIGHLIGHT_ADD_RULE");
+            if (ImportRulesButton != null) ImportRulesButton.Content = T("LOGVIEWER_HIGHLIGHT_IMPORT");
+            if (ExportRulesButton != null) ExportRulesButton.Content = T("LOGVIEWER_HIGHLIGHT_EXPORT");
+            if (DialogRoot != null) DialogRoot.Tag = T("LOGVIEWER_HIGHLIGHT_SEARCH_PLACEHOLDER");
         }
 
         public IReadOnlyList<LogViewerHighlightRule> GetRules()
@@ -69,10 +84,10 @@ namespace neTiPx.Views
             var picker = new FileSavePicker
             {
                 SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-                SuggestedFileName = "LogViewerHighlights"
+                SuggestedFileName = T("LOGVIEWER_HIGHLIGHT_EXPORT_FILENAME")
             };
             picker.FileTypeChoices.Clear();
-            picker.FileTypeChoices.Add("JSON", new List<string> { ".json" });
+            picker.FileTypeChoices.Add(T("LOGVIEWER_FILETYPE_JSON"), new List<string> { ".json" });
 
             var hwnd = WindowHelper.GetWindowHandle(App.MainWindow);
             InitializeWithWindow.Initialize(picker, hwnd);
@@ -132,15 +147,15 @@ namespace neTiPx.Views
 
     public sealed class HighlightColorOptionItem
     {
-        public HighlightColorOptionItem(string key, string displayName)
+        public HighlightColorOptionItem(string key, Brush swatchBrush)
         {
             Key = key;
-            DisplayName = displayName;
+            SwatchBrush = swatchBrush;
         }
 
         public string Key { get; }
 
-        public string DisplayName { get; }
+        public Brush SwatchBrush { get; }
     }
 
     public sealed class HighlightRuleExport

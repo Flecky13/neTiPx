@@ -18,7 +18,7 @@
 
         <TextBlock Grid.Row="0"
                    x:Name="LogViewerTitleText"
-                   Text="Log Viewer"
+                   Text=""
                    Style="{StaticResource SectionTitle}"
                    FontSize="20"
                    FontWeight="SemiBold" />
@@ -31,14 +31,14 @@
                       ColumnSpacing="12">
                     <Button x:Name="LogViewerOpenButton"
                             Grid.Column="0"
-                            Content="Datei öffnen"
+                            Content=""
                             Click="LogViewerOpenButton_Click"
                             Style="{StaticResource AccentButtonStyle}"
                             MinWidth="140" />
 
                     <ComboBox x:Name="LogViewerFileComboBox"
                               Grid.Column="1"
-                              PlaceholderText="Keine Datei ausgewählt"
+                              PlaceholderText=""
                               DisplayMemberPath="DisplayText"
                               SelectionChanged="LogViewerFileComboBox_SelectionChanged"
                               SizeChanged="LogViewerFileComboBox_SizeChanged"
@@ -60,26 +60,26 @@
                       ColumnSpacing="12">
                     <Button x:Name="LogViewerHighlightConfigButton"
                             Grid.Column="0"
-                            Content="Highlights"
+                            Content=""
                             Click="LogViewerHighlightConfigButton_Click"
                             VerticalAlignment="Bottom" />
 
                     <CheckBox x:Name="LogViewerAutoRefreshCheckBox"
                               Grid.Column="1"
-                              Content="Auto aktualisieren"
+                              Content=""
                               IsChecked="True"
                               Click="LogViewerAutoRefreshCheckBox_Click"
                               VerticalAlignment="Bottom" />
 
                     <TextBox x:Name="LogViewerFilterTextBox"
                              Grid.Column="2"
-                             Header="Filter"
-                             PlaceholderText="Text enthalten..."
+                             Header=""
+                             PlaceholderText=""
                              TextChanged="LogViewerFilterTextBox_TextChanged" />
 
                     <TextBlock x:Name="LogViewerMatchesText"
                                Grid.Column="3"
-                               Text="0 / 0"
+                               Text=""
                                VerticalAlignment="Bottom"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </Grid>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UserControl
+    x:Name="DialogRoot"
     x:Class="neTiPx.Views.LogViewerHighlightConfigDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,15 +16,15 @@
                     Spacing="8"
                     HorizontalAlignment="Left">
             <Button x:Name="AddRuleButton"
-                    Content="Regel hinzufügen"
+                    Content=""
                     Click="AddRuleButton_Click" />
 
             <Button x:Name="ImportRulesButton"
-                    Content="Import"
+                    Content=""
                     Click="ImportRulesButton_Click" />
 
             <Button x:Name="ExportRulesButton"
-                    Content="Export"
+                    Content=""
                     Click="ExportRulesButton_Click" />
         </StackPanel>
 
@@ -40,13 +41,25 @@
                                 Padding="0,4">
                         <TextBox Width="285"
                                  Text="{x:Bind SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 PlaceholderText="Suchtext" />
+                                 PlaceholderText="{Binding ElementName=DialogRoot, Path=Tag}" />
 
                         <ComboBox Width="95"
-                                  DisplayMemberPath="DisplayName"
                                   ItemsSource="{Binding ElementName=RulesListView, Path=Tag}"
                                   SelectedValuePath="Key"
-                                  SelectedValue="{x:Bind ColorKey, Mode=TwoWay}" />
+                                  SelectedValue="{x:Bind ColorKey, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="56"
+                                            Height="14"
+                                            CornerRadius="3"
+                                            Background="{Binding SwatchBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
                         <Button Width="42"
                                 MinWidth="42"

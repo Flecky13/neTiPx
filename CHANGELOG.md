@@ -11,6 +11,7 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - **Log Viewer / Live-Update**: Nachladen neuer Logeinträge auf inkrementelles Anhängen umgestellt; Auto-Scroll lässt sich separat steuern und bleibt bei deaktivierter Option auf der aktuellen Position stehen.
+- **Navigation / Hauptmenü**: Breite des erweiterten WinUI-`NavigationView`-Bereichs ist über `OpenPaneLength` gezielt festgelegt; komprimierte Breite bleibt über `CompactPaneLength` definiert.
 
 ### Fixed
 - **Log Viewer / Filter**: Live-Updates mit aktivem Filter bewerten nur noch neu hinzugekommene bzw. geänderte Zeilen, statt die gesamte Ansicht sichtbar neu aufzubauen.
