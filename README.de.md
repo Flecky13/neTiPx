@@ -1,6 +1,7 @@
 # neTiPx
 
-🌍 Language:
+🌍 Language: Deutsch
+
 Thisway for [English](README.md)
 
 <p align="center">

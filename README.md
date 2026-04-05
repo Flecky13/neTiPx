@@ -1,6 +1,7 @@
 # neTiPx
 
-  🌍 Language:
+🌍 Language: English
+
  Hierlang für [Deutsch](README.de.md)
 
 <p align="center">
