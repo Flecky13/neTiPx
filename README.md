@@ -20,6 +20,7 @@
   - [Netzwerkscanner](#netzwerkscanner)
   - [Log Viewer](#log-viewer)
   - [Routen Tool](#routen-tool)
+  - [Info](#info)
   - [Einstellungen](#einstellungen)
 - [Funktionen im Detail](#-funktionen-im-detail)
   - [PING Tool](#ping-tool-1)
@@ -48,7 +49,7 @@
 - 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
 - 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
 - 🔎 **Netzwerkscanner**: Scan von IP-Bereichen mit Port-Prüfung und Detailansicht gefundener Geräte
-- 📄 **Log Viewer**: Öffnen und Live-Anzeigen von Logdateien mit Filter, Treffer-Navigation und optionalem Auto-Scroll
+- 📄 **Log Viewer**: Öffnen und Live-Anzeigen von Logdateien mit Filter, Highlight-Regeln, 16-Farben-Swatch-Auswahl und optionalem Auto-Scroll
 - 🛣️ **Routen Tool**: Anzeige aktueller IPv4-Routen inkl. Löschfunktion für benutzerseitige/persistente Routen und direktem Hinzufügen neuer Routen
 - 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner, Netzwerkscanner, Log Viewer und Routen als eigene Unterseiten mit Lazy-Loading
 - 🗂️ **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
@@ -99,7 +100,7 @@ Verwalten Sie mehrere IP-Profile und wechseln Sie schnell zwischen verschiedenen
 
 Das Ping Tool ermöglicht die Überwachung mehrerer Ziele mit eigener Taktung und Protokollanzeige:
 
-![Ping Tool](Bilder/Tool_Page.png)
+![Ping Tool](Bilder/tools_ping.png)
 
 **Funktionen:**
 - **Mehrere Ziele**: IPs oder Hostnamen hinzufügen und parallel überwachen
@@ -112,6 +113,8 @@ Das Ping Tool ermöglicht die Überwachung mehrerer Ziele mit eigener Taktung un
 ### WLAN Scanner
 
 Der WLAN Scanner nutzt die native Windows WLAN API für detaillierte Netzwerkinformationen:
+
+![WLAN Scanner](Bilder/tools_wlan.png)
 
 **Funktionen:**
 - **Native API**: Direkter Zugriff auf Windows WLAN-Schnittstelle
@@ -134,6 +137,8 @@ Der WLAN Scanner nutzt die native Windows WLAN API für detaillierte Netzwerkinf
 ### Netzwerk-Rechner
 
 Der Netzwerk-Rechner bietet intelligente IP-Subnetz-Berechnungen mit automatischer Synchronisierung:
+
+![Netzwerk-Rechner](Bilder/tools_NetCalc.png)
 
 **Funktionen:**
 - **Intelligente Eingabe**: IP-Adresse, Subnetzmaske oder CIDR-Sufix - alle Felder aktualisieren sich automatisch
@@ -163,6 +168,8 @@ Der Netzwerk-Rechner bietet intelligente IP-Subnetz-Berechnungen mit automatisch
 
 Der Netzwerkscanner durchsucht lokale IP-Bereiche und zeigt erkannte Geräte inkl. Port-Status an.
 
+![Netzwerkscanner](Bilder/tool_NetScan.png)
+
 **Funktionen:**
 - **Scan von IP-Bereichen**: Einzelne Bereiche oder mehrere Bereiche in einer Anfrage
 - **Port-Prüfung**: Frei konfigurierbare Portliste für Erreichbarkeits- und Dienstprüfung
@@ -173,16 +180,29 @@ Der Netzwerkscanner durchsucht lokale IP-Bereiche und zeigt erkannte Geräte ink
 
 Der Log Viewer öffnet vorhandene Logdateien und zeigt neue Einträge live in einer separaten Tool-Unterseite an.
 
+![Log Viewer](Bilder/tools_LogViewer.png)
+
 **Funktionen:**
 - **Dateiauswahl und Verlauf**: Zuletzt verwendete Logdateien lassen sich direkt erneut öffnen
 - **Live-Anzeige**: Neue Einträge werden automatisch an die bestehende Ansicht angehängt
-- **Filter und Suche**: Freitextfilter mit Trefferzähler sowie Vor/Zurück-Navigation zwischen Treffern
+- **Filter und Suche**: Freitextfilter mit Trefferzähler (`sichtbar / gesamt`) und sofortiger Aktualisierung
+- **Highlight-Regeln**: Suchbegriffe können farblich markiert werden
+- **Farbwahl über Swatches**: Auswahl über farbige Rechteck-Swatches statt Textliste
+- **Erweiterte Farbpalette**: 16 auswählbare Farben für Hervorhebungen
 - **Automatisches Weiterscrollen**: Optionales Mitscrollen ans Dateiende während neue Einträge eintreffen
 - **Robustes Nachladen**: Auch während die Datei von einem anderen Prozess beschrieben wird, bleibt die Anzeige lesbar
 
 ### Routen Tool
 
 Das Routen Tool zeigt die aktuelle IPv4-Routing-Tabelle und unterstützt die gezielte Analyse für ein konkretes Ziel.
+
+![Routen Tool](Bilder/tools_routen.png)
+
+### Info
+
+Die Info-Seite bündelt Versions- und Update-Informationen sowie wichtige Links.
+
+![Info](Bilder/Infos.png)
 
 **Funktionen:**
 - **Routenübersicht**: Anzeige aktiver und persistenter IPv4-Routen inklusive Default-Route (`0.0.0.0/0`)
@@ -271,8 +291,11 @@ zurück zum
 
 - **Unterstützte Formate**: Öffnet Log-, Text-, CSV- und JSON-Dateien zur schnellen Sichtprüfung
 - **Live-Append statt Voll-Reload**: Neue Daten werden an die bestehende Anzeige angehängt, ohne die ganze Datei jedes Mal neu aufzubauen
-- **Filter mit Treffer-Navigation**: Textsuche mit Hervorhebung, Trefferzähler und Navigation zwischen den Fundstellen
+- **Highlight-Regeln mit Farbswatches**: Regeln können angelegt, entfernt, importiert und exportiert werden; Farbauswahl über visuelle Swatches
+- **16 Highlight-Farben**: Erweiterte Palette für bessere visuelle Unterscheidung im Log
+- **Filter mit Trefferzähler**: Textsuche mit Hervorhebung und Anzeige `sichtbar / gesamt`
 - **Auto-Scroll optional**: Bei aktivierter Option bleibt die Ansicht am Ende der Datei; deaktiviert bleibt die aktuelle Position erhalten
+- **Vollständige Lokalisierung**: Alle sichtbaren Texte des Log-Viewers inklusive Highlight-Dialog kommen aus den Sprachdateien
 - **Fehlertolerantes Lesen**: Datei wird mit gemeinsamem Zugriff geöffnet, damit auch aktiv beschriebene Logs beobachtet werden können
 
 ### WLAN Scanner - Technische Details
