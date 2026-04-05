@@ -56,8 +56,8 @@
 - 📄 **Log Viewer**: Open and live display of log files with filtering, highlight rules, 16-color swatch selection and optional auto-scroll
 - 🛣️ **Routes Tool**: Display current IPv4 routes including delete function for user-defined/persistent routes and direct addition of new routes
 - 🧩 **Modular Tools Page**: Ping, WLAN, Network Calculator, Network Scanner, Log Viewer and Routes as separate subpages with lazy loading
-- 🗂️ **Page Visibility**: Main and tool pages can be shown/hidden via \PagesVisibility.xml\
-- 🛠️ **Hidden Admin Configuration**: On the Settings page, the word \Wünschen\ opens a dialog for managing page visibility
+- 🗂️ **Page Visibility**: Main and tool pages can be shown/hidden via `PagesVisibility.xml`
+- 🛠️ **Hidden Admin Configuration**: On the Settings page, the word `Wünschen` opens a dialog for managing page visibility
 
 Back to
 [Table of Contents](#-table-of-contents)
@@ -91,7 +91,7 @@ Manage multiple IP profiles and quickly switch between different network configu
 - **Multiple IP Addresses**: Assign multiple IP addresses to an adapter
 - **DNS Configuration**: Configure primary and secondary DNS servers
 - **Routes per Profile**: Manage static IPv4 routes directly in the IP profile
-- **Route Mode**: Choose between \eplace\ and \dd\ existing persistent routes per profile
+- **Route Mode**: Choose between `replace` and `add` existing persistent routes per profile
 - **System Reconciliation**: Existing system routes are detected and marked in the profile dialog
 - **Real-time Connection Status**: Monitor gateway and DNS servers with color-coded traffic light
   - 🟢 Green: Reachable (good ping)
@@ -111,7 +111,7 @@ The Ping Tool enables monitoring of multiple targets with individual timing and 
 - **IPv4/IPv6 Display**: Response time and status indicator per protocol
 - **Active Status per Line**: Enable and disable individual targets independently
 - **Background Option**: Pings continue optionally even when the Ping page is not in focus
-- **Status for Unused Protocols**: Display \inactive\ with gray indicator
+- **Status for Unused Protocols**: Display `inactive` with gray indicator
 
 ### WLAN Scanner
 
@@ -188,7 +188,7 @@ The Log Viewer opens existing log files and displays new entries live in a separ
 **Features:**
 - **File Selection and History**: Recently used log files can be reopened directly
 - **Live Display**: New entries are automatically appended to the existing view
-- **Filter and Search**: Free-text filter with hit counter (\isible / total\) and instant update
+- **Filter and Search**: Free-text filter with hit counter (`visible / total`) and instant update
 - **Highlight Rules**: Search terms can be color-highlighted
 - **Color Selection via Swatches**: Selection via colored rectangle swatches instead of text list
 - **Extended Color Palette**: 16 selectable colors for highlights
@@ -208,10 +208,10 @@ The Info page consolidates version and update information along with important l
 ![Info](Bilder/Infos.png)
 
 **Features:**
-- **Route Overview**: Display of active and persistent IPv4 routes including default route (\ .0.0.0/0\)
-- **Delete Logic by Source**: Delete button only for user-defined/static routes, system routes marked as \System Route\
+- **Route Overview**: Display of active and persistent IPv4 routes including default route (`0.0.0.0/0`)
+- **Delete Logic by Source**: Delete button only for user-defined/static routes, system routes marked as `System Route`
 - **Target IP Filter**: Enter target IP to display only relevant routes (Longest Prefix Match + Metric)
-- **Sortable Table**: Sort via column headers with direction indicator (\▲\/\▼\)
+- **Sortable Table**: Sort via column headers with direction indicator (`▲`/`▼`)
 - **Add Route**: Create persistent route directly from the tool
 
 ### Settings
@@ -240,14 +240,14 @@ Configure the application to your needs:
 - **Path Display**: Dynamically adjusted single-line display with tooltip for full path
 
 #### 🗂️ Page Visibility
-- **Configuration File**: \%APPDATA%\\neTiPx\\PagesVisibility.xml\
-- **Hidden Dialog**: Click the word \Wünschen\ in Settings
-- **Grouped Control**: Separate areas for \Main Pages\ and \Tools\
+- **Configuration File**: `%APPDATA%\neTiPx\PagesVisibility.xml`
+- **Hidden Dialog**: Click the word `Wünschen` in Settings
+- **Grouped Control**: Separate areas for `Main Pages` and `Tools`
 - **Tools Dependency**:
-  - \Tools (Main Page)\ off => all tool sub-pages off
-  - One tool sub-page on => \Tools (Main Page)\ automatically on
-  - All tool sub-pages off => \Tools (Main Page)\ automatically off
-- **Always Visible**: \Adapter Info\, \Info\ and \Settings\ are permanently visible and cannot be hidden via XML
+  - `Tools (Main Page)` off => all tool sub-pages off
+  - One tool sub-page on => `Tools (Main Page)` automatically on
+  - All tool sub-pages off => `Tools (Main Page)` automatically off
+- **Always Visible**: `Adapter Info`, `Info` and `Settings` are permanently visible and cannot be hidden via XML
 - **Live Update**: When closing the dialog, XML values are saved and navigation is updated immediately
 
 #### 🎨 Color Themes
@@ -274,20 +274,20 @@ Back to
 - **Parallel Monitoring**: Multiple targets are monitored simultaneously
 - **Target Types**: Supports IPv4, IPv6 and hostnames
 - **Visible Protocol Behavior**:
-  - Unused protocol displays \inactive\ and a gray indicator
-  - Disabled target displays \Disabled\ for both protocols
+  - Unused protocol displays `inactive` and a gray indicator
+  - Disabled target displays `Disabled` for both protocols
 - **Flexible Activation**:
   - Per target via row checkbox
-  - Global for background operation via \continue active in background\
+  - Global for background operation via `continue active in background`
 
 ### Ping Logging
 
 - **Individual Log File per Target**: Unique filenames, even with special characters in target name
-- **CSV Format with Timestamp**: \Time;Target;Protocol;Response Time\
+- **CSV Format with Timestamp**: `Time;Target;Protocol;Response Time`
 - **Direct Actions in List**:
   - Open log file
   - Optionally delete with
-  - Before deleting, optionally export via \Save As\
+  - Before deleting, optionally export via `Save As`
 - **Protocol-Specific Logging**: Only relevant IPv4/IPv6 entries are written
 
 ### Log Viewer
@@ -296,7 +296,7 @@ Back to
 - **Live Append Instead of Full Reload**: New data is appended to existing display without rebuilding the entire file each time
 - **Highlight Rules with Color Swatches**: Rules can be created, removed, imported and exported; color selection via visual swatches
 - **16 Highlight Colors**: Extended palette for better visual distinction in logs
-- **Filter with Hit Counter**: Text search with highlighting and display \isible / total\
+- **Filter with Hit Counter**: Text search with highlighting and display `visible / total`
 - **Auto-Scroll Optional**: With option enabled, view stays at end of file; when disabled, current position is retained
 - **Complete Localization**: All visible Log Viewer texts including highlight dialog come from language files
 - **Fault-Tolerant Reading**: File is opened with shared access so actively written logs can be observed
@@ -325,7 +325,7 @@ Back to
 
 ### Route Management and Routing Analysis
 
-- **Source-Based Classification**: Combination of \oute print\, CIM (\Win32_IP4PersistedRouteTable\) and \Get-NetRoute\ to distinguish system and user routes
+- **Source-Based Classification**: Combination of `route print`, CIM (`Win32_IP4PersistedRouteTable`) and `Get-NetRoute` to distinguish system and user routes
 - **Persistence Detection**: Static/persistent routes are detected as deletable, system-level on-link/local/DHCP routes remain protected
 - **Routing Decision in Filter**: For target IPs, only candidates with best prefix and best metric are displayed
 - **Safe Delete/Add Operations**: Route changes are performed elevated and table is re-read after action
@@ -381,8 +381,7 @@ Download and install the Windows App SDK from:
 
 1. **Check System Requirements**: Ensure that Windows App SDK is installed (see [System Requirements](#-system-requirements))
 2. Download the latest setup package from the [Releases](../../releases) section
-3. Run \
-eTiPx_Setup_Vx.x.x.x.exe\
+3. Run `neTiPx_Setup_Vx.x.x.x.exe`
 4. Follow the installation wizard instructions
 5. Start neTiPx from the Start menu or desktop icon
 
@@ -396,7 +395,7 @@ Back to
 
 ## 📄 License & Contact
 
-See \LICENSE\ in the repository. For code questions, please use Issues/PRs in the repo.
+See `LICENSE` in the repository. For code questions, please use Issues/PRs in the repo.
 
 https://buymeacoffee.com/pedrotepe
 
