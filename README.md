@@ -1,7 +1,9 @@
 # neTiPx
 
 <p align="center">
-  🌍 Language: [English](README.md) | [Deutsch](README.de.md)
+  🌍 Language:
+  - [English](README.md)
+  - [Deutsch](README.de.md)
 </p>
 
 <p align="center">
