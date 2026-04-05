@@ -1,8 +1,8 @@
 # neTiPx
 
-<p align="center">
-  🌍 Sprache: [English](README.md) | [Deutsch](README.de.md)
-</p>
+  🌍 Language:
+  - [English](README.md)
+  - [Deutsch](README.de.md)
 
 <p align="center">
   <img src="Bilder/toolicon.png" alt="neTiPx Logo" width="120"/>
