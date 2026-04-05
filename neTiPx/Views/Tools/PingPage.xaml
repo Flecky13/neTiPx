@@ -70,10 +70,10 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,8">
-                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,80,84,20,84,20,Auto,Auto,44" ColumnSpacing="8" RowSpacing="8">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,90,84,20,84,20,Auto,Auto,44" ColumnSpacing="8" RowSpacing="8">
                                     <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding Target, Mode=TwoWay}" Tag="{Binding}" LostFocus="PingTargetTextBox_LostFocus" VerticalAlignment="Center" />
 
-                                    <NumberBox Grid.Row="0" Grid.Column="1" Value="{Binding IntervalSeconds, Mode=TwoWay}" Minimum="1" Maximum="3600" SmallChange="1" SpinButtonPlacementMode="Compact" Tag="{Binding}" ValueChanged="PingIntervalNumberBox_ValueChanged" MinWidth="80" MaxWidth="80" VerticalAlignment="Center" />
+                                    <NumberBox Grid.Row="0" Grid.Column="1" Value="{Binding IntervalSeconds, Mode=TwoWay}" Minimum="1" Maximum="120" SmallChange="1" SpinButtonPlacementMode="Compact" Tag="{Binding}" ValueChanged="PingIntervalNumberBox_ValueChanged" MinWidth="90" MaxWidth="90" VerticalAlignment="Center" />
 
                                     <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding ResponseTimeIpv4, Mode=OneWay}" IsReadOnly="True" PlaceholderText="{Binding ElementName=PingPageRoot, Path=PingResponsePlaceholder, Mode=OneWay}" MinWidth="84" MaxWidth="84" VerticalAlignment="Center" />
 
