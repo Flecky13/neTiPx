@@ -28,7 +28,7 @@
             PaneDisplayMode="Left"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
-            OpenPaneLength="320"
+            OpenPaneLength="240"
             CompactPaneLength="48"
             Background="{ThemeResource AppBackgroundBrush}"
             SelectionChanged="RootNavView_SelectionChanged"
