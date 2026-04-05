@@ -1,373 +1,376 @@
 # neTiPx
 
 <p align="center">
+  🌍 Language: [English](README.md) | [Deutsch](README.de.md)
+</p>
+
+<p align="center">
   <img src="Bilder/toolicon.png" alt="neTiPx Logo" width="120"/>
 </p>
 
-**neTiPx** ist ein modernes Desktop-Tool für Windows zur komfortablen Verwaltung von Netzwerkadaptern und IP-Konfigurationen. Mit einer intuitiven Benutzeroberfläche bietet neTiPx schnellen Zugriff auf alle wichtigen Netzwerkeinstellungen und -informationen.
+**neTiPx** is a modern desktop tool for Windows for comfortable management of network adapters and IP configurations. With an intuitive user interface, neTiPx provides quick access to all important network settings and information.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
 - [Features](#-features)
 - [Screenshots](#-screenshots)
-  - [Adapter-Übersicht](#adapter-übersicht)
-  - [IP-Konfiguration](#ip-konfiguration)
+  - [Adapter Overview](#adapter-overview)
+  - [IP Configuration](#ip-configuration)
   - [Ping Tool](#ping-tool)
   - [WLAN Scanner](#wlan-scanner)
-  - [Netzwerk-Rechner](#netzwerk-rechner)
-  - [Netzwerkscanner](#netzwerkscanner)
+  - [Network Calculator](#network-calculator)
+  - [Network Scanner](#network-scanner)
   - [Log Viewer](#log-viewer)
-  - [Routen Tool](#routen-tool)
+  - [Routes Tool](#routes-tool)
   - [Info](#info)
-  - [Einstellungen](#einstellungen)
-- [Funktionen im Detail](#-funktionen-im-detail)
+  - [Settings](#settings)
+- [Features in Detail](#-features-in-detail)
   - [PING Tool](#ping-tool-1)
-  - [Ping-Logging](#ping-logging)
+  - [Ping Logging](#ping-logging)
   - [Log Viewer](#log-viewer-1)
-  - [WLAN Scanner - Technische Details](#wlan-scanner---technische-details)
-  - [Netzwerkscanner - Technische Details](#netzwerkscanner---technische-details)
-  - [Routenverwaltung und Routing-Analyse](#routenverwaltung-und-routing-analyse)
-- [Systemanforderungen](#-systemanforderungen)
+  - [WLAN Scanner - Technical Details](#wlan-scanner---technical-details)
+  - [Network Scanner - Technical Details](#network-scanner---technical-details)
+  - [Route Management and Routing Analysis](#route-management-and-routing-analysis)
+- [System Requirements](#-system-requirements)
 - [Installation](#-installation)
 
 ---
 
 ## ✨ Features
 
-- 🔌 **Adapter-Verwaltung**: Übersicht über bis zu zwei Netzwerkadapter mit detaillierten Informationen
-- 🌐 **IP-Profilmanager**: Verwaltung mehrerer IP-Profile für schnelles Umschalten zwischen Netzwerkkonfigurationen
-- 📊 **Netzwerk-Informationen**: Detaillierte Anzeige von IPv4/IPv6-Adressen, Gateway, DNS und MAC-Adressen
-- 🎯 **Verbindungsstatus**: Echtzeit-Ping-Überwachung von Gateway und DNS-Servern mit visueller Ampel
-- 🎨 **Theme-Support**: Anpassbare Farbthemen (Hell/Dunkel/System) mit mehreren vordefinierten Farbschemata
-- 📍 **System Tray Integration**: Minimierung in die Taskleiste mit Hover-Fenster für schnelle Netzwerk-Infos
-- 🚀 **Autostart**: Optional beim Systemstart starten
-- 🛰️ **PING Tool**: Mehrere Ziele parallel überwachen (IPv4/IPv6), pro Ziel aktivierbar/deaktivierbar
-- 📝 **Ping-Logging**: Automatische Log-Dateien pro Ziel inklusive Öffnen, Exportieren und Löschen
-- 🧭 **Hintergrundbetrieb**: Pings laufen optional weiter, wenn die Ping-Seite nicht aktiv ist
-- 📡 **WLAN Scanner**: Native Windows API für detaillierte WLAN-Netzwerk-Informationen
-- 🧮 **Netzwerk-Rechner**: IP-Subnetz-Berechnungen mit intelligenter Bereichserkennung und bidirektionaler Synchronisierung
-- 🔎 **Netzwerkscanner**: Scan von IP-Bereichen mit Port-Prüfung und Detailansicht gefundener Geräte
-- 📄 **Log Viewer**: Öffnen und Live-Anzeigen von Logdateien mit Filter, Highlight-Regeln, 16-Farben-Swatch-Auswahl und optionalem Auto-Scroll
-- 🛣️ **Routen Tool**: Anzeige aktueller IPv4-Routen inkl. Löschfunktion für benutzerseitige/persistente Routen und direktem Hinzufügen neuer Routen
-- 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner, Netzwerkscanner, Log Viewer und Routen als eigene Unterseiten mit Lazy-Loading
-- 🗂️ **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
-- 🛠️ **Versteckte Admin-Konfiguration**: Auf der Settings-Seite öffnet das Wort `Wünschen` einen Dialog zur Pflege der Seiten-Sichtbarkeit
+- 🔌 **Adapter Management**: Overview of up to two network adapters with detailed information
+- 🌐 **IP Profile Manager**: Manage multiple IP profiles for quick switching between network configurations
+- 📊 **Network Information**: Detailed display of IPv4/IPv6 addresses, gateway, DNS and MAC addresses
+- 🎯 **Connection Status**: Real-time ping monitoring of gateway and DNS servers with visual traffic light indicator
+- 🎨 **Theme Support**: Customizable color themes (Light/Dark/System) with multiple predefined color schemes
+- 📍 **System Tray Integration**: Minimize to taskbar with hover window for quick network info
+- 🚀 **Autostart**: Optionally start with the system
+- 🛰️ **PING Tool**: Monitor multiple targets in parallel (IPv4/IPv6), enable/disable per target
+- 📝 **Ping Logging**: Automatic log files per target including opening, exporting and deleting
+- 🧭 **Background Operation**: Pings continue optionally when the ping page is not active
+- 📡 **WLAN Scanner**: Native Windows API for detailed WLAN network information
+- 🧮 **Network Calculator**: IP subnet calculations with intelligent range detection and bidirectional synchronization
+- 🔎 **Network Scanner**: Scan IP ranges with port checking and detailed view of found devices
+- 📄 **Log Viewer**: Open and live display of log files with filtering, highlight rules, 16-color swatch selection and optional auto-scroll
+- 🛣️ **Routes Tool**: Display current IPv4 routes including delete function for user-defined/persistent routes and direct addition of new routes
+- 🧩 **Modular Tools Page**: Ping, WLAN, Network Calculator, Network Scanner, Log Viewer and Routes as separate subpages with lazy loading
+- 🗂️ **Page Visibility**: Main and tool pages can be shown/hidden via \PagesVisibility.xml\
+- 🛠️ **Hidden Admin Configuration**: On the Settings page, the word \Wünschen\ opens a dialog for managing page visibility
 
-zurück zum
-[Inhaltsverzeichnis](#-inhaltsverzeichnis)
+Back to
+[Table of Contents](#-table-of-contents)
 ---
 
 ## 📸 Screenshots
 
-### Adapter-Übersicht
+### Adapter Overview
 
-Die Adapter-Seite zeigt detaillierte Informationen zu Ihren konfigurierten Netzwerkadaptern:
+The Adapter page displays detailed information about your configured network adapters:
 
-![Adapter-Übersicht](Bilder/Adapter_Page.png)
+![Adapter Overview](Bilder/Adapter_Page.png)
 
-**Angezegte Informationen:**
-- Name und MAC-Adresse des Adapters
-- IPv4-Adressen mit Subnetzmasken
-- IPv6-Adressen
-- Gateway-Adressen (IPv4 und IPv6)
-- DNS-Server (IPv4 und IPv6)
-- Übersichtliche Darstellung für bis zu zwei Adapter gleichzeitig
+**Displayed Information:**
+- Name and MAC address of the adapter
+- IPv4 addresses with subnet masks
+- IPv6 addresses
+- Gateway addresses (IPv4 and IPv6)
+- DNS servers (IPv4 and IPv6)
+- Clear display for up to two adapters simultaneously
 
+### IP Configuration
 
-### IP-Konfiguration
+Manage multiple IP profiles and quickly switch between different network configurations:
 
-Verwalten Sie mehrere IP-Profile und wechseln Sie schnell zwischen verschiedenen Netzwerkkonfigurationen:
+![IP Configuration](Bilder/IP_Konfigurations_Page.png)
 
-![IP-Konfiguration](Bilder/IP_Konfigurations_Page.png)
-
-**Funktionen:**
-- **Profilmanager**: Erstellen, bearbeiten und löschen Sie IP-Profile
-- **DHCP oder Manuell**: Wählen Sie zwischen automatischer und manueller IP-Konfiguration
-- **Multiple IP-Adressen**: Weisen Sie einem Adapter mehrere IP-Adressen zu
-- **DNS-Konfiguration**: Konfigurieren Sie primäre und sekundäre DNS-Server
-- **Routen pro Profil**: Verwalten Sie statische IPv4-Routen direkt im IP-Profil
-- **Routenmodus**: Wählen Sie pro Profil zwischen `ersetzen` und `hinzufügen` vorhandener persistenter Routen
-- **Systemabgleich**: Bereits vorhandene Systemrouten werden beim Profil-Dialog erkannt und markiert
-- **Echtzeit-Verbindungsstatus**: Überwachen Sie Gateway und DNS-Server mit farbcodierter Ampel
-  - 🟢 Grün: Erreichbar (guter Ping)
-  - 🟡 Gelb: Erreichbar (langsamer Ping)
-  - 🔴 Rot: Nicht erreichbar
-- **Ping-Anzeige**: Zeigt aktuelle Ping-Zeiten für Gateway und DNS-Server
+**Features:**
+- **Profile Manager**: Create, edit and delete IP profiles
+- **DHCP or Manual**: Choose between automatic and manual IP configuration
+- **Multiple IP Addresses**: Assign multiple IP addresses to an adapter
+- **DNS Configuration**: Configure primary and secondary DNS servers
+- **Routes per Profile**: Manage static IPv4 routes directly in the IP profile
+- **Route Mode**: Choose between \eplace\ and \dd\ existing persistent routes per profile
+- **System Reconciliation**: Existing system routes are detected and marked in the profile dialog
+- **Real-time Connection Status**: Monitor gateway and DNS servers with color-coded traffic light
+  - 🟢 Green: Reachable (good ping)
+  - 🟡 Yellow: Reachable (slow ping)
+  - 🔴 Red: Unreachable
+- **Ping Display**: Shows current ping times for gateway and DNS servers
 
 ### Ping Tool
 
-Das Ping Tool ermöglicht die Überwachung mehrerer Ziele mit eigener Taktung und Protokollanzeige:
+The Ping Tool enables monitoring of multiple targets with individual timing and protocol display:
 
 ![Ping Tool](Bilder/tools_ping.png)
 
-**Funktionen:**
-- **Mehrere Ziele**: IPs oder Hostnamen hinzufügen und parallel überwachen
-- **Intervall pro Ziel**: Eigene Ping-Frequenz je Eintrag
-- **IPv4/IPv6 Anzeige**: Antwortzeit und Status-Ampel pro Protokoll
-- **Aktiv-Status pro Zeile**: Einzelne Ziele unabhängig ein- und ausschalten
-- **Hintergrund-Option**: Pings laufen optional weiter, auch wenn die Ping-Seite nicht im Fokus ist
-- **Status für nicht genutzte Protokolle**: Anzeige `inaktiv` mit grauer Ampel
+**Features:**
+- **Multiple Targets**: Add and monitor IPs or hostnames in parallel
+- **Interval per Target**: Individual ping frequency per entry
+- **IPv4/IPv6 Display**: Response time and status indicator per protocol
+- **Active Status per Line**: Enable and disable individual targets independently
+- **Background Option**: Pings continue optionally even when the Ping page is not in focus
+- **Status for Unused Protocols**: Display \inactive\ with gray indicator
 
 ### WLAN Scanner
 
-Der WLAN Scanner nutzt die native Windows WLAN API für detaillierte Netzwerkinformationen:
+The WLAN Scanner uses the native Windows WLAN API for detailed network information:
 
 ![WLAN Scanner](Bilder/tools_wlan.png)
 
-**Funktionen:**
-- **Native API**: Direkter Zugriff auf Windows WLAN-Schnittstelle
-- **Sortierbare Tabelle**: Klicken Sie auf Spaltenüberschriften zum Sortieren
-  - 📶 Signal-Symbol (Stärke-Visualisierung)
-  - SSID (Netzwerkname)
-  - Signal (Prozent)
-  - BSSID (MAC-Adresse des Access Points)
-- **Detaillierte Informationen** in drei Bereichen:
-  - **Signal**: Stärke (%), Qualität (%), RSSI (dBm)
-  - **Frequenz**: Band (2.4G/5G/6G), Kanal, Frequenz (MHz)
-  - **Sicherheit & Standard**: Verschlüsselung (🔓 gesichert / 🔒 offen), PHY-Typ (802.11a/b/g/n/ac/ax), Netzwerk-Typ
-- **Band-Erkennung**: Automatische Erkennung von 2.4 GHz, 5 GHz und 6 GHz (Wi-Fi 6E)
-- **Signal-Symbole**:
-  - 📶 Stark (≥75%)
-  - 📳 Mittel (50-74%)
-  - 📴 Schwach (25-49%)
-  - ❌ Sehr schwach (<25%)
+**Features:**
+- **Native API**: Direct access to Windows WLAN interface
+- **Sortable Table**: Click column headers to sort
+  - 📶 Signal Symbol (strength visualization)
+  - SSID (Network name)
+  - Signal (Percent)
+  - BSSID (MAC address of access point)
+- **Detailed Information** in three areas:
+  - **Signal**: Strength (%), Quality (%), RSSI (dBm)
+  - **Frequency**: Band (2.4G/5G/6G), Channel, Frequency (MHz)
+  - **Security & Standard**: Encryption (🔓 secured / 🔒 open), PHY Type (802.11a/b/g/n/ac/ax), Network Type
+- **Band Detection**: Automatic detection of 2.4 GHz, 5 GHz and 6 GHz (Wi-Fi 6E)
+- **Signal Symbols**:
+  - 📶 Strong (≥75%)
+  - 📳 Medium (50-74%)
+  - 📴 Weak (25-49%)
+  - ❌ Very Weak (<25%)
 
-### Netzwerk-Rechner
+### Network Calculator
 
-Der Netzwerk-Rechner bietet intelligente IP-Subnetz-Berechnungen mit automatischer Synchronisierung:
+The Network Calculator provides intelligent IP subnet calculations with automatic synchronization:
 
-![Netzwerk-Rechner](Bilder/tools_NetCalc.png)
+![Network Calculator](Bilder/tools_NetCalc.png)
 
-**Funktionen:**
-- **Intelligente Eingabe**: IP-Adresse, Subnetzmaske oder CIDR-Sufix - alle Felder aktualisieren sich automatisch
-- **Bidirektionale Synchronisierung**:
-  - Änderung der Subnetzmaske → automatische Berechnung von CIDR-Sufix und Max. Hosts
-  - Änderung des CIDR-Sufix → automatische Berechnung von Subnetzmaske und Max. Hosts
-  - Änderung von Max. Hosts → automatische Berechnung von Subnetzmaske und CIDR-Sufix
-- **Plus/Minus-Steuerung**: Schnelles Umschalten zwischen gültigen Host-Anzahlen (z.B. 254 → 510 → 1022)
-- **Automatische Berechnung**: Ergebnisse werden sofort bei gültigen Eingaben angezeigt
-- **IP-Bereichserkennung**: Automatische Klassifizierung der eingegebenen IP:
-  - Privater Bereich (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
-  - Public Bereich
+**Features:**
+- **Intelligent Input**: IP address, subnet mask or CIDR suffix - all fields update automatically
+- **Bidirectional Synchronization**:
+  - Change subnet mask → automatic calculation of CIDR suffix and max hosts
+  - Change CIDR suffix → automatic calculation of subnet mask and max hosts
+  - Change max hosts → automatic calculation of subnet mask and CIDR suffix
+- **Plus/Minus Control**: Quick switching between valid host counts (e.g. 254 → 510 → 1022)
+- **Automatic Calculation**: Results displayed immediately with valid input
+- **IP Range Detection**: Automatic classification of entered IP:
+  - Private Range (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
+  - Public Range
   - Loopback (127.x.x.x)
   - Zeroconf/Link-Local (169.254.x.x)
   - Multicast (224.x.x.x - 239.x.x.x)
   - Shared Address Space/CGNAT (100.64.x.x)
-  - Dokumentationsbereich
-  - Broadcast, Unspecified, Reserviert
-- **Detaillierte Ergebnisse**:
-  - Netzwerkadresse und Broadcast-Adresse
-  - Erste und letzte verwendbare IP
-  - Subnetzmaske und CIDR-Sufix
-  - Anzahl verfügbarer Hosts
-  - Wildcard-Maske
+  - Documentation Range
+  - Broadcast, Unspecified, Reserved
+- **Detailed Results**:
+  - Network address and broadcast address
+  - First and last usable IP
+  - Subnet mask and CIDR suffix
+  - Number of available hosts
+  - Wildcard mask
 
-### Netzwerkscanner
+### Network Scanner
 
-Der Netzwerkscanner durchsucht lokale IP-Bereiche und zeigt erkannte Geräte inkl. Port-Status an.
+The Network Scanner searches local IP ranges and displays detected devices including port status.
 
-![Netzwerkscanner](Bilder/tool_NetScan.png)
+![Network Scanner](Bilder/tool_NetScan.png)
 
-**Funktionen:**
-- **Scan von IP-Bereichen**: Einzelne Bereiche oder mehrere Bereiche in einer Anfrage
-- **Port-Prüfung**: Frei konfigurierbare Portliste für Erreichbarkeits- und Dienstprüfung
-- **Geräteliste mit Details**: Übersicht erkannter Hosts mit Detailbereich zur schnellen Auswertung
-- **Direktaktionen**: Offene Ports können per Doppelklick mit der Standardanwendung geöffnet werden
+**Features:**
+- **IP Range Scanning**: Single ranges or multiple ranges in one request
+- **Port Checking**: Freely configurable port list for reachability and service checking
+- **Device List with Details**: Overview of detected hosts with detail area for quick evaluation
+- **Direct Actions**: Open ports can be opened with the default application by double-click
 
 ### Log Viewer
 
-Der Log Viewer öffnet vorhandene Logdateien und zeigt neue Einträge live in einer separaten Tool-Unterseite an.
+The Log Viewer opens existing log files and displays new entries live in a separate tool subpage.
 
 ![Log Viewer](Bilder/tools_LogViewer.png)
 
-**Funktionen:**
-- **Dateiauswahl und Verlauf**: Zuletzt verwendete Logdateien lassen sich direkt erneut öffnen
-- **Live-Anzeige**: Neue Einträge werden automatisch an die bestehende Ansicht angehängt
-- **Filter und Suche**: Freitextfilter mit Trefferzähler (`sichtbar / gesamt`) und sofortiger Aktualisierung
-- **Highlight-Regeln**: Suchbegriffe können farblich markiert werden
-- **Farbwahl über Swatches**: Auswahl über farbige Rechteck-Swatches statt Textliste
-- **Erweiterte Farbpalette**: 16 auswählbare Farben für Hervorhebungen
-- **Automatisches Weiterscrollen**: Optionales Mitscrollen ans Dateiende während neue Einträge eintreffen
-- **Robustes Nachladen**: Auch während die Datei von einem anderen Prozess beschrieben wird, bleibt die Anzeige lesbar
+**Features:**
+- **File Selection and History**: Recently used log files can be reopened directly
+- **Live Display**: New entries are automatically appended to the existing view
+- **Filter and Search**: Free-text filter with hit counter (\isible / total\) and instant update
+- **Highlight Rules**: Search terms can be color-highlighted
+- **Color Selection via Swatches**: Selection via colored rectangle swatches instead of text list
+- **Extended Color Palette**: 16 selectable colors for highlights
+- **Automatic Scrolling**: Optional auto-scroll to end of file as new entries arrive
+- **Robust Reloading**: Display remains readable even while file is being written by another process
 
-### Routen Tool
+### Routes Tool
 
-Das Routen Tool zeigt die aktuelle IPv4-Routing-Tabelle und unterstützt die gezielte Analyse für ein konkretes Ziel.
+The Routes Tool displays the current IPv4 routing table and supports targeted analysis for a specific destination.
 
-![Routen Tool](Bilder/tools_routen.png)
+![Routes Tool](Bilder/tools_routen.png)
 
 ### Info
 
-Die Info-Seite bündelt Versions- und Update-Informationen sowie wichtige Links.
+The Info page consolidates version and update information along with important links.
 
 ![Info](Bilder/Infos.png)
 
-**Funktionen:**
-- **Routenübersicht**: Anzeige aktiver und persistenter IPv4-Routen inklusive Default-Route (`0.0.0.0/0`)
-- **Löschlogik nach Quelle**: Löschbutton nur für benutzerseitige/statische Routen, Systemrouten werden als `Systemroute` gekennzeichnet
-- **Ziel-IP-Filter**: Eingabe einer Ziel-IP zeigt nur die tatsächlich relevanten Routen (Longest Prefix Match + Metrik)
-- **Sortierbare Tabelle**: Sortierung über Spaltenköpfe mit Richtungsanzeige (`▲`/`▼`)
-- **Route hinzufügen**: Persistente Route direkt aus dem Tool anlegen
+**Features:**
+- **Route Overview**: Display of active and persistent IPv4 routes including default route (\ .0.0.0/0\)
+- **Delete Logic by Source**: Delete button only for user-defined/static routes, system routes marked as \System Route\
+- **Target IP Filter**: Enter target IP to display only relevant routes (Longest Prefix Match + Metric)
+- **Sortable Table**: Sort via column headers with direction indicator (\▲\/\▼\)
+- **Add Route**: Create persistent route directly from the tool
 
-### Einstellungen
+### Settings
 
-Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
+Configure the application to your needs:
 
-![Einstellungen](Bilder/Einstellungen_Page.png)
+![Settings](Bilder/Einstellungen_Page.png)
 
-**Einstellungsmöglichkeiten:**
+**Configuration Options:**
 
-#### 📡 Netzwerkadapter
-- **Adapter 1 & 2**: Wählen Sie die zwei Hauptadapter aus, die auf der Adapter-Seite angezeigt werden
-- Nur aktive Netzwerkadapter werden zur Auswahl angezeigt
+#### 📡 Network Adapters
+- **Adapter 1 & 2**: Select the two main adapters displayed on the Adapter page
+- Only active network adapters are available for selection
 
 #### 🔔 System Tray
-- **Hover-Fenster**: Zeigt Netzwerkinformationen beim Überfahren des Tray-Icons
-- **Minimierung**: Option zum Minimieren in die Taskleiste statt Schließen
+- **Hover Window**: Display network information when hovering over the tray icon
+- **Minimization**: Option to minimize to taskbar instead of closing
 
 #### 🚀 Autostart
-- **Bei Windows-Start**: Startet die Anwendung automatisch beim Systemstart
-- **Minimiert starten**: Startet die Anwendung minimiert im System Tray
+- **Windows Startup**: Automatically start the application at system startup
+- **Minimized Start**: Start the application minimized in system tray
 
-#### 📝 Ping-Logging
-- **Log-Ordner wählen**: Eigener Speicherort für Ping-Logs auswählbar
-- **Standard-Ordner**: Schnell auf den Standardpfad zurücksetzen
-- **Pfadanzeige**: Dynamisch angepasste Ein-Zeilen-Anzeige mit Tooltip für den vollständigen Pfad
+#### 📝 Ping Logging
+- **Choose Log Folder**: Custom storage location for ping logs
+- **Default Folder**: Quick reset to default path
+- **Path Display**: Dynamically adjusted single-line display with tooltip for full path
 
-#### 🗂️ Seiten-Sichtbarkeit
-- **Konfigurationsdatei**: `%APPDATA%\\neTiPx\\PagesVisibility.xml`
-- **Versteckter Dialog**: In den Einstellungen auf das Wort `Wünschen` klicken
-- **Gruppierte Steuerung**: Separate Bereiche für `Hauptseiten` und `Tools`
-- **Abhängigkeit Tools**:
-  - `Tools (Hauptseite)` aus => alle Tool-Unterseiten aus
-  - Eine Tool-Unterseite an => `Tools (Hauptseite)` automatisch an
-  - Alle Tool-Unterseiten aus => `Tools (Hauptseite)` automatisch aus
-- **Immer sichtbar**: `Adapter Infos`, `Info` und `Einstellungen` sind fest sichtbar und nicht per XML ausblendbar
-- **Live-Aktualisierung**: Beim Schließen des Dialogs werden XML-Werte gespeichert und die Navigation sofort aktualisiert
+#### 🗂️ Page Visibility
+- **Configuration File**: \%APPDATA%\\neTiPx\\PagesVisibility.xml\
+- **Hidden Dialog**: Click the word \Wünschen\ in Settings
+- **Grouped Control**: Separate areas for \Main Pages\ and \Tools\
+- **Tools Dependency**:
+  - \Tools (Main Page)\ off => all tool sub-pages off
+  - One tool sub-page on => \Tools (Main Page)\ automatically on
+  - All tool sub-pages off => \Tools (Main Page)\ automatically off
+- **Always Visible**: \Adapter Info\, \Info\ and \Settings\ are permanently visible and cannot be hidden via XML
+- **Live Update**: When closing the dialog, XML values are saved and navigation is updated immediately
 
-#### 🎨 Farbthemen
-- **Theme-Auswahl**: Wählen Sie aus mehreren vordefinierten Farbthemen
-  - Hell/Dunkel/System
-  - Rot, Blau, Grün, Orange, Lila, Türkis
-- **Benutzerdefinierte Themes**: Erstellen und bearbeiten Sie eigene Farbthemen
-- **Theme-Editor**: Passen Sie Hintergrund-, Text- und Akzentfarben individuell an
+#### 🎨 Color Themes
+- **Theme Selection**: Choose from multiple predefined color themes
+  - Light/Dark/System
+  - Red, Blue, Green, Orange, Purple, Teal
+- **Custom Themes**: Create and edit your own color themes
+- **Theme Editor**: Customize background, text and accent colors individually
 
-#### 🌐 Sprachauswahl
+#### 🌐 Language Selection
 
-- Die Anwendung unterstützt mehrere Sprachen. Über das Dropdown-Menü in den Einstellungen kann die Anzeigesprache gewählt werden.
-- Im Dropdown werden die Eigenbezeichnungen der Sprachen (z. B. „Deutsch“, „English“, „Español“) angezeigt. Diese werden dynamisch aus den Sprachdateien geladen.
-- Änderungen der Sprache wirken sich sofort auf die gesamte Benutzeroberfläche aus.
+- The application supports multiple languages. Select the display language from the dropdown menu in Settings.
+- The dropdown displays the native names of languages (e.g. "Deutsch", "English", "Español"). These are dynamically loaded from language files.
+- Language changes take effect immediately on the entire user interface.
 
-zurück zum
-[Inhaltsverzeichnis](#-inhaltsverzeichnis)
+Back to
+[Table of Contents](#-table-of-contents)
 ---
 
-## 🔧 Funktionen im Detail
+## 🔧 Features in Detail
 
 ### PING Tool
 
-- **Paralleles Monitoring**: Mehrere Ziele werden gleichzeitig überwacht
-- **Zieltypen**: Unterstützt IPv4, IPv6 und Hostnamen
-- **Sichtbares Protokollverhalten**:
-  - Nicht verwendetes Protokoll zeigt `inaktiv` und eine graue Ampel
-  - Deaktiviertes Ziel zeigt `Deaktiviert` für beide Protokolle
-- **Flexible Aktivierung**:
-  - Pro Ziel über die Zeilen-Checkbox
-  - Global für Hintergrundbetrieb über `im Hintergrund weiter aktiv`
+- **Parallel Monitoring**: Multiple targets are monitored simultaneously
+- **Target Types**: Supports IPv4, IPv6 and hostnames
+- **Visible Protocol Behavior**:
+  - Unused protocol displays \inactive\ and a gray indicator
+  - Disabled target displays \Disabled\ for both protocols
+- **Flexible Activation**:
+  - Per target via row checkbox
+  - Global for background operation via \continue active in background\
 
-### Ping-Logging
+### Ping Logging
 
-- **Pro Ziel eigene Log-Datei**: Eindeutige Dateinamen, auch bei Sonderzeichen im Zielnamen
-- **CSV-Format mit Zeitstempel**: `Zeit;Ziel;Protokoll;Antwortzeit`
-- **Direkte Aktionen in der Liste**:
-  - Log-Datei öffnen
-  - Beim Löschen wahlweise mitlöschen
-  - Vor dem Löschen optional per `Speichern unter` exportieren
-- **Protokollspezifisches Logging**: Nur relevante IPv4/IPv6-Einträge werden geschrieben
+- **Individual Log File per Target**: Unique filenames, even with special characters in target name
+- **CSV Format with Timestamp**: \Time;Target;Protocol;Response Time\
+- **Direct Actions in List**:
+  - Open log file
+  - Optionally delete with
+  - Before deleting, optionally export via \Save As\
+- **Protocol-Specific Logging**: Only relevant IPv4/IPv6 entries are written
 
 ### Log Viewer
 
-- **Unterstützte Formate**: Öffnet Log-, Text-, CSV- und JSON-Dateien zur schnellen Sichtprüfung
-- **Live-Append statt Voll-Reload**: Neue Daten werden an die bestehende Anzeige angehängt, ohne die ganze Datei jedes Mal neu aufzubauen
-- **Highlight-Regeln mit Farbswatches**: Regeln können angelegt, entfernt, importiert und exportiert werden; Farbauswahl über visuelle Swatches
-- **16 Highlight-Farben**: Erweiterte Palette für bessere visuelle Unterscheidung im Log
-- **Filter mit Trefferzähler**: Textsuche mit Hervorhebung und Anzeige `sichtbar / gesamt`
-- **Auto-Scroll optional**: Bei aktivierter Option bleibt die Ansicht am Ende der Datei; deaktiviert bleibt die aktuelle Position erhalten
-- **Vollständige Lokalisierung**: Alle sichtbaren Texte des Log-Viewers inklusive Highlight-Dialog kommen aus den Sprachdateien
-- **Fehlertolerantes Lesen**: Datei wird mit gemeinsamem Zugriff geöffnet, damit auch aktiv beschriebene Logs beobachtet werden können
+- **Supported Formats**: Opens log, text, CSV and JSON files for quick visual inspection
+- **Live Append Instead of Full Reload**: New data is appended to existing display without rebuilding the entire file each time
+- **Highlight Rules with Color Swatches**: Rules can be created, removed, imported and exported; color selection via visual swatches
+- **16 Highlight Colors**: Extended palette for better visual distinction in logs
+- **Filter with Hit Counter**: Text search with highlighting and display \isible / total\
+- **Auto-Scroll Optional**: With option enabled, view stays at end of file; when disabled, current position is retained
+- **Complete Localization**: All visible Log Viewer texts including highlight dialog come from language files
+- **Fault-Tolerant Reading**: File is opened with shared access so actively written logs can be observed
 
-### WLAN Scanner - Technische Details
+### WLAN Scanner - Technical Details
 
-- **Native Windows WLAN API**: Direkter P/Invoke-Zugriff auf wlanapi.dll
-  - WlanOpenHandle: Initialisierung der WLAN-Schnittstelle
-  - WlanEnumInterfaces: Auflistung verfügbarer WLAN-Adapter
-  - WlanGetNetworkBssList: Abruf detaillierter BSS-Informationen
-- **Thread-sichere UI-Updates**: DispatcherQueue für sichere Updates aus Background-Threads
-- **Umfassende Netzwerkinformationen**:
-  - Signal: dBm, Prozent, Link-Qualität
-  - Frequenz: MHz, Kanal, Band (2.4/5/6 GHz)
-  - Sicherheit: Privacy Bit, Verschlüsselungsstatus
-  - Standard: PHY-Typ (802.11-Varianten), Netzwerk-Typ (Infrastructure/Ad-Hoc)
-  - Hardware: BSSID, Beacon-Intervall
-- **Robustheit**: Automatischer Fallback auf netsh-Kommandozeile bei API-Problemen
+- **Native Windows WLAN API**: Direct P/Invoke access to wlanapi.dll
+  - WlanOpenHandle: WLAN interface initialization
+  - WlanEnumInterfaces: List available WLAN adapters
+  - WlanGetNetworkBssList: Retrieve detailed BSS information
+- **Thread-Safe UI Updates**: DispatcherQueue for safe updates from background threads
+- **Comprehensive Network Information**:
+  - Signal: dBm, Percent, Link Quality
+  - Frequency: MHz, Channel, Band (2.4/5/6 GHz)
+  - Security: Privacy Bit, Encryption Status
+  - Standard: PHY Type (802.11 variants), Network Type (Infrastructure/Ad-Hoc)
+  - Hardware: BSSID, Beacon Interval
+- **Robustness**: Automatic fallback to netsh command line if API issues occur
 
-### Netzwerkscanner - Technische Details
+### Network Scanner - Technical Details
 
-- **Asynchrones Scannen**: Nicht-blockierende Host- und Port-Prüfungen für flüssige Bedienung
-- **Abbruchfähig**: Laufende Scans können kontrolliert gestoppt werden
-- **Sortierbare Ergebnisliste**: Geräte können nach relevanten Spalten geordnet werden
-- **Detailansicht je Gerät**: Zusammengefasste Host-Informationen und erkannte offene Ports
+- **Asynchronous Scanning**: Non-blocking host and port checks for smooth operation
+- **Cancellable**: Running scans can be controlled stop
+- **Sortable Results List**: Devices can be ordered by relevant columns
+- **Detail View per Device**: Summarized host information and detected open ports
 
-### Routenverwaltung und Routing-Analyse
+### Route Management and Routing Analysis
 
-- **Quellenbasierte Klassifizierung**: Kombination aus `route print`, CIM (`Win32_IP4PersistedRouteTable`) und `Get-NetRoute` zur Unterscheidung von System- und Benutzer-Routen
-- **Persistenz-Erkennung**: Statische/persistente Routen werden als löschbar erkannt, systemseitige On-link/Local/DHCP-Routen bleiben geschützt
-- **Routing-Entscheidung im Filter**: Für Ziel-IPs werden nur Kandidaten mit bestem Präfix und bester Metrik angezeigt
-- **Sichere Lösch-/Add-Operationen**: Route-Änderungen erfolgen erhöht und werden nach Aktion in der Tabelle neu eingelesen
+- **Source-Based Classification**: Combination of \oute print\, CIM (\Win32_IP4PersistedRouteTable\) and \Get-NetRoute\ to distinguish system and user routes
+- **Persistence Detection**: Static/persistent routes are detected as deletable, system-level on-link/local/DHCP routes remain protected
+- **Routing Decision in Filter**: For target IPs, only candidates with best prefix and best metric are displayed
+- **Safe Delete/Add Operations**: Route changes are performed elevated and table is re-read after action
 
-### IP-Profilverwaltung
+### IP Profile Management
 
-- **Mehrere Profile**: Speichern Sie unterschiedliche Netzwerkkonfigurationen für verschiedene Standorte (Büro, Home Office, Extern)
-- **Schnelles Umschalten**: Wechseln Sie mit wenigen Klicks zwischen gespeicherten Profilen
-- **DHCP-Unterstützung**: Automatische IP-Konfiguration via DHCP
-- **Manuelle Konfiguration**: Detaillierte Kontrolle über IP-Adressen, Subnetzmasken, Gateway und DNS
-- **Integrierte Routenverwaltung**: Profilbezogene statische IPv4-Routen mit Dialog zur Pflege und Systemabgleich
-- **Validierung**: Automatische Überprüfung der eingegebenen IP-Adressen und Netzwerkkonfiguration
-- **Multi-IP**: Weisen Sie einem Adapter mehrere IP-Adressen gleichzeitig zu
+- **Multiple Profiles**: Save different network configurations for various locations (Office, Home Office, External)
+- **Quick Switching**: Switch between saved profiles with just a few clicks
+- **DHCP Support**: Automatic IP configuration via DHCP
+- **Manual Configuration**: Detailed control over IP addresses, subnet masks, gateway and DNS
+- **Integrated Route Management**: Profile-specific static IPv4 routes with dialog for management and system reconciliation
+- **Validation**: Automatic verification of entered IP addresses and network configuration
+- **Multi-IP**: Assign multiple IP addresses to an adapter simultaneously
 
-### Verbindungsqualität
+### Connection Quality
 
-- **Automatische Überwachung**: Kontinuierliches Pingen von Gateway und DNS-Servern (alle 5 Sekunden)
-- **Visuelle Anzeige**: Farbcodierte Ampel zeigt den Status auf einen Blick
-- **Ping-Zeiten**: Detaillierte Anzeige der Antwortzeiten in Millisekunden
-- **Mehrfach-Überwachung**: Gleichzeitige Überwachung von Gateway, DNS1 und DNS2
+- **Automatic Monitoring**: Continuous pinging of gateway and DNS servers (every 5 seconds)
+- **Visual Display**: Color-coded traffic light shows status at a glance
+- **Ping Times**: Detailed display of response times in milliseconds
+- **Multiple Monitoring**: Simultaneous monitoring of gateway, DNS1 and DNS2
 
-### Theme-System
+### Theme System
 
-- **Anpassbare Oberfläche**: Passen Sie das Aussehen der Anwendung an Ihre Vorlieben an
-- **Vordefinierte Themes**: Mehrere professionelle Farbschemata zur Auswahl
-- **Echtzeit-Vorschau**: Sehen Sie Änderungen sofort in der Anwendung
+- **Customizable Interface**: Adapt the appearance of the application to your preferences
+- **Predefined Themes**: Multiple professional color schemes to choose from
+- **Real-Time Preview**: See changes immediately in the application
 
-zurück zum
-[Inhaltsverzeichnis](#-inhaltsverzeichnis)
+Back to
+[Table of Contents](#-table-of-contents)
 ---
 
-## 💻 Systemanforderungen
+## 💻 System Requirements
 
-- **Betriebssystem**: Windows 10 Version 1809 (Build 17763) oder höher
+- **Operating System**: Windows 10 Version 1809 (Build 17763) or later
 - **Framework**: .NET 8.0 Runtime
-- **UI-Framework**: WinUI 3 (Windows App SDK) - **erforderlich**
-- **Berechtigungen**: Administrator-Rechte für Änderungen an Netzwerkeinstellungen
+- **UI Framework**: WinUI 3 (Windows App SDK) - **required**
+- **Permissions**: Administrator rights for changes to network settings
 
 ### Windows App SDK
 
-neTiPx erfordert das **Windows App SDK 1.8.5** zur Ausführung. Wenn Sie den folgenden Fehler erhalten:
+neTiPx requires **Windows App SDK 1.8.5** to run. If you receive the following error:
 
-![Fehlendes Windows App SDK](Bilder/FehlendeMSIX.png)
+![Missing Windows App SDK](Bilder/FehlendeMSIX.png)
 
-Laden Sie das Windows App SDK herunter und installieren Sie es von:
+Download and install the Windows App SDK from:
 [Microsoft Windows App SDK Downloads](https://docs.microsoft.com/windows/apps/windows-app-sdk/downloads)
 
 ---
@@ -376,25 +379,26 @@ Laden Sie das Windows App SDK herunter und installieren Sie es von:
 
 ### Installation
 
-1. **Systemanforderungen prüfen**: Stellen Sie sicher, dass das Windows App SDK installiert ist (siehe [Systemanforderungen](#-systemanforderungen))
-2. Laden Sie das neueste Setup-Paket aus dem [Releases](../../releases)-Bereich herunter
-3. Führen Sie `neTiPx_Setup_Vx.x.x.x.exe` aus
-4. Folgen Sie den Anweisungen des Installationsassistenten
-5. Starten Sie neTiPx über das Startmenü oder Desktop-Icon
+1. **Check System Requirements**: Ensure that Windows App SDK is installed (see [System Requirements](#-system-requirements))
+2. Download the latest setup package from the [Releases](../../releases) section
+3. Run \
+eTiPx_Setup_Vx.x.x.x.exe\
+4. Follow the installation wizard instructions
+5. Start neTiPx from the Start menu or desktop icon
 
-**Hinweise**:
-- Für Änderungen an Netzwerkeinstellungen sind Administrator-Rechte erforderlich.
-- Wenn beim Start eine Fehlermeldung bezüglich des Windows App SDK angezeigt wird, siehe [Systemanforderungen](#windows-app-sdk).
+**Notes**:
+- Administrator rights are required for changes to network settings.
+- If you receive an error message about Windows App SDK at startup, see [System Requirements](#windows-app-sdk).
 
-zurück zum
-[Inhaltsverzeichnis](#-inhaltsverzeichnis)
+Back to
+[Table of Contents](#-table-of-contents)
 ---
 
-## 📄 Lizenz & Kontakt
+## 📄 License & Contact
 
-Siehe `LICENSE` im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden.
+See \LICENSE\ in the repository. For code questions, please use Issues/PRs in the repo.
 
 https://buymeacoffee.com/pedrotepe
 
-zurück zum
-[Inhaltsverzeichnis](#-inhaltsverzeichnis)
+Back to
+[Table of Contents](#-table-of-contents)
