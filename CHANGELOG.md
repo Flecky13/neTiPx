@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [1.7.1.0]
+### Fixed
+
+-Fehlende Keys in Sprachdateien
+-überprüfung der Übersetzungen auf vollständigkeit ( wenn noch was fehlt bescheid sagen)
+
 ## [1.7.1.0]
 
 ### Changed
