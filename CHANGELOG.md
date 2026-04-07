@@ -4,6 +4,13 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.2]
+
+### Fixed
+- **Tools / Log Viewer / Datei-Dialoge**: Öffnen, Import und Export von Dateien funktionieren wieder stabil in Entwicklungs- und Release-Umgebungen.
+- **Tools / Log Viewer / Stabilität**: Dialogaufrufe von WinRT-Pickern auf native Windows-Dateidialoge umgestellt, um COM-Fehler (`0x80004005`) zu vermeiden.
+- **Interop / Dateidialoge**: `OPENFILENAME`-Marshalling korrigiert, wodurch `ArgumentException` mit `0x80070057` beim Öffnen, Importieren und Exportieren behoben wurde.
+
 ## [1.7.1.0]
 ### Fixed
 
