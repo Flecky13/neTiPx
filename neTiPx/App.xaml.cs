@@ -31,10 +31,12 @@ namespace neTiPx
         private TrayService? _trayService;
         private readonly Mutex _singleInstanceMutex;
         private readonly bool _isFirstInstance;
-        private static int MIN_WIDTH = 1280;
-        private const int MIN_HEIGHT = 950;
-        private const int MIN_WIDTH_PANE_OPEN = 1280;
-        private const int MIN_WIDTH_PANE_CLOSED = 1008;
+        private const int BaseMinHeight = 950;
+        private const int BaseMinWidthPaneOpen = 1280;
+        private const int BaseMinWidthPaneClosed = 1008;
+        private static int MIN_WIDTH = BaseMinWidthPaneOpen;
+        private static int MIN_HEIGHT = BaseMinHeight;
+        private static bool _isPaneOpen = true;
         private static AppWindow? _appWindow;
 
         /// <summary>
@@ -132,8 +134,8 @@ namespace neTiPx
                 presenter.IsMinimizable = true;
             }
 
-            // Set initial and minimum size
-            _appWindow.Resize(new Windows.Graphics.SizeInt32(MIN_WIDTH, MIN_HEIGHT));
+            // Set initial and minimum size (DPI-aware)
+            ApplyScaledMinWindowSize(enforceResize: true);
             ThemeService.ApplyTheme(rootFrame);
 
             var themeSettingsService = new ThemeSettingsService();
@@ -175,6 +177,12 @@ namespace neTiPx
             // Enforce minimum size when user tries to resize
             _appWindow.Changed += (sender, args) =>
             {
+                if (args.DidPositionChange)
+                {
+                    // Re-evaluate scaling when window moves to a monitor with different DPI.
+                    ApplyScaledMinWindowSize(enforceResize: true);
+                }
+
                 if (args.DidSizeChange)
                 {
                     var size = _appWindow.Size;
@@ -225,16 +233,68 @@ namespace neTiPx
 
         public static void UpdateMinWidth(bool isPaneOpen)
         {
-            MIN_WIDTH = isPaneOpen ? MIN_WIDTH_PANE_OPEN : MIN_WIDTH_PANE_CLOSED;
+            _isPaneOpen = isPaneOpen;
+            ApplyScaledMinWindowSize(enforceResize: true);
+        }
 
-            if (_appWindow != null)
+        private static void ApplyScaledMinWindowSize(bool enforceResize)
+        {
+            if (_appWindow == null)
             {
-                var currentSize = _appWindow.Size;
-                if (currentSize.Width < MIN_WIDTH)
-                {
-                    _appWindow.Resize(new Windows.Graphics.SizeInt32(MIN_WIDTH, currentSize.Height));
-                }
+                return;
             }
+
+            var dpiScale = GetWindowDpiScale();
+            var scaledMinWidth = ScaleForDpi(_isPaneOpen ? BaseMinWidthPaneOpen : BaseMinWidthPaneClosed, dpiScale);
+            var scaledMinHeight = ScaleForDpi(BaseMinHeight, dpiScale);
+
+            var displayArea = DisplayArea.GetFromWindowId(_appWindow.Id, DisplayAreaFallback.Primary);
+            var maxWidth = Math.Max(640, displayArea.WorkArea.Width);
+            var maxHeight = Math.Max(480, displayArea.WorkArea.Height);
+
+            MIN_WIDTH = Math.Min(scaledMinWidth, maxWidth);
+            MIN_HEIGHT = Math.Min(scaledMinHeight, maxHeight);
+
+            if (!enforceResize)
+            {
+                return;
+            }
+
+            var currentSize = _appWindow.Size;
+            var targetWidth = Math.Max(currentSize.Width, MIN_WIDTH);
+            var targetHeight = Math.Max(currentSize.Height, MIN_HEIGHT);
+
+            targetWidth = Math.Min(targetWidth, maxWidth);
+            targetHeight = Math.Min(targetHeight, maxHeight);
+
+            _appWindow.Resize(new Windows.Graphics.SizeInt32(targetWidth, targetHeight));
+        }
+
+        private static double GetWindowDpiScale()
+        {
+            if (MainWindow == null)
+            {
+                return 1.0;
+            }
+
+            var hwnd = WindowHelper.GetWindowHandle(MainWindow);
+            if (hwnd == IntPtr.Zero)
+            {
+                return 1.0;
+            }
+
+            var dpi = GetDpiForWindow(hwnd);
+            if (dpi == 0)
+            {
+                return 1.0;
+            }
+
+            return dpi / 96.0;
+        }
+
+        private static int ScaleForDpi(int valueAt100Percent, double dpiScale)
+        {
+            return Math.Max(1, (int)Math.Round(valueAt100Percent * dpiScale));
         }
 
         /// <summary>
@@ -258,5 +318,8 @@ namespace neTiPx
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
     }
 }
