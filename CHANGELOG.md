@@ -4,6 +4,14 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.4]
+
+### Changed
+- **App / Fenstergröße / DPI**: Mindestbreite und Mindesthöhe werden jetzt DPI-sensitiv aus den Basiswerten berechnet, damit die Größe bei abweichender Windows-Skalierung konsistent bleibt.
+- **App / Multi-Monitor**: Beim Verschieben des Fensters auf einen Monitor mit anderer Skalierung wird die Mindestgröße neu berechnet und angewendet.
+- **App / Arbeitsfläche**: Die berechnete Mindestgröße wird auf die verfügbare Arbeitsfläche des aktuellen Displays begrenzt.
+- **Navigation / Pane-Breite**: Umschalten zwischen offenem und geschlossenem Menü (`UpdateMinWidth`) berücksichtigt jetzt ebenfalls die aktuelle DPI-Skalierung.
+
 ## [1.7.1.2]
 
 ### Fixed
