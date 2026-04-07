@@ -4,13 +4,12 @@ using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Windows.Storage.Pickers;
-using Windows.Storage;
-using WinRT.Interop;
 
 namespace neTiPx.Views
 {
@@ -81,66 +80,97 @@ namespace neTiPx.Views
 
         private async void ExportRulesButton_Click(object sender, RoutedEventArgs e)
         {
-            var picker = new FileSavePicker
+            try
             {
-                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-                SuggestedFileName = T("LOGVIEWER_HIGHLIGHT_EXPORT_FILENAME")
-            };
-            picker.FileTypeChoices.Clear();
-            picker.FileTypeChoices.Add(T("LOGVIEWER_FILETYPE_JSON"), new List<string> { ".json" });
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln exportieren: Dialog öffnen");
 
-            var hwnd = WindowHelper.GetWindowHandle(App.MainWindow);
-            InitializeWithWindow.Initialize(picker, hwnd);
-
-            var saveFile = await picker.PickSaveFileAsync();
-            if (saveFile == null)
-            {
-                return;
-            }
-
-            var payload = GetRules()
-                .Select(rule => new HighlightRuleExport
+                var hwnd = App.MainWindow != null
+                    ? WindowHelper.GetWindowHandle(App.MainWindow)
+                    : IntPtr.Zero;
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Export HWND={hwnd}");
+                if (hwnd == IntPtr.Zero)
                 {
-                    SearchText = rule.SearchText,
-                    ColorKey = rule.ColorKey
-                })
-                .ToList();
+                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    return;
+                }
 
-            var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
-            await FileIO.WriteTextAsync(saveFile, json);
+                var filter = FileDialogHelper.BuildFilter(("JSON-Dateien (*.json)", "*.json"));
+                var suggestedFileName = T("LOGVIEWER_HIGHLIGHT_EXPORT_FILENAME") + ".json";
+                var selected = FileDialogHelper.TrySaveFile(hwnd, T("LOGVIEWER_HIGHLIGHT_EXPORT"), filter, "json", suggestedFileName, out var savePath);
+                if (!selected)
+                {
+                    DebugLogger.Log(LogLevel.INFO, "LogViewer", "Export abgebrochen");
+                    return;
+                }
+
+                var payload = GetRules()
+                    .Select(rule => new HighlightRuleExport
+                    {
+                        SearchText = rule.SearchText,
+                        ColorKey = rule.ColorKey
+                    })
+                    .ToList();
+
+                var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+                await File.WriteAllTextAsync(savePath, json);
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln exportiert nach: {savePath} ({payload.Count} Regel(n))");
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen", ex);
+            }
         }
 
         private async void ImportRulesButton_Click(object sender, RoutedEventArgs e)
         {
-            var picker = new FileOpenPicker();
-            picker.FileTypeFilter.Add(".json");
-
-            var hwnd = WindowHelper.GetWindowHandle(App.MainWindow);
-            InitializeWithWindow.Initialize(picker, hwnd);
-
-            var file = await picker.PickSingleFileAsync();
-            if (file == null)
-            {
-                return;
-            }
-
             try
             {
-                var json = await FileIO.ReadTextAsync(file);
-                var payload = JsonSerializer.Deserialize<List<HighlightRuleExport>>(json) ?? new List<HighlightRuleExport>();
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln importieren: Dialog öffnen");
 
-                Rules.Clear();
-                foreach (var rule in payload.Where(rule => !string.IsNullOrWhiteSpace(rule.SearchText)))
+                var hwnd = App.MainWindow != null
+                    ? WindowHelper.GetWindowHandle(App.MainWindow)
+                    : IntPtr.Zero;
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Import HWND={hwnd}");
+                if (hwnd == IntPtr.Zero)
                 {
-                    Rules.Add(new LogViewerHighlightRule
+                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    return;
+                }
+
+                var filter = FileDialogHelper.BuildFilter(("JSON-Dateien (*.json)", "*.json"));
+                var selected = FileDialogHelper.TryOpenFile(hwnd, T("LOGVIEWER_HIGHLIGHT_IMPORT"), filter, out var importPath);
+                if (!selected)
+                {
+                    DebugLogger.Log(LogLevel.INFO, "LogViewer", "Import abgebrochen");
+                    return;
+                }
+
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Import Datei: {importPath}");
+
+                try
+                {
+                    var json = await File.ReadAllTextAsync(importPath);
+                    var payload = JsonSerializer.Deserialize<List<HighlightRuleExport>>(json) ?? new List<HighlightRuleExport>();
+
+                    Rules.Clear();
+                    foreach (var rule in payload.Where(rule => !string.IsNullOrWhiteSpace(rule.SearchText)))
                     {
-                        SearchText = rule.SearchText.Trim(),
-                        ColorKey = string.IsNullOrWhiteSpace(rule.ColorKey) ? "red" : rule.ColorKey
-                    });
+                        Rules.Add(new LogViewerHighlightRule
+                        {
+                            SearchText = rule.SearchText.Trim(),
+                            ColorKey = string.IsNullOrWhiteSpace(rule.ColorKey) ? "red" : rule.ColorKey
+                        });
+                    }
+                    DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln importiert: {Rules.Count} Regel(n)");
+                }
+                catch (Exception parseEx)
+                {
+                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Import JSON-Parsing fehlgeschlagen", parseEx);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen", ex);
             }
         }
     }

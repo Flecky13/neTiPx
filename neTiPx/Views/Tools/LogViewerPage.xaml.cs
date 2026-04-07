@@ -13,9 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Storage.Pickers;
 using Windows.UI;
-using WinRT.Interop;
 
 namespace neTiPx.Views
 {
@@ -107,24 +105,40 @@ namespace neTiPx.Views
 
         private async void LogViewerOpenButton_Click(object sender, RoutedEventArgs e)
         {
-            var picker = new FileOpenPicker();
-            picker.FileTypeFilter.Add(".log");
-            picker.FileTypeFilter.Add(".txt");
-            picker.FileTypeFilter.Add(".csv");
-            picker.FileTypeFilter.Add(".json");
-            picker.FileTypeFilter.Add("*");
-
-            var hwnd = WindowHelper.GetWindowHandle(App.MainWindow);
-            InitializeWithWindow.Initialize(picker, hwnd);
-
-            var file = await picker.PickSingleFileAsync();
-            if (file == null)
+            try
             {
-                return;
-            }
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", "Datei-Dialog öffnen gestartet");
 
-            AddRecentFile(file.Path);
-            await LoadFileAsync(file.Path, forceStatusMessage: true);
+                var hwnd = App.MainWindow != null
+                    ? WindowHelper.GetWindowHandle(App.MainWindow)
+                    : IntPtr.Zero;
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"HWND={hwnd}");
+                if (hwnd == IntPtr.Zero)
+                {
+                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Datei-Dialog fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    return;
+                }
+
+                var filter = FileDialogHelper.BuildFilter(
+                    ("Log-Dateien (*.log;*.txt;*.csv;*.json)", "*.log;*.txt;*.csv;*.json"),
+                    ("Alle Dateien (*.*)", "*.*"));
+
+                var selected = FileDialogHelper.TryOpenFile(hwnd, T("LOGVIEWER_BUTTON_OPEN"), filter, out var selectedPath);
+
+                if (!selected)
+                {
+                    DebugLogger.Log(LogLevel.INFO, "LogViewer", "Datei-Dialog abgebrochen (kein File ausgewählt)");
+                    return;
+                }
+
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Datei ausgewählt: {selectedPath}");
+                AddRecentFile(selectedPath);
+                await LoadFileAsync(selectedPath, forceStatusMessage: true);
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Datei-Dialog fehlgeschlagen", ex);
+            }
         }
 
         private async void LogViewerFileComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -244,7 +258,7 @@ namespace neTiPx.Views
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
             finally

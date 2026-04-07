@@ -257,10 +257,12 @@ namespace neTiPx.Views
 
             if (PingTargets.Any(p => p.Target.Equals(target, StringComparison.OrdinalIgnoreCase)))
             {
+                DebugLogger.Log(LogLevel.WARN, "Ping", $"Ziel bereits vorhanden, kein Duplikat: {target}");
                 return;
             }
 
             var intervalSeconds = (int)PingIntervalNumberBox.Value;
+            DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel hinzugefügt: {target}, Intervall: {intervalSeconds}s");
             var pingTarget = new PingTarget
             {
                 Target = target,
@@ -285,11 +287,15 @@ namespace neTiPx.Views
         {
             if (sender is Button button && button.Tag is PingTarget target)
             {
+                DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel löschen angefordert: {target.Target}");
                 var deleteConfirmed = await ConfirmLogDeleteActionAsync(target);
                 if (!deleteConfirmed)
                 {
+                    DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel löschen abgebrochen: {target.Target}");
                     return;
                 }
+
+                DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel gelöscht: {target.Target}");
 
                 if (_pingTimers.TryGetValue(target, out var cts))
                 {
@@ -470,6 +476,7 @@ namespace neTiPx.Views
 
             var isEnabled = checkBox.IsChecked == true;
             target.IsPingEnabled = isEnabled;
+            DebugLogger.Log(LogLevel.INFO, "Ping", $"Ping {(isEnabled ? "aktiviert" : "deaktiviert")}: {target.Target}");
 
             if (isEnabled)
             {
@@ -492,6 +499,7 @@ namespace neTiPx.Views
             }
 
             var isActive = checkBox.IsChecked == true;
+            DebugLogger.Log(LogLevel.INFO, "Ping", $"Hintergrund-Ping {(isActive ? "aktiviert" : "deaktiviert")}");
             _settingsService.SetPingBackgroundActive(isActive);
             UpdatePingingState();
         }

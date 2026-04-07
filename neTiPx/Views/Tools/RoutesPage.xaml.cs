@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
 using System.Globalization;
@@ -121,6 +122,7 @@ namespace neTiPx.Views.Tools
             RoutesStatusText.Text = T("ROUTES_STATUS_LOADING");
 
             await Task.Yield();
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Routen werden geladen...");
             var (success, routes, error) = _networkConfigService.ReadAllPersistentRoutes();
 
             Routes.Clear();
@@ -134,10 +136,12 @@ namespace neTiPx.Views.Tools
                     Routes.Add(r);
                 }
 
+                DebugLogger.Log(LogLevel.INFO, "Routes", $"{routes.Count} Route(n) geladen");
                 ApplyFilterAndSort();
             }
             else
             {
+                DebugLogger.Log(LogLevel.ERROR, "Routes", $"Routen laden fehlgeschlagen: {error}");
                 RoutesStatusText.Text = error ?? T("ROUTES_STATUS_LOAD_ERROR");
             }
         }
@@ -362,9 +366,11 @@ namespace neTiPx.Views.Tools
             if (result != ContentDialogResult.Primary)
                 return;
 
+            DebugLogger.Log(LogLevel.INFO, "Routes", $"Route löschen: {route.Destination} mask {route.SubnetMask} via {route.Gateway}");
             var (success, error) = _networkConfigService.DeleteRoute(route);
             if (!success)
             {
+                DebugLogger.Log(LogLevel.ERROR, "Routes", $"Route löschen fehlgeschlagen: {error}");
                 var errorDialog = new ContentDialog
                 {
                     Title = T("ROUTES_DIALOG_DELETE_ERROR_TITLE"),
@@ -376,6 +382,7 @@ namespace neTiPx.Views.Tools
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Route erfolgreich gelöscht");
             await LoadRoutesAsync();
         }
 
@@ -391,9 +398,12 @@ namespace neTiPx.Views.Tools
                 Metric = int.TryParse(AddMetricBox.Text?.Trim(), out var m) && m > 0 ? m : 1
             };
 
+            DebugLogger.Log(LogLevel.INFO, "Routes", $"Route hinzufügen: {route.Destination} mask {route.SubnetMask} via {route.Gateway} metric {route.Metric}");
+
             var (success, error) = _networkConfigService.AddRouteStandalone(route);
             if (!success)
             {
+                DebugLogger.Log(LogLevel.ERROR, "Routes", $"Route hinzufügen fehlgeschlagen: {error}");
                 AddStatusText.Text = error ?? T("ROUTES_ADD_ERROR_CONTENT");
                 AddStatusText.Visibility = Visibility.Visible;
                 return;

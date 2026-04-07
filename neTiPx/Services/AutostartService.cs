@@ -2,6 +2,7 @@ using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Diagnostics;
+using neTiPx.Helpers;
 
 namespace neTiPx.Services
 {
@@ -31,6 +32,7 @@ namespace neTiPx.Services
                 using var key = Registry.CurrentUser.CreateSubKey(RunKeyPath);
                 if (key == null)
                 {
+                    DebugLogger.Log(LogLevel.WARN, "Autostart", "Registry-Key konnte nicht geöffnet werden");
                     return;
                 }
 
@@ -40,15 +42,18 @@ namespace neTiPx.Services
                     if (!string.IsNullOrWhiteSpace(exePath))
                     {
                         key.SetValue(ValueName, $"\"{exePath}\"");
+                        DebugLogger.Log(LogLevel.INFO, "Autostart", $"Autostart aktiviert: {exePath}");
                     }
                 }
                 else
                 {
                     key.DeleteValue(ValueName, throwOnMissingValue: false);
+                    DebugLogger.Log(LogLevel.INFO, "Autostart", "Autostart deaktiviert");
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                DebugLogger.Log(LogLevel.ERROR, "Autostart", "SetEnabled fehlgeschlagen", ex);
             }
         }
 

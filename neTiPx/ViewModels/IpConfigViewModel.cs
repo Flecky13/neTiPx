@@ -792,6 +792,8 @@ namespace neTiPx.ViewModels
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil löschen: '{profile.Name}'");
+
             var index = IpProfiles.IndexOf(profile);
             IpProfiles.Remove(profile);
 
@@ -904,14 +906,17 @@ namespace neTiPx.ViewModels
             ValidateProfile(true);
             if (HasValidationErrors)
             {
+                DebugLogger.Log(LogLevel.WARN, "IpConfig", $"Profil speichern abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
             _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
             _selectedProfilePersistedName = SelectedProfile.Name;
 
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             SelectedProfile.IsDirty = false;
+            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
         }
 
         private bool CanApplyProfile()
@@ -938,18 +943,24 @@ namespace neTiPx.ViewModels
             ValidateProfile(true);
             if (HasValidationErrors)
             {
+                DebugLogger.Log(LogLevel.WARN, "IpConfig", $"Profil anwenden abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
                 return;
             }
+
+            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil anwenden: '{SelectedProfile.Name}', Adapter='{SelectedProfile.AdapterName}', Modus='{SelectedProfile.Mode}'");
 
             var (success, error) = _networkService.ApplyProfile(SelectedProfile);
             if (!success)
             {
+                DebugLogger.Log(LogLevel.ERROR, "IpConfig", $"Profil anwenden fehlgeschlagen: {error}");
                 ValidationMessage = error ?? T("IPCONFIG_MSG_APPLY_ERROR");
                 HasValidationErrors = true;
                 GatewayStatusText = T("ADAPTER_STA_Error");
                 GatewayStatusKind = GatewayStatusKind.Bad;
                 return;
             }
+
+            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{SelectedProfile.Name}'");
 
             // After apply: load fresh settings from NIC and save to INI
             ReloadProfileFromNicAsync().ConfigureAwait(false);

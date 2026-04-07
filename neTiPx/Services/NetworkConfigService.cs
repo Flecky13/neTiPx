@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using neTiPx.Helpers;
 using neTiPx.Models;
 
 namespace neTiPx.Services
@@ -23,8 +24,11 @@ namespace neTiPx.Services
 
         public (bool success, string? error) ApplyProfile(IpProfile profile)
         {
+            DebugLogger.Log(LogLevel.INFO, "NetConfig", $"ApplyProfile start: Profil='{profile.Name}', Adapter='{profile.AdapterName}', Modus='{profile.Mode}'");
+
             if (string.IsNullOrWhiteSpace(profile.AdapterName))
             {
+                DebugLogger.Log(LogLevel.WARN, "NetConfig", "ApplyProfile abgebrochen: kein Adapter gewählt");
                 return (false, "Kein Adapter ausgewaehlt.");
             }
 
@@ -185,11 +189,19 @@ namespace neTiPx.Services
             var destination = route.Destination?.Trim() ?? string.Empty;
             var subnetMask = route.SubnetMask?.Trim() ?? string.Empty;
 
+            DebugLogger.Log(LogLevel.INFO, "NetConfig", $"DeleteRoute: {destination} mask {subnetMask} via {route.Gateway}");
+
             if (!IsValidIPv4(destination))
+            {
+                DebugLogger.Log(LogLevel.WARN, "NetConfig", $"DeleteRoute abgebrochen: Zieladresse '{destination}' ist ungültig");
                 return (false, "Zieladresse ist ungültig.");
+            }
 
             if (SubnetMaskToPrefix(subnetMask) <= 0)
+            {
+                DebugLogger.Log(LogLevel.WARN, "NetConfig", $"DeleteRoute abgebrochen: Subnetzmaske '{subnetMask}' ist ungültig");
                 return (false, "Subnetzmaske ist ungültig.");
+            }
 
             var commands = new List<string>
             {
@@ -209,9 +221,14 @@ namespace neTiPx.Services
                 Metric = route.Metric > 0 ? route.Metric : 1
             };
 
+            DebugLogger.Log(LogLevel.INFO, "NetConfig", $"AddRouteStandalone: {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} via {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}");
+
             var (isValid, validationError) = ValidateRoute(sanitizedRoute);
             if (!isValid)
+            {
+                DebugLogger.Log(LogLevel.WARN, "NetConfig", $"AddRouteStandalone Validierung fehlgeschlagen: {validationError}");
                 return (false, validationError);
+            }
 
             var commands = new List<string>
             {
@@ -367,6 +384,10 @@ namespace neTiPx.Services
                 return (true, null);
             }
 
+            DebugLogger.Log(LogLevel.INFO, "NetConfig", $"Netsh-Befehle starten ({commands.Count} Befehl(e))");
+            foreach (var cmd in commands)
+                DebugLogger.Log(LogLevel.INFO, "NetConfig", $"  CMD: {cmd}");
+
             try
             {
                 var joined = string.Join(" & ", commands);
@@ -383,17 +404,21 @@ namespace neTiPx.Services
                 process?.WaitForExit();
                 if (process == null || process.ExitCode != 0)
                 {
+                    DebugLogger.Log(LogLevel.ERROR, "NetConfig", $"Netsh fehlgeschlagen (ExitCode={process?.ExitCode})");
                     return (false, "netsh wurde nicht erfolgreich ausgefuehrt.");
                 }
 
+                DebugLogger.Log(LogLevel.INFO, "NetConfig", "Netsh-Befehle erfolgreich ausgeführt");
                 return (true, null);
             }
-            catch (System.ComponentModel.Win32Exception)
+            catch (System.ComponentModel.Win32Exception ex)
             {
+                DebugLogger.Log(LogLevel.WARN, "NetConfig", "UAC abgebrochen oder Berechtigung verweigert", ex);
                 return (false, "Berechtigung erforderlich: Bitte UAC bestaetigen.");
             }
             catch (Exception ex)
             {
+                DebugLogger.Log(LogLevel.ERROR, "NetConfig", "RunNetshCommandsElevated fehlgeschlagen", ex);
                 return (false, "Fehler beim Anwenden: " + ex.Message);
             }
         }
