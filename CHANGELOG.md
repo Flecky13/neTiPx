@@ -10,6 +10,9 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Tools / Log Viewer / Datei-Dialoge**: Öffnen, Import und Export von Dateien funktionieren wieder stabil in Entwicklungs- und Release-Umgebungen.
 - **Tools / Log Viewer / Stabilität**: Dialogaufrufe von WinRT-Pickern auf native Windows-Dateidialoge umgestellt, um COM-Fehler (`0x80004005`) zu vermeiden.
 - **Interop / Dateidialoge**: `OPENFILENAME`-Marshalling korrigiert, wodurch `ArgumentException` mit `0x80070057` beim Öffnen, Importieren und Exportieren behoben wurde.
+- **IP-Profile / Manuelle IP-Eingabe**: Subnetzmasken- und CIDR-Eingaben werden nicht mehr automatisch überschrieben; Werte bleiben unverändert im Feld und werden nur validiert.
+- **IP-Profile / Validierung**: Ungültige Subnetz-/CIDR-Werte blockieren Speichern und Anwenden weiterhin und markieren das betroffene Feld rot.
+- **Tools / Routen / CIDR**: CIDR-Eingaben (z. B. `24` oder `/24`) werden vor `route ... mask ...`-Befehlen in Punkt-Subnetzmasken umgewandelt, damit Routen korrekt gesetzt/gelöscht werden.
 
 ## [1.7.1.0]
 ### Fixed
