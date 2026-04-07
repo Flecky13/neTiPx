@@ -1334,34 +1334,14 @@ namespace neTiPx.ViewModels
 
         private static bool IsValidSubnetMask(string subnetMask)
         {
-            if (!IPAddress.TryParse(subnetMask, out var ip))
-            {
-                return false;
-            }
-
-            var bytes = ip.GetAddressBytes();
-            if (bytes.Length != 4)
-            {
-                return false;
-            }
-
-            var mask = ((uint)bytes[0] << 24) |
-                       ((uint)bytes[1] << 16) |
-                       ((uint)bytes[2] << 8) |
-                       bytes[3];
-
-            if (mask == 0)
-            {
-                return false;
-            }
-
-            var inverted = ~mask;
-            return (inverted & (inverted + 1)) == 0;
+            return TryNormalizeSubnetMask(subnetMask, out _);
         }
 
         private static bool IsNetworkAddress(string destination, string subnetMask)
         {
-            if (!IPAddress.TryParse(destination, out var destinationIp) || !IPAddress.TryParse(subnetMask, out var subnetIp))
+            if (!IPAddress.TryParse(destination, out var destinationIp) ||
+                !TryNormalizeSubnetMask(subnetMask, out var normalizedSubnetMask) ||
+                !IPAddress.TryParse(normalizedSubnetMask, out var subnetIp))
             {
                 return false;
             }
@@ -1391,9 +1371,14 @@ namespace neTiPx.ViewModels
         {
             try
             {
+                if (!TryNormalizeSubnetMask(subnet, out var normalizedSubnet))
+                {
+                    return false;
+                }
+
                 if (!IPAddress.TryParse(ip, out var ipAddr) ||
                     !IPAddress.TryParse(testIp, out var testAddr) ||
-                    !IPAddress.TryParse(subnet, out var subnetAddr))
+                    !IPAddress.TryParse(normalizedSubnet, out var subnetAddr))
                 {
                     return false;
                 }
@@ -1420,6 +1405,72 @@ namespace neTiPx.ViewModels
             {
                 return false;
             }
+        }
+
+        private static bool TryNormalizeSubnetMask(string input, out string normalizedSubnetMask)
+        {
+            normalizedSubnetMask = string.Empty;
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+
+            var value = input.Trim();
+            if (value.StartsWith("/", StringComparison.Ordinal))
+            {
+                value = value.Substring(1);
+            }
+
+            if (int.TryParse(value, out var prefixLength))
+            {
+                if (prefixLength <= 0 || prefixLength > 32)
+                {
+                    return false;
+                }
+
+                normalizedSubnetMask = PrefixLengthToSubnetMask(prefixLength);
+                return true;
+            }
+
+            if (!IPAddress.TryParse(value, out var ip))
+            {
+                return false;
+            }
+
+            var bytes = ip.GetAddressBytes();
+            if (bytes.Length != 4)
+            {
+                return false;
+            }
+
+            var mask = ((uint)bytes[0] << 24) |
+                       ((uint)bytes[1] << 16) |
+                       ((uint)bytes[2] << 8) |
+                       bytes[3];
+
+            if (mask == 0)
+            {
+                return false;
+            }
+
+            var inverted = ~mask;
+            if ((inverted & (inverted + 1)) != 0)
+            {
+                return false;
+            }
+
+            normalizedSubnetMask = value;
+            return true;
+        }
+
+        private static string PrefixLengthToSubnetMask(int prefixLength)
+        {
+            var mask = prefixLength == 0 ? 0u : uint.MaxValue << (32 - prefixLength);
+            var first = (mask >> 24) & 0xFF;
+            var second = (mask >> 16) & 0xFF;
+            var third = (mask >> 8) & 0xFF;
+            var fourth = mask & 0xFF;
+            return $"{first}.{second}.{third}.{fourth}";
         }
 
         private async Task UpdateStatusAsync()

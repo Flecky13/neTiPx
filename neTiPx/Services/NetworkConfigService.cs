@@ -53,13 +53,13 @@ namespace neTiPx.Services
                 }
 
                 var first = entries[0];
-                var (valid, errorMessage) = ValidateIpGatewaySubnet(first.IpAddress, first.SubnetMask, profile.Gateway);
+                var (valid, errorMessage, normalizedFirstSubnetMask) = ValidateIpGatewaySubnet(first.IpAddress, first.SubnetMask, profile.Gateway);
                 if (!valid)
                 {
                     return (false, errorMessage);
                 }
 
-                var addressCmd = $"netsh interface ipv4 set address name=\"{ni.Name}\" source=static addr={first.IpAddress} mask={first.SubnetMask}";
+                var addressCmd = $"netsh interface ipv4 set address name=\"{ni.Name}\" source=static addr={first.IpAddress} mask={normalizedFirstSubnetMask}";
                 if (IsValidIPv4(profile.Gateway))
                 {
                     addressCmd += $" gateway={profile.Gateway} gwmetric=1";
@@ -69,13 +69,13 @@ namespace neTiPx.Services
                 for (int i = 1; i < entries.Count; i++)
                 {
                     var entry = entries[i];
-                    var (entryValid, entryError) = ValidateIpGatewaySubnet(entry.IpAddress, entry.SubnetMask, string.Empty);
+                    var (entryValid, entryError, normalizedSubnetMask) = ValidateIpGatewaySubnet(entry.IpAddress, entry.SubnetMask, string.Empty);
                     if (!entryValid)
                     {
                         return (false, $"Validierungsfehler in IP #{i + 1}: {entryError}");
                     }
 
-                    commands.Add($"netsh interface ipv4 add address name=\"{ni.Name}\" addr={entry.IpAddress} mask={entry.SubnetMask}");
+                    commands.Add($"netsh interface ipv4 add address name=\"{ni.Name}\" addr={entry.IpAddress} mask={normalizedSubnetMask}");
                 }
 
                 // Set DNS servers
@@ -203,9 +203,14 @@ namespace neTiPx.Services
                 return (false, "Subnetzmaske ist ungültig.");
             }
 
+            if (!TryNormalizeSubnetMask(subnetMask, out var normalizedSubnetMask))
+            {
+                return (false, "Subnetzmaske ist ungültig.");
+            }
+
             var commands = new List<string>
             {
-                $"route delete {destination} mask {subnetMask} {route.Gateway}"
+                $"route delete {destination} mask {normalizedSubnetMask} {route.Gateway}"
             };
 
             return RunNetshCommandsElevated(commands);
@@ -230,9 +235,14 @@ namespace neTiPx.Services
                 return (false, validationError);
             }
 
+            if (!TryNormalizeSubnetMask(sanitizedRoute.SubnetMask, out var normalizedSubnetMask))
+            {
+                return (false, $"Subnetzmaske '{sanitizedRoute.SubnetMask}' ist ungueltig.");
+            }
+
             var commands = new List<string>
             {
-                $"route -p add {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
+                $"route -p add {sanitizedRoute.Destination} mask {normalizedSubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
             };
 
             return RunNetshCommandsElevated(commands);
@@ -265,17 +275,22 @@ namespace neTiPx.Services
                 return (false, "Route kann nicht geloescht werden: Subnetzmaske ist ungueltig.");
             }
 
+            if (!TryNormalizeSubnetMask(subnetMask, out var normalizedSubnetMask))
+            {
+                return (false, "Route kann nicht geloescht werden: Subnetzmaske ist ungueltig.");
+            }
+
             var prefix = $"{destination}/{prefixLength}";
 
             var persistentRoutes = GetPersistentRoutesForLookup();
-            if (!PersistentRouteExists(destination, subnetMask, route.Gateway, persistentRoutes))
+            if (!PersistentRouteExists(destination, normalizedSubnetMask, route.Gateway, persistentRoutes))
             {
                 return (true, "Route nicht vorhanden.");
             }
 
             var commands = new List<string>
             {
-                $"route delete {destination} mask {subnetMask} {route.Gateway}"
+                $"route delete {destination} mask {normalizedSubnetMask} {route.Gateway}"
             };
 
             return RunNetshCommandsElevated(commands);
@@ -308,15 +323,20 @@ namespace neTiPx.Services
                 return (false, validationError);
             }
 
+            if (!TryNormalizeSubnetMask(sanitizedRoute.SubnetMask, out var normalizedSubnetMask))
+            {
+                return (false, $"Subnetzmaske '{sanitizedRoute.SubnetMask}' ist ungueltig.");
+            }
+
             var persistentRoutes = GetPersistentRoutesForLookup();
-            if (PersistentRouteExists(sanitizedRoute.Destination, sanitizedRoute.SubnetMask, sanitizedRoute.Gateway, persistentRoutes))
+            if (PersistentRouteExists(sanitizedRoute.Destination, normalizedSubnetMask, sanitizedRoute.Gateway, persistentRoutes))
             {
                 return (true, "Route bereits vorhanden.");
             }
 
             var commands = new List<string>
             {
-                $"route -p add {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
+                $"route -p add {sanitizedRoute.Destination} mask {normalizedSubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
             };
 
             return RunNetshCommandsElevated(commands);
@@ -440,79 +460,57 @@ namespace neTiPx.Services
 
         private static bool IsValidSubnetMask(string subnet)
         {
-            if (!IsValidIPv4(subnet))
-            {
-                return false;
-            }
-
-            var bytes = System.Net.IPAddress.Parse(subnet).GetAddressBytes();
-            uint mask = ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
-
-            if (mask == 0)
-            {
-                return false;
-            }
-
-            bool seenZero = false;
-            for (int i = 31; i >= 0; i--)
-            {
-                bool bitSet = (mask & (1u << i)) != 0;
-                if (!bitSet)
-                {
-                    seenZero = true;
-                }
-                else if (seenZero)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return TryNormalizeSubnetMask(subnet, out _);
         }
 
-        private static (bool valid, string errorMessage) ValidateIpGatewaySubnet(string ip, string subnet, string gateway)
+        private static (bool valid, string errorMessage, string normalizedSubnetMask) ValidateIpGatewaySubnet(string ip, string subnet, string gateway)
         {
             if (string.IsNullOrWhiteSpace(ip))
             {
-                return (false, "IP-Adresse ist erforderlich.");
+                return (false, "IP-Adresse ist erforderlich.", string.Empty);
             }
             if (!IsValidIPv4(ip))
             {
-                return (false, $"IP-Adresse '{ip}' ist ungueltig.");
+                return (false, $"IP-Adresse '{ip}' ist ungueltig.", string.Empty);
             }
 
             if (string.IsNullOrWhiteSpace(subnet))
             {
-                return (false, "Subnetzmaske ist erforderlich.");
+                return (false, "Subnetzmaske ist erforderlich.", string.Empty);
             }
-            if (!IsValidSubnetMask(subnet))
+            if (!TryNormalizeSubnetMask(subnet, out var normalizedSubnet))
             {
-                return (false, $"Subnetzmaske '{subnet}' ist ungueltig.");
+                return (false, $"Subnetzmaske '{subnet}' ist ungueltig.", string.Empty);
             }
 
             if (!string.IsNullOrWhiteSpace(gateway))
             {
                 if (!IsValidIPv4(gateway))
                 {
-                    return (false, $"Gateway '{gateway}' ist ungueltig.");
+                    return (false, $"Gateway '{gateway}' ist ungueltig.", string.Empty);
                 }
 
-                if (!IsIpInSubnet(ip, gateway, subnet))
+                if (!IsIpInSubnet(ip, gateway, normalizedSubnet))
                 {
-                    return (false, $"Gateway '{gateway}' passt nicht zum Subnetz der IP '{ip}' mit Maske '{subnet}'.");
+                    return (false, $"Gateway '{gateway}' passt nicht zum Subnetz der IP '{ip}' mit Maske '{subnet}'.", string.Empty);
                 }
             }
 
-            return (true, string.Empty);
+            return (true, string.Empty, normalizedSubnet);
         }
 
         private static bool IsIpInSubnet(string ip, string testIp, string subnet)
         {
             try
             {
+                if (!TryNormalizeSubnetMask(subnet, out var normalizedSubnet))
+                {
+                    return false;
+                }
+
                 if (!System.Net.IPAddress.TryParse(ip, out var ipAddr) ||
                     !System.Net.IPAddress.TryParse(testIp, out var testAddr) ||
-                    !System.Net.IPAddress.TryParse(subnet, out var subnetAddr))
+                    !System.Net.IPAddress.TryParse(normalizedSubnet, out var subnetAddr))
                 {
                     return false;
                 }
@@ -568,12 +566,12 @@ namespace neTiPx.Services
 
         private static int SubnetMaskToPrefix(string subnet)
         {
-            if (!IsValidSubnetMask(subnet))
+            if (!TryNormalizeSubnetMask(subnet, out var normalizedSubnet))
             {
                 return -1;
             }
 
-            var bytes = System.Net.IPAddress.Parse(subnet).GetAddressBytes();
+            var bytes = System.Net.IPAddress.Parse(normalizedSubnet).GetAddressBytes();
             uint mask = ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
 
             int prefix = 0;
@@ -596,8 +594,13 @@ namespace neTiPx.Services
         {
             try
             {
+                if (!TryNormalizeSubnetMask(subnet, out var normalizedSubnet))
+                {
+                    return false;
+                }
+
                 if (!System.Net.IPAddress.TryParse(destination, out var destinationAddr) ||
-                    !System.Net.IPAddress.TryParse(subnet, out var subnetAddr))
+                    !System.Net.IPAddress.TryParse(normalizedSubnet, out var subnetAddr))
                 {
                     return false;
                 }
@@ -614,6 +617,61 @@ namespace neTiPx.Services
             {
                 return false;
             }
+        }
+
+        private static bool TryNormalizeSubnetMask(string input, out string normalizedSubnetMask)
+        {
+            normalizedSubnetMask = string.Empty;
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+
+            var value = input.Trim();
+            if (value.StartsWith("/", StringComparison.Ordinal))
+            {
+                value = value.Substring(1);
+            }
+
+            if (int.TryParse(value, out var prefixLength))
+            {
+                if (prefixLength <= 0 || prefixLength > 32)
+                {
+                    return false;
+                }
+
+                normalizedSubnetMask = PrefixLengthToSubnetMask(prefixLength);
+                return true;
+            }
+
+            if (!IsValidIPv4(value))
+            {
+                return false;
+            }
+
+            var bytes = System.Net.IPAddress.Parse(value).GetAddressBytes();
+            uint mask = ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
+            if (mask == 0)
+            {
+                return false;
+            }
+
+            bool seenZero = false;
+            for (int i = 31; i >= 0; i--)
+            {
+                bool bitSet = (mask & (1u << i)) != 0;
+                if (!bitSet)
+                {
+                    seenZero = true;
+                }
+                else if (seenZero)
+                {
+                    return false;
+                }
+            }
+
+            normalizedSubnetMask = value;
+            return true;
         }
 
         private static bool PersistentRouteExists(string destination, string subnetMask, string gateway, List<RouteEntry>? persistentRoutes = null)
