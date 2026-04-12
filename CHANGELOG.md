@@ -8,6 +8,7 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - **Systray / Hover-Fenster / Layout**: Fensterbreite angepasst, damit lange IPv6-Adressen seltener umbrechen.
+- **Systray / Hover-Fenster / DPI**: Fensterbreite und Höhenanpassung werden jetzt mit der Windows-Bildschirm-Skalierung berechnet, damit das Fenster auf unterschiedlichen DPI-Stufen konsistent bleibt.
 
 ## [1.7.1.4]
 

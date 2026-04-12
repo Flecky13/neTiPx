@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Text;
 using Microsoft.UI.Windowing;
@@ -15,6 +16,11 @@ namespace neTiPx.Views
 {
     public sealed class HoverWindow : Window
     {
+        private const int BaseWindowWidthDip = 330;
+        private const int BaseInitialHeightDip = 100;
+        private const int BaseMaxHeightDip = 600;
+        private const int BaseHeightPaddingDip = 20;
+
         private static readonly LanguageManager _lm = LanguageManager.Instance;
         private HoverViewModel ViewModelInstance;
         private ScrollViewer? _scrollViewer;
@@ -234,12 +240,16 @@ namespace neTiPx.Views
         {
             if (_scrollViewer != null)
             {
+                var dpiScale = GetWindowDpiScale();
                 _scrollViewer.UpdateLayout();
-                _scrollViewer.Measure(new Windows.Foundation.Size(330, double.PositiveInfinity));
-                double contentHeight = _scrollViewer.DesiredSize.Height;
-                double finalHeight = Math.Min(contentHeight + 20, 600);
+                _scrollViewer.Measure(new Windows.Foundation.Size(BaseWindowWidthDip, double.PositiveInfinity));
+                double contentHeightDip = _scrollViewer.DesiredSize.Height;
+                double finalHeightDip = Math.Min(contentHeightDip + BaseHeightPaddingDip, BaseMaxHeightDip);
+
+                var scaledWidth = ScaleForDpi(BaseWindowWidthDip, dpiScale);
+                var scaledHeight = ScaleForDpi(finalHeightDip, dpiScale);
                 var appWindow = WindowHelper.GetAppWindow(this);
-                appWindow.Resize(new Windows.Graphics.SizeInt32(330, (int)finalHeight));
+                appWindow.Resize(new Windows.Graphics.SizeInt32(scaledWidth, scaledHeight));
             }
         }
 
@@ -248,7 +258,10 @@ namespace neTiPx.Views
             var appWindow = WindowHelper.GetAppWindow(this);
 
             // Set initial size (will be adjusted based on content)
-            appWindow.Resize(new Windows.Graphics.SizeInt32(330, 100));
+            var dpiScale = GetWindowDpiScale();
+            appWindow.Resize(new Windows.Graphics.SizeInt32(
+                ScaleForDpi(BaseWindowWidthDip, dpiScale),
+                ScaleForDpi(BaseInitialHeightDip, dpiScale)));
 
             appWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
             if (appWindow.Presenter is OverlappedPresenter presenter)
@@ -270,6 +283,31 @@ namespace neTiPx.Views
 
             WindowHelper.Hide(this);
         }
+
+        private double GetWindowDpiScale()
+        {
+            var hwnd = WindowHelper.GetWindowHandle(this);
+            if (hwnd == IntPtr.Zero)
+            {
+                return 1.0;
+            }
+
+            var dpi = GetDpiForWindow(hwnd);
+            if (dpi == 0)
+            {
+                return 1.0;
+            }
+
+            return dpi / 96.0;
+        }
+
+        private static int ScaleForDpi(double valueAt100Percent, double dpiScale)
+        {
+            return Math.Max(1, (int)Math.Round(valueAt100Percent * dpiScale));
+        }
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
 
         // Helper converter class
         public sealed class BooleanToVisibilityConverter : Microsoft.UI.Xaml.Data.IValueConverter
