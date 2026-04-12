@@ -24,10 +24,10 @@
         <PublishProfile>win-$(Platform).pubxml</PublishProfile>
         <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &gt;= 8">win-x86;win-x64;win-arm64</RuntimeIdentifiers>
         <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &lt; 8">win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
-        <Version>1.7.1.4</Version>
-        <FileVersion>1.7.1.4</FileVersion>
-        <AssemblyVersion>1.7.1.4</AssemblyVersion>
-        <InformationalVersion>1.7.1.4</InformationalVersion>
+        <Version>1.7.1.5</Version>
+        <FileVersion>1.7.1.5</FileVersion>
+        <AssemblyVersion>1.7.1.5</AssemblyVersion>
+        <InformationalVersion>1.7.1.5</InformationalVersion>
 
         <!-- Fix XmlSerializer loading issue -->
         <TrimmerDefaultAction Condition="'$(PublishTrimmed)' == 'true'">link</TrimmerDefaultAction>

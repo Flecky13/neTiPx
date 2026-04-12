@@ -235,11 +235,11 @@ namespace neTiPx.Views
             if (_scrollViewer != null)
             {
                 _scrollViewer.UpdateLayout();
-                _scrollViewer.Measure(new Windows.Foundation.Size(320, double.PositiveInfinity));
+                _scrollViewer.Measure(new Windows.Foundation.Size(330, double.PositiveInfinity));
                 double contentHeight = _scrollViewer.DesiredSize.Height;
                 double finalHeight = Math.Min(contentHeight + 20, 600);
                 var appWindow = WindowHelper.GetAppWindow(this);
-                appWindow.Resize(new Windows.Graphics.SizeInt32(320, (int)finalHeight));
+                appWindow.Resize(new Windows.Graphics.SizeInt32(330, (int)finalHeight));
             }
         }
 
@@ -248,7 +248,7 @@ namespace neTiPx.Views
             var appWindow = WindowHelper.GetAppWindow(this);
 
             // Set initial size (will be adjusted based on content)
-            appWindow.Resize(new Windows.Graphics.SizeInt32(320, 100));
+            appWindow.Resize(new Windows.Graphics.SizeInt32(330, 100));
 
             appWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
             if (appWindow.Presenter is OverlappedPresenter presenter)
