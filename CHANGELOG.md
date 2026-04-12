@@ -4,6 +4,11 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.5]
+
+### Changed
+- **Systray / Hover-Fenster / Layout**: Fensterbreite angepasst, damit lange IPv6-Adressen seltener umbrechen.
+
 ## [1.7.1.4]
 
 ### Changed
