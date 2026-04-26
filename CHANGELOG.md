@@ -6,7 +6,16 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.7.1.5]
 
+### Added
+- **Adapter / Statuskarten / Reachability**: Live-Trendkurven (EKG-artig) für Gateway, DNS 1 und DNS 2 ergänzt, jeweils für IPv4 und IPv6 bei NIC 1 und NIC 2.
+- **Tools / Ping / Verlauf**: Pro Ping-Ziel zusätzliche Trendkurven für IPv4 und IPv6 ergänzt.
+
 ### Changed
+- **Adapter / Statuskarten / Layout**: Statusblöcke als 2-Spalten-Layout angepasst; links Status/IP/Ping, rechts die Trendkurve über die Gesamthöhe der drei Zeilen.
+- **Adapter / Reachability / Monitoring**: Prüfintervall für Gateway/DNS von 5 Sekunden auf 1 Sekunde reduziert.
+- **Adapter / Trendkurven / Darstellung**: Y-Skalierung auf dynamische Bereiche umgestellt, damit auch kleine Latenzänderungen sichtbar bleiben.
+- **Tools / Ping / Layout**: Trendkurven unter die Statistikzeile (IP/Ø/Max/Timeout) verschoben und auf die jeweilige verfügbare Breite von IPv4/IPv6 ausgedehnt.
+- **Tools / Ping / Trendkurven**: Kurvenhöhe auf ca. zwei Textzeilen eingestellt.
 - **Systray / Hover-Fenster / Layout**: Fensterbreite angepasst, damit lange IPv6-Adressen seltener umbrechen.
 - **Systray / Hover-Fenster / DPI**: Fensterbreite und Höhenanpassung werden jetzt mit der Windows-Bildschirm-Skalierung berechnet, damit das Fenster auf unterschiedlichen DPI-Stufen konsistent bleibt.
 
