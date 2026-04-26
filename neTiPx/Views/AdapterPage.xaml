@@ -259,41 +259,53 @@
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding GatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding PrimaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding GatewayPingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding GatewayTrendPoints}" Stroke="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding GatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding PrimaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding GatewayPingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding GatewayTrendPoints}" Stroke="{Binding GatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Dns1StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding PrimaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding Dns1PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding Dns1TrendPoints}" Stroke="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Dns1StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding PrimaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Dns1PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding Dns1TrendPoints}" Stroke="{Binding Dns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Dns2StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding PrimaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding Dns2PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding Dns2TrendPoints}" Stroke="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Dns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding PrimaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Dns2PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding Dns2TrendPoints}" Stroke="{Binding Dns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
                             </StackPanel>
 
@@ -302,41 +314,53 @@
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding GatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding GatewayV6StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding PrimaryAdapterGateway6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding GatewayV6PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding GatewayV6TrendPoints}" Stroke="{Binding GatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding GatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding GatewayV6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding PrimaryAdapterGateway6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding GatewayV6PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding GatewayV6TrendPoints}" Stroke="{Binding GatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Dns1V6StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding PrimaryDns1AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding Dns1V6PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding Dns1V6TrendPoints}" Stroke="{Binding Dns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding Dns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Dns1V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding PrimaryDns1AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Dns1V6PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding Dns1V6TrendPoints}" Stroke="{Binding Dns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding Dns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Dns2V6StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding PrimaryDns2AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding Dns2V6PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding Dns2V6TrendPoints}" Stroke="{Binding Dns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding Dns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Dns2V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding PrimaryDns2AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Dns2V6PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding Dns2V6TrendPoints}" Stroke="{Binding Dns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -361,41 +385,53 @@
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding SecondaryGatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding SecondaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding SecondaryGatewayPingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding SecondaryGatewayTrendPoints}" Stroke="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SecondaryGatewayStatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SecondaryAdapterGateway}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding SecondaryGatewayPingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding SecondaryGatewayTrendPoints}" Stroke="{Binding SecondaryGatewayStatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding SecondaryDns1StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding SecondaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding SecondaryDns1PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding SecondaryDns1TrendPoints}" Stroke="{Binding SecondaryDns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SecondaryDns1StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SecondaryDns1Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding SecondaryDns1PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding SecondaryDns1TrendPoints}" Stroke="{Binding SecondaryDns1StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding SecondaryDns2StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding SecondaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding SecondaryDns2PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding SecondaryDns2TrendPoints}" Stroke="{Binding SecondaryDns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SecondaryDns2StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SecondaryDns2Address}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding SecondaryDns2PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding SecondaryDns2TrendPoints}" Stroke="{Binding SecondaryDns2StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
                             </StackPanel>
 
@@ -404,41 +440,53 @@
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowGatewayStatus, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="Gateway" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding SecondaryGatewayV6StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding SecondaryAdapterGateway6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding SecondaryGatewayV6PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding SecondaryGatewayV6TrendPoints}" Stroke="{Binding SecondaryGatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryGatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SecondaryGatewayV6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SecondaryAdapterGateway6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding SecondaryGatewayV6PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding SecondaryGatewayV6TrendPoints}" Stroke="{Binding SecondaryGatewayV6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns1Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 1" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding SecondaryDns1V6StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding SecondaryDns1AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding SecondaryDns1V6PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding SecondaryDns1V6TrendPoints}" Stroke="{Binding SecondaryDns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SecondaryDns1V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SecondaryDns1AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding SecondaryDns1V6PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding SecondaryDns1V6TrendPoints}" Stroke="{Binding SecondaryDns1V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" Visibility="{Binding ShowDns2Status, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="DNS 2" FontWeight="SemiBold" FontSize="12" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding SecondaryDns2V6StatusText}" VerticalAlignment="Center" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding SecondaryDns2AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding SecondaryDns2V6PingText}" FontSize="11" Opacity="0.7" />
-                                    <Border Width="146" Height="22" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent">
-                                        <Polyline Points="{Binding SecondaryDns2V6TrendPoints}" Stroke="{Binding SecondaryDns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                    </Border>
+                                    <Grid ColumnDefinitions="*,146" ColumnSpacing="10" MinHeight="58">
+                                        <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Ellipse Width="12" Height="12" Fill="{Binding SecondaryDns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SecondaryDns2V6StatusText}" VerticalAlignment="Center" FontSize="12" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding SecondaryDns2AddressV6}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding SecondaryDns2V6PingText}" FontSize="11" Opacity="0.7" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Height="58" BorderThickness="1" BorderBrush="{ThemeResource CardBorderBrush}" CornerRadius="4" Padding="0" Background="Transparent" VerticalAlignment="Stretch">
+                                            <Polyline Points="{Binding SecondaryDns2V6TrendPoints}" Stroke="{Binding SecondaryDns2V6StatusKind, Converter={StaticResource GatewayStatusToBrushConverter}}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>

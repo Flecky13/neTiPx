@@ -149,7 +149,7 @@ namespace neTiPx.ViewModels
             _uiContext = SynchronizationContext.Current;
             try
             {
-                _pingTimer = new TimersTimer(System.TimeSpan.FromSeconds(5))
+                _pingTimer = new TimersTimer(System.TimeSpan.FromSeconds(1))
                 {
                     AutoReset = true
                 };
