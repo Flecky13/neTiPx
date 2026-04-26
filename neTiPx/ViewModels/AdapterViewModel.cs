@@ -90,6 +90,9 @@ namespace neTiPx.ViewModels
         private const int TrendSampleCount = 24;
         private const double TrendWidth = 146d;
         private const double TrendHeight = 22d;
+        private const double TrendTopPadding = 2d;
+        private const double TrendBottomPadding = 2d;
+        private const double TrendMinMetricSpan = 8d;
 
         private readonly Queue<double> _gatewayTrendHistory = new Queue<double>();
         private readonly Queue<double> _dns1TrendHistory = new Queue<double>();
@@ -1267,33 +1270,31 @@ namespace neTiPx.ViewModels
             return false;
         }
 
-        private static double ResolveTrendSample(GatewayStatusKind statusKind, string pingText, ref bool pulseState)
+        private static double ResolveTrendMetric(GatewayStatusKind statusKind, string pingText, ref bool pulseState)
         {
             if (TryExtractPingMs(pingText, out var ms))
             {
-                // 0..300 ms auf sichtbaren Zeichenbereich mappen (niedrig = obere Linie)
-                var clamped = System.Math.Clamp(ms, 0L, 300L);
-                return 2d + (1d - (clamped / 300d)) * (TrendHeight - 4d);
+                return ms;
             }
 
             pulseState = !pulseState;
 
             if (statusKind == GatewayStatusKind.Bad)
             {
-                return pulseState ? 3d : TrendHeight - 2d;
+                return pulseState ? 260d : 120d;
             }
 
             if (statusKind == GatewayStatusKind.Warning)
             {
-                return pulseState ? (TrendHeight / 2d) - 3d : (TrendHeight / 2d) + 3d;
+                return pulseState ? 170d : 110d;
             }
 
             if (statusKind == GatewayStatusKind.Good)
             {
-                return pulseState ? (TrendHeight / 2d) - 1.5d : (TrendHeight / 2d) + 1.5d;
+                return pulseState ? 55d : 45d;
             }
 
-            return TrendHeight / 2d;
+            return 90d;
         }
 
         private static PointCollection BuildTrendPoints(Queue<double> history)
@@ -1307,15 +1308,35 @@ namespace neTiPx.ViewModels
             var samples = history.ToArray();
             var step = TrendWidth / (TrendSampleCount - 1);
             var leading = TrendSampleCount - samples.Length;
+            var minMetric = samples.Min();
+            var maxMetric = samples.Max();
+
+            if ((maxMetric - minMetric) < TrendMinMetricSpan)
+            {
+                var center = (maxMetric + minMetric) / 2d;
+                minMetric = center - (TrendMinMetricSpan / 2d);
+                maxMetric = center + (TrendMinMetricSpan / 2d);
+            }
+
+            var metricRange = maxMetric - minMetric;
+            var usableHeight = TrendHeight - TrendTopPadding - TrendBottomPadding;
+            var centerY = TrendHeight / 2d;
+
+            double MapMetricToY(double metric)
+            {
+                var normalized = (metric - minMetric) / metricRange;
+                // Niedrigere Latenz oben, höhere unten
+                return TrendTopPadding + ((1d - normalized) * usableHeight);
+            }
 
             for (int i = 0; i < leading; i++)
             {
-                points.Add(new Point(i * step, TrendHeight / 2d));
+                points.Add(new Point(i * step, centerY));
             }
 
             for (int i = 0; i < samples.Length; i++)
             {
-                points.Add(new Point((i + leading) * step, samples[i]));
+                points.Add(new Point((i + leading) * step, MapMetricToY(samples[i])));
             }
 
             return points;
@@ -1337,7 +1358,7 @@ namespace neTiPx.ViewModels
             string pingText,
             System.Action<PointCollection> setPoints)
         {
-            var sample = ResolveTrendSample(statusKind, pingText, ref pulseState);
+            var sample = ResolveTrendMetric(statusKind, pingText, ref pulseState);
             PushTrendSample(history, sample);
             setPoints(BuildTrendPoints(history));
         }
