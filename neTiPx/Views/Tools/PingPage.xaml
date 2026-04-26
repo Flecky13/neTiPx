@@ -70,7 +70,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,8">
-                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,90,84,20,84,20,Auto,Auto,44" ColumnSpacing="8" RowSpacing="8">
+                                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,90,84,20,84,20,Auto,Auto,44" ColumnSpacing="8" RowSpacing="8">
                                     <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding Target, Mode=TwoWay}" Tag="{Binding}" LostFocus="PingTargetTextBox_LostFocus" VerticalAlignment="Center" />
 
                                     <NumberBox Grid.Row="0" Grid.Column="1" Value="{Binding IntervalSeconds, Mode=TwoWay}" Minimum="1" Maximum="120" SmallChange="1" SpinButtonPlacementMode="Compact" Tag="{Binding}" ValueChanged="PingIntervalNumberBox_ValueChanged" MinWidth="90" MaxWidth="90" VerticalAlignment="Center" />
@@ -105,6 +105,24 @@
                                         <TextBlock Text="{Binding StatisticsIpv4}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Visibility="{Binding ShowIPv4}" />
                                         <TextBlock Text="{Binding StatisticsIpv6}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Visibility="{Binding ShowIPv6}" />
                                     </StackPanel>
+
+                                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="9" ColumnDefinitions="*,*" ColumnSpacing="12" Margin="8,0,0,0">
+                                        <Border Grid.Column="0" Height="34" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4" Background="Transparent" Visibility="{Binding ShowIPv4}">
+                                            <Viewbox Stretch="Fill">
+                                                <Canvas Width="84" Height="34">
+                                                    <Polyline Points="{Binding TrendPointsIpv4}" Stroke="{Binding StatusColorIpv4}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Border>
+
+                                        <Border Grid.Column="1" Height="34" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" CornerRadius="4" Background="Transparent" Visibility="{Binding ShowIPv6}">
+                                            <Viewbox Stretch="Fill">
+                                                <Canvas Width="84" Height="34">
+                                                    <Polyline Points="{Binding TrendPointsIpv6}" Stroke="{Binding StatusColorIpv6}" StrokeThickness="1.6" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Border>
+                                    </Grid>
                                 </Grid>
                             </Border>
                         </DataTemplate>

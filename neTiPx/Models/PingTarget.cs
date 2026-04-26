@@ -5,6 +5,7 @@ using neTiPx.Helpers;
 using System.Net;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Foundation;
 
 namespace neTiPx.Models
 {
@@ -22,6 +23,20 @@ namespace neTiPx.Models
         private string _source = string.Empty;
         private string _resolvedAddressIpv4 = string.Empty;
         private string _resolvedAddressIpv6 = string.Empty;
+
+        private const int TrendSampleCount = 24;
+        private const double TrendWidth = 84d;
+        private const double TrendHeight = 34d;
+        private const double TrendTopPadding = 2d;
+        private const double TrendBottomPadding = 2d;
+        private const double TrendMinMetricSpan = 8d;
+
+        private readonly Queue<double> _trendHistoryIpv4 = new Queue<double>();
+        private readonly Queue<double> _trendHistoryIpv6 = new Queue<double>();
+        private bool _trendPulseIpv4;
+        private bool _trendPulseIpv6;
+        private PointCollection _trendPointsIpv4 = CreateFlatTrendPoints();
+        private PointCollection _trendPointsIpv6 = CreateFlatTrendPoints();
 
         // Statistiken IPv4
         private int _pingCountIpv4 = 0;
@@ -118,6 +133,18 @@ namespace neTiPx.Models
             }
         }
 
+        public PointCollection TrendPointsIpv4
+        {
+            get => _trendPointsIpv4;
+            set => SetProperty(ref _trendPointsIpv4, value);
+        }
+
+        public PointCollection TrendPointsIpv6
+        {
+            get => _trendPointsIpv6;
+            set => SetProperty(ref _trendPointsIpv6, value);
+        }
+
         // Statistiken IPv4
         public int PingCountIpv4
         {
@@ -145,6 +172,20 @@ namespace neTiPx.Models
             OnPropertyChanged(nameof(StatisticsIpv4));
         }
 
+        public void UpdateTrendIpv4(long? responseTimeMs, bool isBad)
+        {
+            var metric = ResolveTrendMetric(responseTimeMs, isBad, ref _trendPulseIpv4);
+            PushTrendSample(_trendHistoryIpv4, metric);
+            TrendPointsIpv4 = BuildTrendPoints(_trendHistoryIpv4);
+        }
+
+        public void ResetTrendIpv4()
+        {
+            _trendHistoryIpv4.Clear();
+            _trendPulseIpv4 = false;
+            TrendPointsIpv4 = CreateFlatTrendPoints();
+        }
+
         // Statistiken IPv6
         public int PingCountIpv6
         {
@@ -170,6 +211,20 @@ namespace neTiPx.Models
         {
             _responseTimesIpv6.Add(milliseconds);
             OnPropertyChanged(nameof(StatisticsIpv6));
+        }
+
+        public void UpdateTrendIpv6(long? responseTimeMs, bool isBad)
+        {
+            var metric = ResolveTrendMetric(responseTimeMs, isBad, ref _trendPulseIpv6);
+            PushTrendSample(_trendHistoryIpv6, metric);
+            TrendPointsIpv6 = BuildTrendPoints(_trendHistoryIpv6);
+        }
+
+        public void ResetTrendIpv6()
+        {
+            _trendHistoryIpv6.Clear();
+            _trendPulseIpv6 = false;
+            TrendPointsIpv6 = CreateFlatTrendPoints();
         }
 
         // Formatierte Statistiken
@@ -233,5 +288,87 @@ namespace neTiPx.Models
         {
             get => _statusColorIpv4;
         }
+
+        private static PointCollection CreateFlatTrendPoints()
+        {
+            var points = new PointCollection();
+            var step = TrendWidth / (TrendSampleCount - 1);
+            var centerY = TrendHeight / 2d;
+            for (int i = 0; i < TrendSampleCount; i++)
+            {
+                points.Add(new Point(i * step, centerY));
+            }
+            return points;
+        }
+
+        private static double ResolveTrendMetric(long? responseTimeMs, bool isBad, ref bool pulseState)
+        {
+            if (responseTimeMs.HasValue)
+            {
+                return responseTimeMs.Value;
+            }
+
+            pulseState = !pulseState;
+            if (isBad)
+            {
+                return pulseState ? 260d : 120d;
+            }
+
+            return pulseState ? 55d : 45d;
+        }
+
+        private static void PushTrendSample(Queue<double> history, double value)
+        {
+            history.Enqueue(value);
+            while (history.Count > TrendSampleCount)
+            {
+                history.Dequeue();
+            }
+        }
+
+        private static PointCollection BuildTrendPoints(Queue<double> history)
+        {
+            var points = new PointCollection();
+            if (history.Count == 0)
+            {
+                return CreateFlatTrendPoints();
+            }
+
+            var samples = history.ToArray();
+            var step = TrendWidth / (TrendSampleCount - 1);
+            var leading = TrendSampleCount - samples.Length;
+
+            var minMetric = samples.Min();
+            var maxMetric = samples.Max();
+            if ((maxMetric - minMetric) < TrendMinMetricSpan)
+            {
+                var center = (maxMetric + minMetric) / 2d;
+                minMetric = center - (TrendMinMetricSpan / 2d);
+                maxMetric = center + (TrendMinMetricSpan / 2d);
+            }
+
+            var metricRange = maxMetric - minMetric;
+            var usableHeight = TrendHeight - TrendTopPadding - TrendBottomPadding;
+            var centerY = TrendHeight / 2d;
+
+            double MapMetricToY(double metric)
+            {
+                var normalized = (metric - minMetric) / metricRange;
+                return TrendTopPadding + ((1d - normalized) * usableHeight);
+            }
+
+            for (int i = 0; i < leading; i++)
+            {
+                points.Add(new Point(i * step, centerY));
+            }
+
+            for (int i = 0; i < samples.Length; i++)
+            {
+                points.Add(new Point((i + leading) * step, MapMetricToY(samples[i])));
+            }
+
+            return points;
+        }
     }
+
 }

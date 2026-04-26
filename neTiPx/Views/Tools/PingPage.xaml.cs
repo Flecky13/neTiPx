@@ -463,8 +463,10 @@ namespace neTiPx.Views
 
             target.ResponseTimeIpv4 = T("PING_STATUS_DISABLED");
             target.StatusColorIpv4 = new SolidColorBrush(Colors.Gray);
+            target.ResetTrendIpv4();
             target.ResponseTimeIpv6 = T("PING_STATUS_DISABLED");
             target.StatusColorIpv6 = new SolidColorBrush(Colors.Gray);
+            target.ResetTrendIpv6();
         }
 
         private void PingEnabledCheckBox_Click(object sender, RoutedEventArgs e)
@@ -573,6 +575,7 @@ namespace neTiPx.Views
                     {
                         target.ResponseTimeIpv4 = T("PING_STATUS_ERROR");
                         target.StatusColorIpv4 = new SolidColorBrush(Colors.Red);
+                        target.UpdateTrendIpv4(null, isBad: true);
                         _pingLogService.AppendPingResult(target.Target, "IPv4", T("PING_STATUS_ERROR"), target.ResolvedAddressIpv4);
                     }
 
@@ -580,6 +583,7 @@ namespace neTiPx.Views
                     {
                         target.ResponseTimeIpv6 = T("PING_STATUS_ERROR");
                         target.StatusColorIpv6 = new SolidColorBrush(Colors.Red);
+                        target.UpdateTrendIpv6(null, isBad: true);
                         _pingLogService.AppendPingResult(target.Target, "IPv6", T("PING_STATUS_ERROR"), target.ResolvedAddressIpv6);
                     }
                 });
@@ -596,6 +600,7 @@ namespace neTiPx.Views
                     target.ShowIPv6 = Visibility.Collapsed;
                     target.ResponseTimeIpv6 = T("PING_STATUS_INVALID");
                     target.StatusColorIpv6 = new SolidColorBrush(Colors.Gray);
+                    target.ResetTrendIpv6();
                 }
                 else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
@@ -603,6 +608,7 @@ namespace neTiPx.Views
                     target.ShowIPv6 = Visibility.Visible;
                     target.ResponseTimeIpv4 = T("PING_STATUS_INVALID");
                     target.StatusColorIpv4 = new SolidColorBrush(Colors.Gray);
+                    target.ResetTrendIpv4();
                 }
             }
             else
@@ -698,6 +704,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv4 = statusColor;
                     target.PingCountIpv4++;
                     target.AddResponseTimeIpv4(result.Reply.RoundtripTime);
+                    target.UpdateTrendIpv4(result.Reply.RoundtripTime, isBad: false);
                     _pingLogService.AppendPingResult(target.Target, "IPv4", responseTimeStr, result.ResolvedAddress);
                 }
                 else
@@ -706,6 +713,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv6 = statusColor;
                     target.PingCountIpv6++;
                     target.AddResponseTimeIpv6(result.Reply.RoundtripTime);
+                    target.UpdateTrendIpv6(result.Reply.RoundtripTime, isBad: false);
                     _pingLogService.AppendPingResult(target.Target, "IPv6", responseTimeStr, result.ResolvedAddress);
                 }
             }
@@ -719,6 +727,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv4 = statusColor;
                     target.PingCountIpv4++;
                     target.TimeoutCountIpv4++;
+                    target.UpdateTrendIpv4(null, isBad: true);
                     _pingLogService.AppendPingResult(target.Target, "IPv4", T("PING_STATUS_TIMEOUT"), result.ResolvedAddress);
                 }
                 else
@@ -727,6 +736,7 @@ namespace neTiPx.Views
                     target.StatusColorIpv6 = statusColor;
                     target.PingCountIpv6++;
                     target.TimeoutCountIpv6++;
+                    target.UpdateTrendIpv6(null, isBad: true);
                     _pingLogService.AppendPingResult(target.Target, "IPv6", T("PING_STATUS_TIMEOUT"), result.ResolvedAddress);
                 }
             }
