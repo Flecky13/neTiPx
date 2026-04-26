@@ -6,10 +6,12 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using TimersTimer = System.Timers.Timer;
+using Microsoft.UI.Xaml.Media;
 using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
 using Windows.UI.Xaml;
+using Windows.Foundation;
 
 namespace neTiPx.ViewModels
 {
@@ -84,6 +86,49 @@ namespace neTiPx.ViewModels
         private string _secondaryDns2V6StatusText = "Unbekannt";
         private string _secondaryDns2V6PingText = "Ping: -";
         private GatewayStatusKind _secondaryDns2V6StatusKind = GatewayStatusKind.Unknown;
+
+        private const int TrendSampleCount = 24;
+        private const double TrendWidth = 146d;
+        private const double TrendHeight = 22d;
+
+        private readonly Queue<double> _gatewayTrendHistory = new Queue<double>();
+        private readonly Queue<double> _dns1TrendHistory = new Queue<double>();
+        private readonly Queue<double> _dns2TrendHistory = new Queue<double>();
+        private readonly Queue<double> _gatewayV6TrendHistory = new Queue<double>();
+        private readonly Queue<double> _dns1V6TrendHistory = new Queue<double>();
+        private readonly Queue<double> _dns2V6TrendHistory = new Queue<double>();
+        private readonly Queue<double> _secondaryGatewayTrendHistory = new Queue<double>();
+        private readonly Queue<double> _secondaryDns1TrendHistory = new Queue<double>();
+        private readonly Queue<double> _secondaryDns2TrendHistory = new Queue<double>();
+        private readonly Queue<double> _secondaryGatewayV6TrendHistory = new Queue<double>();
+        private readonly Queue<double> _secondaryDns1V6TrendHistory = new Queue<double>();
+        private readonly Queue<double> _secondaryDns2V6TrendHistory = new Queue<double>();
+
+        private bool _gatewayTrendPulse;
+        private bool _dns1TrendPulse;
+        private bool _dns2TrendPulse;
+        private bool _gatewayV6TrendPulse;
+        private bool _dns1V6TrendPulse;
+        private bool _dns2V6TrendPulse;
+        private bool _secondaryGatewayTrendPulse;
+        private bool _secondaryDns1TrendPulse;
+        private bool _secondaryDns2TrendPulse;
+        private bool _secondaryGatewayV6TrendPulse;
+        private bool _secondaryDns1V6TrendPulse;
+        private bool _secondaryDns2V6TrendPulse;
+
+        private PointCollection _gatewayTrendPoints = CreateFlatTrendPoints();
+        private PointCollection _dns1TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _dns2TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _gatewayV6TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _dns1V6TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _dns2V6TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _secondaryGatewayTrendPoints = CreateFlatTrendPoints();
+        private PointCollection _secondaryDns1TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _secondaryDns2TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _secondaryGatewayV6TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _secondaryDns1V6TrendPoints = CreateFlatTrendPoints();
+        private PointCollection _secondaryDns2V6TrendPoints = CreateFlatTrendPoints();
 
         public AdapterViewModel()
         {
@@ -455,6 +500,78 @@ namespace neTiPx.ViewModels
         {
             get => _secondaryDns2V6StatusKind;
             set => SetProperty(ref _secondaryDns2V6StatusKind, value);
+        }
+
+        public PointCollection GatewayTrendPoints
+        {
+            get => _gatewayTrendPoints;
+            set => SetProperty(ref _gatewayTrendPoints, value);
+        }
+
+        public PointCollection Dns1TrendPoints
+        {
+            get => _dns1TrendPoints;
+            set => SetProperty(ref _dns1TrendPoints, value);
+        }
+
+        public PointCollection Dns2TrendPoints
+        {
+            get => _dns2TrendPoints;
+            set => SetProperty(ref _dns2TrendPoints, value);
+        }
+
+        public PointCollection GatewayV6TrendPoints
+        {
+            get => _gatewayV6TrendPoints;
+            set => SetProperty(ref _gatewayV6TrendPoints, value);
+        }
+
+        public PointCollection Dns1V6TrendPoints
+        {
+            get => _dns1V6TrendPoints;
+            set => SetProperty(ref _dns1V6TrendPoints, value);
+        }
+
+        public PointCollection Dns2V6TrendPoints
+        {
+            get => _dns2V6TrendPoints;
+            set => SetProperty(ref _dns2V6TrendPoints, value);
+        }
+
+        public PointCollection SecondaryGatewayTrendPoints
+        {
+            get => _secondaryGatewayTrendPoints;
+            set => SetProperty(ref _secondaryGatewayTrendPoints, value);
+        }
+
+        public PointCollection SecondaryDns1TrendPoints
+        {
+            get => _secondaryDns1TrendPoints;
+            set => SetProperty(ref _secondaryDns1TrendPoints, value);
+        }
+
+        public PointCollection SecondaryDns2TrendPoints
+        {
+            get => _secondaryDns2TrendPoints;
+            set => SetProperty(ref _secondaryDns2TrendPoints, value);
+        }
+
+        public PointCollection SecondaryGatewayV6TrendPoints
+        {
+            get => _secondaryGatewayV6TrendPoints;
+            set => SetProperty(ref _secondaryGatewayV6TrendPoints, value);
+        }
+
+        public PointCollection SecondaryDns1V6TrendPoints
+        {
+            get => _secondaryDns1V6TrendPoints;
+            set => SetProperty(ref _secondaryDns1V6TrendPoints, value);
+        }
+
+        public PointCollection SecondaryDns2V6TrendPoints
+        {
+            get => _secondaryDns2V6TrendPoints;
+            set => SetProperty(ref _secondaryDns2V6TrendPoints, value);
         }
 
         public bool ShowGatewayStatus => _settingsService.GetCheckConnectionGateway();
@@ -1105,6 +1222,126 @@ namespace neTiPx.ViewModels
             return candidate;
         }
 
+        private static PointCollection CreateFlatTrendPoints()
+        {
+            var points = new PointCollection();
+            var step = TrendWidth / (TrendSampleCount - 1);
+            var centerY = TrendHeight / 2d;
+            for (int i = 0; i < TrendSampleCount; i++)
+            {
+                points.Add(new Point(i * step, centerY));
+            }
+            return points;
+        }
+
+        private static bool TryExtractPingMs(string pingText, out long ms)
+        {
+            ms = 0;
+            if (string.IsNullOrWhiteSpace(pingText))
+            {
+                return false;
+            }
+
+            long value = 0;
+            bool foundDigit = false;
+            foreach (var c in pingText)
+            {
+                if (char.IsDigit(c))
+                {
+                    foundDigit = true;
+                    value = value * 10 + (c - '0');
+                }
+                else if (foundDigit)
+                {
+                    ms = value;
+                    return true;
+                }
+            }
+
+            if (foundDigit)
+            {
+                ms = value;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static double ResolveTrendSample(GatewayStatusKind statusKind, string pingText, ref bool pulseState)
+        {
+            if (TryExtractPingMs(pingText, out var ms))
+            {
+                // 0..300 ms auf sichtbaren Zeichenbereich mappen (niedrig = obere Linie)
+                var clamped = System.Math.Clamp(ms, 0L, 300L);
+                return 2d + (1d - (clamped / 300d)) * (TrendHeight - 4d);
+            }
+
+            pulseState = !pulseState;
+
+            if (statusKind == GatewayStatusKind.Bad)
+            {
+                return pulseState ? 3d : TrendHeight - 2d;
+            }
+
+            if (statusKind == GatewayStatusKind.Warning)
+            {
+                return pulseState ? (TrendHeight / 2d) - 3d : (TrendHeight / 2d) + 3d;
+            }
+
+            if (statusKind == GatewayStatusKind.Good)
+            {
+                return pulseState ? (TrendHeight / 2d) - 1.5d : (TrendHeight / 2d) + 1.5d;
+            }
+
+            return TrendHeight / 2d;
+        }
+
+        private static PointCollection BuildTrendPoints(Queue<double> history)
+        {
+            var points = new PointCollection();
+            if (history.Count == 0)
+            {
+                return CreateFlatTrendPoints();
+            }
+
+            var samples = history.ToArray();
+            var step = TrendWidth / (TrendSampleCount - 1);
+            var leading = TrendSampleCount - samples.Length;
+
+            for (int i = 0; i < leading; i++)
+            {
+                points.Add(new Point(i * step, TrendHeight / 2d));
+            }
+
+            for (int i = 0; i < samples.Length; i++)
+            {
+                points.Add(new Point((i + leading) * step, samples[i]));
+            }
+
+            return points;
+        }
+
+        private static void PushTrendSample(Queue<double> history, double value)
+        {
+            history.Enqueue(value);
+            while (history.Count > TrendSampleCount)
+            {
+                history.Dequeue();
+            }
+        }
+
+        private void UpdateTrend(
+            Queue<double> history,
+            ref bool pulseState,
+            GatewayStatusKind statusKind,
+            string pingText,
+            System.Action<PointCollection> setPoints)
+        {
+            var sample = ResolveTrendSample(statusKind, pingText, ref pulseState);
+            PushTrendSample(history, sample);
+            setPoints(BuildTrendPoints(history));
+        }
+
         private async Task CheckHostStatusAsync(string address, string targetKind, System.Action<string, string, GatewayStatusKind> callback)
         {
             if (string.IsNullOrWhiteSpace(address))
@@ -1195,6 +1432,7 @@ namespace neTiPx.ViewModels
                 GatewayStatusText = statusText;
                 GatewayPingText = pingText;
                 GatewayStatusKind = statusKind;
+                UpdateTrend(_gatewayTrendHistory, ref _gatewayTrendPulse, statusKind, pingText, points => GatewayTrendPoints = points);
                 return;
             }
 
@@ -1203,6 +1441,7 @@ namespace neTiPx.ViewModels
                 GatewayStatusText = statusText;
                 GatewayPingText = pingText;
                 GatewayStatusKind = statusKind;
+                UpdateTrend(_gatewayTrendHistory, ref _gatewayTrendPulse, statusKind, pingText, points => GatewayTrendPoints = points);
             }, null);
         }
 
@@ -1213,6 +1452,7 @@ namespace neTiPx.ViewModels
                 Dns1StatusText = statusText;
                 Dns1PingText = pingText;
                 Dns1StatusKind = statusKind;
+                UpdateTrend(_dns1TrendHistory, ref _dns1TrendPulse, statusKind, pingText, points => Dns1TrendPoints = points);
                 return;
             }
 
@@ -1221,6 +1461,7 @@ namespace neTiPx.ViewModels
                 Dns1StatusText = statusText;
                 Dns1PingText = pingText;
                 Dns1StatusKind = statusKind;
+                UpdateTrend(_dns1TrendHistory, ref _dns1TrendPulse, statusKind, pingText, points => Dns1TrendPoints = points);
             }, null);
         }
 
@@ -1231,6 +1472,7 @@ namespace neTiPx.ViewModels
                 Dns2StatusText = statusText;
                 Dns2PingText = pingText;
                 Dns2StatusKind = statusKind;
+                UpdateTrend(_dns2TrendHistory, ref _dns2TrendPulse, statusKind, pingText, points => Dns2TrendPoints = points);
                 return;
             }
 
@@ -1239,6 +1481,7 @@ namespace neTiPx.ViewModels
                 Dns2StatusText = statusText;
                 Dns2PingText = pingText;
                 Dns2StatusKind = statusKind;
+                UpdateTrend(_dns2TrendHistory, ref _dns2TrendPulse, statusKind, pingText, points => Dns2TrendPoints = points);
             }, null);
         }
 
@@ -1249,6 +1492,7 @@ namespace neTiPx.ViewModels
                 GatewayV6StatusText = statusText;
                 GatewayV6PingText = pingText;
                 GatewayV6StatusKind = statusKind;
+                UpdateTrend(_gatewayV6TrendHistory, ref _gatewayV6TrendPulse, statusKind, pingText, points => GatewayV6TrendPoints = points);
                 return;
             }
 
@@ -1257,6 +1501,7 @@ namespace neTiPx.ViewModels
                 GatewayV6StatusText = statusText;
                 GatewayV6PingText = pingText;
                 GatewayV6StatusKind = statusKind;
+                UpdateTrend(_gatewayV6TrendHistory, ref _gatewayV6TrendPulse, statusKind, pingText, points => GatewayV6TrendPoints = points);
             }, null);
         }
 
@@ -1267,6 +1512,7 @@ namespace neTiPx.ViewModels
                 Dns1V6StatusText = statusText;
                 Dns1V6PingText = pingText;
                 Dns1V6StatusKind = statusKind;
+                UpdateTrend(_dns1V6TrendHistory, ref _dns1V6TrendPulse, statusKind, pingText, points => Dns1V6TrendPoints = points);
                 return;
             }
 
@@ -1275,6 +1521,7 @@ namespace neTiPx.ViewModels
                 Dns1V6StatusText = statusText;
                 Dns1V6PingText = pingText;
                 Dns1V6StatusKind = statusKind;
+                UpdateTrend(_dns1V6TrendHistory, ref _dns1V6TrendPulse, statusKind, pingText, points => Dns1V6TrendPoints = points);
             }, null);
         }
 
@@ -1285,6 +1532,7 @@ namespace neTiPx.ViewModels
                 Dns2V6StatusText = statusText;
                 Dns2V6PingText = pingText;
                 Dns2V6StatusKind = statusKind;
+                UpdateTrend(_dns2V6TrendHistory, ref _dns2V6TrendPulse, statusKind, pingText, points => Dns2V6TrendPoints = points);
                 return;
             }
 
@@ -1293,6 +1541,7 @@ namespace neTiPx.ViewModels
                 Dns2V6StatusText = statusText;
                 Dns2V6PingText = pingText;
                 Dns2V6StatusKind = statusKind;
+                UpdateTrend(_dns2V6TrendHistory, ref _dns2V6TrendPulse, statusKind, pingText, points => Dns2V6TrendPoints = points);
             }, null);
         }
 
@@ -1303,6 +1552,7 @@ namespace neTiPx.ViewModels
                 SecondaryGatewayStatusText = statusText;
                 SecondaryGatewayPingText = pingText;
                 SecondaryGatewayStatusKind = statusKind;
+                UpdateTrend(_secondaryGatewayTrendHistory, ref _secondaryGatewayTrendPulse, statusKind, pingText, points => SecondaryGatewayTrendPoints = points);
                 return;
             }
 
@@ -1311,6 +1561,7 @@ namespace neTiPx.ViewModels
                 SecondaryGatewayStatusText = statusText;
                 SecondaryGatewayPingText = pingText;
                 SecondaryGatewayStatusKind = statusKind;
+                UpdateTrend(_secondaryGatewayTrendHistory, ref _secondaryGatewayTrendPulse, statusKind, pingText, points => SecondaryGatewayTrendPoints = points);
             }, null);
         }
 
@@ -1321,6 +1572,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns1StatusText = statusText;
                 SecondaryDns1PingText = pingText;
                 SecondaryDns1StatusKind = statusKind;
+                UpdateTrend(_secondaryDns1TrendHistory, ref _secondaryDns1TrendPulse, statusKind, pingText, points => SecondaryDns1TrendPoints = points);
                 return;
             }
 
@@ -1329,6 +1581,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns1StatusText = statusText;
                 SecondaryDns1PingText = pingText;
                 SecondaryDns1StatusKind = statusKind;
+                UpdateTrend(_secondaryDns1TrendHistory, ref _secondaryDns1TrendPulse, statusKind, pingText, points => SecondaryDns1TrendPoints = points);
             }, null);
         }
 
@@ -1339,6 +1592,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns2StatusText = statusText;
                 SecondaryDns2PingText = pingText;
                 SecondaryDns2StatusKind = statusKind;
+                UpdateTrend(_secondaryDns2TrendHistory, ref _secondaryDns2TrendPulse, statusKind, pingText, points => SecondaryDns2TrendPoints = points);
                 return;
             }
 
@@ -1347,6 +1601,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns2StatusText = statusText;
                 SecondaryDns2PingText = pingText;
                 SecondaryDns2StatusKind = statusKind;
+                UpdateTrend(_secondaryDns2TrendHistory, ref _secondaryDns2TrendPulse, statusKind, pingText, points => SecondaryDns2TrendPoints = points);
             }, null);
         }
 
@@ -1357,6 +1612,7 @@ namespace neTiPx.ViewModels
                 SecondaryGatewayV6StatusText = statusText;
                 SecondaryGatewayV6PingText = pingText;
                 SecondaryGatewayV6StatusKind = statusKind;
+                UpdateTrend(_secondaryGatewayV6TrendHistory, ref _secondaryGatewayV6TrendPulse, statusKind, pingText, points => SecondaryGatewayV6TrendPoints = points);
                 return;
             }
 
@@ -1365,6 +1621,7 @@ namespace neTiPx.ViewModels
                 SecondaryGatewayV6StatusText = statusText;
                 SecondaryGatewayV6PingText = pingText;
                 SecondaryGatewayV6StatusKind = statusKind;
+                UpdateTrend(_secondaryGatewayV6TrendHistory, ref _secondaryGatewayV6TrendPulse, statusKind, pingText, points => SecondaryGatewayV6TrendPoints = points);
             }, null);
         }
 
@@ -1375,6 +1632,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns1V6StatusText = statusText;
                 SecondaryDns1V6PingText = pingText;
                 SecondaryDns1V6StatusKind = statusKind;
+                UpdateTrend(_secondaryDns1V6TrendHistory, ref _secondaryDns1V6TrendPulse, statusKind, pingText, points => SecondaryDns1V6TrendPoints = points);
                 return;
             }
 
@@ -1383,6 +1641,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns1V6StatusText = statusText;
                 SecondaryDns1V6PingText = pingText;
                 SecondaryDns1V6StatusKind = statusKind;
+                UpdateTrend(_secondaryDns1V6TrendHistory, ref _secondaryDns1V6TrendPulse, statusKind, pingText, points => SecondaryDns1V6TrendPoints = points);
             }, null);
         }
 
@@ -1393,6 +1652,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns2V6StatusText = statusText;
                 SecondaryDns2V6PingText = pingText;
                 SecondaryDns2V6StatusKind = statusKind;
+                UpdateTrend(_secondaryDns2V6TrendHistory, ref _secondaryDns2V6TrendPulse, statusKind, pingText, points => SecondaryDns2V6TrendPoints = points);
                 return;
             }
 
@@ -1401,6 +1661,7 @@ namespace neTiPx.ViewModels
                 SecondaryDns2V6StatusText = statusText;
                 SecondaryDns2V6PingText = pingText;
                 SecondaryDns2V6StatusKind = statusKind;
+                UpdateTrend(_secondaryDns2V6TrendHistory, ref _secondaryDns2V6TrendPulse, statusKind, pingText, points => SecondaryDns2V6TrendPoints = points);
             }, null);
         }
 
