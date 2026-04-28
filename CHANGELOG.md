@@ -4,6 +4,22 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.7]
+
+### Changed
+- **Tools / UNC-Profile / Eingabe-UX**: Änderungen in Profilname, UNC-Pfad und Benutzername werden jetzt sofort erkannt (`UpdateSourceTrigger=PropertyChanged`) statt erst nach Fokusverlust.
+- **Tools / UNC-Profile / Profilnamenliste**: Linke Profil-Liste aktualisiert den Namen beim Umbenennen live und zeigt den Dirty-Status konsistent über `DisplayName`.
+- **Tools / UNC-Profile / Profilwechsel**: Wechsel auf ein anderes Profil folgt jetzt dem gleichen Ablauf wie bei IP-Profilen (Auswahlhandling im Code-Behind inkl. Save-/Discard-Entscheidung).
+
+### Added
+- **Tools / UNC-Profile / Unsaved-Dialog**: Beim Verlassen eines UNC-Profils mit ungespeicherten Änderungen erscheint ein Dialog zum Speichern oder Verwerfen.
+- **Tools / UNC-Profile / Passwortfeld**: Passwortänderungen werden aus der `PasswordBox` ins Modell synchronisiert und lösen damit zuverlässig die Dirty-Logik aus.
+- **Tools / UNC-Profile / Passwort-Reveal**: Standard-`PasswordBox` mit `PasswordRevealMode=Peek` aktiviert (Auge im Feld, Klartext nur solange gedrückt).
+
+### Fixed
+- **Tools / UNC-Profile / Dirty-Erkennung**: Feedback-Schleife bei `DisplayName`-PropertyChanged bereinigt; Sternanzeige und Änderungszustand bleiben stabil.
+- **Tools / UNC-Profile / Passwort bei Profilwechsel**: Synchronisierung der `PasswordBox` beim DataContext-Wechsel verbessert, damit gespeicherte Werte nach Profilwechsel korrekt angezeigt werden.
+
 ## [1.7.1.6]
 
 ### Changed
