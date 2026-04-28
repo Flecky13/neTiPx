@@ -193,6 +193,7 @@
   "NETSCAN_ERROR_NO_ACTION": "Keen Start-Akschon definiert för",
   "NETSCAN_ERROR_OPEN_CONNECTION": "Fehler bi dat Apen van dat Verbinding",
   "TOOLS_LOG_VIEWER": "Log Viewer",
+    "TOOLS_UNC_PATH": "UNC-Pade",
   "TOOLS_ROUTES": "Routen",
   "ROUTECFG_TITLE": "Routen instellen",
   "ROUTECFG_SUBTITLE": "Statische IPv4-Routen instellen",

@@ -94,6 +94,7 @@
   "TOOLS_TITLE": "Werkzeuch",
   "TOOLS_SUBTITLE": "Netz-Utilities un Diagnose-Zeuch",
   "TOOLS_PING": "PING",
+    "TOOLS_UNC_PATH": "UNC-Zeuch",
   "TOOLS_WLAN": "WLAN",
   "TOOLS_NET_CALC": "Netz-Rechner",
   "NETCALC_LABEL_IP_ADDRESS": "IP-Adress",

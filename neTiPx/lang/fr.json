@@ -94,6 +94,7 @@
   "TOOLS_TITLE": "Outils",
   "TOOLS_SUBTITLE": "Utilitaires réseau et outils de diagnostic",
   "TOOLS_PING": "PING",
+    "TOOLS_UNC_PATH": "Chemins UNC",
   "TOOLS_WLAN": "WLAN",
   "TOOLS_NET_CALC": "Calculateur réseau",
   "NETCALC_LABEL_IP_ADDRESS": "Adresse IP",

@@ -193,6 +193,7 @@
   "NETSCAN_ERROR_NO_ACTION": "Brak zdefiniowanej akcji startowej dla",
   "NETSCAN_ERROR_OPEN_CONNECTION": "Błąd podczas otwierania połączenia",
   "TOOLS_LOG_VIEWER": "Podgląd logów",
+    "TOOLS_UNC_PATH": "Ścieżki UNC",
   "TOOLS_ROUTES": "Trasy",
   "ROUTECFG_TITLE": "Konfiguruj trasy",
   "ROUTECFG_SUBTITLE": "Konfiguruj statyczne trasy IPv4, które są dodatkowo stosowane podczas zastosowania profilu.",

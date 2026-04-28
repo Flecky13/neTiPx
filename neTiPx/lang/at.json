@@ -94,6 +94,7 @@
   "TOOLS_TITLE": "Tools",
   "TOOLS_SUBTITLE": "Netzwerk-Utilities und Diagnose-Tools",
   "TOOLS_PING": "PING",
+    "TOOLS_UNC_PATH": "UNC Pfade",
   "TOOLS_LOG_VIEWER": "Log Viewer",
   "TOOLS_WLAN": "WLAN",
   "TOOLS_NET_CALC": "Netzwerk-Rechna",

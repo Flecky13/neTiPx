@@ -1,8 +1,7 @@
 {
   "LANG_SELF": "Español",
   "NAV_ADAPTERS": "Información Adaptadores",
-  "NAV_IPCONFIG": "Configuración IP",
-  "NAV_TOOLS": "Herramientas",
+  "NAV_IPCONFIG": "Configuración IP",  "NAV_TOOLS": "Herramientas",
   "NAV_INFO": "Información",
   "NAV_SETTINGS": "Configuración",
   "ADAPTER_TITLE": "Adaptadores",
@@ -193,6 +192,7 @@
   "NETSCAN_ERROR_NO_ACTION": "No se definió acción de inicio para",
   "NETSCAN_ERROR_OPEN_CONNECTION": "Error al abrir la conexión",
   "TOOLS_LOG_VIEWER": "Visor de logs",
+    "TOOLS_UNC_PATH": "Rutas UNC",
   "TOOLS_ROUTES": "Rutas",
   "ROUTECFG_TITLE": "Configurar rutas",
   "ROUTECFG_SUBTITLE": "Configura rutas IPv4 estáticas que se aplican adicionalmente al aplicar el perfil.",

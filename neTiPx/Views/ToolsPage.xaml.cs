@@ -66,6 +66,7 @@ namespace neTiPx.Views
             if (ToolsNavScanner != null) ToolsNavScanner.Content = _lm.Lang("TOOLS_NET_SCAN");
             if (ToolsNavRoutes != null) ToolsNavRoutes.Content = _lm.Lang("TOOLS_ROUTES");
             if (ToolsNavLogViewer != null) ToolsNavLogViewer.Content = _lm.Lang("TOOLS_LOG_VIEWER");
+                    if (ToolsNavUncPath != null) ToolsNavUncPath.Content = _lm.Lang("TOOLS_UNC_PATH");
         }
 
         public void RefreshVisibilityConfiguration()
@@ -127,6 +128,7 @@ namespace neTiPx.Views
                 if (NetworkScannerPanel != null) NetworkScannerPanel.Visibility = Visibility.Collapsed;
                 if (RoutesPanel != null) RoutesPanel.Visibility = Visibility.Collapsed;
                 if (LogViewerPanel != null) LogViewerPanel.Visibility = Visibility.Collapsed;
+                                if (UncPathPanel != null) UncPathPanel.Visibility = Visibility.Collapsed;
                 if (ToolsContentScrollViewer != null) ToolsContentScrollViewer.Visibility = Visibility.Visible;
 
                 // Ausgewähltes Panel anzeigen
@@ -198,6 +200,17 @@ namespace neTiPx.Views
                             if (LogViewerPanel.Content == null)
                             {
                                 LogViewerPanel.Navigate(typeof(LogViewerPage));
+                            }
+                        }
+                        SetPingPageHostActiveState(false);
+                        break;
+                    case "UncPath":
+                        if (UncPathPanel != null)
+                        {
+                            UncPathPanel.Visibility = Visibility.Visible;
+                            if (UncPathPanel.Content == null)
+                            {
+                                UncPathPanel.Navigate(typeof(UncPathPage));
                             }
                         }
                         SetPingPageHostActiveState(false);

@@ -2,7 +2,7 @@
   "LANG_SELF": "Schwiizerdütsch",
   "NAV_ADAPTERS": "Adapter Infos",
   "NAV_IPCONFIG": "IP Konfiguration",
-  "NAV_TOOLS": "Tools",
+  "NAV_TOOLS": "Tools"
   "NAV_INFO": "Info",
   "NAV_SETTINGS": "Iistellige",
   "ADAPTER_TITLE": "Adapter",
@@ -95,6 +95,7 @@
   "TOOLS_SUBTITLE": "Netzwerk-Utilities und Diagnose-Tools",
   "TOOLS_PING": "PING",
   "TOOLS_LOG_VIEWER": "Log Viewer",
+    "TOOLS_UNC_PATH": "UNC Pfade",
   "TOOLS_WLAN": "WLAN",
   "TOOLS_NET_CALC": "Netzwerk-Rächner",
   "NETCALC_LABEL_IP_ADDRESS": "IP-Adresse",

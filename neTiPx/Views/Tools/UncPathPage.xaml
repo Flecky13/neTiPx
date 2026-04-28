@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Class="neTiPx.Views.Tools.UncPathPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:neTiPx.Models"
+    xmlns:viewModels="using:neTiPx.ViewModels"
+    mc:Ignorable="d">
+    <Page.DataContext>
+        <viewModels:UncPathViewModel />
+    </Page.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" Padding="24">
+            <TextBlock x:Name="UncPathTitleText" Text="UNC Pfade" Style="{StaticResource SectionTitle}" FontSize="20" FontWeight="SemiBold" />
+
+            <!-- Hauptbereich: Profile (Links) | Konfiguration (Mitte) | Status (Rechts) -->
+            <Grid ColumnDefinitions="200,*,210" ColumnSpacing="16">
+                <!-- Linker Bereich: UNC-Profile Liste -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Name="UncProfilesTitle" Text="UNC Profile" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
+
+                        <!-- Profil-Liste -->
+                        <ListView
+                            x:Name="ProfileListView"
+                            ItemsSource="{Binding UncPathProfiles}"
+                            SelectedItem="{Binding SelectedProfile, Mode=OneWay}"
+                            SelectionChanged="ProfileListView_SelectionChanged"
+                            SelectionMode="Single"
+                            MaxHeight="400">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:UncPathProfile">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="4" ColumnSpacing="4">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="{Binding DisplayName}"
+                                            VerticalAlignment="Center"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Padding="4"
+                                            MinHeight="32"
+                                            MinWidth="32"
+                                            Command="{Binding DataContext.DeleteProfileCommand, ElementName=ProfileListView}">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <!-- Buttons: + Neu, ⊕ Kopieren -->
+                        <Button
+                            x:Name="AddProfileButton"
+                            Content="+ Neues Profil"
+                            Command="{Binding AddProfileCommand}"
+                            HorizontalAlignment="Stretch" />
+                        <Button
+                            x:Name="CopyProfileButton"
+                            Content="⊕ Kopieren"
+                            Command="{Binding CopyProfileCommand}"
+                            HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mittlerer Bereich: Profil-Einstellungen -->
+                <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12">
+                            <!-- Profilname -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Profilname" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold"/>
+                                <TextBox
+                                    x:Name="ProfileNameBox"
+                                    Text="{Binding SelectedProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="z.B. Office Server"/>
+                            </StackPanel>
+
+                            <!-- UNC Pfade Liste -->
+                            <StackPanel Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="UNC Pfade" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold"/>
+                                    <Button
+                                        Content="+ Hinzufügen"
+                                        Command="{Binding AddUncPathCommand}"
+                                        Padding="8,4"
+                                        FontSize="12"/>
+                                </StackPanel>
+
+                                <ItemsRepeater ItemsSource="{Binding SelectedProfile.UncPaths}">
+                                    <ItemsRepeater.Layout>
+                                        <StackLayout Spacing="8"/>
+                                    </ItemsRepeater.Layout>
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="models:UncPathEntry">
+                                            <Border
+                                                BorderBrush="{ThemeResource CardBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                Padding="12">
+                                                <StackPanel Spacing="8">
+                                                    <!-- UNC Pfad -->
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock Text="UNC Pfad (z.B. \\server\share)" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="SemiBold"/>
+                                                        <TextBox
+                                                            Text="{Binding UncPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            PlaceholderText="\\server\share"
+                                                            BorderBrush="{Binding HasUncPathError, Converter={StaticResource BooleanToValidationBorderBrushConverter}}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Benutzername -->
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock Text="Benutzername (optional)" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                                        <TextBox
+                                                            Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            PlaceholderText="domain\benutzer"/>
+                                                    </StackPanel>
+
+                                                    <!-- Passwort -->
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock Text="Passwort (optional)" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                                        <PasswordBox
+                                                            x:Name="PasswordBox"
+                                                            Loaded="PasswordBox_Loaded"
+                                                            DataContextChanged="PasswordBox_DataContextChanged"
+                                                            PasswordChanged="PasswordBox_PasswordChanged"
+                                                            PasswordRevealMode="Peek"
+                                                            PlaceholderText="Passwort"/>
+                                                    </StackPanel>
+
+                                                    <!-- Entfernen Button -->
+                                                    <Button
+                                                        Content="Entfernen"
+                                                        Command="{Binding DataContext.RemoveUncPathCommand, ElementName=ProfileListView}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Right"
+                                                        IsEnabled="{Binding CanRemove}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Rechter Bereich: Aktionen & Status -->
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock
+                            Text="Aktionen"
+                            Style="{StaticResource SectionTitle}"
+                            FontWeight="Bold" />
+
+                        <!-- Anwenden & Speichern -->
+                        <StackPanel Spacing="8">
+                            <Button
+                                x:Name="ApplyButton"
+                                Command="{Binding ApplyProfileCommand}"
+                                HorizontalAlignment="Stretch"
+                                Style="{StaticResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="14" />
+                                    <TextBlock Text="Anwenden" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button
+                                x:Name="SaveButton"
+                                Command="{Binding SaveProfileCommand}"
+                                HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                                    <TextBlock Text="Speichern" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Letzte Aktion Box -->
+                        <StackPanel Spacing="8">
+                            <!-- Lade-Indicator -->
+                            <ProgressRing
+                                IsActive="{Binding IsApplying}"
+                                Visibility="{Binding IsApplying, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                HorizontalAlignment="Center"/>
+
+                            <Border
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10">
+                                <TextBlock
+                                    Text="{Binding StatusMessage}"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    TextWrapping="Wrap"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

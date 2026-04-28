@@ -95,6 +95,7 @@
   "TOOLS_SUBTITLE": "Network utilities and diagnostic tools",
   "TOOLS_PING": "PING",
   "TOOLS_LOG_VIEWER": "Log Viewer",
+    "TOOLS_UNC_PATH": "UNC Paths",
   "PING_TITLE": "PING Tool",
   "PING_CONFIG_TITLE": "Configuration",
   "PING_CONFIG_BACKGROUND_ACTIVE": "keep active in background",
