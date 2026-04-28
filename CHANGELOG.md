@@ -4,6 +4,17 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.6]
+
+### Changed
+- **Installer / BuildRelease**: Download der Windows App SDK Runtime ist jetzt versionsdynamisch und wird nicht mehr über eine fest eingetragene URL-Version gesteuert.
+- **Installer / Versionsprüfung**: Ermittelt die aufgelöste `Microsoft.WindowsAppSDK`-Version direkt aus `neTiPx/obj/project.assets.json` nach dem Publish-Schritt.
+- **Installer / Download-Logik**: Verwendet automatisch `https://aka.ms/windowsappsdk/<major.minor>/latest/windowsappruntimeinstall-x64.exe` passend zur aktuell verwendeten SDK-Haupt-/Nebenversion.
+- **Installer / Cache**: Lokale Version wird in `Installation/WindowsAppRuntimeInstall.version` gespeichert; erneuter Download erfolgt nur bei Versionswechsel oder fehlender Installer-Datei.
+
+### Added
+- **Installer / Setup-Voraussetzung**: NSIS-Setup enthält `WindowsAppRuntimeInstall-x64.exe` als Prerequisite und startet die Runtime-Installation still (`--quiet`) vor der App-Installation.
+
 ## [1.7.1.5]
 
 ### Added
