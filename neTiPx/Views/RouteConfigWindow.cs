@@ -143,7 +143,8 @@ namespace neTiPx.Views
         {
             var root = new Grid
             {
-                Background = GetBrush("AppBackgroundBrush")
+                Background = GetBrush("AppBackgroundBrush"),
+                RequestedTheme = GetMainWindowTheme()
             };
             root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -178,6 +179,15 @@ namespace neTiPx.Views
                 MinWidth = 120,
                 Style = GetStyle("AccentButtonStyle")
             };
+
+            // Für helle Farbprofile (Weiß/Prinzessin) wird der Button-Text explizit weiß gesetzt,
+            // da der globale implizite TextBlock-Style (AppTextBrush) dort sonst den dunklen Text durchdrückt.
+            // Bei dunklen Profilen ergibt sich weiß automatisch über den AccentButtonStyle.
+            if (GetMainWindowTheme() == ElementTheme.Light)
+            {
+                _applyButton.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255));
+            }
+
             _applyButton.Click += ApplyButton_Click;
 
             buttonPanel.Children.Add(_cancelButton);
@@ -197,6 +207,16 @@ namespace neTiPx.Views
         private static Brush? GetBrush(string key)
         {
             return Application.Current.Resources.TryGetValue(key, out var value) ? value as Brush : null;
+        }
+
+        private static ElementTheme GetMainWindowTheme()
+        {
+            if (App.MainWindow.Content is FrameworkElement mainRoot)
+            {
+                return mainRoot.RequestedTheme;
+            }
+
+            return ElementTheme.Default;
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)

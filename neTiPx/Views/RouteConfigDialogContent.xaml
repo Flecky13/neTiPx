@@ -26,9 +26,9 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <StackPanel Spacing="2">
                             <TextBlock x:Name="SystemSectionTitleText" Text="Ständige Routen im System" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="{x:Bind SystemRoutesStatus, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{x:Bind SystemRoutesStatus, Mode=OneWay}" Foreground="{ThemeResource AppTextSecondaryBrush}" FontSize="12" />
                         </StackPanel>
-                        <Button x:Name="ReloadSystemRoutesButton" Grid.Column="1" Click="ReloadSystemRoutes_Click" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center">
+                        <Button x:Name="ReloadSystemRoutesButton" Grid.Column="1" Click="ReloadSystemRoutes_Click" Style="{StaticResource AccentButtonStyle}" Foreground="{ThemeResource AccentButtonForeground}" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE72C;" FontSize="14" Foreground="{Binding Foreground, ElementName=ReloadSystemRoutesButton}" />
                                 <TextBlock x:Name="ReloadSystemRoutesButtonText" Text="Neu Einlesen" Foreground="{Binding Foreground, ElementName=ReloadSystemRoutesButton}" />
@@ -37,11 +37,11 @@
                     </Grid>
 
                     <Grid ColumnDefinitions="140,140,140,50,90" ColumnSpacing="6" Margin="0,4,0,0">
-                        <TextBlock x:Name="SystemHeaderDestinationText" Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="SystemHeaderSubnetText" Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="SystemHeaderGatewayText" Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="SystemHeaderMetricText" Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="SystemHeaderActionText" Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="SystemHeaderDestinationText" Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="SystemHeaderSubnetText" Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="SystemHeaderGatewayText" Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="SystemHeaderMetricText" Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="SystemHeaderActionText" Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
                     </Grid>
 
                     <ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto">
@@ -93,7 +93,7 @@
                 <StackPanel Spacing="12">
                     <Grid>
                         <TextBlock x:Name="ProfileRoutesSectionTitleText" Text="Neue Routen für dieses Profil" Style="{StaticResource SectionTitle}" VerticalAlignment="Center" />
-                        <Button x:Name="AddRouteButton" Click="AddRoute_Click" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind CanAddRoute, Mode=OneWay}" HorizontalAlignment="Right">
+                        <Button x:Name="AddRouteButton" Click="AddRoute_Click" Style="{StaticResource AccentButtonStyle}" Foreground="{ThemeResource AccentButtonForeground}" IsEnabled="{x:Bind CanAddRoute, Mode=OneWay}" HorizontalAlignment="Right">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon Glyph="&#xE710;" FontSize="14" Foreground="{Binding Foreground, ElementName=AddRouteButton}" />
                                 <TextBlock x:Name="AddRouteButtonText" Text="Route hinzufügen" Foreground="{Binding Foreground, ElementName=AddRouteButton}" />
@@ -101,11 +101,11 @@
                         </Button>
                     </Grid>
                     <Grid ColumnDefinitions="140,140,140,50,90" ColumnSpacing="6" Margin="0,4,0,0">
-                        <TextBlock x:Name="ProfileHeaderDestinationText" Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="ProfileHeaderSubnetText" Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="ProfileHeaderGatewayText" Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="ProfileHeaderMetricText" Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock x:Name="ProfileHeaderActionText" Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="ProfileHeaderDestinationText" Text="Zielnetz" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="ProfileHeaderSubnetText" Grid.Column="1" Text="Subnetzmaske" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="ProfileHeaderGatewayText" Grid.Column="2" Text="Gateway" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="ProfileHeaderMetricText" Grid.Column="3" Text="Metrik" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
+                        <TextBlock x:Name="ProfileHeaderActionText" Grid.Column="4" Text="Aktion" FontWeight="SemiBold" FontSize="12" Foreground="{ThemeResource AppTextSecondaryBrush}" />
                     </Grid>
 
                     <ScrollViewer MaxHeight="360" VerticalScrollBarVisibility="Auto">
