@@ -23,6 +23,7 @@ public sealed partial class UncPathViewModel : ObservableObject
     private readonly UncPathService _uncPathService = new();
 
     private ObservableCollection<UncPathProfile> _uncPathProfiles = [];
+    private ObservableCollection<MountedUncConnection> _mountedConnections = [];
     private UncPathProfile? _selectedProfile;
     private string _selectedProfileNameBackup = string.Empty;
     private bool _isApplying;
@@ -41,6 +42,7 @@ public sealed partial class UncPathViewModel : ObservableObject
         RemoveUncPathCommand = new RelayCommand<UncPathEntry>(RemoveUncPath, _ => SelectedProfile?.UncPaths.Count > 1);
         SaveProfileCommand = new RelayCommand(SaveProfile, () => SelectedProfile != null);
         ApplyProfileCommand = new RelayCommand(ApplyProfile, CanApplyProfile);
+        DisconnectMountedConnectionCommand = new RelayCommand<MountedUncConnection>(DisconnectMountedConnection, c => c != null);
         // Daten werden NICHT hier geladen – die Page ruft LoadProfiles() erst
         // im Loaded-Event auf, wenn die gesamte UI bereits aufgebaut ist.
     }
@@ -89,6 +91,12 @@ public sealed partial class UncPathViewModel : ObservableObject
 
     public IReadOnlyList<string> DriveLetters => FixedDriveLetters;
 
+    public ObservableCollection<MountedUncConnection> MountedConnections
+    {
+        get => _mountedConnections;
+        set => SetProperty(ref _mountedConnections, value);
+    }
+
     #endregion
 
     #region Commands
@@ -100,6 +108,7 @@ public sealed partial class UncPathViewModel : ObservableObject
     public ICommand RemoveUncPathCommand { get; }
     public ICommand SaveProfileCommand { get; }
     public ICommand ApplyProfileCommand { get; }
+    public ICommand DisconnectMountedConnectionCommand { get; }
 
     #endregion
 
@@ -123,6 +132,7 @@ public sealed partial class UncPathViewModel : ObservableObject
         if (UncPathProfiles.Count == 0)
         {
             SelectedProfile = null;
+            _ = RefreshMountedConnectionsAsync();
             return;
         }
 
@@ -132,10 +142,12 @@ public sealed partial class UncPathViewModel : ObservableObject
                 string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase));
 
             SelectedProfile = match ?? UncPathProfiles[0];
+            _ = RefreshMountedConnectionsAsync();
             return;
         }
 
         SelectedProfile = UncPathProfiles[0];
+        _ = RefreshMountedConnectionsAsync();
     }
 
     /// <summary>
@@ -312,8 +324,44 @@ public sealed partial class UncPathViewModel : ObservableObject
         }
         finally
         {
+            await RefreshMountedConnectionsAsync();
             IsApplying = false;
             RefreshCommandStates();
+        }
+    }
+
+    private async void DisconnectMountedConnection(MountedUncConnection? connection)
+    {
+        if (connection == null)
+            return;
+
+        SetLastAction($"Trenne Verbindung: {connection.DisplayText}");
+
+        try
+        {
+            var (success, message) = await _uncPathService.DisconnectMappedConnection(connection.DisconnectTarget);
+            SetLastAction(success ? message : $"Fehler beim Trennen: {message}");
+        }
+        catch (Exception ex)
+        {
+            SetLastAction($"Fehler beim Trennen: {ex.Message}");
+        }
+        finally
+        {
+            await RefreshMountedConnectionsAsync();
+        }
+    }
+
+    public async Task RefreshMountedConnectionsAsync()
+    {
+        try
+        {
+            var connections = await _uncPathService.GetMountedConnections();
+            MountedConnections = new ObservableCollection<MountedUncConnection>(connections);
+        }
+        catch
+        {
+            MountedConnections = [];
         }
     }
 

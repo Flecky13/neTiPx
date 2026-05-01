@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using neTiPx.Models;
 
 namespace neTiPx.Services;
@@ -121,18 +122,22 @@ public sealed class UncPathService
     }
 
     /// <summary>
-    /// Trennt einen UNC-Pfad
+    /// Trennt eine gemountete UNC-Verbindung anhand Laufwerksbuchstaben oder UNC-Pfad.
     /// </summary>
-    public async Task<(bool Success, string Message)> DisconnectUncPath(string uncPath)
+    public async Task<(bool Success, string Message)> DisconnectMappedConnection(string target)
     {
         return await Task.Run(() =>
         {
             try
             {
+                var normalizedTarget = NormalizeDisconnectTarget(target);
+                if (string.IsNullOrWhiteSpace(normalizedTarget))
+                    return (false, "Kein gueltiges Trenn-Ziel uebergeben.");
+
                 var psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = $"/c net use \"{uncPath}\" /delete /yes",
+                    Arguments = $"/c net use \"{normalizedTarget}\" /delete /yes",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -147,7 +152,7 @@ public sealed class UncPathService
                     process.WaitForExit(10000);
 
                     if (process.ExitCode == 0)
-                        return (true, $"✓ {uncPath}: Verbindung getrennt");
+                        return (true, $"✓ {normalizedTarget}: Verbindung getrennt");
                     else
                     {
                         var error = process.StandardError.ReadToEnd();
@@ -163,13 +168,13 @@ public sealed class UncPathService
     }
 
     /// <summary>
-    /// Listet aktuell gemountete Netzwerkfreigaben auf
+    /// Listet aktuell gemountete Netzwerkfreigaben strukturiert auf.
     /// </summary>
-    public async Task<List<string>> GetMountedShares()
+    public async Task<List<MountedUncConnection>> GetMountedConnections()
     {
         return await Task.Run(() =>
         {
-            var shares = new List<string>();
+            var connections = new List<MountedUncConnection>();
 
             try
             {
@@ -185,15 +190,37 @@ public sealed class UncPathService
                 using (var process = Process.Start(psi))
                 {
                     if (process == null)
-                        return shares;
+                        return connections;
 
                     var output = process.StandardOutput.ReadToEnd();
 
-                    // Parse output: lines mit \\ sind mounted shares
+                    // Parse output: Zeilen mit UNC-Pfaden (\\server\share)
                     foreach (var line in output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries))
                     {
-                        if (line.Contains("\\\\"))
-                            shares.Add(line.Trim());
+                        if (!line.Contains("\\\\", StringComparison.Ordinal))
+                            continue;
+
+                        var tokens = Regex.Split(line.Trim(), "\\s+");
+                        var remoteIndex = Array.FindIndex(tokens, t => t.StartsWith("\\\\", StringComparison.Ordinal));
+
+                        if (remoteIndex < 0)
+                            continue;
+
+                        var remote = tokens[remoteIndex].Trim();
+                        var drive = string.Empty;
+
+                        if (remoteIndex > 0 && IsDriveToken(tokens[remoteIndex - 1]))
+                            drive = NormalizeDriveLetter(tokens[remoteIndex - 1]);
+
+                        if (string.IsNullOrWhiteSpace(remote))
+                            continue;
+
+                        connections.Add(new MountedUncConnection
+                        {
+                            DriveLetter = drive,
+                            UncPath = remote,
+                            DisconnectTarget = string.IsNullOrWhiteSpace(drive) ? remote : drive
+                        });
                     }
                 }
             }
@@ -202,7 +229,25 @@ public sealed class UncPathService
                 System.Diagnostics.Debug.WriteLine($"[UncPathService] Fehler beim Auflisten: {ex.Message}");
             }
 
-            return shares;
+            return connections;
         });
+    }
+
+    private static bool IsDriveToken(string value)
+    {
+        return NormalizeDriveLetter(value).Length == 2;
+    }
+
+    private static string NormalizeDisconnectTarget(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var drive = NormalizeDriveLetter(value);
+        if (!string.IsNullOrWhiteSpace(drive))
+            return drive;
+
+        var trimmed = value.Trim();
+        return trimmed.StartsWith("\\\\", StringComparison.Ordinal) ? trimmed : string.Empty;
     }
 }
