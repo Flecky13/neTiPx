@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Timers;
 using System.Threading.Tasks;
@@ -373,13 +374,80 @@ namespace neTiPx.Services
                     {
                         // Optional: Fehlerbehandlung, z.B. Toast-Notification
                         System.Diagnostics.Debug.WriteLine($"Fehler beim Anwenden des Profils: {error}");
+                        return;
                     }
+
+                    ApplyLinkedUncProfileForIpProfile(profile);
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Fehler beim Anwenden des Profils: {ex.Message}");
             }
+        }
+
+        private static void ApplyLinkedUncProfileForIpProfile(Models.IpProfile profile)
+        {
+            var linkedUncProfileName = profile.LinkedUncProfileName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(linkedUncProfileName))
+            {
+                return;
+            }
+
+            if (!WaitForAdapterAfterApply(profile, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(1)))
+            {
+                System.Diagnostics.Debug.WriteLine($"UNC-Profil '{linkedUncProfileName}' wurde nicht angewendet: Adapter nicht bereit.");
+                return;
+            }
+
+            var uncStore = new UncPathStore();
+            var uncProfile = uncStore.LoadProfiles().FirstOrDefault(p =>
+                string.Equals(p.Name, linkedUncProfileName, StringComparison.OrdinalIgnoreCase));
+
+            if (uncProfile == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"UNC-Profil '{linkedUncProfileName}' nicht gefunden.");
+                return;
+            }
+
+            var uncService = new UncPathService();
+            var (success, message) = uncService.ApplyProfile(uncProfile).GetAwaiter().GetResult();
+            if (!success)
+            {
+                System.Diagnostics.Debug.WriteLine($"UNC-Profil '{linkedUncProfileName}' fehlgeschlagen: {message}");
+            }
+        }
+
+        private static bool WaitForAdapterAfterApply(Models.IpProfile profile, TimeSpan timeout, TimeSpan pollInterval)
+        {
+            if (string.IsNullOrWhiteSpace(profile.AdapterName))
+            {
+                return false;
+            }
+
+            var expectedManualIp = profile.Mode.Equals("Manual", StringComparison.OrdinalIgnoreCase)
+                ? profile.IpAddresses.FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.IpAddress))?.IpAddress?.Trim()
+                : string.Empty;
+
+            var networkInfoService = new NetworkInfoService();
+            var startedAt = DateTime.UtcNow;
+
+            while (DateTime.UtcNow - startedAt < timeout)
+            {
+                var config = networkInfoService.GetIpv4Config(profile.AdapterName);
+                if (config != null && config.IpAddresses.Count > 0)
+                {
+                    if (string.IsNullOrWhiteSpace(expectedManualIp) ||
+                        config.IpAddresses.Any(ip => string.Equals(ip.IpAddress, expectedManualIp, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return true;
+                    }
+                }
+
+                System.Threading.Thread.Sleep(pollInterval);
+            }
+
+            return false;
         }
 
         private static IntPtr LoadTrayIcon()

@@ -20,10 +20,14 @@ namespace neTiPx.ViewModels
     {
         private static readonly LanguageManager _lm = LanguageManager.Instance;
         private static readonly TimeSpan ConnectionMonitoringInterval = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan UncApplyWaitTimeout = TimeSpan.FromSeconds(20);
+        private static readonly TimeSpan UncApplyPollInterval = TimeSpan.FromSeconds(1);
 
         private static string T(string key) => _lm.Lang(key);
 
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
+        private readonly UncPathStore _uncPathStore = new UncPathStore();
+        private readonly UncPathService _uncPathService = new UncPathService();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
         private readonly SettingsService _settingsService = new SettingsService();
         private readonly SynchronizationContext? _uiContext;
@@ -31,6 +35,7 @@ namespace neTiPx.ViewModels
         private CancellationTokenSource? _monitoringCts;
         private bool _isLoadingProfile = false;
         private bool _isMonitoringActive;
+        private bool _isApplyingProfile;
 
         private IpProfile? _selectedProfile;
         private string _gatewayStatusText = string.Empty;
@@ -52,14 +57,22 @@ namespace neTiPx.ViewModels
 
         public event Action<int>? IpAddressAdded;
 
+        public sealed class UncProfileOption
+        {
+            public string Value { get; set; } = string.Empty;
+            public string DisplayName { get; set; } = string.Empty;
+        }
+
         public IpConfigViewModel()
         {
             AdapterList = new ObservableCollection<string>();
             IpModeOptions = new ObservableCollection<string> { "DHCP", "Manual" };
             IpProfiles = new ObservableCollection<IpProfile>();
+            UncProfileOptions = new ObservableCollection<UncProfileOption>();
 
             LoadAdapters();
             LoadProfilesFromConfig();
+            RefreshUncProfileOptions();
 
             AddIpCommand = new RelayCommand(AddIpAddress, CanAddIpAddress);
             RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress, CanRemoveIpAddress);
@@ -85,6 +98,7 @@ namespace neTiPx.ViewModels
         public ObservableCollection<string> AdapterList { get; }
         public ObservableCollection<string> IpModeOptions { get; }
         public ObservableCollection<IpProfile> IpProfiles { get; }
+        public ObservableCollection<UncProfileOption> UncProfileOptions { get; }
 
         public IpProfile? SelectedProfile
         {
@@ -108,6 +122,7 @@ namespace neTiPx.ViewModels
                         ClearIpAddressValidationFlags(_selectedProfile);
                         UpdateIpAddressRemoveState(_selectedProfile);
                         AttachProfileHandlers(_selectedProfile);
+                        EnsureLinkedUncProfileSelection(_selectedProfile);
                         LoadProfileSettingsOnProfileChangeAsync().ConfigureAwait(false);
                     }
 
@@ -336,6 +351,7 @@ namespace neTiPx.ViewModels
                 SelectedProfile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
                 SelectedProfile.RoutesEnabled = storedProfile.RoutesEnabled;
                 SelectedProfile.AddRoutesOnApply = storedProfile.AddRoutesOnApply;
+                SelectedProfile.LinkedUncProfileName = storedProfile.LinkedUncProfileName;
                 SelectedProfile.Routes.Clear();
                 foreach (var route in storedProfile.Routes)
                 {
@@ -381,6 +397,7 @@ namespace neTiPx.ViewModels
                 ValidationMessage = T("IPCONFIG_MSG_CONFIGURATION_READ");
                 HasValidationErrors = false;
                 SelectedProfile.IsDirty = false;
+                EnsureLinkedUncProfileSelection(SelectedProfile);
                 return Task.CompletedTask;
             }
             finally
@@ -419,6 +436,7 @@ namespace neTiPx.ViewModels
             targetProfile.Dns1 = sourceProfile.Dns1;
             targetProfile.Dns2 = sourceProfile.Dns2;
             targetProfile.RoutesEnabled = sourceProfile.RoutesEnabled;
+            targetProfile.LinkedUncProfileName = sourceProfile.LinkedUncProfileName;
 
             targetProfile.IpAddresses.Clear();
             foreach (var entry in sourceProfile.IpAddresses)
@@ -705,7 +723,8 @@ namespace neTiPx.ViewModels
             {
                 Name = newName,
                 Mode = "DHCP",
-                AdapterName = null
+                AdapterName = null,
+                LinkedUncProfileName = string.Empty
             };
             newProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
             newProfile.IsDirty = false;
@@ -735,6 +754,7 @@ namespace neTiPx.ViewModels
                 Gateway = source.Gateway,
                 Dns1 = source.Dns1,
                 Dns2 = source.Dns2,
+                LinkedUncProfileName = source.LinkedUncProfileName,
                 RoutesEnabled = source.RoutesEnabled,
                 AddRoutesOnApply = source.AddRoutesOnApply,
                 IsDirty = false
@@ -921,7 +941,7 @@ namespace neTiPx.ViewModels
 
         private bool CanApplyProfile()
         {
-            return SelectedProfile != null && !SelectedProfile.IsDirty && !HasValidationErrors;
+            return SelectedProfile != null && !SelectedProfile.IsDirty && !HasValidationErrors && !_isApplyingProfile;
         }
 
         private void RefreshActionButtonsState()
@@ -932,7 +952,7 @@ namespace neTiPx.ViewModels
             SaveCommand?.RaiseCanExecuteChanged();
         }
 
-        private void ApplyProfile()
+        private async void ApplyProfile()
         {
             if (SelectedProfile == null)
             {
@@ -949,24 +969,169 @@ namespace neTiPx.ViewModels
 
             DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil anwenden: '{SelectedProfile.Name}', Adapter='{SelectedProfile.AdapterName}', Modus='{SelectedProfile.Mode}'");
 
-            var (success, error) = _networkService.ApplyProfile(SelectedProfile);
-            if (!success)
+            _isApplyingProfile = true;
+            RefreshActionButtonsState();
+
+            var profile = SelectedProfile;
+
+            try
             {
-                DebugLogger.Log(LogLevel.ERROR, "IpConfig", $"Profil anwenden fehlgeschlagen: {error}");
-                ValidationMessage = error ?? T("IPCONFIG_MSG_APPLY_ERROR");
-                HasValidationErrors = true;
-                GatewayStatusText = T("ADAPTER_STA_Error");
-                GatewayStatusKind = GatewayStatusKind.Bad;
+                var (success, error) = await Task.Run(() => _networkService.ApplyProfile(profile));
+                if (!success)
+                {
+                    DebugLogger.Log(LogLevel.ERROR, "IpConfig", $"Profil anwenden fehlgeschlagen: {error}");
+                    ValidationMessage = error ?? T("IPCONFIG_MSG_APPLY_ERROR");
+                    HasValidationErrors = true;
+                    GatewayStatusText = T("ADAPTER_STA_Error");
+                    GatewayStatusKind = GatewayStatusKind.Bad;
+                    return;
+                }
+
+                DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{profile.Name}'");
+
+                // After apply: load fresh settings from NIC and save
+                await ReloadProfileFromNicAsync();
+                SaveProfile();
+                profile.IsDirty = false;
+
+                var uncProfileName = profile.LinkedUncProfileName?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(uncProfileName))
+                {
+                    ValidationMessage = T("IPCONFIG_MSG_PROFILE_APPLIED");
+                    HasValidationErrors = false;
+                    return;
+                }
+
+                ValidationMessage = T("IPCONFIG_MSG_WAITING_NETWORK_BEFORE_UNC");
+                HasValidationErrors = false;
+
+                var networkReady = await WaitForAdapterAfterApplyAsync(profile, UncApplyWaitTimeout, CancellationToken.None);
+                if (!networkReady)
+                {
+                    ValidationMessage = T("IPCONFIG_MSG_UNC_WAIT_TIMEOUT");
+                    HasValidationErrors = true;
+                    return;
+                }
+
+                var uncProfiles = _uncPathStore.LoadProfiles();
+                var linkedUncProfile = uncProfiles.FirstOrDefault(p =>
+                    string.Equals(p.Name, uncProfileName, StringComparison.OrdinalIgnoreCase));
+
+                if (linkedUncProfile == null)
+                {
+                    ValidationMessage = T("IPCONFIG_MSG_UNC_PROFILE_NOT_FOUND");
+                    HasValidationErrors = true;
+                    return;
+                }
+
+                var (uncSuccess, uncMessage) = await _uncPathService.ApplyProfile(linkedUncProfile);
+                if (!uncSuccess)
+                {
+                    DebugLogger.Log(LogLevel.WARN, "IpConfig", $"UNC-Profil anwenden fehlgeschlagen: {uncMessage}");
+                    ValidationMessage = T("IPCONFIG_MSG_UNC_PROFILE_APPLY_FAILED");
+                    HasValidationErrors = true;
+                    return;
+                }
+
+                ValidationMessage = T("IPCONFIG_MSG_PROFILE_AND_UNC_APPLIED");
+                HasValidationErrors = false;
+            }
+            finally
+            {
+                _isApplyingProfile = false;
+                RefreshActionButtonsState();
+            }
+        }
+
+        public void RefreshUncProfileOptions()
+        {
+            var profiles = _uncPathStore.LoadProfiles()
+                .Select(p => p.Name?.Trim() ?? string.Empty)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            UncProfileOptions.Clear();
+            UncProfileOptions.Add(new UncProfileOption
+            {
+                Value = string.Empty,
+                DisplayName = T("IPCONFIG_UNC_PROFILE_NONE")
+            });
+
+            foreach (var profileName in profiles)
+            {
+                UncProfileOptions.Add(new UncProfileOption
+                {
+                    Value = profileName,
+                    DisplayName = profileName
+                });
+            }
+
+            if (SelectedProfile != null)
+            {
+                EnsureLinkedUncProfileSelection(SelectedProfile);
+            }
+        }
+
+        private void EnsureLinkedUncProfileSelection(IpProfile profile)
+        {
+            var linkedName = profile.LinkedUncProfileName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(linkedName))
+            {
+                profile.LinkedUncProfileName = string.Empty;
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{SelectedProfile.Name}'");
+            if (UncProfileOptions.Any(option =>
+                !string.IsNullOrWhiteSpace(option.Value) &&
+                string.Equals(option.Value, linkedName, StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
 
-            // After apply: load fresh settings from NIC and save to INI
-            ReloadProfileFromNicAsync().ConfigureAwait(false);
-            SaveProfile();
-            ValidationMessage = T("IPCONFIG_MSG_PROFILE_APPLIED");
-            SelectedProfile.IsDirty = false;
+            profile.LinkedUncProfileName = string.Empty;
+        }
+
+        private static async Task<bool> WaitForAdapterAfterApplyAsync(IpProfile profile, TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(profile.AdapterName))
+            {
+                return false;
+            }
+
+            var expectedManualIp = profile.Mode.Equals("Manual", StringComparison.OrdinalIgnoreCase)
+                ? profile.IpAddresses.FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.IpAddress))?.IpAddress?.Trim()
+                : string.Empty;
+
+            var networkInfoService = new NetworkInfoService();
+            var startedAt = DateTime.UtcNow;
+
+            while (DateTime.UtcNow - startedAt < timeout)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var config = networkInfoService.GetIpv4Config(profile.AdapterName);
+                if (config != null && config.IpAddresses.Count > 0)
+                {
+                    if (string.IsNullOrWhiteSpace(expectedManualIp))
+                    {
+                        return true;
+                    }
+
+                    var hasExpectedIp = config.IpAddresses.Any(ip =>
+                        string.Equals(ip.IpAddress, expectedManualIp, StringComparison.OrdinalIgnoreCase));
+
+                    if (hasExpectedIp)
+                    {
+                        return true;
+                    }
+                }
+
+                await Task.Delay(UncApplyPollInterval, cancellationToken);
+            }
+
+            return false;
         }
 
         private static List<string> GetProfileNames(Dictionary<string, string> values)

@@ -101,55 +101,74 @@
                         <StackPanel Spacing="12">
                             <TextBlock x:Name="ProfileSettingsTitle" Text="Profil-Einstellungen" Style="{StaticResource SectionTitle}" FontWeight="Bold" />
 
-                            <!-- Profilname -->
-                            <StackPanel Spacing="4">
-                                <TextBlock x:Name="ProfileNameLabel" Text="Profilname" FontWeight="SemiBold" />
-                                <TextBox
-                                    x:Name="ProfileNameTextBox"
-                                    Text="{Binding SelectedProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    PlaceholderText="z.B. Büro, Heimnetzwerk..."
-                                    IsEnabled="{Binding IsProfileSelected}" />
-                            </StackPanel>
+                            <!-- Profilname + Netzwerkkarte (50/50) -->
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                            <!-- Netzwerkkarte -->
-                            <StackPanel Spacing="4">
-                                <TextBlock x:Name="AdapterLabel" Text="Netzwerkkarte" FontWeight="SemiBold" />
+                                <!-- Profilname -->
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock x:Name="ProfileNameLabel" Text="Profilname" FontWeight="SemiBold" />
+                                    <TextBox
+                                        x:Name="ProfileNameTextBox"
+                                        Text="{Binding SelectedProfile.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        PlaceholderText="z.B. Büro, Heimnetzwerk..."
+                                        IsEnabled="{Binding IsProfileSelected}" />
+                                </StackPanel>
+
+                                <!-- Netzwerkkarte -->
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock x:Name="AdapterLabel" Text="Netzwerkkarte" FontWeight="SemiBold" />
+                                    <ComboBox
+                                        x:Name="AdapterComboBox"
+                                        ItemsSource="{Binding AdapterList}"
+                                        SelectedItem="{Binding SelectedProfile.AdapterName, Mode=TwoWay}"
+                                        PlaceholderText="Adapter wählen..."
+                                        HorizontalAlignment="Stretch"
+                                        IsEnabled="{Binding IsProfileSelected}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- IP Modus, UNC Profil, Routen (3 Spalten x 2 Zeilen) -->
+                            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                                <!-- Spalte 1: IP Modus -->
+                                <TextBlock Grid.Column="0" Grid.Row="0" x:Name="IpModeLabel" Text="IP Modus" FontWeight="SemiBold" />
+                                <CheckBox
+                                    Grid.Column="0" Grid.Row="1"
+                                    x:Name="DhcpModeCheckBox"
+                                    Content="{Binding SelectedProfile.Mode}"
+                                    Margin="0"
+                                    IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=DHCP}"
+                                    IsEnabled="{Binding IsProfileSelected}"
+                                    VerticalAlignment="Top" />
+
+                                <!-- Spalte 2: UNC Profil -->
+                                <TextBlock Grid.Column="1" Grid.Row="0" x:Name="LinkedUncProfileLabel" Text="UNC Profil" FontWeight="SemiBold" />
                                 <ComboBox
-                                    x:Name="AdapterComboBox"
-                                    ItemsSource="{Binding AdapterList}"
-                                    SelectedItem="{Binding SelectedProfile.AdapterName, Mode=TwoWay}"
-                                    PlaceholderText="Adapter wählen..."
-                                    HorizontalAlignment="Stretch"
-                                    IsEnabled="{Binding IsProfileSelected}" />
-                            </StackPanel>
+                                    Grid.Column="1" Grid.Row="1"
+                                    x:Name="LinkedUncProfileComboBox"
+                                    ItemsSource="{Binding UncProfileOptions}"
+                                    DisplayMemberPath="DisplayName"
+                                    SelectedValuePath="Value"
+                                    SelectedValue="{Binding SelectedProfile.LinkedUncProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding IsProfileSelected}"
+                                    Width="120"
+                                    HorizontalAlignment="Left" />
 
-                            <!-- IP Modus -->
-                            <StackPanel Spacing="4">
-                                <TextBlock x:Name="IpModeLabel" Text="IP Modus" FontWeight="SemiBold" />
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <RadioButton
-                                        x:Name="DhcpModeRadio"
-                                        Content="DHCP"
-                                        GroupName="IpMode"
-                                        Margin="0"
-                                        IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=DHCP}"
-                                        IsEnabled="{Binding IsProfileSelected}" />
-                                    <RadioButton
-                                        x:Name="ManualModeRadio"
-                                        Content="Manual"
-                                        GroupName="IpMode"
-                                        Margin="0"
-                                        IsChecked="{Binding SelectedProfile.Mode, Mode=TwoWay, Converter={StaticResource StringToModeConverter}, ConverterParameter=Manual}"
-                                        IsEnabled="{Binding IsProfileSelected}" />
+                                <!-- Spalte 3: Routen -->
+                                <TextBlock Grid.Column="2" Grid.Row="0" Text="Routen" FontWeight="SemiBold" />
+                                <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Top">
                                     <CheckBox
                                         x:Name="RoutesEnabledCheckBox"
-                                        Content="Routen Aktivieren"
+                                        Content="{Binding SelectedProfile.RoutesEnabled, Converter={StaticResource BooleanToStatusConverter}}"
                                         Margin="0"
                                         IsChecked="{Binding SelectedProfile.RoutesEnabled, Mode=TwoWay}"
                                         IsEnabled="{Binding IsProfileSelected}" />
                                     <Button x:Name="RoutesButton"
                                         ToolTipService.ToolTip="{x:Null}"
-                                        Margin="0"
+                                        Margin="4,0,0,0"
                                         Padding="2"
                                         MinWidth="0"
                                         Width="26"
@@ -160,7 +179,7 @@
                                         <SymbolIcon Symbol="Directions" />
                                     </Button>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
 
                             <!-- Gateway -->
                             <StackPanel Spacing="4">

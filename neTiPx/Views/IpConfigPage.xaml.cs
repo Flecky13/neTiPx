@@ -53,9 +53,9 @@ namespace neTiPx.Views
             if (AdapterLabel != null) AdapterLabel.Text = _lm.Lang("IPCONFIG_ADAPTER");
             if (AdapterComboBox != null) AdapterComboBox.PlaceholderText = _lm.Lang("IPCONFIG_PLACEHOLDER_ADAPTER");
             if (IpModeLabel != null) IpModeLabel.Text = _lm.Lang("IPCONFIG_IP_MODE");
-            if (DhcpModeRadio != null) DhcpModeRadio.Content = "DHCP";
-            if (ManualModeRadio != null) ManualModeRadio.Content = "Manual";
+            // DhcpModeCheckBox.Content is bound to SelectedProfile.Mode (shows DHCP / Manual dynamically)
             if (RoutesEnabledCheckBox != null) RoutesEnabledCheckBox.Content = _lm.Lang("IPCONFIG_ROUTES_ACTIVE");
+            if (LinkedUncProfileLabel != null) LinkedUncProfileLabel.Text = _lm.Lang("IPCONFIG_UNC_PROFILE");
 
             if (GatewayLabel != null) GatewayLabel.Text = "Gateway";
             if (GatewayTextBox != null) GatewayTextBox.PlaceholderText = "Gateway (z.B. 192.168.1.1)";
@@ -81,6 +81,11 @@ namespace neTiPx.Views
             if (Dns1StatusLabel != null) Dns1StatusLabel.Text = "DNS 1";
             if (Dns2StatusLabel != null) Dns2StatusLabel.Text = "DNS 2";
             if (ConnectionQualityLabel != null) ConnectionQualityLabel.Text = _lm.Lang("IPCONFIG_CONNECTION_QUALITY");
+
+            if (DataContext is IpConfigViewModel viewModel)
+            {
+                viewModel.RefreshUncProfileOptions();
+            }
 
             SetToolTips();
         }

@@ -13,6 +13,7 @@ namespace neTiPx.Models
         private string _dns2 = string.Empty;
         private bool _routesEnabled;
         private bool _addRoutesOnApply = true;
+        private string _linkedUncProfileName = string.Empty;
         private bool _isDirty;
 
         public string Name
@@ -67,6 +68,12 @@ namespace neTiPx.Models
         {
             get => _addRoutesOnApply;
             set => SetProperty(ref _addRoutesOnApply, value);
+        }
+
+        public string LinkedUncProfileName
+        {
+            get => _linkedUncProfileName;
+            set => SetProperty(ref _linkedUncProfileName, value);
         }
 
         public bool IsDirty

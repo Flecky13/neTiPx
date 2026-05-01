@@ -14,9 +14,13 @@ namespace neTiPx.Converters
 
         public object? ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            if (value is bool isChecked && isChecked && parameter is string mode)
+            if (value is bool isChecked && parameter is string param)
             {
-                return mode;
+                if (string.Equals(param, "DHCP", StringComparison.OrdinalIgnoreCase))
+                    return isChecked ? "DHCP" : "Manual";
+                if (string.Equals(param, "Manual", StringComparison.OrdinalIgnoreCase))
+                    return isChecked ? "Manual" : "DHCP";
+                return isChecked ? param : null;
             }
             return null;
         }
