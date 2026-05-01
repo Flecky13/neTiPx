@@ -52,11 +52,15 @@ public sealed class UncPathStore
                 // UNC-Pfade laden
                 foreach (var pathElement in profileElement.Elements("uncPath"))
                 {
+                    var rawDriveLetter = pathElement.Attribute("driveLetter")?.Value ?? string.Empty;
+                    var normalizedDrive = NormalizeDriveLetter(rawDriveLetter);
+
                     var entry = new UncPathEntry
                     {
                         UncPath = pathElement.Attribute("path")?.Value ?? string.Empty,
                         Username = pathElement.Attribute("username")?.Value ?? string.Empty,
-                        Password = pathElement.Attribute("password")?.Value ?? string.Empty
+                        Password = pathElement.Attribute("password")?.Value ?? string.Empty,
+                        DriveLetter = normalizedDrive
                     };
 
                     profile.UncPaths.Add(entry);
@@ -89,10 +93,12 @@ public sealed class UncPathStore
 
                 foreach (var path in profile.UncPaths)
                 {
+                    var normalizedDriveLetter = NormalizeDriveLetter(path.DriveLetter);
                     var pathElement = new XElement("uncPath",
                         new XAttribute("path", path.UncPath ?? string.Empty),
                         new XAttribute("username", path.Username ?? string.Empty),
-                        new XAttribute("password", path.Password ?? string.Empty));
+                        new XAttribute("password", path.Password ?? string.Empty),
+                        new XAttribute("driveLetter", normalizedDriveLetter));
 
                     profileElement.Add(pathElement);
                 }
@@ -178,7 +184,8 @@ public sealed class UncPathStore
             {
                 UncPath = path.UncPath,
                 Username = path.Username,
-                Password = path.Password
+                Password = path.Password,
+                DriveLetter = path.DriveLetter
             });
         }
 
@@ -191,5 +198,17 @@ public sealed class UncPathStore
     private string GetUniqueProfileName(string baseName, int index)
     {
         return baseName; // Später erweitern falls nötig
+    }
+
+    private static string NormalizeDriveLetter(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var trimmed = value.Trim().TrimEnd(':');
+        if (trimmed.Length != 1 || !char.IsLetter(trimmed[0]))
+            return string.Empty;
+
+        return char.ToUpperInvariant(trimmed[0]) + ":";
     }
 }

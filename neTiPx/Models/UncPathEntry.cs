@@ -11,6 +11,7 @@ public sealed class UncPathEntry : ObservableObject
     private string _uncPath = string.Empty;
     private string _username = string.Empty;
     private string _password = string.Empty;
+    private string _driveLetter = string.Empty;
     private bool _hasUncPathError;
     private bool _canRemove = true;
 
@@ -39,6 +40,15 @@ public sealed class UncPathEntry : ObservableObject
     {
         get => _password;
         set => SetProperty(ref _password, value);
+    }
+
+    /// <summary>
+    /// Laufwerksbuchstabe fuer die Zuordnung (z.B. Z:)
+    /// </summary>
+    public string DriveLetter
+    {
+        get => _driveLetter;
+        set => SetProperty(ref _driveLetter, value);
     }
 
     /// <summary>

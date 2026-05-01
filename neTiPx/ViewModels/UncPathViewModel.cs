@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Input;
 using neTiPx.Helpers;
 using neTiPx.Models;
@@ -13,6 +14,11 @@ namespace neTiPx.ViewModels;
 /// </summary>
 public sealed partial class UncPathViewModel : ObservableObject
 {
+    private static readonly IReadOnlyList<string> FixedDriveLetters = Enumerable
+        .Range('A', 'Z' - 'A' + 1)
+        .Select(c => $"{(char)c}:")
+        .ToList();
+
     private readonly UncPathStore _uncPathStore = new();
     private readonly UncPathService _uncPathService = new();
 
@@ -34,10 +40,9 @@ public sealed partial class UncPathViewModel : ObservableObject
         AddUncPathCommand = new RelayCommand(AddUncPath, () => SelectedProfile != null);
         RemoveUncPathCommand = new RelayCommand<UncPathEntry>(RemoveUncPath, _ => SelectedProfile?.UncPaths.Count > 1);
         SaveProfileCommand = new RelayCommand(SaveProfile, () => SelectedProfile != null);
-        ApplyProfileCommand = new RelayCommand(ApplyProfile, () => !IsApplying && SelectedProfile != null);
-
-        // Profile laden
-        LoadProfiles();
+        ApplyProfileCommand = new RelayCommand(ApplyProfile, CanApplyProfile);
+        // Daten werden NICHT hier geladen – die Page ruft LoadProfiles() erst
+        // im Loaded-Event auf, wenn die gesamte UI bereits aufgebaut ist.
     }
 
     #region Properties
@@ -82,6 +87,8 @@ public sealed partial class UncPathViewModel : ObservableObject
         set => SetProperty(ref _statusMessage, value);
     }
 
+    public IReadOnlyList<string> DriveLetters => FixedDriveLetters;
+
     #endregion
 
     #region Commands
@@ -99,14 +106,36 @@ public sealed partial class UncPathViewModel : ObservableObject
     #region Methoden
 
     /// <summary>
-    /// Lädt alle Profile aus der Speicherdatei
+    /// Lädt alle Profile aus der Speicherdatei. Wird von der Page im Loaded-Event aufgerufen.
     /// </summary>
-    private void LoadProfiles()
+    public void LoadProfiles()
+    {
+        ReloadProfilesAndSelect(null);
+    }
+
+    /// <summary>
+    /// Lädt Profile neu aus XML und selektiert ein Profil per Namen (falls vorhanden).
+    /// </summary>
+    public void ReloadProfilesAndSelect(string? profileName)
     {
         UncPathProfiles = _uncPathStore.LoadProfiles();
 
-        if (UncPathProfiles.Count > 0)
-            SelectedProfile = UncPathProfiles[0];
+        if (UncPathProfiles.Count == 0)
+        {
+            SelectedProfile = null;
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(profileName))
+        {
+            var match = UncPathProfiles.FirstOrDefault(p =>
+                string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase));
+
+            SelectedProfile = match ?? UncPathProfiles[0];
+            return;
+        }
+
+        SelectedProfile = UncPathProfiles[0];
     }
 
     /// <summary>
@@ -218,48 +247,9 @@ public sealed partial class UncPathViewModel : ObservableObject
         if (profile == null)
             return true;
 
-        if (string.IsNullOrWhiteSpace(profile.Name))
-        {
-            SetLastAction("Speichern fehlgeschlagen: Profilname fehlt.");
-            return false;
-        }
-
         if (profile.UncPaths == null)
         {
             SetLastAction("Speichern fehlgeschlagen: UNC-Pfade konnten nicht gelesen werden.");
-            return false;
-        }
-
-        // Validiere alle UNC-Pfade und sammle Details
-        bool hasErrors = false;
-        var invalidEntries = new List<int>();
-        for (int i = 0; i < profile.UncPaths.Count; i++)
-        {
-            var entry = profile.UncPaths[i];
-            if (entry == null)
-            {
-                hasErrors = true;
-                invalidEntries.Add(i + 1);
-                continue;
-            }
-
-            entry.HasUncPathError = !UncPathEntry.ValidateUncPath(entry.UncPath);
-            if (entry.HasUncPathError)
-            {
-                hasErrors = true;
-                invalidEntries.Add(i + 1);
-            }
-        }
-
-        if (hasErrors)
-        {
-            SetLastAction($"Speichern fehlgeschlagen: Ungueltige UNC-Pfade in Zeile(n) {string.Join(", ", invalidEntries)}. Format: \\\\server\\share");
-            return false;
-        }
-
-        if (!profile.IsValid())
-        {
-            SetLastAction("Speichern fehlgeschlagen: Profil ist ungueltig.");
             return false;
         }
 
@@ -272,11 +262,14 @@ public sealed partial class UncPathViewModel : ObservableObject
                 SelectedProfile = profile;
             }
 
-            SetLastAction("Profil erfolgreich gespeichert.");
+            SetLastAction("Gespeichert");
+
+            RefreshCommandStates();
             return true;
         }
 
         SetLastAction("Speichern fehlgeschlagen: Profilname bereits vorhanden oder Fehler beim Schreiben der Datei UNC-Profile.xml.");
+        RefreshCommandStates();
         return false;
     }
 
@@ -294,21 +287,10 @@ public sealed partial class UncPathViewModel : ObservableObject
         if (SelectedProfile == null || IsApplying)
             return;
 
-        if (string.IsNullOrWhiteSpace(SelectedProfile.Name))
+        var validationErrors = CollectValidationErrors(SelectedProfile, markUncErrors: true);
+        if (validationErrors.Count > 0)
         {
-            SetLastAction("Anwenden abgebrochen: Profilname fehlt.");
-            return;
-        }
-
-        var invalidEntries = SelectedProfile.UncPaths
-            .Select((e, i) => new { Entry = e, Index = i + 1 })
-            .Where(x => !UncPathEntry.ValidateUncPath(x.Entry.UncPath))
-            .Select(x => x.Index)
-            .ToList();
-
-        if (invalidEntries.Count > 0)
-        {
-            SetLastAction($"Anwenden abgebrochen: Ungueltige UNC-Pfade in Zeile(n) {string.Join(", ", invalidEntries)}.");
+            SetLastAction($"Anwenden abgebrochen: {string.Join(" | ", validationErrors)}");
             return;
         }
 
@@ -323,10 +305,6 @@ public sealed partial class UncPathViewModel : ObservableObject
                 SetLastAction("Alle UNC-Pfade verbunden:\n" + message);
             else
                 SetLastAction("Fehler beim Verbinden:\n" + message);
-
-            // Optional: Profil automatisch speichern nach erfolgreicher Anwendung
-            if (success && SelectedProfile != null)
-                SaveProfile();
         }
         catch (Exception ex)
         {
@@ -335,7 +313,19 @@ public sealed partial class UncPathViewModel : ObservableObject
         finally
         {
             IsApplying = false;
+            RefreshCommandStates();
         }
+    }
+
+    private bool CanApplyProfile()
+    {
+        if (IsApplying || SelectedProfile == null)
+            return false;
+
+        if (SelectedProfile.IsDirty)
+            return false;
+
+        return CollectValidationErrors(SelectedProfile, markUncErrors: false).Count == 0;
     }
 
     private void RefreshCommandStates()
@@ -404,6 +394,12 @@ public sealed partial class UncPathViewModel : ObservableObject
 
     private void UncPathEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(UncPathEntry.CanRemove) ||
+            e.PropertyName == nameof(UncPathEntry.HasUncPathError))
+        {
+            return;
+        }
+
         MarkSelectedProfileDirty();
         RefreshCommandStates();
     }
@@ -417,6 +413,112 @@ public sealed partial class UncPathViewModel : ObservableObject
     private void SetLastAction(string message)
     {
         StatusMessage = message;
+    }
+
+    private bool TryValidateDriveLetters(UncPathProfile profile, out string message)
+    {
+        message = string.Empty;
+
+        var missingRows = new List<int>();
+        var duplicateRows = new List<int>();
+        var invalidRows = new List<int>();
+        var seen = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        for (int i = 0; i < profile.UncPaths.Count; i++)
+        {
+            var row = i + 1;
+            var rawDrive = profile.UncPaths[i].DriveLetter?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(rawDrive))
+            {
+                missingRows.Add(row);
+                continue;
+            }
+
+            if (rawDrive.Length != 2 || rawDrive[1] != ':' || !char.IsLetter(rawDrive[0]))
+            {
+                invalidRows.Add(row);
+                continue;
+            }
+
+            var drive = rawDrive.ToUpperInvariant();
+
+            if (seen.ContainsKey(drive))
+            {
+                duplicateRows.Add(row);
+                duplicateRows.Add(seen[drive]);
+            }
+            else
+            {
+                seen[drive] = row;
+            }
+        }
+
+        duplicateRows = duplicateRows.Distinct().OrderBy(v => v).ToList();
+
+        if (missingRows.Count > 0)
+        {
+            message = $"Laufwerksbuchstabe fehlt in Zeile(n) {string.Join(", ", missingRows)}.";
+            return false;
+        }
+
+        if (invalidRows.Count > 0)
+        {
+            message = $"Laufwerksbuchstabe ungueltig in Zeile(n) {string.Join(", ", invalidRows)}. Erlaubt ist A: bis Z:.";
+            return false;
+        }
+
+        if (duplicateRows.Count > 0)
+        {
+            message = $"Laufwerksbuchstabe doppelt gewaehlt in Zeile(n) {string.Join(", ", duplicateRows)}.";
+            return false;
+        }
+
+        return true;
+    }
+
+    private List<string> CollectValidationErrors(UncPathProfile profile, bool markUncErrors)
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(profile.Name))
+            errors.Add("Profilname fehlt.");
+
+        if (profile.UncPaths.Count == 0)
+        {
+            errors.Add("Mindestens ein UNC-Pfad ist erforderlich.");
+            return errors;
+        }
+
+        var missingUncRows = new List<int>();
+        var invalidUncRows = new List<int>();
+
+        for (int i = 0; i < profile.UncPaths.Count; i++)
+        {
+            var entry = profile.UncPaths[i];
+            var row = i + 1;
+            var isMissing = string.IsNullOrWhiteSpace(entry.UncPath);
+            var isInvalid = !isMissing && !UncPathEntry.ValidateUncPath(entry.UncPath);
+
+            if (markUncErrors)
+                entry.HasUncPathError = isMissing || isInvalid;
+
+            if (isMissing)
+                missingUncRows.Add(row);
+            else if (isInvalid)
+                invalidUncRows.Add(row);
+        }
+
+        if (missingUncRows.Count > 0)
+            errors.Add($"UNC-Pfad fehlt in Zeile(n) {string.Join(", ", missingUncRows)}.");
+
+        if (invalidUncRows.Count > 0)
+            errors.Add($"UNC-Pfad ungueltig in Zeile(n) {string.Join(", ", invalidUncRows)}. Format: \\\\server\\share");
+
+        if (!TryValidateDriveLetters(profile, out var driveValidationMessage))
+            errors.Add(driveValidationMessage);
+
+        return errors;
     }
 
     /// <summary>

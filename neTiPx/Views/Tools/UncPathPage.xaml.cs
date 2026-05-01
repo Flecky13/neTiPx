@@ -26,8 +26,9 @@ public sealed partial class UncPathPage : Page
 
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (DataContext is UncPathViewModel viewModel)
-            ProfileListView.SelectedItem = viewModel.SelectedProfile;
+        // UI ist aufgebaut, dann Profile aus XML laden und erstes Profil anzeigen.
+        _viewModel.ReloadProfilesAndSelect(null);
+        ProfileListView.SelectedItem = _viewModel.SelectedProfile;
     }
 
     private async void ProfileListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -76,8 +77,9 @@ public sealed partial class UncPathPage : Page
                 }
             }
 
-            viewModel.SelectedProfile = nextProfile;
-            ProfileListView.SelectedItem = nextProfile;
+            // Beim Wechsel erneut aus XML lesen und danach Profil anzeigen.
+            viewModel.ReloadProfilesAndSelect(nextProfile.Name);
+            ProfileListView.SelectedItem = viewModel.SelectedProfile;
         }
         finally
         {

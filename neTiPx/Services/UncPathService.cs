@@ -13,7 +13,7 @@ public sealed class UncPathService
     /// </summary>
     public async Task<(bool Success, string Message)> ApplyProfile(UncPathProfile profile)
     {
-        if (profile?.UncPaths.Count == 0)
+        if (profile == null || profile.UncPaths.Count == 0)
             return (false, "Keine UNC-Pfade im Profil vorhanden");
 
         var results = new List<string>();
@@ -91,10 +91,12 @@ public sealed class UncPathService
     private string BuildNetUseCommand(UncPathEntry entry)
     {
         var uncPath = entry.UncPath?.Trim() ?? string.Empty;
+        var driveLetter = NormalizeDriveLetter(entry.DriveLetter);
+        var driveTarget = string.IsNullOrWhiteSpace(driveLetter) ? string.Empty : $"{driveLetter} ";
 
         // Ohne Authentifizierung
         if (string.IsNullOrWhiteSpace(entry.Username))
-            return $"/c net use \"{uncPath}\"";
+            return $"/c net use {driveTarget}\"{uncPath}\"";
 
         // Mit Authentifizierung
         var username = entry.Username?.Trim() ?? string.Empty;
@@ -103,7 +105,19 @@ public sealed class UncPathService
         // Passwort escapen falls nötig
         password = password.Replace("\"", "\"\"");
 
-        return $"/c net use \"{uncPath}\" \"{password}\" /user:{username}";
+        return $"/c net use {driveTarget}\"{uncPath}\" \"{password}\" /user:{username}";
+    }
+
+    private static string NormalizeDriveLetter(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var trimmed = value.Trim().TrimEnd(':');
+        if (trimmed.Length != 1 || !char.IsLetter(trimmed[0]))
+            return string.Empty;
+
+        return char.ToUpperInvariant(trimmed[0]) + ":";
     }
 
     /// <summary>
