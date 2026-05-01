@@ -277,12 +277,13 @@
                                     Command="{Binding AddIpCommand}"
                                     Click="AddIpButton_Click"
                                     HorizontalAlignment="Left"
+                                    Style="{Binding IsManual, Converter={StaticResource BooleanToButtonStyleConverter}, ConverterParameter=AccentButtonStyle}"
                                     IsEnabled="{Binding IsManual}">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <FontIcon Glyph="&#xE710;" FontSize="14"
-                                                  Foreground="{Binding IsEnabled, ElementName=AddIpButton, Converter={StaticResource BooleanToEnabledContentBrushConverter}}" />
+                                                  Foreground="{Binding Foreground, ElementName=AddIpButton}" />
                                         <TextBlock x:Name="AddIpButtonText" Text="IP Adresse hinzufügen"
-                                                   Foreground="{Binding IsEnabled, ElementName=AddIpButton, Converter={StaticResource BooleanToEnabledContentBrushConverter}}" />
+                                                   Foreground="{Binding Foreground, ElementName=AddIpButton}" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>

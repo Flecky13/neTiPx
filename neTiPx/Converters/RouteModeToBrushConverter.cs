@@ -27,10 +27,16 @@ namespace neTiPx.Converters
 
             if (string.Equals(mode, "count", StringComparison.OrdinalIgnoreCase))
             {
-                var countKey = routesEnabled ? "TextFillColorPrimaryBrush" : "TextFillColorDisabledBrush";
+                var countKey = routesEnabled ? "RouteModeCountBrush" : "RouteModeDisabledBrush";
                 if (Application.Current.Resources.TryGetValue(countKey, out var countBrush) && countBrush is Brush countResult)
                 {
                     return countResult;
+                }
+
+                var fallbackCountKey = routesEnabled ? "TextFillColorPrimaryBrush" : "TextFillColorDisabledBrush";
+                if (Application.Current.Resources.TryGetValue(fallbackCountKey, out var fallbackCountBrush) && fallbackCountBrush is Brush fallbackCountResult)
+                {
+                    return fallbackCountResult;
                 }
 
                 return new SolidColorBrush(routesEnabled ? Microsoft.UI.Colors.Black : Microsoft.UI.Colors.Gray);
@@ -42,16 +48,25 @@ namespace neTiPx.Converters
             string key;
             if (!routesEnabled)
             {
-                key = "TextFillColorDisabledBrush";
+                key = "RouteModeDisabledBrush";
             }
             else
             {
-                key = isActive ? "AccentTextFillColorPrimaryBrush" : "TextFillColorSecondaryBrush";
+                key = isActive ? "RouteModeActiveBrush" : "RouteModeInactiveBrush";
             }
 
             if (Application.Current.Resources.TryGetValue(key, out var brush) && brush is Brush result)
             {
                 return result;
+            }
+
+            var fallbackKey = !routesEnabled
+                ? "TextFillColorDisabledBrush"
+                : isActive ? "AccentTextFillColorPrimaryBrush" : "TextFillColorSecondaryBrush";
+
+            if (Application.Current.Resources.TryGetValue(fallbackKey, out var fallbackBrush) && fallbackBrush is Brush fallbackResult)
+            {
+                return fallbackResult;
             }
 
             if (!routesEnabled)

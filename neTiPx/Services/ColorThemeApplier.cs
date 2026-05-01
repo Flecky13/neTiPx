@@ -10,15 +10,16 @@ namespace neTiPx.Services
         public void Apply(ColorTheme theme)
         {
             var appResources = Application.Current.Resources;
+            var routeBrushes = GetRouteBrushes(theme);
 
             if (appResources.ThemeDictionaries.TryGetValue("Light", out var lightObj) && lightObj is ResourceDictionary lightDict)
             {
-                ApplyThemeToDictionary(lightDict, theme);
+                ApplyThemeToDictionary(lightDict, theme, routeBrushes);
             }
 
             if (appResources.ThemeDictionaries.TryGetValue("Dark", out var darkObj) && darkObj is ResourceDictionary darkDict)
             {
-                ApplyThemeToDictionary(darkDict, theme);
+                ApplyThemeToDictionary(darkDict, theme, routeBrushes);
             }
 
             appResources["AppBackgroundBrush"] = new SolidColorBrush(ParseColor(theme.AppBackgroundColor));
@@ -30,6 +31,10 @@ namespace neTiPx.Services
             appResources["NavigationViewItemForeground"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForeground));
             appResources["NavigationViewItemForegroundPointerOver"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForegroundPointerOver));
             appResources["NavigationViewItemForegroundSelected"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForegroundSelected));
+            appResources["RouteModeActiveBrush"] = new SolidColorBrush(routeBrushes.Active);
+            appResources["RouteModeInactiveBrush"] = new SolidColorBrush(routeBrushes.Inactive);
+            appResources["RouteModeCountBrush"] = new SolidColorBrush(routeBrushes.Count);
+            appResources["RouteModeDisabledBrush"] = new SolidColorBrush(routeBrushes.Disabled);
 
             if (App.MainWindow.Content is FrameworkElement root)
             {
@@ -42,7 +47,7 @@ namespace neTiPx.Services
             }
         }
 
-        private static void ApplyThemeToDictionary(ResourceDictionary dictionary, ColorTheme theme)
+        private static void ApplyThemeToDictionary(ResourceDictionary dictionary, ColorTheme theme, RouteBrushes routeBrushes)
         {
             dictionary["AppBackgroundColor"] = ParseColor(theme.AppBackgroundColor);
             dictionary["CardBackgroundColor"] = ParseColor(theme.CardBackgroundColor);
@@ -61,7 +66,47 @@ namespace neTiPx.Services
             dictionary["AccentButtonForegroundPointerOver"] = white;
             dictionary["AccentButtonForegroundPressed"] = white;
             dictionary["AccentButtonForegroundDisabled"] = whiteDisabled;
+
+            dictionary["RouteModeActiveBrush"] = new SolidColorBrush(routeBrushes.Active);
+            dictionary["RouteModeInactiveBrush"] = new SolidColorBrush(routeBrushes.Inactive);
+            dictionary["RouteModeCountBrush"] = new SolidColorBrush(routeBrushes.Count);
+            dictionary["RouteModeDisabledBrush"] = new SolidColorBrush(routeBrushes.Disabled);
         }
+
+        private static RouteBrushes GetRouteBrushes(ColorTheme theme)
+        {
+            // Für helle Themes mit sehr zarten Akzenten explizit kräftige, gut lesbare Farben setzen.
+            if (string.Equals(theme.Name, "Weiß", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(theme.Name, "Weiss", StringComparison.OrdinalIgnoreCase))
+            {
+                return new RouteBrushes(
+                    Active: Windows.UI.Color.FromArgb(255, 15, 108, 189),
+                    Inactive: Windows.UI.Color.FromArgb(255, 55, 65, 81),
+                    Count: Windows.UI.Color.FromArgb(255, 17, 24, 39),
+                    Disabled: Windows.UI.Color.FromArgb(255, 148, 163, 184));
+            }
+
+            if (string.Equals(theme.Name, "Prinzessin", StringComparison.OrdinalIgnoreCase))
+            {
+                return new RouteBrushes(
+                    Active: Windows.UI.Color.FromArgb(255, 194, 24, 91),
+                    Inactive: Windows.UI.Color.FromArgb(255, 122, 30, 77),
+                    Count: Windows.UI.Color.FromArgb(255, 90, 20, 56),
+                    Disabled: Windows.UI.Color.FromArgb(255, 166, 77, 121));
+            }
+
+            return new RouteBrushes(
+                Active: ParseColor(theme.NavigationViewItemForegroundSelected),
+                Inactive: ParseColor(theme.AppTextSecondaryColor),
+                Count: ParseColor(theme.AppTextColor),
+                Disabled: Windows.UI.Color.FromArgb(255, 145, 145, 145));
+        }
+
+        private readonly record struct RouteBrushes(
+            Windows.UI.Color Active,
+            Windows.UI.Color Inactive,
+            Windows.UI.Color Count,
+            Windows.UI.Color Disabled);
 
         private static bool IsLightColor(Windows.UI.Color color)
         {
