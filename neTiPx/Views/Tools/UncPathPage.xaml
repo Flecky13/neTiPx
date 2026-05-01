@@ -178,8 +178,8 @@
                                     HorizontalAlignment="Stretch"
                                     Style="{StaticResource AccentButtonStyle}">
                                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                        <FontIcon Glyph="&#xE73E;" FontSize="14" />
-                                        <TextBlock Text="Anwenden" />
+                                        <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="{Binding Foreground, ElementName=ApplyButton}" />
+                                        <TextBlock Text="Anwenden" Foreground="{Binding Foreground, ElementName=ApplyButton}" />
                                     </StackPanel>
                                 </Button>
 
@@ -188,8 +188,8 @@
                                     Command="{Binding SaveProfileCommand}"
                                     HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                                        <FontIcon Glyph="&#xE74E;" FontSize="14" />
-                                        <TextBlock Text="Speichern" />
+                                        <FontIcon Glyph="&#xE74E;" FontSize="14" Foreground="{Binding Foreground, ElementName=SaveButton}" />
+                                        <TextBlock Text="Speichern" Foreground="{Binding Foreground, ElementName=SaveButton}" />
                                     </StackPanel>
                                 </Button>
                             </StackPanel>

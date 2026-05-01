@@ -53,6 +53,14 @@ namespace neTiPx.Services
             dictionary["NavigationViewItemForeground"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForeground));
             dictionary["NavigationViewItemForegroundPointerOver"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForegroundPointerOver));
             dictionary["NavigationViewItemForegroundSelected"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForegroundSelected));
+
+            // AccentButton-Text immer Weiß: AccentButton hat immer farbigen (blauen) Hintergrund
+            var white = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255));
+            var whiteDisabled = new SolidColorBrush(Windows.UI.Color.FromArgb(128, 255, 255, 255));
+            dictionary["AccentButtonForeground"] = white;
+            dictionary["AccentButtonForegroundPointerOver"] = white;
+            dictionary["AccentButtonForegroundPressed"] = white;
+            dictionary["AccentButtonForegroundDisabled"] = whiteDisabled;
         }
 
         private static bool IsLightColor(Windows.UI.Color color)

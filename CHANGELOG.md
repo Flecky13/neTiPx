@@ -4,6 +4,20 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.8]
+
+### Changed
+- **Tools / UNC-Profile / Laufwerksauswahl**: Laufwerks-Dropdown auf feste Liste `A:` bis `Z:` vereinheitlicht;
+
+### Added
+- **Tools / UNC-Profile / Verbindungen**: Neuer Bereich rechts unten mit aktuell verbundenen UNC-Pfaden im System.
+- **Tools / UNC-Profile / Trennen**: Pro verbundener Zeile ein Trennen-Button (Mülleimer-Symbol) hinzugefügt.
+- **Tools / UNC-Profile / Auto-Refresh**: Liste der bestehenden UNC-Verbindungen wird nach Anwenden und nach Trennen automatisch neu eingelesen.
+- **Tools / UNC-Profile / Tooltip**: Bei Mouseover über dem Verbindungsfeld wird der vollständige UNC-Pfad als Tooltip angezeigt.
+
+### Fixed
+- **Tools / UNC-Profile / Anzeige**: Persistierte Laufwerksbuchstaben werden in der vereinfachten Architektur wieder konsistent im Dropdown dargestellt.
+
 ## [1.7.1.7]
 
 ### Changed

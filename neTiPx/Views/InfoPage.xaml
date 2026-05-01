@@ -75,43 +75,47 @@
                     <!-- Rechte Seite: Update-Buttons -->
                     <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
                         <Button
+                            x:Name="CheckForUpdateButton"
                             Command="{Binding CheckForUpdateCommand}"
                             HorizontalAlignment="Stretch"
                             MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE895;" FontSize="16" />
-                                <TextBlock x:Name="CheckUpdateButtonText" Text="Auf Update Prüfen" />
+                                <FontIcon Glyph="&#xE895;" FontSize="16" Foreground="{Binding Foreground, ElementName=CheckForUpdateButton}" />
+                                <TextBlock x:Name="CheckUpdateButtonText" Text="Auf Update Prüfen" Foreground="{Binding Foreground, ElementName=CheckForUpdateButton}" />
                             </StackPanel>
                         </Button>
 
                         <Button
+                            x:Name="InstallUpdateButton"
                             Command="{Binding InstallUpdateCommand}"
                             HorizontalAlignment="Stretch"
                             MinWidth="200"
                             Style="{StaticResource AccentButtonStyle}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE896;" FontSize="16" />
-                                <TextBlock x:Name="InstallUpdateButtonText" Text="Update Installieren" />
+                                <FontIcon Glyph="&#xE896;" FontSize="16" Foreground="{Binding Foreground, ElementName=InstallUpdateButton}" />
+                                <TextBlock x:Name="InstallUpdateButtonText" Text="Update Installieren" Foreground="{Binding Foreground, ElementName=InstallUpdateButton}" />
                             </StackPanel>
                         </Button>
 
                         <Button
+                            x:Name="ShowChangelogButton"
                             Command="{Binding ShowChangelogCommand}"
                             HorizontalAlignment="Stretch"
                             MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE8F3;" FontSize="16" />
-                                <TextBlock x:Name="ChangelogButtonText" Text="Changelog / Release" />
+                                <FontIcon Glyph="&#xE8F3;" FontSize="16" Foreground="{Binding Foreground, ElementName=ShowChangelogButton}" />
+                                <TextBlock x:Name="ChangelogButtonText" Text="Changelog / Release" Foreground="{Binding Foreground, ElementName=ShowChangelogButton}" />
                             </StackPanel>
                         </Button>
 
                         <Button
+                            x:Name="ShowHelpButton"
                             Command="{Binding ShowHelpCommand}"
                             HorizontalAlignment="Stretch"
                             MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE897;" FontSize="16" />
-                                <TextBlock x:Name="HelpButtonText" Text="Hilfe" />
+                                <FontIcon Glyph="&#xE897;" FontSize="16" Foreground="{Binding Foreground, ElementName=ShowHelpButton}" />
+                                <TextBlock x:Name="HelpButtonText" Text="Hilfe" Foreground="{Binding Foreground, ElementName=ShowHelpButton}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

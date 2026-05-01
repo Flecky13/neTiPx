@@ -24,6 +24,11 @@
                     <SolidColorBrush x:Key="NavigationViewItemForeground" Color="#1A1A1A" />
                     <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="#1A1A1A" />
                     <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="#1A1A1A" />
+                    <!-- AccentButton-Text immer in Weiß, da AccentButton immer farbigen Hintergrund hat -->
+                    <SolidColorBrush x:Key="AccentButtonForeground" Color="White" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="White" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="White" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#80FFFFFF" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="AppBackgroundColor">#202020</Color>
@@ -34,6 +39,11 @@
                     <SolidColorBrush x:Key="NavigationViewItemForeground" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="#FFFFFF" />
+                    <!-- AccentButton-Text immer in Weiß, da AccentButton immer farbigen Hintergrund hat -->
+                    <SolidColorBrush x:Key="AccentButtonForeground" Color="White" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="White" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="White" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#80FFFFFF" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
