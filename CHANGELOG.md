@@ -4,6 +4,15 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.1.9]
+
+### Fixed
+- **IP-Konfiguration / UNC-Profil-Dropdown**: Breite auf 180 px reduziert; das Dropdown war zuvor zu breit und hat das Layout gestreckt.
+- **Routen konfigurieren / Farbprofile Weiß & Prinzessin / Texte**: Sekundäre Beschriftungen und Spaltenköpfe im Routen-Dialog verwenden jetzt `AppTextSecondaryBrush` statt `TextFillColorSecondaryBrush`; Texte sind damit auf hellen Hintergründen wieder lesbar.
+- **Routen konfigurieren / Farbprofile Weiß & Prinzessin / Buttons**: Accent-Buttons (Neu Einlesen, Route hinzufügen) erhalten jetzt explizit `AccentButtonForeground`; Text war zuvor schwarz statt weiß.
+- **Routen konfigurieren / Separates Fenster / Theme-Sync**: Separates Routen-Fenster übernimmt jetzt das `RequestedTheme` des Hauptfensters, damit Theme-Ressourcen konsistent ausgewertet werden.
+- **Routen konfigurieren / Separates Fenster / Übernehmen-Button**: Text des Übernehmen-Buttons ist bei hellen Farbprofilen (Weiß, Prinzessin) nun weiß; bei dunklen Profilen wird die Farbe automatisch über den `AccentButtonStyle` gesteuert.
+
 ## [1.7.1.8]
 
 ### Changed
