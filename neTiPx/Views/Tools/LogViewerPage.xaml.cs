@@ -146,8 +146,11 @@ namespace neTiPx.Views
         {
             if (_suppressFileSelectionChange || LogViewerFileComboBox?.SelectedItem is not RecentFileEntry selectedEntry)
             {
+                UpdateNavigationButtons();
                 return;
             }
+
+            UpdateNavigationButtons();
 
             if (string.Equals(selectedEntry.FullPath, _currentFilePath, StringComparison.OrdinalIgnoreCase))
             {
@@ -161,6 +164,28 @@ namespace neTiPx.Views
         private void LogViewerFileComboBox_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             RefreshRecentFileDisplayTexts();
+        }
+
+        private async void LogViewerDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (LogViewerFileComboBox?.SelectedItem is not RecentFileEntry selectedEntry)
+            {
+                return;
+            }
+
+            _logViewerStore.RemoveRecentFile(selectedEntry.FullPath);
+            RecentFiles.Remove(selectedEntry);
+            _logViewerStore.WriteRecentFiles(RecentFiles.Select(entry => entry.FullPath), null);
+
+            _currentFilePath = string.Empty;
+            Lines.Clear();
+            _allLines.Clear();
+            RefreshVisibleLines();
+            DisposeWatcher();
+
+            LogViewerFileComboBox.SelectedItem = null;
+            UpdateNavigationButtons();
+            UpdateMatchInfo();
         }
 
         private async void LogViewerReloadButton_Click(object sender, RoutedEventArgs e)
@@ -641,6 +666,7 @@ namespace neTiPx.Views
         private void UpdateNavigationButtons()
         {
             if (LogViewerReloadButton != null) LogViewerReloadButton.IsEnabled = !string.IsNullOrWhiteSpace(_currentFilePath);
+            if (LogViewerDeleteButton != null) LogViewerDeleteButton.IsEnabled = LogViewerFileComboBox?.SelectedItem != null;
         }
 
         private void ScrollToLatestLine(bool force = false)
@@ -750,8 +776,11 @@ namespace neTiPx.Views
 
         private void LoadRecentFiles()
         {
+            var recentPaths = _logViewerStore.ReadRecentFiles();
+            _logViewerStore.ValidateAndRemoveNonExistentFiles(recentPaths);
+
             RecentFiles.Clear();
-            foreach (var path in _logViewerStore.ReadRecentFiles())
+            foreach (var path in recentPaths.Where(p => File.Exists(p)))
             {
                 RecentFiles.Add(CreateRecentFileEntry(path));
             }

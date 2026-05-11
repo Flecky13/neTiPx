@@ -27,7 +27,7 @@
                 Style="{StaticResource CardBorder}"
                 Padding="16">
             <StackPanel Spacing="12">
-                <Grid ColumnDefinitions="Auto,*,Auto"
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
                       ColumnSpacing="12">
                     <Button x:Name="LogViewerOpenButton"
                             Grid.Column="0"
@@ -46,8 +46,18 @@
                               Width="Auto"
                               VerticalAlignment="Center" />
 
-                    <Button x:Name="LogViewerReloadButton"
+                    <Button x:Name="LogViewerDeleteButton"
                             Grid.Column="2"
+                            Click="LogViewerDeleteButton_Click"
+                            MinWidth="36"
+                            Padding="8,6"
+                            IsEnabled="False"
+                            ToolTipService.ToolTip="Ausgewählte Datei aus Liste entfernen">
+                        <FontIcon Glyph="&#xE74D;" />
+                    </Button>
+
+                    <Button x:Name="LogViewerReloadButton"
+                            Grid.Column="3"
                             Click="LogViewerReloadButton_Click"
                             MinWidth="36"
                             Padding="8,6"

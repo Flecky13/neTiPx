@@ -76,6 +76,63 @@ namespace neTiPx.Services
             }
         }
 
+        public void RemoveRecentFile(string filePath)
+        {
+            try
+            {
+                var path = ConfigFileHelper.GetLogViewerRecentFilesXmlPath();
+                if (!File.Exists(path))
+                {
+                    return;
+                }
+
+                var doc = XDocument.Load(path);
+                var root = doc.Root;
+                if (root == null)
+                {
+                    return;
+                }
+
+                var toRemove = root.Elements("file")
+                    .Where(element => string.Equals(element.Attribute("path")?.Value, filePath, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                foreach (var element in toRemove)
+                {
+                    element.Remove();
+                }
+
+                var directory = Path.GetDirectoryName(path);
+                if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                doc.Save(path);
+            }
+            catch
+            {
+            }
+        }
+
+        public void ValidateAndRemoveNonExistentFiles(IEnumerable<string> recentFiles)
+        {
+            try
+            {
+                var nonExistentPaths = recentFiles
+                    .Where(path => !string.IsNullOrWhiteSpace(path) && !File.Exists(path.Trim()))
+                    .ToList();
+
+                foreach (var path in nonExistentPaths)
+                {
+                    RemoveRecentFile(path);
+                }
+            }
+            catch
+            {
+            }
+        }
+
         public void WriteRecentFiles(IEnumerable<string> recentFiles, string? lastSelectedFilePath = null)
         {
             try
