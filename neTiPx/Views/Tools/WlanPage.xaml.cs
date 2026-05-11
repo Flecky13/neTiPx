@@ -114,6 +114,8 @@ namespace neTiPx.Views
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "WLAN", $"Button: WLAN-Sortierung | Spalte='{column}'");
+
             if (string.Equals(_wifiSortColumn, column, StringComparison.OrdinalIgnoreCase))
             {
                 _wifiSortAscending = !_wifiSortAscending;

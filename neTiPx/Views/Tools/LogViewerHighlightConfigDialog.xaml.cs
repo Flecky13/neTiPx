@@ -63,6 +63,7 @@ namespace neTiPx.Views
         private void AddRuleButton_Click(object sender, RoutedEventArgs e)
         {
             var defaultColorKey = ColorOptions.FirstOrDefault()?.Key ?? "red";
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Button: Highlight-Regel hinzufügen | Standardfarbe='{defaultColorKey}'");
             Rules.Add(new LogViewerHighlightRule
             {
                 SearchText = string.Empty,
@@ -74,6 +75,7 @@ namespace neTiPx.Views
         {
             if ((sender as FrameworkElement)?.Tag is LogViewerHighlightRule rule)
             {
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Button: Highlight-Regel entfernen | Suchtext='{rule.SearchText}' Farbe='{rule.ColorKey}'");
                 Rules.Remove(rule);
             }
         }

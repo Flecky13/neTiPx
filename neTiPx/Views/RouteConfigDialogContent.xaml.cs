@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.Helpers;
 using neTiPx.Models;
 using neTiPx.Services;
 using System.Globalization;
@@ -198,6 +199,8 @@ namespace neTiPx.Views
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "RouteConfig", "Button: Profil-Route hinzufügen");
+
             Routes.Add(new RouteEntry { Metric = 1 });
             OnPropertyChanged(nameof(CanAddRoute));
         }
@@ -208,6 +211,8 @@ namespace neTiPx.Views
             {
                 return;
             }
+
+            DebugLogger.Log(LogLevel.INFO, "RouteConfig", $"Button: Profil-Route entfernen | Ziel='{route.Destination}' Maske='{route.SubnetMask}' Gateway='{route.Gateway}'");
 
             bool hasContent = !string.IsNullOrWhiteSpace(route.Destination)
                 || !string.IsNullOrWhiteSpace(route.SubnetMask)
@@ -258,6 +263,8 @@ namespace neTiPx.Views
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "RouteConfig", $"Button: Profil-Route anwenden | Ziel='{route.Destination}' Maske='{route.SubnetMask}' Gateway='{route.Gateway}' Metric={route.Metric}");
+
             if (_addRouteToSystem == null)
             {
                 return;
@@ -304,6 +311,7 @@ namespace neTiPx.Views
 
         private async void ReloadSystemRoutes_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "RouteConfig", "Button: Systemrouten neu einlesen");
             await ReloadSystemRoutesInternalAsync(showErrorDialog: true);
         }
 
@@ -364,6 +372,8 @@ namespace neTiPx.Views
             {
                 return;
             }
+
+            DebugLogger.Log(LogLevel.INFO, "RouteConfig", $"Button: Systemroute entfernen | Ziel='{route.Destination}' Maske='{route.SubnetMask}' Gateway='{route.Gateway}'");
 
             if (_deleteRouteFromSystem == null)
             {

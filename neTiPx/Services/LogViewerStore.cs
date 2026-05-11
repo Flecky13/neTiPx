@@ -80,6 +80,7 @@ namespace neTiPx.Services
         {
             try
             {
+                DebugLogger.Log(LogLevel.INFO, "LogViewerStore", $"Datei aus Recent-Liste entfernen: {filePath}");
                 var path = ConfigFileHelper.GetLogViewerRecentFilesXmlPath();
                 if (!File.Exists(path))
                 {
@@ -119,6 +120,7 @@ namespace neTiPx.Services
         {
             try
             {
+                DebugLogger.Log(LogLevel.INFO, "LogViewerStore", "Validierung nicht-existenter Recent-Dateien");
                 var nonExistentPaths = recentFiles
                     .Where(path => !string.IsNullOrWhiteSpace(path) && !File.Exists(path.Trim()))
                     .ToList();
@@ -137,6 +139,7 @@ namespace neTiPx.Services
         {
             try
             {
+                DebugLogger.Log(LogLevel.INFO, "LogViewerStore", $"WriteRecentFiles: {recentFiles.Count()} Eintr\u00e4ge (zuletzt: {lastSelectedFilePath ?? "<keine>"})");
                 var sanitized = recentFiles
                     .Where(path => !string.IsNullOrWhiteSpace(path))
                     .Select(path => path.Trim())

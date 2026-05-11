@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using neTiPx.Helpers;
 using neTiPx.Services;
 using System;
 using System.Linq;
@@ -246,6 +247,7 @@ namespace neTiPx.Views
             }
 
             var nextPrefix = Math.Min(32, currentPrefix + 1);
+            DebugLogger.Log(LogLevel.INFO, "NetCalc", $"Button: Hosts - | Prefix {currentPrefix} -> {nextPrefix}");
             ApplyPrefixToNetworkCalcInputs(nextPrefix);
             TryCalculateNetworkAuto();
         }
@@ -258,6 +260,7 @@ namespace neTiPx.Views
             }
 
             var nextPrefix = Math.Max(0, currentPrefix - 1);
+            DebugLogger.Log(LogLevel.INFO, "NetCalc", $"Button: Hosts + | Prefix {currentPrefix} -> {nextPrefix}");
             ApplyPrefixToNetworkCalcInputs(nextPrefix);
             TryCalculateNetworkAuto();
         }

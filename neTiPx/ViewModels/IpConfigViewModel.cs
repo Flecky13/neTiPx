@@ -24,7 +24,6 @@ namespace neTiPx.ViewModels
         private static readonly TimeSpan UncApplyPollInterval = TimeSpan.FromSeconds(1);
 
         private static string T(string key) => _lm.Lang(key);
-
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly UncPathStore _uncPathStore = new UncPathStore();
         private readonly UncPathService _uncPathService = new UncPathService();
@@ -33,7 +32,7 @@ namespace neTiPx.ViewModels
         private readonly SynchronizationContext? _uiContext;
         private readonly SemaphoreSlim _statusUpdateLock = new SemaphoreSlim(1, 1);
         private CancellationTokenSource? _monitoringCts;
-        private bool _isLoadingProfile = false;
+        private bool _isLoadingProfile;
         private bool _isMonitoringActive;
         private bool _isApplyingProfile;
 
@@ -48,7 +47,7 @@ namespace neTiPx.ViewModels
         private string _dns2PingText = string.Empty;
         private GatewayStatusKind _dns2StatusKind = GatewayStatusKind.Unknown;
         private string _validationMessage = string.Empty;
-        private bool _hasValidationErrors = false;
+        private bool _hasValidationErrors;
         private bool _showInputValidationErrors;
         private bool _gatewayHasValidationError;
         private bool _dns1HasValidationError;

@@ -542,6 +542,7 @@ namespace neTiPx.Views
 
             try
             {
+                DebugLogger.Log(LogLevel.INFO, "Ping", $"Button: Ping-Log öffnen | Ziel='{target.Target}'");
                 _pingLogService.OpenLogFile(target.Target);
             }
             catch

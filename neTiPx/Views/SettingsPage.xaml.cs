@@ -292,6 +292,7 @@ namespace neTiPx.Views
 
         private async void SelectPingLogFolderButton_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Settings", "Ping-Log-Ordner Auswahl gestartet");
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
 
@@ -311,6 +312,7 @@ namespace neTiPx.Views
 
         private async void OpenPagesVisibilityConfigText_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Settings", "Button: Seiten-Sichtbarkeit öffnen");
             _pagesVisibilityService.EnsureConfigExists();
             var entries = _pagesVisibilityService.ReadXmlManagedEntries();
 
@@ -521,6 +523,7 @@ namespace neTiPx.Views
 
         private void ResetPingLogFolderButton_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Settings", "Ping-Log-Ordner zurückgesetzt auf Standard");
             _settingsService.SetPingLogFolderPath(string.Empty);
             _pingLogFolderPath = _pingLogService.GetLogFolderPath();
             UpdatePingLogFolderPathDisplay();
@@ -575,6 +578,7 @@ namespace neTiPx.Views
 
             if (ColorSchemeCombo.SelectedItem is ColorSchemeItem item)
             {
+                DebugLogger.Log(LogLevel.INFO, "Settings", $"Farbschema geändert: {item.Theme}");
                 _colorThemeApplier.Apply(item.Theme);
                 _settingsService.SetColorTheme(item.Theme);
             }
@@ -618,8 +622,11 @@ namespace neTiPx.Views
             if (_isLoading)
                 return;
 
+            var adapterName = GetSelectedAdapterName(PrimaryAdapterCombo) ?? string.Empty;
+            DebugLogger.Log(LogLevel.INFO, "Settings", $"Primärer Adapter geändert: {adapterName}");
+
             var settings = _adapterStore.ReadAdapters();
-            settings.PrimaryAdapter = GetSelectedAdapterName(PrimaryAdapterCombo) ?? string.Empty;
+            settings.PrimaryAdapter = adapterName;
             _adapterStore.WriteAdapters(settings);
         }
 
@@ -628,8 +635,11 @@ namespace neTiPx.Views
             if (_isLoading)
                 return;
 
+            var adapterName = GetSelectedAdapterName(SecondaryAdapterCombo) ?? string.Empty;
+            DebugLogger.Log(LogLevel.INFO, "Settings", $"Sekundärer Adapter geändert: {adapterName}");
+
             var settings = _adapterStore.ReadAdapters();
-            settings.SecondaryAdapter = GetSelectedAdapterName(SecondaryAdapterCombo) ?? string.Empty;
+            settings.SecondaryAdapter = adapterName;
             _adapterStore.WriteAdapters(settings);
         }
 

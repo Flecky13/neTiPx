@@ -768,6 +768,8 @@ namespace neTiPx.Views
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "NetScan", $"DoubleTap: Port-Aktion | IP='{selectedDevice.IpAddress}' PortInfo='{portInfo}'");
+
             OpenPortConnection(selectedDevice.IpAddress, portInfo);
         }
 
@@ -855,6 +857,8 @@ namespace neTiPx.Views
             {
                 return;
             }
+
+            DebugLogger.Log(LogLevel.INFO, "NetScan", $"Button: Sortierung | Spalte='{column}'");
 
             if (string.Equals(_networkScanSortColumn, column, StringComparison.OrdinalIgnoreCase))
             {

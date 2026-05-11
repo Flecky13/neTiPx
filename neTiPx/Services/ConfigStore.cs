@@ -14,21 +14,31 @@ namespace neTiPx.Services
 
             if (!File.Exists(path))
             {
+                DebugLogger.Log(LogLevel.INFO, "ConfigStore", $"ReadAll: Konfiguration nicht vorhanden ({path})");
                 return values;
             }
 
-            foreach (var line in File.ReadAllLines(path))
+            try
             {
-                if (string.IsNullOrWhiteSpace(line) || !line.Contains("="))
+                foreach (var line in File.ReadAllLines(path))
                 {
-                    continue;
+                    if (string.IsNullOrWhiteSpace(line) || !line.Contains("="))
+                    {
+                        continue;
+                    }
+
+                    var parts = line.Split(new[] { '=' }, 2);
+                    values[parts[0].Trim()] = parts[1].Trim();
                 }
 
-                var parts = line.Split(new[] { '=' }, 2);
-                values[parts[0].Trim()] = parts[1].Trim();
+                DebugLogger.Log(LogLevel.INFO, "ConfigStore", $"ReadAll: {values.Count} Einträge geladen");
+                return values;
             }
-
-            return values;
+            catch (Exception ex)
+            {
+                DebugLogger.Log(LogLevel.ERROR, "ConfigStore", "ReadAll: Lesen fehlgeschlagen", ex);
+                return values;
+            }
         }
 
         public void WriteAll(Dictionary<string, string> values)
@@ -55,7 +65,15 @@ namespace neTiPx.Services
                 outLines.Add(kv.Key + " = " + kv.Value);
             }
 
-            File.WriteAllLines(path, outLines);
+            try
+            {
+                File.WriteAllLines(path, outLines);
+                DebugLogger.Log(LogLevel.INFO, "ConfigStore", $"WriteAll: {outLines.Count} Zeilen geschrieben");
+            }
+            catch (Exception ex)
+            {
+                DebugLogger.Log(LogLevel.ERROR, "ConfigStore", "WriteAll: Schreiben fehlgeschlagen", ex);
+            }
         }
     }
 }

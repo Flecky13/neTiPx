@@ -173,6 +173,7 @@ namespace neTiPx.Views
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Datei aus Recent-Liste löschen: {selectedEntry.FullPath}");
             _logViewerStore.RemoveRecentFile(selectedEntry.FullPath);
             RecentFiles.Remove(selectedEntry);
             _logViewerStore.WriteRecentFiles(RecentFiles.Select(entry => entry.FullPath), null);
@@ -195,12 +196,15 @@ namespace neTiPx.Views
                 return;
             }
 
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Button: Datei neu laden | Datei='{_currentFilePath}'");
+
             await LoadFileAsync(_currentFilePath, forceStatusMessage: true);
         }
 
         private void LogViewerAutoRefreshCheckBox_Click(object sender, RoutedEventArgs e)
         {
             _autoScrollEnabled = LogViewerAutoRefreshCheckBox?.IsChecked == true;
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Button: Auto-Refresh {(_autoScrollEnabled ? "aktiviert" : "deaktiviert")}");
             if (_autoScrollEnabled)
             {
                 _isPinnedToBottom = true;
@@ -215,6 +219,7 @@ namespace neTiPx.Views
 
         private async void LogViewerHighlightConfigButton_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", "Button: Highlight-Konfiguration öffnen");
             var dialogContent = new LogViewerHighlightConfigDialog(HighlightRules, HighlightColorOptions);
             var dialog = new ContentDialog
             {
@@ -229,6 +234,7 @@ namespace neTiPx.Views
             var result = await dialog.ShowAsync();
             if (result != ContentDialogResult.Primary)
             {
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", "Highlight-Konfiguration abgebrochen");
                 return;
             }
 
@@ -239,6 +245,7 @@ namespace neTiPx.Views
             }
 
             _highlightStore.WriteRules(HighlightRules);
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln gespeichert: {HighlightRules.Count}");
             RefreshVisibleLines();
         }
 
@@ -247,6 +254,7 @@ namespace neTiPx.Views
             await _loadLock.WaitAsync();
             try
             {
+                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Datei laden: {filePath}");
                 SetLoadingState(true);
                 var fileSnapshot = await ReadAllLinesWithRetryAsync(filePath);
 
@@ -795,6 +803,7 @@ namespace neTiPx.Views
 
         private async Task RestoreLastSelectedFileAsync()
         {
+            DebugLogger.Log(LogLevel.INFO, "LogViewer", "Letzte ausgewählte Datei wiederherstellen");
             var lastSelectedPath = _logViewerStore.ReadLastSelectedFile();
             if (string.IsNullOrWhiteSpace(lastSelectedPath))
             {

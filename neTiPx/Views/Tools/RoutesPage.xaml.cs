@@ -311,6 +311,7 @@ namespace neTiPx.Views.Tools
 
         private void ClearFilter_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Routenfilter löschen");
             if (DestinationFilterBox != null)
             {
                 DestinationFilterBox.Text = string.Empty;
@@ -321,26 +322,31 @@ namespace neTiPx.Views.Tools
 
         private void SortDestination_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Zielnetz");
             ToggleSort(SortColumn.Destination);
         }
 
         private void SortSubnetMask_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Subnetzmaske");
             ToggleSort(SortColumn.SubnetMask);
         }
 
         private void SortGateway_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Gateway");
             ToggleSort(SortColumn.Gateway);
         }
 
         private void SortMetric_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Metrik");
             ToggleSort(SortColumn.Metric);
         }
 
         private async void RefreshRoutes_Click(object sender, RoutedEventArgs e)
         {
+            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Routen neu einlesen");
             await LoadRoutesAsync();
         }
 
