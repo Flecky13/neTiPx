@@ -326,7 +326,10 @@ namespace neTiPx.Views
             if (DataContext is not IpConfigViewModel viewModel || viewModel.SelectedProfile == null)
                 return;
 
-            DebugLogger.Log(LogLevel.INFO, "IpConfig", $"Button: Routen konfigurieren | Profil='{viewModel.SelectedProfile.Name}'");
+            LogHandler.LogEvent("IpConfig", "ButtonClick", "RoutesConfigOpen", new Dictionary<string, string?>
+            {
+                ["Profile"] = viewModel.SelectedProfile.Name
+            });
 
             var routeWindow = new RouteConfigWindow(viewModel.SelectedProfile, viewModel);
 
@@ -335,7 +338,7 @@ namespace neTiPx.Views
 
         private void AddIpButton_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "IpConfig", "Button: IP-Adresse hinzufügen");
+            LogHandler.LogEvent("IpConfig", "ButtonClick", "IpAddressAdd");
             _focusNewIpAddressRequested = true;
         }
 
@@ -375,3 +378,4 @@ namespace neTiPx.Views
         }
     }
 }
+

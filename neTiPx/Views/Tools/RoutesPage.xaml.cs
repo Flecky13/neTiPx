@@ -122,7 +122,7 @@ namespace neTiPx.Views.Tools
             RoutesStatusText.Text = T("ROUTES_STATUS_LOADING");
 
             await Task.Yield();
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Routen werden geladen...");
+            LogHandler.Log(LogLevel.INFO, "Routes", "Routen werden geladen...");
             var (success, routes, error) = _networkConfigService.ReadAllPersistentRoutes();
 
             Routes.Clear();
@@ -136,12 +136,12 @@ namespace neTiPx.Views.Tools
                     Routes.Add(r);
                 }
 
-                DebugLogger.Log(LogLevel.INFO, "Routes", $"{routes.Count} Route(n) geladen");
+                LogHandler.Log(LogLevel.INFO, "Routes", $"{routes.Count} Route(n) geladen");
                 ApplyFilterAndSort();
             }
             else
             {
-                DebugLogger.Log(LogLevel.ERROR, "Routes", $"Routen laden fehlgeschlagen: {error}");
+                LogHandler.Log(LogLevel.ERROR, "Routes", $"Routen laden fehlgeschlagen: {error}");
                 RoutesStatusText.Text = error ?? T("ROUTES_STATUS_LOAD_ERROR");
             }
         }
@@ -311,7 +311,7 @@ namespace neTiPx.Views.Tools
 
         private void ClearFilter_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Routenfilter löschen");
+            LogHandler.LogEvent("Routes", "ButtonClick", "FilterClear");
             if (DestinationFilterBox != null)
             {
                 DestinationFilterBox.Text = string.Empty;
@@ -322,31 +322,31 @@ namespace neTiPx.Views.Tools
 
         private void SortDestination_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Zielnetz");
+            LogHandler.LogEvent("Routes", "ButtonClick", "SortDestination");
             ToggleSort(SortColumn.Destination);
         }
 
         private void SortSubnetMask_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Subnetzmaske");
+            LogHandler.LogEvent("Routes", "ButtonClick", "SortSubnetMask");
             ToggleSort(SortColumn.SubnetMask);
         }
 
         private void SortGateway_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Gateway");
+            LogHandler.LogEvent("Routes", "ButtonClick", "SortGateway");
             ToggleSort(SortColumn.Gateway);
         }
 
         private void SortMetric_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Sortierung Metrik");
+            LogHandler.LogEvent("Routes", "ButtonClick", "SortMetric");
             ToggleSort(SortColumn.Metric);
         }
 
         private async void RefreshRoutes_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Button: Routen neu einlesen");
+            LogHandler.LogEvent("Routes", "ButtonClick", "RoutesReload");
             await LoadRoutesAsync();
         }
 
@@ -354,6 +354,13 @@ namespace neTiPx.Views.Tools
         {
             if (sender is not Button button || button.Tag is not RouteEntry route)
                 return;
+
+            LogHandler.LogEvent("Routes", "ButtonClick", "RouteDelete", new Dictionary<string, string?>
+            {
+                ["Destination"] = route.Destination,
+                ["SubnetMask"] = route.SubnetMask,
+                ["Gateway"] = route.Gateway
+            });
 
             if (!route.CanDeleteFromSystem)
                 return;
@@ -372,11 +379,11 @@ namespace neTiPx.Views.Tools
             if (result != ContentDialogResult.Primary)
                 return;
 
-            DebugLogger.Log(LogLevel.INFO, "Routes", $"Route löschen: {route.Destination} mask {route.SubnetMask} via {route.Gateway}");
+            LogHandler.Log(LogLevel.INFO, "Routes", $"Route löschen: {route.Destination} mask {route.SubnetMask} via {route.Gateway}");
             var (success, error) = _networkConfigService.DeleteRoute(route);
             if (!success)
             {
-                DebugLogger.Log(LogLevel.ERROR, "Routes", $"Route löschen fehlgeschlagen: {error}");
+                LogHandler.Log(LogLevel.ERROR, "Routes", $"Route löschen fehlgeschlagen: {error}");
                 var errorDialog = new ContentDialog
                 {
                     Title = T("ROUTES_DIALOG_DELETE_ERROR_TITLE"),
@@ -388,7 +395,7 @@ namespace neTiPx.Views.Tools
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "Routes", "Route erfolgreich gelöscht");
+            LogHandler.Log(LogLevel.INFO, "Routes", "Route erfolgreich gelöscht");
             await LoadRoutesAsync();
         }
 
@@ -404,12 +411,20 @@ namespace neTiPx.Views.Tools
                 Metric = int.TryParse(AddMetricBox.Text?.Trim(), out var m) && m > 0 ? m : 1
             };
 
-            DebugLogger.Log(LogLevel.INFO, "Routes", $"Route hinzufügen: {route.Destination} mask {route.SubnetMask} via {route.Gateway} metric {route.Metric}");
+            LogHandler.LogEvent("Routes", "ButtonClick", "RouteAdd", new Dictionary<string, string?>
+            {
+                ["Destination"] = route.Destination,
+                ["SubnetMask"] = route.SubnetMask,
+                ["Gateway"] = route.Gateway,
+                ["Metric"] = route.Metric.ToString(CultureInfo.InvariantCulture)
+            });
+
+            LogHandler.Log(LogLevel.INFO, "Routes", $"Route hinzufügen: {route.Destination} mask {route.SubnetMask} via {route.Gateway} metric {route.Metric}");
 
             var (success, error) = _networkConfigService.AddRouteStandalone(route);
             if (!success)
             {
-                DebugLogger.Log(LogLevel.ERROR, "Routes", $"Route hinzufügen fehlgeschlagen: {error}");
+                LogHandler.Log(LogLevel.ERROR, "Routes", $"Route hinzufügen fehlgeschlagen: {error}");
                 AddStatusText.Text = error ?? T("ROUTES_ADD_ERROR_CONTENT");
                 AddStatusText.Visibility = Visibility.Visible;
                 return;
@@ -424,3 +439,4 @@ namespace neTiPx.Views.Tools
         }
     }
 }
+

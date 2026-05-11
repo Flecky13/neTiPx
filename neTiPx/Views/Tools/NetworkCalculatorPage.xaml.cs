@@ -247,7 +247,11 @@ namespace neTiPx.Views
             }
 
             var nextPrefix = Math.Min(32, currentPrefix + 1);
-            DebugLogger.Log(LogLevel.INFO, "NetCalc", $"Button: Hosts - | Prefix {currentPrefix} -> {nextPrefix}");
+            LogHandler.LogEvent("NetCalc", "ButtonClick", "HostsMinus", new Dictionary<string, string?>
+            {
+                ["CurrentPrefix"] = currentPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["NextPrefix"] = nextPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            });
             ApplyPrefixToNetworkCalcInputs(nextPrefix);
             TryCalculateNetworkAuto();
         }
@@ -260,7 +264,11 @@ namespace neTiPx.Views
             }
 
             var nextPrefix = Math.Max(0, currentPrefix - 1);
-            DebugLogger.Log(LogLevel.INFO, "NetCalc", $"Button: Hosts + | Prefix {currentPrefix} -> {nextPrefix}");
+            LogHandler.LogEvent("NetCalc", "ButtonClick", "HostsPlus", new Dictionary<string, string?>
+            {
+                ["CurrentPrefix"] = currentPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["NextPrefix"] = nextPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            });
             ApplyPrefixToNetworkCalcInputs(nextPrefix);
             TryCalculateNetworkAuto();
         }
@@ -806,3 +814,4 @@ namespace neTiPx.Views
         }
     }
 }
+

@@ -57,7 +57,7 @@ namespace neTiPx.Services
                 var ipForLog = GetIpForLog(target, resolvedIp);
                 var line = $"{protocol}: {timestamp};{domainName};{ipForLog};{response}";
                 File.AppendAllLines(filePath, new[] { line });
-                DebugLogger.Log(LogLevel.INFO, "PingLog", $"Ping-Ergebnis geloggt: {target} ({protocol}): {response}");
+                LogHandler.Log(LogLevel.INFO, "PingLog", $"Ping-Ergebnis geloggt: {target} ({protocol}): {response}");
             }
             catch
             {
@@ -67,7 +67,7 @@ namespace neTiPx.Services
 
         public void OpenLogFile(string target)
         {
-            DebugLogger.Log(LogLevel.INFO, "PingLog", $"Ping-Log öffnen: {target}");
+            LogHandler.Log(LogLevel.INFO, "PingLog", $"Ping-Log öffnen: {target}");
             var filePath = GetLogFilePath(target);
             var directory = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrWhiteSpace(directory))
@@ -100,7 +100,7 @@ namespace neTiPx.Services
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
-                    DebugLogger.Log(LogLevel.INFO, "PingLog", $"Ping-Log gelöscht: {target}");
+                    LogHandler.Log(LogLevel.INFO, "PingLog", $"Ping-Log gelöscht: {target}");
                 }
 
                 return true;
@@ -203,3 +203,4 @@ namespace neTiPx.Services
         }
     }
 }
+

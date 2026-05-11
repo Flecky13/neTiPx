@@ -106,6 +106,11 @@ namespace neTiPx.Views
         {
             var rangeInput = NetworkScanRangesTextBox.Text.Trim();
 
+            LogHandler.LogEvent("NetScan", "ButtonClick", "ScanStart", new Dictionary<string, string?>
+            {
+                ["Input"] = rangeInput
+            });
+
             NetworkScanErrorBar.IsOpen = false;
 
             if (string.IsNullOrWhiteSpace(rangeInput))
@@ -116,12 +121,12 @@ namespace neTiPx.Views
 
             if (!TryParseNetworkScanRanges(rangeInput, out var ipList, out var parseError))
             {
-                DebugLogger.Log(LogLevel.WARN, "NetScan", $"Eingabe ungültig: {parseError}");
+                LogHandler.Log(LogLevel.WARN, "NetScan", $"Eingabe ungültig: {parseError}");
                 ShowScanError(parseError ?? T("NETSCAN_ERROR_INVALID_RANGE"));
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "NetScan", $"Scan startet: Eingabe='{rangeInput}', IPs={ipList.Count}");
+            LogHandler.Log(LogLevel.INFO, "NetScan", $"Scan startet: Eingabe='{rangeInput}', IPs={ipList.Count}");
 
             // Bereiche speichern
             _networkScanStore.WriteLastScanRanges(rangeInput);
@@ -146,12 +151,12 @@ namespace neTiPx.Views
             }
             catch (OperationCanceledException)
             {
-                DebugLogger.Log(LogLevel.WARN, "NetScan", "Scan vom Benutzer abgebrochen");
+                LogHandler.Log(LogLevel.WARN, "NetScan", "Scan vom Benutzer abgebrochen");
                 NetworkScanStatusTextBlock.Text = T("NETSCAN_STATUS_CANCELED");
             }
             catch (Exception ex)
             {
-                DebugLogger.Log(LogLevel.ERROR, "NetScan", "Scan fehlgeschlagen", ex);
+                LogHandler.Log(LogLevel.ERROR, "NetScan", "Scan fehlgeschlagen", ex);
                 ShowScanError($"{T("NETSCAN_ERROR_SCAN_FAILED")}: {ex.Message}");
             }
             finally
@@ -184,7 +189,7 @@ namespace neTiPx.Views
                 var statusMsg = NetworkDevices.Count > 0
                     ? $"{T("NETSCAN_STATUS_FINISHED_FOUND")} ({NetworkDevices.Count})"
                     : T("NETSCAN_STATUS_FINISHED_NONE");
-                DebugLogger.Log(LogLevel.INFO, "NetScan", $"Scan abgeschlossen: {NetworkDevices.Count} Gerät(e) gefunden");
+                LogHandler.Log(LogLevel.INFO, "NetScan", $"Scan abgeschlossen: {NetworkDevices.Count} Gerät(e) gefunden");
                 NetworkScanStatusTextBlock.Text = statusMsg;
             });
         }
@@ -768,7 +773,11 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "NetScan", $"DoubleTap: Port-Aktion | IP='{selectedDevice.IpAddress}' PortInfo='{portInfo}'");
+            LogHandler.LogEvent("NetScan", "DoubleTapped", "PortAction", new Dictionary<string, string?>
+            {
+                ["Ip"] = selectedDevice.IpAddress,
+                ["PortInfo"] = portInfo
+            });
 
             OpenPortConnection(selectedDevice.IpAddress, portInfo);
         }
@@ -858,7 +867,10 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "NetScan", $"Button: Sortierung | Spalte='{column}'");
+            LogHandler.LogEvent("NetScan", "ButtonClick", "Sort", new Dictionary<string, string?>
+            {
+                ["Column"] = column
+            });
 
             if (string.Equals(_networkScanSortColumn, column, StringComparison.OrdinalIgnoreCase))
             {
@@ -963,3 +975,4 @@ namespace neTiPx.Views
         }
     }
 }
+

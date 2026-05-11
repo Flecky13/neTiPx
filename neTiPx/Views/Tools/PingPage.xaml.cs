@@ -255,14 +255,19 @@ namespace neTiPx.Views
                 return;
             }
 
+            LogHandler.LogEvent("Ping", "ButtonClick", "AddTarget", new Dictionary<string, string?>
+            {
+                ["Target"] = target
+            });
+
             if (PingTargets.Any(p => p.Target.Equals(target, StringComparison.OrdinalIgnoreCase)))
             {
-                DebugLogger.Log(LogLevel.WARN, "Ping", $"Ziel bereits vorhanden, kein Duplikat: {target}");
+                LogHandler.Log(LogLevel.WARN, "Ping", $"Ziel bereits vorhanden, kein Duplikat: {target}");
                 return;
             }
 
             var intervalSeconds = (int)PingIntervalNumberBox.Value;
-            DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel hinzugefügt: {target}, Intervall: {intervalSeconds}s");
+            LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel hinzugefügt: {target}, Intervall: {intervalSeconds}s");
             var pingTarget = new PingTarget
             {
                 Target = target,
@@ -287,15 +292,19 @@ namespace neTiPx.Views
         {
             if (sender is Button button && button.Tag is PingTarget target)
             {
-                DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel löschen angefordert: {target.Target}");
+                LogHandler.LogEvent("Ping", "ButtonClick", "DeleteTarget", new Dictionary<string, string?>
+                {
+                    ["Target"] = target.Target
+                });
+                LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel löschen angefordert: {target.Target}");
                 var deleteConfirmed = await ConfirmLogDeleteActionAsync(target);
                 if (!deleteConfirmed)
                 {
-                    DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel löschen abgebrochen: {target.Target}");
+                    LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel löschen abgebrochen: {target.Target}");
                     return;
                 }
 
-                DebugLogger.Log(LogLevel.INFO, "Ping", $"Ziel gelöscht: {target.Target}");
+                LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel gelöscht: {target.Target}");
 
                 if (_pingTimers.TryGetValue(target, out var cts))
                 {
@@ -477,8 +486,13 @@ namespace neTiPx.Views
             }
 
             var isEnabled = checkBox.IsChecked == true;
+            LogHandler.LogEvent("Ping", "ButtonClick", "TargetPingToggle", new Dictionary<string, string?>
+            {
+                ["Target"] = target.Target,
+                ["Enabled"] = isEnabled ? "true" : "false"
+            });
             target.IsPingEnabled = isEnabled;
-            DebugLogger.Log(LogLevel.INFO, "Ping", $"Ping {(isEnabled ? "aktiviert" : "deaktiviert")}: {target.Target}");
+            LogHandler.Log(LogLevel.INFO, "Ping", $"Ping {(isEnabled ? "aktiviert" : "deaktiviert")}: {target.Target}");
 
             if (isEnabled)
             {
@@ -501,7 +515,11 @@ namespace neTiPx.Views
             }
 
             var isActive = checkBox.IsChecked == true;
-            DebugLogger.Log(LogLevel.INFO, "Ping", $"Hintergrund-Ping {(isActive ? "aktiviert" : "deaktiviert")}");
+            LogHandler.LogEvent("Ping", "ButtonClick", "BackgroundPingToggle", new Dictionary<string, string?>
+            {
+                ["Enabled"] = isActive ? "true" : "false"
+            });
+            LogHandler.Log(LogLevel.INFO, "Ping", $"Hintergrund-Ping {(isActive ? "aktiviert" : "deaktiviert")}");
             _settingsService.SetPingBackgroundActive(isActive);
             UpdatePingingState();
         }
@@ -542,7 +560,10 @@ namespace neTiPx.Views
 
             try
             {
-                DebugLogger.Log(LogLevel.INFO, "Ping", $"Button: Ping-Log öffnen | Ziel='{target.Target}'");
+                LogHandler.LogEvent("Ping", "ButtonClick", "OpenPingLog", new Dictionary<string, string?>
+                {
+                    ["Target"] = target.Target
+                });
                 _pingLogService.OpenLogFile(target.Target);
             }
             catch
@@ -765,3 +786,4 @@ namespace neTiPx.Views
         }
     }
 }
+

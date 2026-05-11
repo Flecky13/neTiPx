@@ -50,7 +50,7 @@ namespace neTiPx.Services
 
         public void SaveProfile(IpProfile profile, string? previousName)
         {
-            DebugLogger.Log(LogLevel.INFO, "IpProfileStore", $"Profil speichern: '{profile.Name}' (vorher: '{previousName ?? "<neu>"}')");
+            LogHandler.Log(LogLevel.INFO, "IpProfileStore", $"Profil speichern: '{profile.Name}' (vorher: '{previousName ?? "<neu>"}')");
             var profiles = ReadAllProfiles();
 
             if (!string.IsNullOrWhiteSpace(previousName) &&
@@ -78,7 +78,7 @@ namespace neTiPx.Services
 
         public void RemoveProfile(string profileName)
         {
-            DebugLogger.Log(LogLevel.INFO, "IpProfileStore", $"Profil löschen: '{profileName}'");
+            LogHandler.Log(LogLevel.INFO, "IpProfileStore", $"Profil löschen: '{profileName}'");
             var profiles = ReadAllProfiles();
             profiles = profiles
                 .Where(p => !string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase))
@@ -395,3 +395,4 @@ namespace neTiPx.Services
         }
     }
 }
+

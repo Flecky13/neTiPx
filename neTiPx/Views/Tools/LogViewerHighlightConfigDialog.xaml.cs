@@ -63,7 +63,10 @@ namespace neTiPx.Views
         private void AddRuleButton_Click(object sender, RoutedEventArgs e)
         {
             var defaultColorKey = ColorOptions.FirstOrDefault()?.Key ?? "red";
-            DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Button: Highlight-Regel hinzufügen | Standardfarbe='{defaultColorKey}'");
+            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRuleAdd", new Dictionary<string, string?>
+            {
+                ["DefaultColor"] = defaultColorKey
+            });
             Rules.Add(new LogViewerHighlightRule
             {
                 SearchText = string.Empty,
@@ -75,24 +78,29 @@ namespace neTiPx.Views
         {
             if ((sender as FrameworkElement)?.Tag is LogViewerHighlightRule rule)
             {
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Button: Highlight-Regel entfernen | Suchtext='{rule.SearchText}' Farbe='{rule.ColorKey}'");
+                LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRuleRemove", new Dictionary<string, string?>
+                {
+                    ["SearchText"] = rule.SearchText,
+                    ["Color"] = rule.ColorKey
+                });
                 Rules.Remove(rule);
             }
         }
 
         private async void ExportRulesButton_Click(object sender, RoutedEventArgs e)
         {
+            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRulesExport");
             try
             {
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln exportieren: Dialog öffnen");
+                LogHandler.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln exportieren: Dialog öffnen");
 
                 var hwnd = App.MainWindow != null
                     ? WindowHelper.GetWindowHandle(App.MainWindow)
                     : IntPtr.Zero;
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Export HWND={hwnd}");
+                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Export HWND={hwnd}");
                 if (hwnd == IntPtr.Zero)
                 {
-                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
                     return;
                 }
 
@@ -101,7 +109,7 @@ namespace neTiPx.Views
                 var selected = FileDialogHelper.TrySaveFile(hwnd, T("LOGVIEWER_HIGHLIGHT_EXPORT"), filter, "json", suggestedFileName, out var savePath);
                 if (!selected)
                 {
-                    DebugLogger.Log(LogLevel.INFO, "LogViewer", "Export abgebrochen");
+                    LogHandler.Log(LogLevel.INFO, "LogViewer", "Export abgebrochen");
                     return;
                 }
 
@@ -115,27 +123,28 @@ namespace neTiPx.Views
 
                 var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
                 await File.WriteAllTextAsync(savePath, json);
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln exportiert nach: {savePath} ({payload.Count} Regel(n))");
+                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln exportiert nach: {savePath} ({payload.Count} Regel(n))");
             }
             catch (Exception ex)
             {
-                DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen", ex);
+                LogHandler.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen", ex);
             }
         }
 
         private async void ImportRulesButton_Click(object sender, RoutedEventArgs e)
         {
+            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRulesImport");
             try
             {
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln importieren: Dialog öffnen");
+                LogHandler.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln importieren: Dialog öffnen");
 
                 var hwnd = App.MainWindow != null
                     ? WindowHelper.GetWindowHandle(App.MainWindow)
                     : IntPtr.Zero;
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Import HWND={hwnd}");
+                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Import HWND={hwnd}");
                 if (hwnd == IntPtr.Zero)
                 {
-                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
                     return;
                 }
 
@@ -143,11 +152,11 @@ namespace neTiPx.Views
                 var selected = FileDialogHelper.TryOpenFile(hwnd, T("LOGVIEWER_HIGHLIGHT_IMPORT"), filter, out var importPath);
                 if (!selected)
                 {
-                    DebugLogger.Log(LogLevel.INFO, "LogViewer", "Import abgebrochen");
+                    LogHandler.Log(LogLevel.INFO, "LogViewer", "Import abgebrochen");
                     return;
                 }
 
-                DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Import Datei: {importPath}");
+                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Import Datei: {importPath}");
 
                 try
                 {
@@ -163,16 +172,16 @@ namespace neTiPx.Views
                             ColorKey = string.IsNullOrWhiteSpace(rule.ColorKey) ? "red" : rule.ColorKey
                         });
                     }
-                    DebugLogger.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln importiert: {Rules.Count} Regel(n)");
+                    LogHandler.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln importiert: {Rules.Count} Regel(n)");
                 }
                 catch (Exception parseEx)
                 {
-                    DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Import JSON-Parsing fehlgeschlagen", parseEx);
+                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Import JSON-Parsing fehlgeschlagen", parseEx);
                 }
             }
             catch (Exception ex)
             {
-                DebugLogger.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen", ex);
+                LogHandler.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen", ex);
             }
         }
     }
@@ -197,3 +206,4 @@ namespace neTiPx.Views
         public string ColorKey { get; set; } = "red";
     }
 }
+

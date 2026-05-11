@@ -40,7 +40,10 @@ namespace neTiPx.ViewModels
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             AppVersion = version == null ? T("INFO_UNKNOWN") : version.ToString(4);
-            DebugLogger.Log(LogLevel.INFO, "Info", $"InfoViewModel initialisiert | aktuelle Version: {AppVersion}");
+            LogHandler.LogEvent("Info", "PageInit", "CurrentVersion", new System.Collections.Generic.Dictionary<string, string?>
+            {
+                ["Version"] = AppVersion
+            });
             _latestVersion = T("INFO_STATUS_NOT_CHECKED");
             _updateStatus = T("INFO_STATUS_NOT_CHECKED");
 
@@ -115,7 +118,10 @@ namespace neTiPx.ViewModels
 
         private async void CheckForUpdate()
         {
-            DebugLogger.Log(LogLevel.INFO, "Info", $"Versionspruefung gestartet | aktuelle Version: {AppVersion}");
+            LogHandler.LogEvent("Info", "ButtonClick", "CheckForUpdate", new System.Collections.Generic.Dictionary<string, string?>
+            {
+                ["CurrentVersion"] = AppVersion
+            });
             UpdateStatus = T("INFO_STATUS_CHECKING");
             UpdateStatusKind = GatewayStatusKind.Warning;
 
@@ -127,7 +133,7 @@ namespace neTiPx.ViewModels
                     IsUpdateAvailable = false;
                     UpdateStatus = T("INFO_STATUS_NO_RELEASE_INFO");
                     UpdateStatusKind = GatewayStatusKind.Bad;
-                    DebugLogger.Log(LogLevel.WARN, "Info", "Versionspruefung ohne Release-Info beendet");
+                    LogHandler.Log(LogLevel.WARN, "Info", "Versionspruefung ohne Release-Info beendet");
                     return;
                 }
 
@@ -147,14 +153,14 @@ namespace neTiPx.ViewModels
                     IsUpdateAvailable = true;
                     UpdateStatus = T("INFO_STATUS_UPDATE_AVAILABLE");
                     UpdateStatusKind = GatewayStatusKind.Good;
-                    DebugLogger.Log(LogLevel.INFO, "Info", $"Update verfuegbar | installiert: {currentVersion} | latest: {latestVersion} | url: {LatestReleaseUrl}");
+                    LogHandler.Log(LogLevel.INFO, "Info", $"Update verfuegbar | installiert: {currentVersion} | latest: {latestVersion} | url: {LatestReleaseUrl}");
                 }
                 else
                 {
                     IsUpdateAvailable = false;
                     UpdateStatus = T("INFO_STATUS_UP_TO_DATE");
                     UpdateStatusKind = GatewayStatusKind.Good;
-                    DebugLogger.Log(LogLevel.INFO, "Info", $"Kein Update erforderlich | installiert: {currentVersion} | latest: {latestVersion}");
+                    LogHandler.Log(LogLevel.INFO, "Info", $"Kein Update erforderlich | installiert: {currentVersion} | latest: {latestVersion}");
                 }
             }
             catch (Exception ex)
@@ -162,7 +168,7 @@ namespace neTiPx.ViewModels
                 IsUpdateAvailable = false;
                 UpdateStatus = T("INFO_STATUS_CHECK_FAILED");
                 UpdateStatusKind = GatewayStatusKind.Bad;
-                DebugLogger.Log(LogLevel.ERROR, "Info", "Versionspruefung fehlgeschlagen", ex);
+                LogHandler.Log(LogLevel.ERROR, "Info", "Versionspruefung fehlgeschlagen", ex);
                 Debug.WriteLine($"Update check failed: {ex}");
             }
         }
@@ -174,11 +180,11 @@ namespace neTiPx.ViewModels
 
         private async void InstallUpdate()
         {
-            DebugLogger.Log(LogLevel.INFO, "Info", "Update-Installation gestartet");
+            LogHandler.LogEvent("Info", "ButtonClick", "InstallUpdate");
             if (string.IsNullOrWhiteSpace(_setupDownloadUrl))
             {
                 // Fallback: Öffne Release-Seite
-                DebugLogger.Log(LogLevel.WARN, "Info", "Keine Setup-URL vorhanden, oeffne Release-Seite");
+                LogHandler.Log(LogLevel.WARN, "Info", "Keine Setup-URL vorhanden, oeffne Release-Seite");
                 OpenUrl(LatestReleaseUrl);
                 return;
             }
@@ -203,7 +209,7 @@ namespace neTiPx.ViewModels
                     }
                 }
 
-                DebugLogger.Log(LogLevel.INFO, "Info", $"Setup heruntergeladen: {setupFilePath}");
+                LogHandler.Log(LogLevel.INFO, "Info", $"Setup heruntergeladen: {setupFilePath}");
 
                 UpdateStatus = T("INFO_STATUS_STARTING_INSTALL");
 
@@ -216,14 +222,14 @@ namespace neTiPx.ViewModels
 
                 // Beende die Anwendung
                 await Task.Delay(500); // Kurze Verzögerung, damit Setup starten kann
-                DebugLogger.Log(LogLevel.INFO, "Info", "Anwendung wird fuer Update-Installation beendet");
+                LogHandler.Log(LogLevel.INFO, "Info", "Anwendung wird fuer Update-Installation beendet");
                 Environment.Exit(0);
             }
             catch (Exception ex)
             {
                 UpdateStatus = T("INFO_STATUS_DOWNLOAD_FAILED_OPENING_RELEASE");
                 UpdateStatusKind = GatewayStatusKind.Bad;
-                DebugLogger.Log(LogLevel.ERROR, "Info", "Download/Installation fehlgeschlagen, fallback auf Release-Seite", ex);
+                LogHandler.Log(LogLevel.ERROR, "Info", "Download/Installation fehlgeschlagen, fallback auf Release-Seite", ex);
                 Debug.WriteLine($"Failed to download/install update: {ex}");
 
                 // Fallback: Öffne Release-Seite
@@ -234,13 +240,13 @@ namespace neTiPx.ViewModels
 
         private void ShowChangelog()
         {
-            DebugLogger.Log(LogLevel.INFO, "Info", "Button: Changelog/Release geoeffnet");
+            LogHandler.LogEvent("Info", "ButtonClick", "ShowChangelog");
             OpenUrl(ReleasesUrl);
         }
 
         private void ShowHelp()
         {
-            DebugLogger.Log(LogLevel.INFO, "Info", "Button: Hilfe geoeffnet");
+            LogHandler.LogEvent("Info", "ButtonClick", "ShowHelp");
             OpenUrl(new Uri(ReadmeUrl));
         }
 
@@ -403,3 +409,4 @@ namespace neTiPx.ViewModels
         }
     }
 }
+

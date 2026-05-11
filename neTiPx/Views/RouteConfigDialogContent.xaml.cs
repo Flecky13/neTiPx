@@ -199,7 +199,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "RouteConfig", "Button: Profil-Route hinzufügen");
+            LogHandler.LogEvent("RouteConfig", "ButtonClick", "ProfileRouteAdd");
 
             Routes.Add(new RouteEntry { Metric = 1 });
             OnPropertyChanged(nameof(CanAddRoute));
@@ -212,7 +212,12 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "RouteConfig", $"Button: Profil-Route entfernen | Ziel='{route.Destination}' Maske='{route.SubnetMask}' Gateway='{route.Gateway}'");
+            LogHandler.LogEvent("RouteConfig", "ButtonClick", "ProfileRouteRemove", new Dictionary<string, string?>
+            {
+                ["Destination"] = route.Destination,
+                ["SubnetMask"] = route.SubnetMask,
+                ["Gateway"] = route.Gateway
+            });
 
             bool hasContent = !string.IsNullOrWhiteSpace(route.Destination)
                 || !string.IsNullOrWhiteSpace(route.SubnetMask)
@@ -263,7 +268,13 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "RouteConfig", $"Button: Profil-Route anwenden | Ziel='{route.Destination}' Maske='{route.SubnetMask}' Gateway='{route.Gateway}' Metric={route.Metric}");
+            LogHandler.LogEvent("RouteConfig", "ButtonClick", "ProfileRouteApply", new Dictionary<string, string?>
+            {
+                ["Destination"] = route.Destination,
+                ["SubnetMask"] = route.SubnetMask,
+                ["Gateway"] = route.Gateway,
+                ["Metric"] = route.Metric.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            });
 
             if (_addRouteToSystem == null)
             {
@@ -311,7 +322,7 @@ namespace neTiPx.Views
 
         private async void ReloadSystemRoutes_Click(object sender, RoutedEventArgs e)
         {
-            DebugLogger.Log(LogLevel.INFO, "RouteConfig", "Button: Systemrouten neu einlesen");
+            LogHandler.LogEvent("RouteConfig", "ButtonClick", "SystemRoutesReload");
             await ReloadSystemRoutesInternalAsync(showErrorDialog: true);
         }
 
@@ -373,7 +384,12 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "RouteConfig", $"Button: Systemroute entfernen | Ziel='{route.Destination}' Maske='{route.SubnetMask}' Gateway='{route.Gateway}'");
+            LogHandler.LogEvent("RouteConfig", "ButtonClick", "SystemRouteRemove", new Dictionary<string, string?>
+            {
+                ["Destination"] = route.Destination,
+                ["SubnetMask"] = route.SubnetMask,
+                ["Gateway"] = route.Gateway
+            });
 
             if (_deleteRouteFromSystem == null)
             {
@@ -516,3 +532,4 @@ namespace neTiPx.Views
         }
     }
 }
+

@@ -114,7 +114,10 @@ namespace neTiPx.Views
                 return;
             }
 
-            DebugLogger.Log(LogLevel.INFO, "WLAN", $"Button: WLAN-Sortierung | Spalte='{column}'");
+            LogHandler.LogEvent("WLAN", "ButtonClick", "Sort", new Dictionary<string, string?>
+            {
+                ["Column"] = column
+            });
 
             if (string.Equals(_wifiSortColumn, column, StringComparison.OrdinalIgnoreCase))
             {
@@ -276,3 +279,4 @@ namespace neTiPx.Views
         }
     }
 }
+
