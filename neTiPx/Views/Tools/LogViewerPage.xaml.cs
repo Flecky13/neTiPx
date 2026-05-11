@@ -54,13 +54,14 @@ namespace neTiPx.Views
 
         private static string T(string key) => _lm.Lang(key);
 
-        private void LogViewerPage_Loaded(object sender, RoutedEventArgs e)
+        private async void LogViewerPage_Loaded(object sender, RoutedEventArgs e)
         {
             _lm.LanguageChanged -= OnLanguageChanged;
             _lm.LanguageChanged += OnLanguageChanged;
             EnsureLogListScrollViewer();
             LoadHighlightRules();
             LoadRecentFiles();
+            await RestoreLastSelectedFileAsync();
             UpdateLanguage();
             UpdateMatchInfo();
         }
@@ -763,6 +764,42 @@ namespace neTiPx.Views
             RefreshRecentFileDisplayTexts();
         }
 
+        private async Task RestoreLastSelectedFileAsync()
+        {
+            var lastSelectedPath = _logViewerStore.ReadLastSelectedFile();
+            if (string.IsNullOrWhiteSpace(lastSelectedPath))
+            {
+                lastSelectedPath = RecentFiles.FirstOrDefault()?.FullPath ?? string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(lastSelectedPath))
+            {
+                return;
+            }
+
+            if (!File.Exists(lastSelectedPath))
+            {
+                SelectRecentFile(lastSelectedPath);
+                return;
+            }
+
+            if (!RecentFiles.Any(entry => string.Equals(entry.FullPath, lastSelectedPath, StringComparison.OrdinalIgnoreCase)))
+            {
+                AddRecentFile(lastSelectedPath);
+            }
+            else
+            {
+                SelectRecentFile(lastSelectedPath);
+            }
+
+            if (string.Equals(_currentFilePath, lastSelectedPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            await LoadFileAsync(lastSelectedPath, forceStatusMessage: false, scrollToEnd: false);
+        }
+
         private void LoadHighlightRules()
         {
             HighlightRules.Clear();
@@ -796,7 +833,7 @@ namespace neTiPx.Views
                 RecentFiles.RemoveAt(RecentFiles.Count - 1);
             }
 
-            _logViewerStore.WriteRecentFiles(RecentFiles.Select(entry => entry.FullPath));
+            _logViewerStore.WriteRecentFiles(RecentFiles.Select(entry => entry.FullPath), filePath);
             RefreshRecentFileDisplayTexts();
             SelectRecentFile(filePath);
         }
