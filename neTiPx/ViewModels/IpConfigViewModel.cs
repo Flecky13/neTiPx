@@ -53,6 +53,7 @@ namespace neTiPx.ViewModels
         private bool _dns1HasValidationError;
         private bool _dns2HasValidationError;
         private string? _selectedProfilePersistedName;
+        private string _selectedProfileBaseline = string.Empty;
 
         public event Action<int>? IpAddressAdded;
 
@@ -121,8 +122,24 @@ namespace neTiPx.ViewModels
                         ClearIpAddressValidationFlags(_selectedProfile);
                         UpdateIpAddressRemoveState(_selectedProfile);
                         AttachProfileHandlers(_selectedProfile);
-                        EnsureLinkedUncProfileSelection(_selectedProfile);
-                        LoadProfileSettingsOnProfileChangeAsync().ConfigureAwait(false);
+                        // Load profile with loading flag set to prevent PropertyChanged events from marking dirty
+                        _isLoadingProfile = true;
+                        try
+                        {
+                            EnsureLinkedUncProfileSelection(_selectedProfile);
+                            LoadProfileSettingsOnProfileChange(_selectedProfile);
+                        }
+                        finally
+                        {
+                            _isLoadingProfile = false;
+                        }
+
+                        _selectedProfileBaseline = BuildProfileFingerprint(_selectedProfile);
+                        _selectedProfile.IsDirty = false;
+                    }
+                    else
+                    {
+                        _selectedProfileBaseline = string.Empty;
                     }
 
                     OnPropertyChanged(nameof(IsProfileSelected));
@@ -297,7 +314,48 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            SelectedProfile.IsDirty = true;
+            SelectedProfile.IsDirty = !string.Equals(
+                BuildProfileFingerprint(SelectedProfile),
+                _selectedProfileBaseline,
+                StringComparison.Ordinal);
+        }
+
+        private static string NormalizeDirtyValue(string? value)
+        {
+            return value?.Trim() ?? string.Empty;
+        }
+
+        private string BuildProfileFingerprint(IpProfile profile)
+        {
+            var ipParts = profile.IpAddresses
+                .Select(entry => $"{NormalizeDirtyValue(entry.IpAddress)}|{NormalizeDirtyValue(entry.SubnetMask)}")
+                .Where(part => !string.Equals(part, "|", StringComparison.Ordinal))
+                .ToArray();
+
+            var routeParts = profile.Routes
+                .Where(route =>
+                    !string.IsNullOrWhiteSpace(route.Destination) ||
+                    !string.IsNullOrWhiteSpace(route.SubnetMask) ||
+                    !string.IsNullOrWhiteSpace(route.Gateway) ||
+                    route.Metric > 0)
+                .Select(route =>
+                    $"{NormalizeDirtyValue(route.Destination)}|{NormalizeDirtyValue(route.SubnetMask)}|{NormalizeDirtyValue(route.Gateway)}|{route.Metric}")
+                .ToArray();
+
+            return string.Join("§", new[]
+            {
+                NormalizeDirtyValue(profile.Name),
+                NormalizeMode(profile.Mode),
+                NormalizeDirtyValue(NormalizeAdapterName(profile.AdapterName)),
+                NormalizeDirtyValue(profile.Gateway),
+                NormalizeDirtyValue(profile.Dns1),
+                NormalizeDirtyValue(profile.Dns2),
+                profile.RoutesEnabled ? "1" : "0",
+                profile.AddRoutesOnApply ? "1" : "0",
+                NormalizeDirtyValue(profile.LinkedUncProfileName).ToLowerInvariant(),
+                string.Join(";", ipParts),
+                string.Join(";", routeParts)
+            });
         }
 
         public bool SaveCurrentProfileForProfileSwitch()
@@ -316,6 +374,7 @@ namespace neTiPx.ViewModels
             _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
             _selectedProfilePersistedName = SelectedProfile.Name;
             SelectedProfile.IsDirty = false;
+            _selectedProfileBaseline = BuildProfileFingerprint(SelectedProfile);
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             return true;
         }
@@ -325,91 +384,81 @@ namespace neTiPx.ViewModels
             if (SelectedProfile != null)
             {
                 SelectedProfile.IsDirty = false;
+                _selectedProfileBaseline = BuildProfileFingerprint(SelectedProfile);
             }
         }
 
-        private Task LoadProfileSettingsOnProfileChangeAsync()
+        private void LoadProfileSettingsOnProfileChange(IpProfile profile)
         {
-            if (SelectedProfile == null)
+            if (profile == null)
             {
-                return Task.CompletedTask;
+                return;
             }
 
-            try
+            // Always load profile from XML first
+            if (!_ipProfileStore.TryGetProfile(profile.Name, out var storedProfile))
             {
-                _isLoadingProfile = true;
+                return;
+            }
 
-                // Always load profile from XML first
-                if (!_ipProfileStore.TryGetProfile(SelectedProfile.Name, out var storedProfile))
+            // Copy mode and basic settings from XML
+            profile.Mode = storedProfile.Mode;
+            profile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
+            profile.RoutesEnabled = storedProfile.RoutesEnabled;
+            profile.AddRoutesOnApply = storedProfile.AddRoutesOnApply;
+            profile.LinkedUncProfileName = storedProfile.LinkedUncProfileName;
+            profile.Routes.Clear();
+            foreach (var route in storedProfile.Routes)
+            {
+                profile.Routes.Add(new RouteEntry
                 {
-                    return Task.CompletedTask;
-                }
+                    Destination = route.Destination,
+                    SubnetMask = route.SubnetMask,
+                    Gateway = route.Gateway,
+                    Metric = route.Metric > 0 ? route.Metric : 1
+                });
+            }
 
-                // Copy mode and basic settings from XML
-                SelectedProfile.Mode = storedProfile.Mode;
-                SelectedProfile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
-                SelectedProfile.RoutesEnabled = storedProfile.RoutesEnabled;
-                SelectedProfile.AddRoutesOnApply = storedProfile.AddRoutesOnApply;
-                SelectedProfile.LinkedUncProfileName = storedProfile.LinkedUncProfileName;
-                SelectedProfile.Routes.Clear();
-                foreach (var route in storedProfile.Routes)
-                {
-                    SelectedProfile.Routes.Add(new RouteEntry
-                    {
-                        Destination = route.Destination,
-                        SubnetMask = route.SubnetMask,
-                        Gateway = route.Gateway,
-                        Metric = route.Metric > 0 ? route.Metric : 1
-                    });
-                }
-
-                // If mode is DHCP, load remaining settings from NIC
-                if (string.Equals(storedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
-                {
-                    var nicLoaded = LoadProfileFromNic(SelectedProfile);
-                    ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
-                    HasValidationErrors = false;
-                    SelectedProfile.IsDirty = false;
-                    return Task.CompletedTask;
-                }
-
-                // If mode is Manual, load remaining settings from XML
-                SelectedProfile.Gateway = storedProfile.Gateway;
-                SelectedProfile.Dns1 = storedProfile.Dns1;
-                SelectedProfile.Dns2 = storedProfile.Dns2;
-
-                SelectedProfile.IpAddresses.Clear();
-                foreach (var entry in storedProfile.IpAddresses)
-                {
-                    SelectedProfile.IpAddresses.Add(new IpAddressEntry
-                    {
-                        IpAddress = entry.IpAddress,
-                        SubnetMask = entry.SubnetMask
-                    });
-                }
-
-                if (SelectedProfile.IpAddresses.Count == 0)
-                {
-                    SelectedProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
-                }
-
-                ValidationMessage = T("IPCONFIG_MSG_CONFIGURATION_READ");
+            // If mode is DHCP, load remaining settings from NIC
+            if (string.Equals(storedProfile.Mode, "DHCP", StringComparison.OrdinalIgnoreCase))
+            {
+                var nicLoaded = LoadProfileFromNic(profile);
+                ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
                 HasValidationErrors = false;
-                SelectedProfile.IsDirty = false;
-                EnsureLinkedUncProfileSelection(SelectedProfile);
-                return Task.CompletedTask;
+                profile.IsDirty = false;
+                return;
             }
-            finally
+
+            // If mode is Manual, load remaining settings from XML
+            profile.Gateway = storedProfile.Gateway;
+            profile.Dns1 = storedProfile.Dns1;
+            profile.Dns2 = storedProfile.Dns2;
+
+            profile.IpAddresses.Clear();
+            foreach (var entry in storedProfile.IpAddresses)
             {
-                _isLoadingProfile = false;
+                profile.IpAddresses.Add(new IpAddressEntry
+                {
+                    IpAddress = entry.IpAddress,
+                    SubnetMask = entry.SubnetMask
+                });
             }
+
+            if (profile.IpAddresses.Count == 0)
+            {
+                profile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
+            }
+
+            ValidationMessage = T("IPCONFIG_MSG_CONFIGURATION_READ");
+            HasValidationErrors = false;
+            profile.IsDirty = false;
         }
 
-        private Task ReloadProfileFromNicAsync()
+        private void ReloadProfileFromNic()
         {
             if (SelectedProfile == null || string.IsNullOrWhiteSpace(SelectedProfile.AdapterName))
             {
-                return Task.CompletedTask;
+                return;
             }
 
             try
@@ -420,7 +469,6 @@ namespace neTiPx.ViewModels
                 var nicLoaded = LoadProfileFromNic(SelectedProfile);
                 ValidationMessage = nicLoaded ? T("IPCONFIG_MSG_SETTINGS_READ") : T("IPCONFIG_MSG_NO_SETTINGS");
                 HasValidationErrors = false;
-                return Task.CompletedTask;
             }
             finally
             {
@@ -945,6 +993,7 @@ namespace neTiPx.ViewModels
 
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             SelectedProfile.IsDirty = false;
+            _selectedProfileBaseline = BuildProfileFingerprint(SelectedProfile);
             LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
         }
 
@@ -1006,7 +1055,7 @@ namespace neTiPx.ViewModels
                 LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{profile.Name}'");
 
                 // After apply: load fresh settings from NIC and save
-                await ReloadProfileFromNicAsync();
+                ReloadProfileFromNic();
                 SaveProfile();
                 profile.IsDirty = false;
 
@@ -1900,5 +1949,3 @@ namespace neTiPx.ViewModels
         }
     }
 }
-
-

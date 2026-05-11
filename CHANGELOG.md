@@ -4,8 +4,11 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-
 ## [1.7.2.0]
+
+### Fixed
+- **IP-Konfiguration / Profil-Auswahl**: Ungültiger isDirty-Status behoben, der beim Öffnen eines IP-Profils fälschlicherweise das Profil als nicht gespeichert markierte. Das Problem trat auf, weil `EnsureLinkedUncProfileSelection()` aufgerufen wurde, während `_isLoadingProfile` noch `false` war.
+
 ### Changed
 - **Infrastruktur / Logging**: Vollständige Zentralisierung aller Anwendungs-Logging durch `LogHandler.cs`. Alle Logs (aus Views, ViewModels, Services) werden jetzt über einen einheitlichen Handler mit semantischer Kategorisierung (`USER_EVENT`, `SYSTEM_EVENT`, `ERROR_EVENT`) an `DebugLogger` weitergeleitet.
 - **Infrastruktur / Logging / API**: Deprecated Alias-Methoden `Log(...)` und `LogEvent(...)` aus `LogHandler.cs` entfernt. Alle Call-Sites verwenden jetzt explizite Methoden wie `LogUserEvent(...)`, `LogSystemEvent(...)`, `LogErrorEvent(...)` und `LogSystemMessage(...)`.
