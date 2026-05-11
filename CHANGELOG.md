@@ -4,9 +4,12 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.7.2.0]
 
+## [1.7.2.0]
 ### Changed
+- **Infrastruktur / Logging**: Vollständige Zentralisierung aller Anwendungs-Logging durch `LogHandler.cs`. Alle Logs (aus Views, ViewModels, Services) werden jetzt über einen einheitlichen Handler mit semantischer Kategorisierung (`USER_EVENT`, `SYSTEM_EVENT`, `ERROR_EVENT`) an `DebugLogger` weitergeleitet.
+- **Infrastruktur / Logging / API**: Deprecated Alias-Methoden `Log(...)` und `LogEvent(...)` aus `LogHandler.cs` entfernt. Alle Call-Sites verwenden jetzt explizite Methoden wie `LogUserEvent(...)`, `LogSystemEvent(...)`, `LogErrorEvent(...)` und `LogSystemMessage(...)`.
+- **Infrastruktur / Logging / Event-Namen**: Alle Log-Event-Namen standardisiert als Konstanten (`EventMessage`, `EventException`, `EventError`) in `LogHandler.cs`.
 - **Lokalisierung / Paketinhalt**: `lang/ch.json` korrigiert.
 - **Lokalisierung / Paketinhalt**: `lang/test.json` wird nicht mehr als Content bzw. None ins App-Paket aufgenommen, damit Testdateien nicht ausgeliefert werden.
 
