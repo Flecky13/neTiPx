@@ -816,7 +816,7 @@ namespace neTiPx.ViewModels
                 ["Profile"] = profile.Name
             });
 
-            LogHandler.Log(LogLevel.INFO, "IpConfig", $"Profil löschen: '{profile.Name}'");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil löschen: '{profile.Name}'");
 
             var index = IpProfiles.IndexOf(profile);
             IpProfiles.Remove(profile);
@@ -935,17 +935,17 @@ namespace neTiPx.ViewModels
             ValidateProfile(true);
             if (HasValidationErrors)
             {
-                LogHandler.Log(LogLevel.WARN, "IpConfig", $"Profil speichern abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil speichern abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
                 return;
             }
 
-            LogHandler.Log(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
             _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
             _selectedProfilePersistedName = SelectedProfile.Name;
 
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             SelectedProfile.IsDirty = false;
-            LogHandler.Log(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
         }
 
         private bool CanApplyProfile()
@@ -979,11 +979,11 @@ namespace neTiPx.ViewModels
             ValidateProfile(true);
             if (HasValidationErrors)
             {
-                LogHandler.Log(LogLevel.WARN, "IpConfig", $"Profil anwenden abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil anwenden abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
                 return;
             }
 
-            LogHandler.Log(LogLevel.INFO, "IpConfig", $"Profil anwenden: '{SelectedProfile.Name}', Adapter='{SelectedProfile.AdapterName}', Modus='{SelectedProfile.Mode}'");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil anwenden: '{SelectedProfile.Name}', Adapter='{SelectedProfile.AdapterName}', Modus='{SelectedProfile.Mode}'");
 
             _isApplyingProfile = true;
             RefreshActionButtonsState();
@@ -995,7 +995,7 @@ namespace neTiPx.ViewModels
                 var (success, error) = await Task.Run(() => _networkService.ApplyProfile(profile));
                 if (!success)
                 {
-                    LogHandler.Log(LogLevel.ERROR, "IpConfig", $"Profil anwenden fehlgeschlagen: {error}");
+                    LogHandler.LogErrorMessage("IpConfig", $"Profil anwenden fehlgeschlagen: {error}");
                     ValidationMessage = error ?? T("IPCONFIG_MSG_APPLY_ERROR");
                     HasValidationErrors = true;
                     GatewayStatusText = T("ADAPTER_STA_Error");
@@ -1003,7 +1003,7 @@ namespace neTiPx.ViewModels
                     return;
                 }
 
-                LogHandler.Log(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{profile.Name}'");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{profile.Name}'");
 
                 // After apply: load fresh settings from NIC and save
                 await ReloadProfileFromNicAsync();
@@ -1043,7 +1043,7 @@ namespace neTiPx.ViewModels
                 var (uncSuccess, uncMessage) = await _uncPathService.ApplyProfile(linkedUncProfile);
                 if (!uncSuccess)
                 {
-                    LogHandler.Log(LogLevel.WARN, "IpConfig", $"UNC-Profil anwenden fehlgeschlagen: {uncMessage}");
+                    LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"UNC-Profil anwenden fehlgeschlagen: {uncMessage}");
                     ValidationMessage = T("IPCONFIG_MSG_UNC_PROFILE_APPLY_FAILED");
                     HasValidationErrors = true;
                     return;

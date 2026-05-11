@@ -262,12 +262,12 @@ namespace neTiPx.Views
 
             if (PingTargets.Any(p => p.Target.Equals(target, StringComparison.OrdinalIgnoreCase)))
             {
-                LogHandler.Log(LogLevel.WARN, "Ping", $"Ziel bereits vorhanden, kein Duplikat: {target}");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "Ping", $"Ziel bereits vorhanden, kein Duplikat: {target}");
                 return;
             }
 
             var intervalSeconds = (int)PingIntervalNumberBox.Value;
-            LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel hinzugefügt: {target}, Intervall: {intervalSeconds}s");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Ping", $"Ziel hinzugefügt: {target}, Intervall: {intervalSeconds}s");
             var pingTarget = new PingTarget
             {
                 Target = target,
@@ -296,15 +296,15 @@ namespace neTiPx.Views
                 {
                     ["Target"] = target.Target
                 });
-                LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel löschen angefordert: {target.Target}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "Ping", $"Ziel löschen angefordert: {target.Target}");
                 var deleteConfirmed = await ConfirmLogDeleteActionAsync(target);
                 if (!deleteConfirmed)
                 {
-                    LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel löschen abgebrochen: {target.Target}");
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "Ping", $"Ziel löschen abgebrochen: {target.Target}");
                     return;
                 }
 
-                LogHandler.Log(LogLevel.INFO, "Ping", $"Ziel gelöscht: {target.Target}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "Ping", $"Ziel gelöscht: {target.Target}");
 
                 if (_pingTimers.TryGetValue(target, out var cts))
                 {
@@ -492,7 +492,7 @@ namespace neTiPx.Views
                 ["Enabled"] = isEnabled ? "true" : "false"
             });
             target.IsPingEnabled = isEnabled;
-            LogHandler.Log(LogLevel.INFO, "Ping", $"Ping {(isEnabled ? "aktiviert" : "deaktiviert")}: {target.Target}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Ping", $"Ping {(isEnabled ? "aktiviert" : "deaktiviert")}: {target.Target}");
 
             if (isEnabled)
             {
@@ -519,7 +519,7 @@ namespace neTiPx.Views
             {
                 ["Enabled"] = isActive ? "true" : "false"
             });
-            LogHandler.Log(LogLevel.INFO, "Ping", $"Hintergrund-Ping {(isActive ? "aktiviert" : "deaktiviert")}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Ping", $"Hintergrund-Ping {(isActive ? "aktiviert" : "deaktiviert")}");
             _settingsService.SetPingBackgroundActive(isActive);
             UpdatePingingState();
         }

@@ -24,11 +24,11 @@ namespace neTiPx.Services
 
         public (bool success, string? error) ApplyProfile(IpProfile profile)
         {
-            LogHandler.Log(LogLevel.INFO, "NetConfig", $"ApplyProfile start: Profil='{profile.Name}', Adapter='{profile.AdapterName}', Modus='{profile.Mode}'");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"ApplyProfile start: Profil='{profile.Name}', Adapter='{profile.AdapterName}', Modus='{profile.Mode}'");
 
             if (string.IsNullOrWhiteSpace(profile.AdapterName))
             {
-                LogHandler.Log(LogLevel.WARN, "NetConfig", "ApplyProfile abgebrochen: kein Adapter gewählt");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", "ApplyProfile abgebrochen: kein Adapter gewählt");
                 return (false, "Kein Adapter ausgewaehlt.");
             }
 
@@ -189,17 +189,17 @@ namespace neTiPx.Services
             var destination = route.Destination?.Trim() ?? string.Empty;
             var subnetMask = route.SubnetMask?.Trim() ?? string.Empty;
 
-            LogHandler.Log(LogLevel.INFO, "NetConfig", $"DeleteRoute: {destination} mask {subnetMask} via {route.Gateway}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"DeleteRoute: {destination} mask {subnetMask} via {route.Gateway}");
 
             if (!IsValidIPv4(destination))
             {
-                LogHandler.Log(LogLevel.WARN, "NetConfig", $"DeleteRoute abgebrochen: Zieladresse '{destination}' ist ungültig");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", $"DeleteRoute abgebrochen: Zieladresse '{destination}' ist ungültig");
                 return (false, "Zieladresse ist ungültig.");
             }
 
             if (SubnetMaskToPrefix(subnetMask) <= 0)
             {
-                LogHandler.Log(LogLevel.WARN, "NetConfig", $"DeleteRoute abgebrochen: Subnetzmaske '{subnetMask}' ist ungültig");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", $"DeleteRoute abgebrochen: Subnetzmaske '{subnetMask}' ist ungültig");
                 return (false, "Subnetzmaske ist ungültig.");
             }
 
@@ -226,12 +226,12 @@ namespace neTiPx.Services
                 Metric = route.Metric > 0 ? route.Metric : 1
             };
 
-            LogHandler.Log(LogLevel.INFO, "NetConfig", $"AddRouteStandalone: {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} via {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"AddRouteStandalone: {sanitizedRoute.Destination} mask {sanitizedRoute.SubnetMask} via {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}");
 
             var (isValid, validationError) = ValidateRoute(sanitizedRoute);
             if (!isValid)
             {
-                LogHandler.Log(LogLevel.WARN, "NetConfig", $"AddRouteStandalone Validierung fehlgeschlagen: {validationError}");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", $"AddRouteStandalone Validierung fehlgeschlagen: {validationError}");
                 return (false, validationError);
             }
 
@@ -404,9 +404,9 @@ namespace neTiPx.Services
                 return (true, null);
             }
 
-            LogHandler.Log(LogLevel.INFO, "NetConfig", $"Netsh-Befehle starten ({commands.Count} Befehl(e))");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Netsh-Befehle starten ({commands.Count} Befehl(e))");
             foreach (var cmd in commands)
-                LogHandler.Log(LogLevel.INFO, "NetConfig", $"  CMD: {cmd}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"  CMD: {cmd}");
 
             try
             {
@@ -424,21 +424,21 @@ namespace neTiPx.Services
                 process?.WaitForExit();
                 if (process == null || process.ExitCode != 0)
                 {
-                    LogHandler.Log(LogLevel.ERROR, "NetConfig", $"Netsh fehlgeschlagen (ExitCode={process?.ExitCode})");
+                    LogHandler.LogErrorMessage("NetConfig", $"Netsh fehlgeschlagen (ExitCode={process?.ExitCode})");
                     return (false, "netsh wurde nicht erfolgreich ausgefuehrt.");
                 }
 
-                LogHandler.Log(LogLevel.INFO, "NetConfig", "Netsh-Befehle erfolgreich ausgeführt");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", "Netsh-Befehle erfolgreich ausgeführt");
                 return (true, null);
             }
             catch (System.ComponentModel.Win32Exception ex)
             {
-                LogHandler.Log(LogLevel.WARN, "NetConfig", "UAC abgebrochen oder Berechtigung verweigert", ex);
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", "UAC abgebrochen oder Berechtigung verweigert", ex);
                 return (false, "Berechtigung erforderlich: Bitte UAC bestaetigen.");
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "NetConfig", "RunNetshCommandsElevated fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("NetConfig", "RunNetshCommandsElevated fehlgeschlagen", ex);
                 return (false, "Fehler beim Anwenden: " + ex.Message);
             }
         }

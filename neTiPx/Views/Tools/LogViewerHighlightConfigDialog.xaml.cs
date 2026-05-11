@@ -92,15 +92,15 @@ namespace neTiPx.Views
             LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRulesExport");
             try
             {
-                LogHandler.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln exportieren: Dialog öffnen");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Highlight-Regeln exportieren: Dialog öffnen");
 
                 var hwnd = App.MainWindow != null
                     ? WindowHelper.GetWindowHandle(App.MainWindow)
                     : IntPtr.Zero;
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Export HWND={hwnd}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Export HWND={hwnd}");
                 if (hwnd == IntPtr.Zero)
                 {
-                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    LogHandler.LogErrorMessage("LogViewer", "Export fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
                     return;
                 }
 
@@ -109,7 +109,7 @@ namespace neTiPx.Views
                 var selected = FileDialogHelper.TrySaveFile(hwnd, T("LOGVIEWER_HIGHLIGHT_EXPORT"), filter, "json", suggestedFileName, out var savePath);
                 if (!selected)
                 {
-                    LogHandler.Log(LogLevel.INFO, "LogViewer", "Export abgebrochen");
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Export abgebrochen");
                     return;
                 }
 
@@ -123,11 +123,11 @@ namespace neTiPx.Views
 
                 var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
                 await File.WriteAllTextAsync(savePath, json);
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln exportiert nach: {savePath} ({payload.Count} Regel(n))");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Highlight-Regeln exportiert nach: {savePath} ({payload.Count} Regel(n))");
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "LogViewer", "Export fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("LogViewer", "Export fehlgeschlagen", ex);
             }
         }
 
@@ -136,15 +136,15 @@ namespace neTiPx.Views
             LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRulesImport");
             try
             {
-                LogHandler.Log(LogLevel.INFO, "LogViewer", "Highlight-Regeln importieren: Dialog öffnen");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Highlight-Regeln importieren: Dialog öffnen");
 
                 var hwnd = App.MainWindow != null
                     ? WindowHelper.GetWindowHandle(App.MainWindow)
                     : IntPtr.Zero;
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Import HWND={hwnd}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Import HWND={hwnd}");
                 if (hwnd == IntPtr.Zero)
                 {
-                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    LogHandler.LogErrorMessage("LogViewer", "Import fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
                     return;
                 }
 
@@ -152,11 +152,11 @@ namespace neTiPx.Views
                 var selected = FileDialogHelper.TryOpenFile(hwnd, T("LOGVIEWER_HIGHLIGHT_IMPORT"), filter, out var importPath);
                 if (!selected)
                 {
-                    LogHandler.Log(LogLevel.INFO, "LogViewer", "Import abgebrochen");
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Import abgebrochen");
                     return;
                 }
 
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Import Datei: {importPath}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Import Datei: {importPath}");
 
                 try
                 {
@@ -172,16 +172,16 @@ namespace neTiPx.Views
                             ColorKey = string.IsNullOrWhiteSpace(rule.ColorKey) ? "red" : rule.ColorKey
                         });
                     }
-                    LogHandler.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln importiert: {Rules.Count} Regel(n)");
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Highlight-Regeln importiert: {Rules.Count} Regel(n)");
                 }
                 catch (Exception parseEx)
                 {
-                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Import JSON-Parsing fehlgeschlagen", parseEx);
+                    LogHandler.LogErrorMessage("LogViewer", "Import JSON-Parsing fehlgeschlagen", parseEx);
                 }
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "LogViewer", "Import fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("LogViewer", "Import fehlgeschlagen", ex);
             }
         }
     }

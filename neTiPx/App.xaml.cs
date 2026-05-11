@@ -99,11 +99,11 @@ namespace neTiPx
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            LogHandler.Log(LogLevel.INFO, "App", "OnLaunched – App startet");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "App", "OnLaunched – App startet");
 
             if (!_isFirstInstance)
             {
-                LogHandler.Log(LogLevel.WARN, "App", "Zweite Instanz erkannt – Signal an laufende Instanz, beende mich");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "App", "Zweite Instanz erkannt – Signal an laufende Instanz, beende mich");
                 SignalRunningInstance();
                 Exit();
                 return;
@@ -154,23 +154,23 @@ namespace neTiPx
 
             // Sprache laden (vor dem ersten Navigieren, damit alle Pages lokalisiert starten)
             var langCode = settingsService.GetLanguageCode();
-            LogHandler.Log(LogLevel.INFO, "App", $"Sprache wird geladen: {langCode}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "App", $"Sprache wird geladen: {langCode}");
             LanguageManager.Instance.LoadLanguage(langCode);
-            LogHandler.Log(LogLevel.INFO, "App", "Sprache geladen");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "App", "Sprache geladen");
 
             // Settings-Daten bereits beim App-Start vollständig laden, auch wenn die App im Tray startet.
             var settingsWarmupStopwatch = Stopwatch.StartNew();
             Debug.WriteLine("[SettingsWarmup][App] PreloadNow start");
-            LogHandler.Log(LogLevel.INFO, "App", "Settings-Warmup startet");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "App", "Settings-Warmup startet");
             SettingsPageWarmupService.PreloadNow();
             settingsWarmupStopwatch.Stop();
             Debug.WriteLine($"[SettingsWarmup][App] PreloadNow done after {settingsWarmupStopwatch.ElapsedMilliseconds} ms");
-            LogHandler.Log(LogLevel.INFO, "App", $"Settings-Warmup abgeschlossen ({settingsWarmupStopwatch.ElapsedMilliseconds} ms)");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "App", $"Settings-Warmup abgeschlossen ({settingsWarmupStopwatch.ElapsedMilliseconds} ms)");
 
             _ = rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
             MainWindow.Activate();
             WindowHelper.Hide(MainWindow);
-            LogHandler.Log(LogLevel.INFO, "App", "Hauptfenster erstellt, App läuft im Tray");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "App", "Hauptfenster erstellt, App läuft im Tray");
 
             _trayService = new TrayService(HoverWindow);
 
@@ -201,13 +201,13 @@ namespace neTiPx
                 var closeToTray = settingsService.GetCloseToTrayOnClose();
                 if (closeToTray)
                 {
-                    LogHandler.Log(LogLevel.INFO, "App", "Fenster geschlossen – minimiere in Tray");
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "App", "Fenster geschlossen – minimiere in Tray");
                     args.Cancel = true;
                     WindowHelper.Hide(MainWindow);
                     return;
                 }
 
-                LogHandler.Log(LogLevel.INFO, "App", "App wird beendet");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "App", "App wird beendet");
                 args.Cancel = true;
                 _trayService?.Dispose();
                 ExitApp();
@@ -304,7 +304,7 @@ namespace neTiPx
         /// <param name="e">Details about the navigation failure</param>
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
-            LogHandler.Log(LogLevel.ERROR, "App", $"Navigation fehlgeschlagen: {e.SourcePageType.FullName}");
+            LogHandler.LogErrorMessage("App", $"Navigation fehlgeschlagen: {e.SourcePageType.FullName}");
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
 

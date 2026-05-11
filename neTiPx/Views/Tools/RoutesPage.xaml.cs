@@ -122,7 +122,7 @@ namespace neTiPx.Views.Tools
             RoutesStatusText.Text = T("ROUTES_STATUS_LOADING");
 
             await Task.Yield();
-            LogHandler.Log(LogLevel.INFO, "Routes", "Routen werden geladen...");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", "Routen werden geladen...");
             var (success, routes, error) = _networkConfigService.ReadAllPersistentRoutes();
 
             Routes.Clear();
@@ -136,12 +136,12 @@ namespace neTiPx.Views.Tools
                     Routes.Add(r);
                 }
 
-                LogHandler.Log(LogLevel.INFO, "Routes", $"{routes.Count} Route(n) geladen");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", $"{routes.Count} Route(n) geladen");
                 ApplyFilterAndSort();
             }
             else
             {
-                LogHandler.Log(LogLevel.ERROR, "Routes", $"Routen laden fehlgeschlagen: {error}");
+                LogHandler.LogErrorMessage("Routes", $"Routen laden fehlgeschlagen: {error}");
                 RoutesStatusText.Text = error ?? T("ROUTES_STATUS_LOAD_ERROR");
             }
         }
@@ -379,11 +379,11 @@ namespace neTiPx.Views.Tools
             if (result != ContentDialogResult.Primary)
                 return;
 
-            LogHandler.Log(LogLevel.INFO, "Routes", $"Route löschen: {route.Destination} mask {route.SubnetMask} via {route.Gateway}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", $"Route löschen: {route.Destination} mask {route.SubnetMask} via {route.Gateway}");
             var (success, error) = _networkConfigService.DeleteRoute(route);
             if (!success)
             {
-                LogHandler.Log(LogLevel.ERROR, "Routes", $"Route löschen fehlgeschlagen: {error}");
+                LogHandler.LogErrorMessage("Routes", $"Route löschen fehlgeschlagen: {error}");
                 var errorDialog = new ContentDialog
                 {
                     Title = T("ROUTES_DIALOG_DELETE_ERROR_TITLE"),
@@ -395,7 +395,7 @@ namespace neTiPx.Views.Tools
                 return;
             }
 
-            LogHandler.Log(LogLevel.INFO, "Routes", "Route erfolgreich gelöscht");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", "Route erfolgreich gelöscht");
             await LoadRoutesAsync();
         }
 
@@ -419,12 +419,12 @@ namespace neTiPx.Views.Tools
                 ["Metric"] = route.Metric.ToString(CultureInfo.InvariantCulture)
             });
 
-            LogHandler.Log(LogLevel.INFO, "Routes", $"Route hinzufügen: {route.Destination} mask {route.SubnetMask} via {route.Gateway} metric {route.Metric}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", $"Route hinzufügen: {route.Destination} mask {route.SubnetMask} via {route.Gateway} metric {route.Metric}");
 
             var (success, error) = _networkConfigService.AddRouteStandalone(route);
             if (!success)
             {
-                LogHandler.Log(LogLevel.ERROR, "Routes", $"Route hinzufügen fehlgeschlagen: {error}");
+                LogHandler.LogErrorMessage("Routes", $"Route hinzufügen fehlgeschlagen: {error}");
                 AddStatusText.Text = error ?? T("ROUTES_ADD_ERROR_CONTENT");
                 AddStatusText.Visibility = Visibility.Visible;
                 return;

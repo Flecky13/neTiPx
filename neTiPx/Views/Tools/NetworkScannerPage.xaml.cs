@@ -121,12 +121,12 @@ namespace neTiPx.Views
 
             if (!TryParseNetworkScanRanges(rangeInput, out var ipList, out var parseError))
             {
-                LogHandler.Log(LogLevel.WARN, "NetScan", $"Eingabe ungültig: {parseError}");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetScan", $"Eingabe ungültig: {parseError}");
                 ShowScanError(parseError ?? T("NETSCAN_ERROR_INVALID_RANGE"));
                 return;
             }
 
-            LogHandler.Log(LogLevel.INFO, "NetScan", $"Scan startet: Eingabe='{rangeInput}', IPs={ipList.Count}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetScan", $"Scan startet: Eingabe='{rangeInput}', IPs={ipList.Count}");
 
             // Bereiche speichern
             _networkScanStore.WriteLastScanRanges(rangeInput);
@@ -151,12 +151,12 @@ namespace neTiPx.Views
             }
             catch (OperationCanceledException)
             {
-                LogHandler.Log(LogLevel.WARN, "NetScan", "Scan vom Benutzer abgebrochen");
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetScan", "Scan vom Benutzer abgebrochen");
                 NetworkScanStatusTextBlock.Text = T("NETSCAN_STATUS_CANCELED");
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "NetScan", "Scan fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("NetScan", "Scan fehlgeschlagen", ex);
                 ShowScanError($"{T("NETSCAN_ERROR_SCAN_FAILED")}: {ex.Message}");
             }
             finally
@@ -189,7 +189,7 @@ namespace neTiPx.Views
                 var statusMsg = NetworkDevices.Count > 0
                     ? $"{T("NETSCAN_STATUS_FINISHED_FOUND")} ({NetworkDevices.Count})"
                     : T("NETSCAN_STATUS_FINISHED_NONE");
-                LogHandler.Log(LogLevel.INFO, "NetScan", $"Scan abgeschlossen: {NetworkDevices.Count} Gerät(e) gefunden");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetScan", $"Scan abgeschlossen: {NetworkDevices.Count} Gerät(e) gefunden");
                 NetworkScanStatusTextBlock.Text = statusMsg;
             });
         }

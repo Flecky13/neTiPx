@@ -14,7 +14,7 @@ namespace neTiPx.Services
 
             if (!File.Exists(path))
             {
-                LogHandler.Log(LogLevel.INFO, "ConfigStore", $"ReadAll: Konfiguration nicht vorhanden ({path})");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "ConfigStore", $"ReadAll: Konfiguration nicht vorhanden ({path})");
                 return values;
             }
 
@@ -31,12 +31,12 @@ namespace neTiPx.Services
                     values[parts[0].Trim()] = parts[1].Trim();
                 }
 
-                LogHandler.Log(LogLevel.INFO, "ConfigStore", $"ReadAll: {values.Count} Einträge geladen");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "ConfigStore", $"ReadAll: {values.Count} Einträge geladen");
                 return values;
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "ConfigStore", "ReadAll: Lesen fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("ConfigStore", "ReadAll: Lesen fehlgeschlagen", ex);
                 return values;
             }
         }
@@ -68,11 +68,11 @@ namespace neTiPx.Services
             try
             {
                 File.WriteAllLines(path, outLines);
-                LogHandler.Log(LogLevel.INFO, "ConfigStore", $"WriteAll: {outLines.Count} Zeilen geschrieben");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "ConfigStore", $"WriteAll: {outLines.Count} Zeilen geschrieben");
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "ConfigStore", "WriteAll: Schreiben fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("ConfigStore", "WriteAll: Schreiben fehlgeschlagen", ex);
             }
         }
     }

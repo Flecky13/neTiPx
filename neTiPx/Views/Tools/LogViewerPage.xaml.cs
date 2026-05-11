@@ -109,15 +109,15 @@ namespace neTiPx.Views
             LogHandler.LogEvent("LogViewer", "ButtonClick", "OpenFileDialog");
             try
             {
-                LogHandler.Log(LogLevel.INFO, "LogViewer", "Datei-Dialog öffnen gestartet");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Datei-Dialog öffnen gestartet");
 
                 var hwnd = App.MainWindow != null
                     ? WindowHelper.GetWindowHandle(App.MainWindow)
                     : IntPtr.Zero;
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"HWND={hwnd}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"HWND={hwnd}");
                 if (hwnd == IntPtr.Zero)
                 {
-                    LogHandler.Log(LogLevel.ERROR, "LogViewer", "Datei-Dialog fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
+                    LogHandler.LogErrorMessage("LogViewer", "Datei-Dialog fehlgeschlagen | Kein gueltiges Owner-HWND gefunden");
                     return;
                 }
 
@@ -129,17 +129,17 @@ namespace neTiPx.Views
 
                 if (!selected)
                 {
-                    LogHandler.Log(LogLevel.INFO, "LogViewer", "Datei-Dialog abgebrochen (kein File ausgewählt)");
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Datei-Dialog abgebrochen (kein File ausgewählt)");
                     return;
                 }
 
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Datei ausgewählt: {selectedPath}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Datei ausgewählt: {selectedPath}");
                 AddRecentFile(selectedPath);
                 await LoadFileAsync(selectedPath, forceStatusMessage: true);
             }
             catch (Exception ex)
             {
-                LogHandler.Log(LogLevel.ERROR, "LogViewer", "Datei-Dialog fehlgeschlagen", ex);
+                LogHandler.LogErrorMessage("LogViewer", "Datei-Dialog fehlgeschlagen", ex);
             }
         }
 
@@ -179,7 +179,7 @@ namespace neTiPx.Views
                 ["File"] = selectedEntry.FullPath
             });
 
-            LogHandler.Log(LogLevel.INFO, "LogViewer", $"Datei aus Recent-Liste löschen: {selectedEntry.FullPath}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Datei aus Recent-Liste löschen: {selectedEntry.FullPath}");
             _logViewerStore.RemoveRecentFile(selectedEntry.FullPath);
             RecentFiles.Remove(selectedEntry);
             _logViewerStore.WriteRecentFiles(RecentFiles.Select(entry => entry.FullPath), null);
@@ -246,7 +246,7 @@ namespace neTiPx.Views
             var result = await dialog.ShowAsync();
             if (result != ContentDialogResult.Primary)
             {
-                LogHandler.Log(LogLevel.INFO, "LogViewer", "Highlight-Konfiguration abgebrochen");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Highlight-Konfiguration abgebrochen");
                 return;
             }
 
@@ -257,7 +257,7 @@ namespace neTiPx.Views
             }
 
             _highlightStore.WriteRules(HighlightRules);
-            LogHandler.Log(LogLevel.INFO, "LogViewer", $"Highlight-Regeln gespeichert: {HighlightRules.Count}");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Highlight-Regeln gespeichert: {HighlightRules.Count}");
             RefreshVisibleLines();
         }
 
@@ -266,7 +266,7 @@ namespace neTiPx.Views
             await _loadLock.WaitAsync();
             try
             {
-                LogHandler.Log(LogLevel.INFO, "LogViewer", $"Datei laden: {filePath}");
+                LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", $"Datei laden: {filePath}");
                 SetLoadingState(true);
                 var fileSnapshot = await ReadAllLinesWithRetryAsync(filePath);
 
@@ -815,7 +815,7 @@ namespace neTiPx.Views
 
         private async Task RestoreLastSelectedFileAsync()
         {
-            LogHandler.Log(LogLevel.INFO, "LogViewer", "Letzte ausgewählte Datei wiederherstellen");
+            LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Letzte ausgewählte Datei wiederherstellen");
             var lastSelectedPath = _logViewerStore.ReadLastSelectedFile();
             if (string.IsNullOrWhiteSpace(lastSelectedPath))
             {
