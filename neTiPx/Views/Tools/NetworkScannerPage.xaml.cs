@@ -106,7 +106,7 @@ namespace neTiPx.Views
         {
             var rangeInput = NetworkScanRangesTextBox.Text.Trim();
 
-            LogHandler.LogEvent("NetScan", "ButtonClick", "ScanStart", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("NetScan", "ButtonClick", "ScanStart", new Dictionary<string, string?>
             {
                 ["Input"] = rangeInput
             });
@@ -773,7 +773,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("NetScan", "DoubleTapped", "PortAction", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("NetScan", "DoubleTapped", "PortAction", new Dictionary<string, string?>
             {
                 ["Ip"] = selectedDevice.IpAddress,
                 ["PortInfo"] = portInfo
@@ -867,7 +867,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("NetScan", "ButtonClick", "Sort", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("NetScan", "ButtonClick", "Sort", new Dictionary<string, string?>
             {
                 ["Column"] = column
             });
@@ -975,4 +975,5 @@ namespace neTiPx.Views
         }
     }
 }
+
 

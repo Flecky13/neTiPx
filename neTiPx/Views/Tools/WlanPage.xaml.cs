@@ -114,7 +114,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("WLAN", "ButtonClick", "Sort", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("WLAN", "ButtonClick", "Sort", new Dictionary<string, string?>
             {
                 ["Column"] = column
             });
@@ -279,4 +279,5 @@ namespace neTiPx.Views
         }
     }
 }
+
 

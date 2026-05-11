@@ -11,20 +11,9 @@ namespace neTiPx.Services
         public const string CategorySystemEvent = "SYSTEM_EVENT";
         public const string CategoryErrorEvent = "ERROR_EVENT";
 
-        public static void Log(LogLevel level, string area, string message)
-        {
-            LogSystemMessage(level, area, message);
-        }
-
-        public static void Log(LogLevel level, string area, string message, Exception ex)
-        {
-            LogSystemMessage(level, area, message, ex);
-        }
-
-        public static void LogEvent(string area, string eventName, string? detail = null, IReadOnlyDictionary<string, string?>? payload = null)
-        {
-            LogUserEvent(area, eventName, detail, payload);
-        }
+        public const string EventMessage = "Message";
+        public const string EventException = "Exception";
+        public const string EventError = "Error";
 
         public static void LogUserEvent(string area, string eventName, string? detail = null, IReadOnlyDictionary<string, string?>? payload = null)
         {
@@ -44,14 +33,14 @@ namespace neTiPx.Services
         public static void LogSystemMessage(LogLevel level, string area, string message)
         {
             var category = level == LogLevel.ERROR ? CategoryErrorEvent : CategorySystemEvent;
-            var eventName = level == LogLevel.ERROR ? "Error" : "Message";
+            var eventName = level == LogLevel.ERROR ? EventError : EventMessage;
             DebugLogger.Log(level, area, BuildCategorizedMessage(category, eventName, message, null));
         }
 
         public static void LogSystemMessage(LogLevel level, string area, string message, Exception ex)
         {
             var category = level == LogLevel.ERROR ? CategoryErrorEvent : CategorySystemEvent;
-            DebugLogger.Log(level, area, BuildCategorizedMessage(category, "Exception", message, null), ex);
+            DebugLogger.Log(level, area, BuildCategorizedMessage(category, EventException, message, null), ex);
         }
 
         public static void LogErrorEvent(string area, string eventName, string? detail = null, IReadOnlyDictionary<string, string?>? payload = null)
@@ -66,12 +55,12 @@ namespace neTiPx.Services
 
         public static void LogErrorMessage(string area, string message)
         {
-            DebugLogger.Log(LogLevel.ERROR, area, BuildCategorizedMessage(CategoryErrorEvent, "Error", message, null));
+            DebugLogger.Log(LogLevel.ERROR, area, BuildCategorizedMessage(CategoryErrorEvent, EventError, message, null));
         }
 
         public static void LogErrorMessage(string area, string message, Exception ex)
         {
-            DebugLogger.Log(LogLevel.ERROR, area, BuildCategorizedMessage(CategoryErrorEvent, "Exception", message, null), ex);
+            DebugLogger.Log(LogLevel.ERROR, area, BuildCategorizedMessage(CategoryErrorEvent, EventException, message, null), ex);
         }
 
         private static string BuildCategorizedMessage(string category, string? eventName, string? detail, IReadOnlyDictionary<string, string?>? payload)
@@ -113,7 +102,7 @@ namespace neTiPx.Services
                 return;
             }
 
-            LogEvent(area, "SettingChanged", $"{settingName}: '{oldValue ?? string.Empty}' -> '{newValue ?? string.Empty}'");
+            LogUserEvent(area, "SettingChanged", $"{settingName}: '{oldValue ?? string.Empty}' -> '{newValue ?? string.Empty}'");
         }
     }
 }

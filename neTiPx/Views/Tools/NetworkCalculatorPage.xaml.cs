@@ -247,7 +247,7 @@ namespace neTiPx.Views
             }
 
             var nextPrefix = Math.Min(32, currentPrefix + 1);
-            LogHandler.LogEvent("NetCalc", "ButtonClick", "HostsMinus", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("NetCalc", "ButtonClick", "HostsMinus", new Dictionary<string, string?>
             {
                 ["CurrentPrefix"] = currentPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["NextPrefix"] = nextPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture)
@@ -264,7 +264,7 @@ namespace neTiPx.Views
             }
 
             var nextPrefix = Math.Max(0, currentPrefix - 1);
-            LogHandler.LogEvent("NetCalc", "ButtonClick", "HostsPlus", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("NetCalc", "ButtonClick", "HostsPlus", new Dictionary<string, string?>
             {
                 ["CurrentPrefix"] = currentPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["NextPrefix"] = nextPrefix.ToString(System.Globalization.CultureInfo.InvariantCulture)
@@ -814,4 +814,5 @@ namespace neTiPx.Views
         }
     }
 }
+
 

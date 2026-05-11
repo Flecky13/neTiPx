@@ -89,7 +89,7 @@ namespace neTiPx.Views
 
         private void OnLanguageChanged(object? sender, EventArgs e)
         {
-            LogHandler.LogEvent("Settings", "LanguageApplied", _settingsService.GetLanguageCode());
+            LogHandler.LogUserEvent("Settings", "LanguageApplied", _settingsService.GetLanguageCode());
             UpdateLanguage();
             LoadAdapters();
         }
@@ -294,7 +294,7 @@ namespace neTiPx.Views
 
         private async void SelectPingLogFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Settings", "ButtonClick", "PingLogFolderSelect");
+            LogHandler.LogUserEvent("Settings", "ButtonClick", "PingLogFolderSelect");
             var picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
 
@@ -314,7 +314,7 @@ namespace neTiPx.Views
 
         private async void OpenPagesVisibilityConfigText_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            LogHandler.LogEvent("Settings", "Tapped", "PagesVisibilityConfigOpen");
+            LogHandler.LogUserEvent("Settings", "Tapped", "PagesVisibilityConfigOpen");
             _pagesVisibilityService.EnsureConfigExists();
             var entries = _pagesVisibilityService.ReadXmlManagedEntries();
 
@@ -525,7 +525,7 @@ namespace neTiPx.Views
 
         private void ResetPingLogFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Settings", "ButtonClick", "PingLogFolderReset");
+            LogHandler.LogUserEvent("Settings", "ButtonClick", "PingLogFolderReset");
             _settingsService.SetPingLogFolderPath(string.Empty);
             _pingLogFolderPath = _pingLogService.GetLogFolderPath();
             UpdatePingLogFolderPathDisplay();
@@ -1183,4 +1183,5 @@ namespace neTiPx.Views
 
     }
 }
+
 

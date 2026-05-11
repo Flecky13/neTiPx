@@ -811,7 +811,7 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            LogHandler.LogEvent("IpConfig", "ButtonClick", "ProfileDelete", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("IpConfig", "ButtonClick", "ProfileDelete", new Dictionary<string, string?>
             {
                 ["Profile"] = profile.Name
             });
@@ -926,7 +926,7 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            LogHandler.LogEvent("IpConfig", "ButtonClick", "ProfileSave", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("IpConfig", "ButtonClick", "ProfileSave", new Dictionary<string, string?>
             {
                 ["Profile"] = SelectedProfile.Name
             });
@@ -968,7 +968,7 @@ namespace neTiPx.ViewModels
                 return;
             }
 
-            LogHandler.LogEvent("IpConfig", "ButtonClick", "ProfileApply", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("IpConfig", "ButtonClick", "ProfileApply", new Dictionary<string, string?>
             {
                 ["Profile"] = SelectedProfile.Name,
                 ["Adapter"] = SelectedProfile.AdapterName,
@@ -1900,4 +1900,5 @@ namespace neTiPx.ViewModels
         }
     }
 }
+
 

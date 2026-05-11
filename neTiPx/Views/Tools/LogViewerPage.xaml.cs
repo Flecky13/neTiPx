@@ -106,7 +106,7 @@ namespace neTiPx.Views
 
         private async void LogViewerOpenButton_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "OpenFileDialog");
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "OpenFileDialog");
             try
             {
                 LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Datei-Dialog öffnen gestartet");
@@ -174,7 +174,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "RecentFileRemove", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "RecentFileRemove", new Dictionary<string, string?>
             {
                 ["File"] = selectedEntry.FullPath
             });
@@ -202,7 +202,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "FileReload", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "FileReload", new Dictionary<string, string?>
             {
                 ["File"] = _currentFilePath
             });
@@ -213,7 +213,7 @@ namespace neTiPx.Views
         private void LogViewerAutoRefreshCheckBox_Click(object sender, RoutedEventArgs e)
         {
             _autoScrollEnabled = LogViewerAutoRefreshCheckBox?.IsChecked == true;
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "AutoRefreshToggle", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "AutoRefreshToggle", new Dictionary<string, string?>
             {
                 ["Enabled"] = _autoScrollEnabled ? "true" : "false"
             });
@@ -231,7 +231,7 @@ namespace neTiPx.Views
 
         private async void LogViewerHighlightConfigButton_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightConfigOpen");
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "HighlightConfigOpen");
             var dialogContent = new LogViewerHighlightConfigDialog(HighlightRules, HighlightColorOptions);
             var dialog = new ContentDialog
             {
@@ -1106,4 +1106,5 @@ namespace neTiPx.Views
         private sealed record HighlightMatch(int LineIndex, int Start, int Length, int RuleIndex);
     }
 }
+
 

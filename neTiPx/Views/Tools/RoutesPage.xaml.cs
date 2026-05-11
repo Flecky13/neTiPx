@@ -311,7 +311,7 @@ namespace neTiPx.Views.Tools
 
         private void ClearFilter_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Routes", "ButtonClick", "FilterClear");
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "FilterClear");
             if (DestinationFilterBox != null)
             {
                 DestinationFilterBox.Text = string.Empty;
@@ -322,31 +322,31 @@ namespace neTiPx.Views.Tools
 
         private void SortDestination_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Routes", "ButtonClick", "SortDestination");
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "SortDestination");
             ToggleSort(SortColumn.Destination);
         }
 
         private void SortSubnetMask_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Routes", "ButtonClick", "SortSubnetMask");
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "SortSubnetMask");
             ToggleSort(SortColumn.SubnetMask);
         }
 
         private void SortGateway_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Routes", "ButtonClick", "SortGateway");
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "SortGateway");
             ToggleSort(SortColumn.Gateway);
         }
 
         private void SortMetric_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Routes", "ButtonClick", "SortMetric");
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "SortMetric");
             ToggleSort(SortColumn.Metric);
         }
 
         private async void RefreshRoutes_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("Routes", "ButtonClick", "RoutesReload");
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "RoutesReload");
             await LoadRoutesAsync();
         }
 
@@ -355,7 +355,7 @@ namespace neTiPx.Views.Tools
             if (sender is not Button button || button.Tag is not RouteEntry route)
                 return;
 
-            LogHandler.LogEvent("Routes", "ButtonClick", "RouteDelete", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "RouteDelete", new Dictionary<string, string?>
             {
                 ["Destination"] = route.Destination,
                 ["SubnetMask"] = route.SubnetMask,
@@ -411,7 +411,7 @@ namespace neTiPx.Views.Tools
                 Metric = int.TryParse(AddMetricBox.Text?.Trim(), out var m) && m > 0 ? m : 1
             };
 
-            LogHandler.LogEvent("Routes", "ButtonClick", "RouteAdd", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("Routes", "ButtonClick", "RouteAdd", new Dictionary<string, string?>
             {
                 ["Destination"] = route.Destination,
                 ["SubnetMask"] = route.SubnetMask,
@@ -439,4 +439,5 @@ namespace neTiPx.Views.Tools
         }
     }
 }
+
 

@@ -255,7 +255,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("Ping", "ButtonClick", "AddTarget", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("Ping", "ButtonClick", "AddTarget", new Dictionary<string, string?>
             {
                 ["Target"] = target
             });
@@ -292,7 +292,7 @@ namespace neTiPx.Views
         {
             if (sender is Button button && button.Tag is PingTarget target)
             {
-                LogHandler.LogEvent("Ping", "ButtonClick", "DeleteTarget", new Dictionary<string, string?>
+                LogHandler.LogUserEvent("Ping", "ButtonClick", "DeleteTarget", new Dictionary<string, string?>
                 {
                     ["Target"] = target.Target
                 });
@@ -486,7 +486,7 @@ namespace neTiPx.Views
             }
 
             var isEnabled = checkBox.IsChecked == true;
-            LogHandler.LogEvent("Ping", "ButtonClick", "TargetPingToggle", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("Ping", "ButtonClick", "TargetPingToggle", new Dictionary<string, string?>
             {
                 ["Target"] = target.Target,
                 ["Enabled"] = isEnabled ? "true" : "false"
@@ -515,7 +515,7 @@ namespace neTiPx.Views
             }
 
             var isActive = checkBox.IsChecked == true;
-            LogHandler.LogEvent("Ping", "ButtonClick", "BackgroundPingToggle", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("Ping", "ButtonClick", "BackgroundPingToggle", new Dictionary<string, string?>
             {
                 ["Enabled"] = isActive ? "true" : "false"
             });
@@ -560,7 +560,7 @@ namespace neTiPx.Views
 
             try
             {
-                LogHandler.LogEvent("Ping", "ButtonClick", "OpenPingLog", new Dictionary<string, string?>
+                LogHandler.LogUserEvent("Ping", "ButtonClick", "OpenPingLog", new Dictionary<string, string?>
                 {
                     ["Target"] = target.Target
                 });
@@ -786,4 +786,5 @@ namespace neTiPx.Views
         }
     }
 }
+
 

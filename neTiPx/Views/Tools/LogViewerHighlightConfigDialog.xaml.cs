@@ -63,7 +63,7 @@ namespace neTiPx.Views
         private void AddRuleButton_Click(object sender, RoutedEventArgs e)
         {
             var defaultColorKey = ColorOptions.FirstOrDefault()?.Key ?? "red";
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRuleAdd", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "HighlightRuleAdd", new Dictionary<string, string?>
             {
                 ["DefaultColor"] = defaultColorKey
             });
@@ -78,7 +78,7 @@ namespace neTiPx.Views
         {
             if ((sender as FrameworkElement)?.Tag is LogViewerHighlightRule rule)
             {
-                LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRuleRemove", new Dictionary<string, string?>
+                LogHandler.LogUserEvent("LogViewer", "ButtonClick", "HighlightRuleRemove", new Dictionary<string, string?>
                 {
                     ["SearchText"] = rule.SearchText,
                     ["Color"] = rule.ColorKey
@@ -89,7 +89,7 @@ namespace neTiPx.Views
 
         private async void ExportRulesButton_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRulesExport");
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "HighlightRulesExport");
             try
             {
                 LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Highlight-Regeln exportieren: Dialog öffnen");
@@ -133,7 +133,7 @@ namespace neTiPx.Views
 
         private async void ImportRulesButton_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("LogViewer", "ButtonClick", "HighlightRulesImport");
+            LogHandler.LogUserEvent("LogViewer", "ButtonClick", "HighlightRulesImport");
             try
             {
                 LogHandler.LogSystemMessage(LogLevel.INFO, "LogViewer", "Highlight-Regeln importieren: Dialog öffnen");
@@ -206,4 +206,5 @@ namespace neTiPx.Views
         public string ColorKey { get; set; } = "red";
     }
 }
+
 

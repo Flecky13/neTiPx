@@ -40,7 +40,7 @@ namespace neTiPx.ViewModels
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             AppVersion = version == null ? T("INFO_UNKNOWN") : version.ToString(4);
-            LogHandler.LogEvent("Info", "PageInit", "CurrentVersion", new System.Collections.Generic.Dictionary<string, string?>
+            LogHandler.LogUserEvent("Info", "PageInit", "CurrentVersion", new System.Collections.Generic.Dictionary<string, string?>
             {
                 ["Version"] = AppVersion
             });
@@ -118,7 +118,7 @@ namespace neTiPx.ViewModels
 
         private async void CheckForUpdate()
         {
-            LogHandler.LogEvent("Info", "ButtonClick", "CheckForUpdate", new System.Collections.Generic.Dictionary<string, string?>
+            LogHandler.LogUserEvent("Info", "ButtonClick", "CheckForUpdate", new System.Collections.Generic.Dictionary<string, string?>
             {
                 ["CurrentVersion"] = AppVersion
             });
@@ -180,7 +180,7 @@ namespace neTiPx.ViewModels
 
         private async void InstallUpdate()
         {
-            LogHandler.LogEvent("Info", "ButtonClick", "InstallUpdate");
+            LogHandler.LogUserEvent("Info", "ButtonClick", "InstallUpdate");
             if (string.IsNullOrWhiteSpace(_setupDownloadUrl))
             {
                 // Fallback: Öffne Release-Seite
@@ -240,13 +240,13 @@ namespace neTiPx.ViewModels
 
         private void ShowChangelog()
         {
-            LogHandler.LogEvent("Info", "ButtonClick", "ShowChangelog");
+            LogHandler.LogUserEvent("Info", "ButtonClick", "ShowChangelog");
             OpenUrl(ReleasesUrl);
         }
 
         private void ShowHelp()
         {
-            LogHandler.LogEvent("Info", "ButtonClick", "ShowHelp");
+            LogHandler.LogUserEvent("Info", "ButtonClick", "ShowHelp");
             OpenUrl(new Uri(ReadmeUrl));
         }
 
@@ -409,4 +409,5 @@ namespace neTiPx.ViewModels
         }
     }
 }
+
 

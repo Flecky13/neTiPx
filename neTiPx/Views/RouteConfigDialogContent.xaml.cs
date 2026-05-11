@@ -199,7 +199,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("RouteConfig", "ButtonClick", "ProfileRouteAdd");
+            LogHandler.LogUserEvent("RouteConfig", "ButtonClick", "ProfileRouteAdd");
 
             Routes.Add(new RouteEntry { Metric = 1 });
             OnPropertyChanged(nameof(CanAddRoute));
@@ -212,7 +212,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("RouteConfig", "ButtonClick", "ProfileRouteRemove", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("RouteConfig", "ButtonClick", "ProfileRouteRemove", new Dictionary<string, string?>
             {
                 ["Destination"] = route.Destination,
                 ["SubnetMask"] = route.SubnetMask,
@@ -268,7 +268,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("RouteConfig", "ButtonClick", "ProfileRouteApply", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("RouteConfig", "ButtonClick", "ProfileRouteApply", new Dictionary<string, string?>
             {
                 ["Destination"] = route.Destination,
                 ["SubnetMask"] = route.SubnetMask,
@@ -322,7 +322,7 @@ namespace neTiPx.Views
 
         private async void ReloadSystemRoutes_Click(object sender, RoutedEventArgs e)
         {
-            LogHandler.LogEvent("RouteConfig", "ButtonClick", "SystemRoutesReload");
+            LogHandler.LogUserEvent("RouteConfig", "ButtonClick", "SystemRoutesReload");
             await ReloadSystemRoutesInternalAsync(showErrorDialog: true);
         }
 
@@ -384,7 +384,7 @@ namespace neTiPx.Views
                 return;
             }
 
-            LogHandler.LogEvent("RouteConfig", "ButtonClick", "SystemRouteRemove", new Dictionary<string, string?>
+            LogHandler.LogUserEvent("RouteConfig", "ButtonClick", "SystemRouteRemove", new Dictionary<string, string?>
             {
                 ["Destination"] = route.Destination,
                 ["SubnetMask"] = route.SubnetMask,
@@ -532,4 +532,5 @@ namespace neTiPx.Views
         }
     }
 }
+
 
