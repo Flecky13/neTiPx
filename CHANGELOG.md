@@ -4,6 +4,12 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.2.0]
+
+### Changed
+- **Lokalisierung / Paketinhalt**: `lang/ch.json` korrigiert.
+- **Lokalisierung / Paketinhalt**: `lang/test.json` wird nicht mehr als Content bzw. None ins App-Paket aufgenommen, damit Testdateien nicht ausgeliefert werden.
+
 ## [1.7.1.9]
 
 ### Fixed
