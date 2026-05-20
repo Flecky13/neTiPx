@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+        x:Class="neTiPx.UI.Avalonia.Views.MainWindow"
+        Title="neTiPx - Network Tools"
+        Width="1200" Height="700"
+        MinWidth="800" MinHeight="600"
+        Icon="/Assets/toolicon.ico">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="16,12">
+            <TextBlock Text="neTiPx - Network Configuration Tool"
+                       Foreground="White"
+                       FontSize="18"
+                       FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" Margin="16">
+            <TabControl>
+                <!-- IP Configuration Tab -->
+                <TabItem Header="IP Configuration">
+                    <Grid RowDefinitions="Auto,*" Margin="16">
+                        <TextBlock Grid.Row="0" 
+                                   Text="IP-Profile verwalten" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,16"/>
+                        
+                        <TextBlock Grid.Row="1" 
+                                   Text="IP Configuration wird hier implementiert..." 
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Center"
+                                   Foreground="Gray"/>
+                    </Grid>
+                </TabItem>
+
+                <!-- Network Scanner Tab -->
+                <TabItem Header="Network Scanner">
+                    <Grid RowDefinitions="Auto,*" Margin="16">
+                        <TextBlock Grid.Row="0" 
+                                   Text="Netzwerk scannen" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,16"/>
+                        
+                        <TextBlock Grid.Row="1" 
+                                   Text="Network Scanner wird hier implementiert..." 
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Center"
+                                   Foreground="Gray"/>
+                    </Grid>
+                </TabItem>
+
+                <!-- UNC Paths Tab -->
+                <TabItem Header="UNC Paths">
+                    <Grid RowDefinitions="Auto,*" Margin="16">
+                        <TextBlock Grid.Row="0" 
+                                   Text="UNC-Pfade verwalten" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,16"/>
+                        
+                        <TextBlock Grid.Row="1" 
+                                   Text="UNC Paths werden hier implementiert..." 
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Center"
+                                   Foreground="Gray"/>
+                    </Grid>
+                </TabItem>
+
+                <!-- Settings Tab -->
+                <TabItem Header="Settings">
+                    <Grid RowDefinitions="Auto,*" Margin="16">
+                        <TextBlock Grid.Row="0" 
+                                   Text="Einstellungen" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,16"/>
+                        
+                        <StackPanel Grid.Row="1" Spacing="12" MaxWidth="600">
+                            <TextBlock Text="Theme" FontWeight="SemiBold"/>
+                            <ComboBox SelectedIndex="0">
+                                <ComboBoxItem Content="System"/>
+                                <ComboBoxItem Content="Light"/>
+                                <ComboBoxItem Content="Dark"/>
+                            </ComboBox>
+
+                            <TextBlock Text="Language" FontWeight="SemiBold" Margin="0,16,0,0"/>
+                            <ComboBox SelectedIndex="0">
+                                <ComboBoxItem Content="Deutsch"/>
+                                <ComboBoxItem Content="English"/>
+                                <ComboBoxItem Content="Français"/>
+                            </ComboBox>
+
+                            <CheckBox Content="Autostart aktivieren" Margin="0,24,0,0"/>
+                            <CheckBox Content="Tray-Icon anzeigen"/>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Window>

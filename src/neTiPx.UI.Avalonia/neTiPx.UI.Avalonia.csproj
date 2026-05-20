@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>neTiPx.UI.Avalonia</RootNamespace>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <Version>1.7.2.0</Version>
+        <ApplicationIcon>Assets\toolicon.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <!-- Plattform-spezifische Compilation Symbols -->
+    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+        <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(OS)' == 'Unix' OR '$(OS)' == 'Linux'">
+        <DefineConstants>$(DefineConstants);LINUX;UNIX</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <DefineConstants>$(DefineConstants);OSX</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+        <None Remove="lang\**\*.json" />
+        <EmbeddedResource Include="lang\**\*.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.*" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.*" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.*" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.*" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.*" />
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.*" Condition="'$(Configuration)' == 'Debug'" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\neTiPx.Core\neTiPx.Core.csproj" />
+        <ProjectReference Include="..\neTiPx.Services.Windows\neTiPx.Services.Windows.csproj" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+        <ProjectReference Include="..\neTiPx.Services.Linux\neTiPx.Services.Linux.csproj" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+        <ProjectReference Include="..\neTiPx.Services.macOS\neTiPx.Services.macOS.csproj" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+    </ItemGroup>
+</Project>

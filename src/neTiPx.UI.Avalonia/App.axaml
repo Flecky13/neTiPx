@@ -1,0 +1,19 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="neTiPx.UI.Avalonia.App"
+             RequestedThemeVariant="Default">
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+
+    <Application.Resources>
+        <!-- Global Resources -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#0078D4" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#005A9E" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#107C10" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#FF8C00" />
+        <SolidColorBrush x:Key="ErrorBrush" Color="#E81123" />
+    </Application.Resources>
+</Application>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>neTiPx.Core</RootNamespace>
+        <Version>1.7.2.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Text.Json" Version="8.*" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.*" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.*" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    </ItemGroup>
+</Project>
