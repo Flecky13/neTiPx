@@ -394,7 +394,35 @@ zurück zum
 [Inhaltsverzeichnis](#-inhaltsverzeichnis)
 ---
 
-## 📄 Lizenz & Kontakt
+## �️ Build & Entwicklung
+
+Für die Erstellung von Builds für Windows, Linux und macOS siehe die Build-Dokumentation:
+
+- **[Installation/BUILD_QUICKSTART.md](Installation/BUILD_QUICKSTART.md)** - Schnellstart für alle Plattformen
+- **[Installation/BUILD_AND_DEPLOY.md](Installation/BUILD_AND_DEPLOY.md)** - Detaillierte Build- und Deployment-Anleitung
+
+**Unterstützte Plattformen:**
+- Windows (x64, x86, ARM64)
+- Linux (x64, ARM64) - mit .deb, AppImage und tar.gz
+- macOS (Intel, Apple Silicon) - mit .app Bundle und .dmg
+
+**Schnellstart:**
+```bash
+# Alle Plattformen bauen
+./Installation/build-all.sh        # Linux/macOS
+.\Installation\build-all.ps1       # Windows
+
+# Plattformspezifisch mit Paketen
+./Installation/build-linux.sh      # Linux (.deb, AppImage)
+./Installation/build-macos.sh      # macOS (.app, .dmg)
+.\Installation\build-windows.ps1   # Windows (mit NSIS)
+```
+
+zurück zum
+[Inhaltsverzeichnis](#-inhaltsverzeichnis)
+---
+
+## �📄 Lizenz & Kontakt
 
 Siehe `LICENSE` im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden.
 

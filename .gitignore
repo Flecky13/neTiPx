@@ -22,8 +22,22 @@ build_setup.bat
 ## sprachdateien
 test.json
 
-## installer
-[Ii]nstallation/
+
+## installer (ignore output files but keep build scripts)
+[Ii]nstallation
+[Ii]nstallation/*.exe
+[Ii]nstallation/*.msi
+[Ii]nstallation/*.log
+[Ii]nstallation/Output/
+
+## Publish/Package outputs
+publish/
+packages/
+*.AppImage
+*.deb
+*.dmg
+*.app/
+*.iconset/
 
 ## Build results
 [Dd]ebug/

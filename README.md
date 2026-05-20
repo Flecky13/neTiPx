@@ -393,7 +393,35 @@ Back to
 [Table of Contents](#-table-of-contents)
 ---
 
-## 📄 License & Contact
+## �️ Build & Development
+
+For building Windows, Linux and macOS versions see the build documentation:
+
+- **[Installation/BUILD_QUICKSTART.md](Installation/BUILD_QUICKSTART.md)** - Quick start for all platforms
+- **[Installation/BUILD_AND_DEPLOY.md](Installation/BUILD_AND_DEPLOY.md)** - Detailed build and deployment guide
+
+**Supported Platforms:**
+- Windows (x64, x86, ARM64)
+- Linux (x64, ARM64) - with .deb, AppImage and tar.gz
+- macOS (Intel, Apple Silicon) - with .app Bundle and .dmg
+
+**Quick Start:**
+```bash
+# Build all platforms
+./Installation/build-all.sh        # Linux/macOS
+.\Installation\build-all.ps1       # Windows
+
+# Platform-specific with packages
+./Installation/build-linux.sh      # Linux (.deb, AppImage)
+./Installation/build-macos.sh      # macOS (.app, .dmg)
+.\Installation\build-windows.ps1   # Windows (with NSIS)
+```
+
+Back to
+[Table of Contents](#-table-of-contents)
+---
+
+## �📄 License & Contact
 
 See `LICENSE` in the repository. For code questions, please use Issues/PRs in the repo.
 
