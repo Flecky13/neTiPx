@@ -1,0 +1,15 @@
+<Project>
+    <PropertyGroup>
+        <!-- Zentrale Versionsangabe für alle Projekte -->
+        <Version>2.0.1.0</Version>
+        <AssemblyVersion>2.0.1.0</AssemblyVersion>
+        <FileVersion>2.0.1.0</FileVersion>
+        
+        <!-- Gemeinsame Metadaten -->
+        <Authors>Pedro</Authors>
+        <Company>neTiPx</Company>
+        <Product>neTiPx - Network Tools</Product>
+        <Copyright>© 2026 neTiPx by Pedro</Copyright>
+        <Description>Cross-platform network configuration and diagnostic tool</Description>
+    </PropertyGroup>
+</Project>

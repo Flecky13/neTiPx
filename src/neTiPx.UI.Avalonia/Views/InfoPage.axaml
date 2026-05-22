@@ -2,8 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
-             x:Class="neTiPx.UI.Avalonia.Views.InfoPage">
+             x:Class="neTiPx.UI.Avalonia.Views.InfoPage"
+             x:DataType="vm:InfoViewModel">
+    
+    <Design.DataContext>
+        <vm:InfoViewModel />
+    </Design.DataContext>
     
     <ScrollViewer>
         <StackPanel Spacing="16" Margin="24">
@@ -40,47 +46,50 @@
                         
                         <StackPanel Spacing="4">
                             <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
-                            <TextBlock Text="1.7.2.0" FontSize="16" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
                             <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
-                            <TextBlock Text="1.7.2.0" FontSize="16" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding LatestVersion}" FontSize="16" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Plattform" Opacity="0.7" FontSize="12" />
+                            <TextBlock Text="{Binding PlatformInfo}" FontSize="14" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse Width="10" Height="10" Fill="Green" VerticalAlignment="Center" />
-                            <TextBlock Text="Update-Status" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
+                            <Ellipse Width="10" Height="10" Fill="{Binding UpdateStatusColor}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" Opacity="0.8" VerticalAlignment="Center" />
                         </StackPanel>
 
-                        <TextBlock Text="Anwendung ist auf dem neuesten Stand" FontSize="12" Opacity="0.8" TextWrapping="Wrap" />
-
-                        <StackPanel Spacing="2">
-                            <Button Content="GitHub Releases →" HorizontalAlignment="Left" />
-                            <Button Content="Latest Release →" HorizontalAlignment="Left" />
+                        <StackPanel Spacing="4" Margin="0,8,0,0">
+                            <Button Content="GitHub Releases →" HorizontalAlignment="Left" 
+                                    Command="{Binding OpenGitHubReleasesCommand}" />
+                            <Button Content="Latest Release →" HorizontalAlignment="Left"
+                                    Command="{Binding OpenLatestReleaseCommand}" />
                         </StackPanel>
                     </StackPanel>
 
                     <!-- Rechte Seite: Update-Buttons -->
                     <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
-                        <Button HorizontalAlignment="Stretch" MinWidth="200">
+                        <Button HorizontalAlignment="Stretch" MinWidth="200"
+                                Command="{Binding CheckForUpdatesCommand}"
+                                IsEnabled="{Binding !IsChecking}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🔍" FontSize="16" />
                                 <TextBlock Text="Auf Update Prüfen" />
                             </StackPanel>
                         </Button>
 
-                        <Button HorizontalAlignment="Stretch" MinWidth="200" Classes="accent">
+                        <!-- Update-Button nur sichtbar wenn Update verfügbar -->
+                        <Button HorizontalAlignment="Stretch" MinWidth="200" Classes="accent"
+                                IsVisible="{Binding IsUpdateAvailable}"
+                                Command="{Binding DownloadUpdateCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="⬇️" FontSize="16" />
-                                <TextBlock Text="Update Installieren" />
-                            </StackPanel>
-                        </Button>
-
-                        <Button HorizontalAlignment="Stretch" MinWidth="200">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="🔓" FontSize="16" />
-                                <TextBlock Text="MSI Installieren" />
+                                <TextBlock Text="Update Herunterladen" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -115,25 +124,61 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
-                        <Button Classes="accent">
+                        <Button Classes="accent" Command="{Binding OpenDocumentationCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📄" />
                                 <TextBlock Text="Dokumentation" />
                             </StackPanel>
                         </Button>
-                        <Button>
+                        <Button Command="{Binding OpenBugReportCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🐛" />
                                 <TextBlock Text="Bug melden" />
                             </StackPanel>
                         </Button>
-                        <Button>
+                        <Button Command="{Binding OpenGitHubRepositoryCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="⭐" />
                                 <TextBlock Text="GitHub Repository" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Lizenz & Kontakt -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="24"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Lizenz &amp; Kontakt" FontSize="18" FontWeight="SemiBold" />
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Siehe LICENSE im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden."
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                        <TextBlock Text="Kontakt:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
+                        <Button Grid.Row="0" Grid.Column="1" 
+                                Content="https://github.com/Flecky13"
+                                Command="{Binding OpenContactCommand}"
+                                HorizontalAlignment="Left"
+                                Padding="4,2"
+                                Classes="hyperlink" />
+
+                        <TextBlock Text="Support:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
+                        <Button Grid.Row="1" Grid.Column="1" 
+                                Content="https://buymeacoffee.com/pedrotepe"
+                                Command="{Binding OpenSupportCommand}"
+                                HorizontalAlignment="Left"
+                                Padding="4,2"
+                                Classes="hyperlink" />
+                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

@@ -9,7 +9,6 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <Version>2.0.1.0</Version>
         <ApplicationIcon>Assets\toolicon.ico</ApplicationIcon>
     </PropertyGroup>
 
