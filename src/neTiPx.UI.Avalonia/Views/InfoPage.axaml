@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="neTiPx.UI.Avalonia.Views.InfoPage">
+    
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="24">
+            <!-- Header mit Image -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="24" 
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Info" FontSize="24" FontWeight="Bold" />
+                        <TextBlock Text="Anwendungs Informationen, Hilfe, Update" />
+                    </StackPanel>
+                    <Image Grid.Column="1"
+                           Source="/Assets/toolicon.ico"
+                           Width="120"
+                           Height="120"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right" />
+                </Grid>
+            </Border>
+
+            <!-- Versions-Info mit Update-Buttons -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="24"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <!-- Linke Seite: Versions-Informationen -->
+                    <StackPanel Grid.Column="0" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock Text="neTiPx - Network Tools" FontSize="18" FontWeight="SemiBold" />
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
+                            <TextBlock Text="1.7.2.0" FontSize="16" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
+                            <TextBlock Text="1.7.2.0" FontSize="16" FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Ellipse Width="10" Height="10" Fill="Green" VerticalAlignment="Center" />
+                            <TextBlock Text="Update-Status" FontSize="12" Opacity="0.7" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <TextBlock Text="Anwendung ist auf dem neuesten Stand" FontSize="12" Opacity="0.8" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="2">
+                            <Button Content="GitHub Releases →" HorizontalAlignment="Left" />
+                            <Button Content="Latest Release →" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Rechte Seite: Update-Buttons -->
+                    <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
+                        <Button HorizontalAlignment="Stretch" MinWidth="200">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="🔍" FontSize="16" />
+                                <TextBlock Text="Auf Update Prüfen" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button HorizontalAlignment="Stretch" MinWidth="200" Classes="accent">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="⬇️" FontSize="16" />
+                                <TextBlock Text="Update Installieren" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button HorizontalAlignment="Stretch" MinWidth="200">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="🔓" FontSize="16" />
+                                <TextBlock Text="MSI Installieren" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- About -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="24"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Über neTiPx" FontSize="18" FontWeight="Bold" />
+                    <TextBlock Text="neTiPx ist ein umfassendes Netzwerk-Konfigurations- und Diagnose-Tool für Windows, macOS und Linux." TextWrapping="Wrap" />
+                    
+                    <Separator Margin="0,8" />
+                    
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Entwickelt von: Pedro" FontWeight="SemiBold" />
+                        <TextBlock Text="© 2026 neTiPx" Opacity="0.7" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4" Margin="0,8,0,0">
+                        <TextBlock Text="Features:" FontWeight="SemiBold" />
+                        <TextBlock Text="• IP-Profile verwalten und schnell wechseln" />
+                        <TextBlock Text="• Netzwerk-Scanner und PING-Tools" />
+                        <TextBlock Text="• WLAN-Management" />
+                        <TextBlock Text="• Netzwerk-Rechner und Routing" />
+                        <TextBlock Text="• UNC-Pfade verwalten" />
+                        <TextBlock Text="• Plattformübergreifend (Windows, macOS, Linux)" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+                        <Button Classes="accent">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="📄" />
+                                <TextBlock Text="Dokumentation" />
+                            </StackPanel>
+                        </Button>
+                        <Button>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="🐛" />
+                                <TextBlock Text="Bug melden" />
+                            </StackPanel>
+                        </Button>
+                        <Button>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="⭐" />
+                                <TextBlock Text="GitHub Repository" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

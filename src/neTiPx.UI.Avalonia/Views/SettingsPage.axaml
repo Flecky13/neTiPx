@@ -1,0 +1,236 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="neTiPx.UI.Avalonia.Views.SettingsPage">
+    
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="24">
+            <!-- Header mit Image -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="24" 
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Einstellungen" FontSize="24" FontWeight="Bold" />
+                        <TextBlock Text="Konfiguriere dein Tool nach deinen Wünschen" />
+                    </StackPanel>
+                    <Image Grid.Column="1"
+                           Source="/Assets/toolicon.ico"
+                           Width="120"
+                           Height="120"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right" />
+                </Grid>
+            </Border>
+
+            <!-- 3x3 Grid für Konfigurationsbereiche -->
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*,*" RowSpacing="16" ColumnSpacing="16">
+                <!-- Oben Links: Netzwerkadapter -->
+                <Border Grid.Row="0" Grid.Column="0" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Netzwerkadapter" FontWeight="Bold" />
+                        <TextBlock Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Primärer Adapter (NIC 1):" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0">
+                                <ComboBoxItem Content="Ethernet" />
+                                <ComboBoxItem Content="Wi-Fi" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Sekundärer Adapter (NIC 2):" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="1">
+                                <ComboBoxItem Content="Ethernet" />
+                                <ComboBoxItem Content="Wi-Fi" />
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Oben Mitte: Ping-Logging -->
+                <Border Grid.Row="0" Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Ping-Logging" FontWeight="Bold" />
+                        <TextBlock Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Log-Ordner" FontWeight="SemiBold" FontSize="12" />
+                            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                                    BorderThickness="1" 
+                                    CornerRadius="6" 
+                                    Padding="10,8">
+                                <TextBlock Text="C:\Users\...\Documents\neTiPx\Logs" Opacity="0.8" />
+                            </Border>
+                        </StackPanel>
+
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="📁 Ordner ändern" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Oben Rechts: Erscheinungsbild -->
+                <Border Grid.Row="0" Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Erscheinungsbild" FontWeight="Bold" />
+                        <TextBlock Text="Theme und Sprache anpassen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Theme:" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0">
+                                <ComboBoxItem Content="System" />
+                                <ComboBoxItem Content="Light" />
+                                <ComboBoxItem Content="Dark" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Sprache:" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0">
+                                <ComboBoxItem Content="Deutsch" />
+                                <ComboBoxItem Content="English" />
+                                <ComboBoxItem Content="Français" />
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Links: Autostart -->
+                <Border Grid.Row="1" Grid.Column="0" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Autostart" FontWeight="Bold" />
+                        <TextBlock Text="Anwendung beim Systemstart" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <CheckBox Content="Autostart aktivieren" />
+                        <CheckBox Content="Minimiert starten" />
+                        <CheckBox Content="Im Tray starten" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Mitte: Benachrichtigungen -->
+                <Border Grid.Row="1" Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Benachrichtigungen" FontWeight="Bold" />
+                        <TextBlock Text="Systembenachrichtigungen konfigurieren" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <CheckBox Content="Profil-Wechsel anzeigen" IsChecked="True" />
+                        <CheckBox Content="Netzwerkfehler anzeigen" IsChecked="True" />
+                        <CheckBox Content="Updates verfügbar" IsChecked="True" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Rechts: Erweitert -->
+                <Border Grid.Row="1" Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Erweitert" FontWeight="Bold" />
+                        <TextBlock Text="Erweiterte Optionen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <CheckBox Content="Debug-Modus aktivieren" />
+                        <CheckBox Content="Telemetrie senden" />
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="Cache leeren" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Links: Sicherheit -->
+                <Border Grid.Row="2" Grid.Column="0" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Sicherheit" FontWeight="Bold" />
+                        <TextBlock Text="Sicherheitseinstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <CheckBox Content="Admin-Rechte benötigt" IsChecked="True" />
+                        <CheckBox Content="Passwortschutz" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Mitte: Netzwerk -->
+                <Border Grid.Row="2" Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Netzwerk" FontWeight="Bold" />
+                        <TextBlock Text="Netzwerk-Timeouts und Optionen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Ping Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
+                            <NumericUpDown Value="1000" Minimum="100" Maximum="10000" Increment="100" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Scan Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
+                            <NumericUpDown Value="5000" Minimum="1000" Maximum="60000" Increment="1000" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Rechts: Daten -->
+                <Border Grid.Row="2" Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Daten" FontWeight="Bold" />
+                        <TextBlock Text="Anwendungsdaten verwalten" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="📤 Einstellungen exportieren" />
+                        </Button>
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="📥 Einstellungen importieren" />
+                        </Button>
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="🗑️ Zurücksetzen" Foreground="Red" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
