@@ -7,6 +7,9 @@ namespace neTiPx.UI.Avalonia.ViewModels;
 public partial class HoverViewModel : ObservableObject
 {
     private readonly AdapterStore _adapterStore;
+    private readonly InternetService _internetService;
+    private readonly NetworkInfoService _networkInfoService;
+    private readonly AdapterDiscoveryService _adapterDiscoveryService;
 
     [ObservableProperty]
     private string _publicIp = "-";
@@ -65,19 +68,34 @@ public partial class HoverViewModel : ObservableObject
     public HoverViewModel()
     {
         _adapterStore = new AdapterStore();
+        _internetService = new InternetService();
+        _networkInfoService = new NetworkInfoService();
+        _adapterDiscoveryService = new AdapterDiscoveryService();
     }
 
-    public Task RefreshAsync()
+    public async Task RefreshAsync()
     {
         var adapterSettings = _adapterStore.ReadAdapters();
         var adapter1 = adapterSettings.PrimaryAdapter;
         var adapter2 = adapterSettings.SecondaryAdapter;
 
-        // Simplified for now - you can implement these services later
-        PublicIp = "-";
+        // Auto-detect adapters if none configured
+        if (string.IsNullOrWhiteSpace(adapter1) && string.IsNullOrWhiteSpace(adapter2))
+        {
+            var autoDetected = _adapterDiscoveryService.AutoDetectAdapters();
+            if (autoDetected != null)
+            {
+                adapter1 = autoDetected.PrimaryAdapter;
+                adapter2 = autoDetected.SecondaryAdapter;
+            }
+        }
+
+        // Load public IP asynchronously
+        PublicIp = await _internetService.LoadExternalIpAsync();
         
-        string[,]? nic1 = null;
-        string[,]? nic2 = null;
+        // Load network info for both adapters
+        var nic1 = _networkInfoService.GetNetworkInfo(adapter1 ?? string.Empty);
+        var nic2 = _networkInfoService.GetNetworkInfo(adapter2 ?? string.Empty);
 
         ParseNetworkInfo(nic1, out var nic1Name, out var nic1Ipv4, out var nic1Gw4, out var nic1Dns4,
             out var nic1Ipv6, out var nic1Gw6, out var nic1Dns6, out var hasNic1Ipv6);
@@ -104,8 +122,6 @@ public partial class HoverViewModel : ObservableObject
         HasNic2Ipv6 = hasNic2Ipv6;
 
         HasNic2 = !string.IsNullOrWhiteSpace(nic2Name);
-        
-        return Task.CompletedTask;
     }
 
     private static void ParseNetworkInfo(string[,]? info, out string name, out string ipv4, out string gw4,
