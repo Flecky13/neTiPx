@@ -1,0 +1,130 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="400"
+        x:Class="neTiPx.UI.Avalonia.Views.HoverWindow"
+        x:DataType="vm:HoverViewModel"
+        Title="neTiPx Info"
+        Width="330" 
+        MinWidth="330" MaxWidth="330"
+        SizeToContent="Height"
+        CanResize="false"
+        ShowInTaskbar="False"
+        SystemDecorations="BorderOnly"
+        Background="White">
+
+    <Design.DataContext>
+        <vm:HoverViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="White">
+        <StackPanel Spacing="0" Background="White" Margin="5">
+            
+            <!-- Public IP Section -->
+            <Border Background="#FFEFD5" Padding="5" Margin="0,0,0,5">
+                <Grid ColumnDefinitions="100,*">
+                    <TextBlock Grid.Column="0" Text="Public IP:" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding PublicIp}" FontSize="13" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Separator -->
+            <Border Height="5" Background="#DAA520" Margin="0,0,0,5" />
+
+            <!-- NIC1 Section -->
+            <Border Background="White" Padding="5" Margin="0,0,0,5">
+                <StackPanel Spacing="5">
+                    <!-- Header -->
+                    <Border Background="#FFEFD5" Padding="3" Margin="-5,-5,-5,0">
+                        <TextBlock Text="{Binding Nic1Name}" FontWeight="Bold" FontSize="13" />
+                    </Border>
+
+                    <!-- IPv4 -->
+                    <Grid ColumnDefinitions="70,*">
+                        <TextBlock Grid.Column="0" Text="IPv4:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Nic1Ipv4}" FontSize="12" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <!-- Gateway4 -->
+                    <Grid ColumnDefinitions="70,*">
+                        <TextBlock Grid.Column="0" Text="Gateway4:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Nic1Gateway4}" FontSize="12" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <!-- DNS4 -->
+                    <Grid ColumnDefinitions="70,*">
+                        <TextBlock Grid.Column="0" Text="DNS4:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Nic1Dns4}" FontSize="12" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <!-- IPv6 Section -->
+                    <StackPanel Spacing="5" IsVisible="{Binding HasNic1Ipv6}">
+                        <Grid ColumnDefinitions="70,*">
+                            <TextBlock Grid.Column="0" Text="IPv6:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Nic1Ipv6}" FontSize="12" TextWrapping="Wrap" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="70,*">
+                            <TextBlock Grid.Column="0" Text="Gateway6:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Nic1Gateway6}" FontSize="12" TextWrapping="Wrap" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="70,*">
+                            <TextBlock Grid.Column="0" Text="DNS6:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Nic1Dns6}" FontSize="12" TextWrapping="Wrap" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- NIC2 Section -->
+            <Border Background="White" Padding="5" Margin="0,0,0,5" IsVisible="{Binding HasNic2}">
+                <StackPanel Spacing="5">
+                    <!-- Header -->
+                    <Border Background="#FFEFD5" Padding="3" Margin="-5,-5,-5,0">
+                        <TextBlock Text="{Binding Nic2Name}" FontWeight="Bold" FontSize="13" />
+                    </Border>
+
+                    <!-- IPv4 -->
+                    <Grid ColumnDefinitions="70,*">
+                        <TextBlock Grid.Column="0" Text="IPv4:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Nic2Ipv4}" FontSize="12" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <!-- Gateway4 -->
+                    <Grid ColumnDefinitions="70,*">
+                        <TextBlock Grid.Column="0" Text="Gateway4:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Nic2Gateway4}" FontSize="12" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <!-- DNS4 -->
+                    <Grid ColumnDefinitions="70,*">
+                        <TextBlock Grid.Column="0" Text="DNS4:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                        <TextBlock Grid.Column="1" Text="{Binding Nic2Dns4}" FontSize="12" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <!-- IPv6 Section -->
+                    <StackPanel Spacing="5" IsVisible="{Binding HasNic2Ipv6}">
+                        <Grid ColumnDefinitions="70,*">
+                            <TextBlock Grid.Column="0" Text="IPv6:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Nic2Ipv6}" FontSize="12" TextWrapping="Wrap" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="70,*">
+                            <TextBlock Grid.Column="0" Text="Gateway6:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Nic2Gateway6}" FontSize="12" TextWrapping="Wrap" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="70,*">
+                            <TextBlock Grid.Column="0" Text="DNS6:" FontWeight="Bold" FontSize="12" TextAlignment="Right" Margin="0,0,5,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Nic2Dns6}" FontSize="12" TextWrapping="Wrap" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>

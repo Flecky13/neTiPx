@@ -1,0 +1,207 @@
+using System;
+using System.Threading.Tasks;
+using System.Timers;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform;
+using Avalonia.Threading;
+using neTiPx.UI.Avalonia.Views;
+using Timer = System.Timers.Timer;
+
+namespace neTiPx.UI.Avalonia.Services;
+
+public class TrayService : IDisposable
+{
+    private readonly TrayIcon _trayIcon;
+    private readonly HoverWindow _hoverWindow;
+    private readonly Timer _autoHideTimer;
+    private readonly Timer _singleClickTimer;
+    private int _clickCount = 0;
+    private const int DoubleClickMilliseconds = 500;
+    private const int AutoHideSeconds = 5;
+    private bool _isHoverWindowVisible = false;
+
+    public TrayService()
+    {
+        _hoverWindow = new HoverWindow();
+
+        _autoHideTimer = new Timer(AutoHideSeconds * 1000) { AutoReset = false };
+        _autoHideTimer.Elapsed += AutoHideTimer_Elapsed;
+
+        _singleClickTimer = new Timer(DoubleClickMilliseconds) { AutoReset = false };
+        _singleClickTimer.Elapsed += SingleClickTimer_Elapsed;
+
+        // Create TrayIcon
+        _trayIcon = new TrayIcon();
+        
+        // Load icon from assets
+        try
+        {
+            var iconUri = new Uri("avares://neTiPx.UI.Avalonia/Assets/toolicon.ico");
+            var assets = AssetLoader.Open(iconUri);
+            _trayIcon.Icon = new WindowIcon(assets);
+        }
+        catch
+        {
+            // Fallback: no icon
+        }
+
+        _trayIcon.ToolTipText = "neTiPx";
+        
+        // Create context menu
+        var menu = new NativeMenu();
+        
+        var infoItem = new NativeMenuItem("Netzwerk-Info umschalten");
+        infoItem.Click += (_, _) => ToggleHoverWindow();
+        menu.Add(infoItem);
+        
+        menu.Add(new NativeMenuItemSeparator());
+        
+        var openItem = new NativeMenuItem("Öffnen/Schließen");
+        openItem.Click += (_, _) => ToggleMainWindow();
+        menu.Add(openItem);
+        
+        menu.Add(new NativeMenuItemSeparator());
+        
+        var exitItem = new NativeMenuItem("Beenden");
+        exitItem.Click += (_, _) => ExitApplication();
+        menu.Add(exitItem);
+        
+        _trayIcon.Menu = menu;
+        
+        // Handle clicks - detect single vs double click
+        _trayIcon.Clicked += OnTrayIconClicked;
+        
+        _trayIcon.IsVisible = true;
+    }
+
+    private void OnTrayIconClicked(object? sender, EventArgs e)
+    {
+        _clickCount++;
+        
+        if (_clickCount == 1)
+        {
+            // Start timer to wait for potential second click
+            _singleClickTimer.Stop();
+            _singleClickTimer.Start();
+        }
+        else if (_clickCount == 2)
+        {
+            // Double click detected - stop timer and toggle main window
+            _singleClickTimer.Stop();
+            _clickCount = 0;
+            ToggleMainWindow();
+        }
+    }
+
+    private void SingleClickTimer_Elapsed(object? sender, ElapsedEventArgs e)
+    {
+        // Timer elapsed, it was a single click - toggle info window
+        _clickCount = 0;
+        ToggleHoverWindow();
+    }
+
+    private void ToggleHoverWindow()
+    {
+        if (_isHoverWindowVisible)
+        {
+            // Window is open - close it
+            HideHoverWindow();
+        }
+        else
+        {
+            // Window is closed - open it
+            ShowHoverWindow();
+        }
+    }
+
+    private async Task ShowHoverWindowAsync()
+    {
+        await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            await _hoverWindow.RefreshAsync();
+            _hoverWindow.Show();
+            _isHoverWindowVisible = true;
+            
+            // Position window near cursor (bottom-right corner of screen as default)
+            var screen = _hoverWindow.Screens.Primary;
+            if (screen != null)
+            {
+                var workingArea = screen.WorkingArea;
+                var x = workingArea.Right - _hoverWindow.Width - 20;
+                var y = workingArea.Bottom - _hoverWindow.Height - 50;
+                
+                _hoverWindow.Position = new PixelPoint((int)x, (int)y);
+            }
+
+            _autoHideTimer.Stop();
+            _autoHideTimer.Start();
+        });
+    }
+
+    private void ShowHoverWindow()
+    {
+        _ = ShowHoverWindowAsync();
+    }
+
+    private void ToggleMainWindow()
+    {
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var mainWindow = desktop.MainWindow;
+                if (mainWindow != null)
+                {
+                    if (mainWindow.IsVisible)
+                    {
+                        // Window is open - hide it
+                        mainWindow.Hide();
+                    }
+                    else
+                    {
+                        // Window is closed - show it
+                        mainWindow.Show();
+                        mainWindow.Activate();
+                        mainWindow.WindowState = WindowState.Normal;
+                    }
+                }
+            }
+        });
+    }
+
+    private void ExitApplication()
+    {
+        Dispose();
+        
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.Shutdown();
+            }
+        });
+    }
+
+    private void HideHoverWindow()
+    {
+        _autoHideTimer.Stop();
+        _isHoverWindowVisible = false;
+        Dispatcher.UIThread.InvokeAsync(() => _hoverWindow.Hide());
+    }
+
+    private void AutoHideTimer_Elapsed(object? sender, ElapsedEventArgs e)
+    {
+        HideHoverWindow();
+    }
+
+    public void Dispose()
+    {
+        _trayIcon.IsVisible = false;
+        _trayIcon.Dispose();
+        _autoHideTimer.Dispose();
+        _singleClickTimer.Dispose();
+        _hoverWindow?.Close();
+    }
+}

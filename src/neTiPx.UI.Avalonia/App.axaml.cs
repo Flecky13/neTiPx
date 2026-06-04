@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using neTiPx.Core.Services;
+using neTiPx.UI.Avalonia.Services;
 using neTiPx.UI.Avalonia.Views;
 using System;
 using System.Runtime.InteropServices;
@@ -20,6 +21,7 @@ namespace neTiPx.UI.Avalonia;
 public partial class App : Application
 {
     public static IServiceProvider? ServiceProvider { get; private set; }
+    private TrayService? _trayService;
 
     public override void Initialize()
     {
@@ -32,6 +34,17 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow();
+            
+            // Initialize TrayService
+            _trayService = new TrayService();
+            
+            // Start minimized to tray (window is created but not shown)
+            // User can open it from tray icon
+            
+            desktop.ShutdownRequested += (sender, e) =>
+            {
+                _trayService?.Dispose();
+            };
         }
 
         base.OnFrameworkInitializationCompleted();
