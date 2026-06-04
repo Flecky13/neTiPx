@@ -58,8 +58,47 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Oben Mitte: Ping-Logging -->
+                <!-- Oben Mitte: Sicherheit -->
                 <Border Grid.Row="0" Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Sicherheit" FontWeight="Bold" />
+                        <TextBlock Text="Sicherheitseinstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <CheckBox Content="Admin-Rechte benötigt" IsChecked="True" />
+                        <CheckBox Content="Passwortschutz" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Oben Rechts: Netzwerk -->
+                <Border Grid.Row="0" Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Netzwerk" FontWeight="Bold" />
+                        <TextBlock Text="Netzwerk-Timeouts und Optionen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Ping Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
+                            <NumericUpDown Value="1000" Minimum="100" Maximum="10000" Increment="100" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Scan Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
+                            <NumericUpDown Value="5000" Minimum="1000" Maximum="60000" Increment="1000" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Links: Ping-Logging -->
+                <Border Grid.Row="1" Grid.Column="0" 
                         BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                         BorderThickness="1" 
                         CornerRadius="8" 
@@ -85,8 +124,44 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Oben Rechts: Erscheinungsbild -->
-                <Border Grid.Row="0" Grid.Column="2" 
+                <!-- Mitte Mitte: Reserviert -->
+                <Border Grid.Row="1" Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Reserviert" FontWeight="Bold" />
+                        <TextBlock Text="Für zukünftige Features" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mitte Rechts: Daten -->
+                <Border Grid.Row="1" Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Daten" FontWeight="Bold" />
+                        <TextBlock Text="Anwendungsdaten verwalten" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="📤 Einstellungen exportieren" />
+                        </Button>
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="📥 Einstellungen importieren" />
+                        </Button>
+                        <Button HorizontalAlignment="Stretch">
+                            <TextBlock Text="🗑️ Zurücksetzen" Foreground="Red" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Links: Erscheinungsbild -->
+                <Border Grid.Row="2" Grid.Column="0" 
                         BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                         BorderThickness="1" 
                         CornerRadius="8" 
@@ -116,8 +191,8 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Mitte Links: Autostart -->
-                <Border Grid.Row="1" Grid.Column="0" 
+                <!-- Unten Mitte: Autostart -->
+                <Border Grid.Row="2" Grid.Column="1" 
                         BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                         BorderThickness="1" 
                         CornerRadius="8" 
@@ -133,82 +208,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Mitte Mitte: Benachrichtigungen -->
-                <Border Grid.Row="1" Grid.Column="1" 
-                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
-                        BorderThickness="1" 
-                        CornerRadius="8" 
-                        Padding="16"
-                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Benachrichtigungen" FontWeight="Bold" />
-                        <TextBlock Text="Systembenachrichtigungen konfigurieren" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-
-                        <CheckBox Content="Profil-Wechsel anzeigen" IsChecked="True" />
-                        <CheckBox Content="Netzwerkfehler anzeigen" IsChecked="True" />
-                        <CheckBox Content="Updates verfügbar" IsChecked="True" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Mitte Rechts: Erweitert -->
-                <Border Grid.Row="1" Grid.Column="2" 
-                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
-                        BorderThickness="1" 
-                        CornerRadius="8" 
-                        Padding="16"
-                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Erweitert" FontWeight="Bold" />
-                        <TextBlock Text="Erweiterte Optionen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-
-                        <CheckBox Content="Debug-Modus aktivieren" />
-                        <CheckBox Content="Telemetrie senden" />
-                        <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="Cache leeren" />
-                        </Button>
-                    </StackPanel>
-                </Border>
-
-                <!-- Unten Links: Sicherheit -->
-                <Border Grid.Row="2" Grid.Column="0" 
-                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
-                        BorderThickness="1" 
-                        CornerRadius="8" 
-                        Padding="16"
-                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Sicherheit" FontWeight="Bold" />
-                        <TextBlock Text="Sicherheitseinstellungen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-
-                        <CheckBox Content="Admin-Rechte benötigt" IsChecked="True" />
-                        <CheckBox Content="Passwortschutz" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Unten Mitte: Netzwerk -->
-                <Border Grid.Row="2" Grid.Column="1" 
-                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
-                        BorderThickness="1" 
-                        CornerRadius="8" 
-                        Padding="16"
-                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Netzwerk" FontWeight="Bold" />
-                        <TextBlock Text="Netzwerk-Timeouts und Optionen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Ping Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
-                            <NumericUpDown Value="1000" Minimum="100" Maximum="10000" Increment="100" />
-                        </StackPanel>
-
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Scan Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
-                            <NumericUpDown Value="5000" Minimum="1000" Maximum="60000" Increment="1000" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Unten Rechts: Daten -->
+                <!-- Unten Rechts: Info-Fenster -->
                 <Border Grid.Row="2" Grid.Column="2" 
                         BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                         BorderThickness="1" 
@@ -216,18 +216,10 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Daten" FontWeight="Bold" />
-                        <TextBlock Text="Anwendungsdaten verwalten" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="Info-Fenster" FontWeight="Bold" />
+                        <TextBlock Text="Tray Info-Fenster konfigurieren" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
-                        <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="📤 Einstellungen exportieren" />
-                        </Button>
-                        <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="📥 Einstellungen importieren" />
-                        </Button>
-                        <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="🗑️ Zurücksetzen" Foreground="Red" />
-                        </Button>
+                        <TextBlock Text="Konfiguration folgt..." FontStyle="Italic" Opacity="0.6" />
                     </StackPanel>
                 </Border>
             </Grid>
