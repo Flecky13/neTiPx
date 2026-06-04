@@ -6,6 +6,83 @@
 
     <Application.Styles>
         <FluentTheme />
+        
+        <!-- Global TextBlock Style for Theme Text Color -->
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <!-- ComboBox Style -->
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        </Style>
+        
+        <!-- ComboBox Dropdown Border Style -->
+        <Style Selector="ComboBox /template/ Border#PopupBorder">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxDropDownBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxDropDownBorderBrush}" />
+        </Style>
+        
+        <!-- ComboBox Item Style -->
+        <Style Selector="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource ListBoxItemForeground}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        
+        <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ListBoxItemBackgroundPointerOver}" />
+        </Style>
+        
+        <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ListBoxItemBackgroundSelected}" />
+        </Style>
+        
+        <Style Selector="ComboBoxItem:selected">
+            <Setter Property="Foreground" Value="{DynamicResource ListBoxItemForegroundSelected}" />
+        </Style>
+        
+        <!-- CheckBox Style -->
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="CheckBox /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="CheckBox TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <!-- CheckBox Border Style -->
+        <Style Selector="CheckBox /template/ Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrush}" />
+        </Style>
+        
+        <!-- Disable CheckBox text color change on hover -->
+        <Style Selector="CheckBox:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="CheckBox:pointerover TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <!-- Button Style -->
+        <Style Selector="Button">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        </Style>
+        
+        <!-- NumericUpDown Style -->
+        <Style Selector="NumericUpDown">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        </Style>
     </Application.Styles>
 
     <Application.Resources>
@@ -15,5 +92,18 @@
         <SolidColorBrush x:Key="SuccessBrush" Color="#107C10" />
         <SolidColorBrush x:Key="WarningBrush" Color="#FF8C00" />
         <SolidColorBrush x:Key="ErrorBrush" Color="#E81123" />
+        
+        <!-- Theme Colors (will be overridden by ThemeApplier) -->
+        <Color x:Key="AppBackgroundColor">#FF1A2430</Color>
+        <Color x:Key="CardBackgroundColor">#FF223040</Color>
+        <Color x:Key="CardBorderColor">#FF30465A</Color>
+        <Color x:Key="AppTextColor">#FFFFFFFF</Color>
+        <Color x:Key="AppTextSecondaryColor">#FFD0DAE5</Color>
+        
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="{DynamicResource AppBackgroundColor}" />
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="{DynamicResource CardBackgroundColor}" />
+        <SolidColorBrush x:Key="CardBorderBrush" Color="{DynamicResource CardBorderColor}" />
+        <SolidColorBrush x:Key="AppTextBrush" Color="{DynamicResource AppTextColor}" />
+        <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{DynamicResource AppTextSecondaryColor}" />
     </Application.Resources>
 </Application>

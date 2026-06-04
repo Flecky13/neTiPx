@@ -172,12 +172,10 @@
                         <TextBlock Text="Theme und Sprache anpassen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Theme:" FontWeight="SemiBold" FontSize="12" />
-                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0">
-                                <ComboBoxItem Content="System" />
-                                <ComboBoxItem Content="Light" />
-                                <ComboBoxItem Content="Dark" />
-                            </ComboBox>
+                            <TextBlock Text="Farbschema:" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox HorizontalAlignment="Stretch" 
+                                      ItemsSource="{Binding AvailableThemes}"
+                                      SelectedItem="{Binding SelectedTheme}" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">

@@ -32,7 +32,7 @@
             
             <!-- Navigation Pane -->
             <SplitView.Pane>
-                <Grid RowDefinitions="Auto,*,Auto">
+                <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource SystemControlBackgroundAltMediumBrush}">
                     <!-- Toggle Button -->
                     <Button Grid.Row="0" 
                             Command="{Binding TogglePaneCommand}"
@@ -40,7 +40,7 @@
                             HorizontalAlignment="Left"
                             Margin="2"
                             Padding="2">
-                        <TextBlock Text="☰" FontSize="18" />
+                        <TextBlock Text="☰" FontSize="18" Foreground="{DynamicResource NavigationViewItemForeground}" />
                     </Button>
 
                     <!-- Navigation Items -->
@@ -59,10 +59,16 @@
                                         HorizontalContentAlignment="Left"
                                         Padding="2,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{Binding Icon}" FontSize="16" VerticalAlignment="Center" Width="20" TextAlignment="Center" />
+                                        <TextBlock Text="{Binding Icon}" 
+                                                   FontSize="16" 
+                                                   VerticalAlignment="Center" 
+                                                   Width="20" 
+                                                   TextAlignment="Center"
+                                                   Foreground="{DynamicResource NavigationViewItemForeground}" />
                                         <TextBlock Text="{Binding DisplayName}" 
                                                    VerticalAlignment="Center"
-                                                   IsVisible="{Binding $parent[Window].DataContext.IsPaneOpen}" />
+                                                   IsVisible="{Binding $parent[Window].DataContext.IsPaneOpen}"
+                                                   Foreground="{DynamicResource NavigationViewItemForeground}" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
@@ -76,7 +82,8 @@
                                FontSize="12"
                                Opacity="0.7"
                                VerticalAlignment="Bottom"
-                               IsVisible="{Binding IsPaneOpen}" />
+                               IsVisible="{Binding IsPaneOpen}"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                 </Grid>
             </SplitView.Pane>
 

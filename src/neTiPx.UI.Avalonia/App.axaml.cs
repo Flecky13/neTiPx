@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using neTiPx.Core.Services;
 using neTiPx.UI.Avalonia.Services;
+using neTiPx.UI.Avalonia.ViewModels;
 using neTiPx.UI.Avalonia.Views;
 using System;
 using System.Runtime.InteropServices;
@@ -33,6 +34,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // Load and apply saved theme before creating window
+            LoadAndApplyTheme();
+            
             desktop.MainWindow = new MainWindow();
             
             // Initialize TrayService
@@ -81,5 +85,20 @@ public partial class App : Application
         // services.AddTransient<MainWindowViewModel>();
 
         ServiceProvider = services.BuildServiceProvider();
+    }
+
+    private void LoadAndApplyTheme()
+    {
+        try
+        {
+            var themeService = new ThemeService();
+            var themeName = themeService.ReadThemeName();
+            var theme = themeService.GetThemeByName(themeName);
+            ThemeApplier.Apply(theme);
+        }
+        catch
+        {
+            // Ignore theme loading errors, use default
+        }
     }
 }

@@ -12,16 +12,6 @@ public enum GatewayStatusKind
 }
 
 /// <summary>
-/// Farbthema-Optionen
-/// </summary>
-public enum ColorTheme
-{
-    System,
-    Light,
-    Dark
-}
-
-/// <summary>
 /// Route-Modus (wird evtl. erweitert)
 /// </summary>
 public enum RouteMode

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.NetworkInformation;
 using CommunityToolkit.Mvvm.ComponentModel;
+using neTiPx.Core.Models;
 using neTiPx.Core.Services;
 
 namespace neTiPx.UI.Avalonia.ViewModels;
@@ -11,6 +12,7 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly AdapterStore _adapterStore;
     private readonly HoverWindowSettings _hoverWindowSettings;
+    private readonly ThemeService _themeService;
     
     [ObservableProperty]
     private ObservableCollection<string> _availableAdapters;
@@ -23,6 +25,13 @@ public partial class SettingsViewModel : ObservableObject
     
     [ObservableProperty]
     private string? _selectedSecondaryAdapter;
+
+    // Theme Einstellungen
+    [ObservableProperty]
+    private ObservableCollection<string> _availableThemes;
+
+    [ObservableProperty]
+    private string? _selectedTheme;
 
     // Info-Fenster Einstellungen
     [ObservableProperty]
@@ -38,12 +47,15 @@ public partial class SettingsViewModel : ObservableObject
     {
         _adapterStore = new AdapterStore();
         _hoverWindowSettings = new HoverWindowSettings();
+        _themeService = new ThemeService();
         _availableAdapters = new ObservableCollection<string>();
         _availableSecondaryAdapters = new ObservableCollection<string>();
+        _availableThemes = new ObservableCollection<string>();
         
         LoadAvailableAdapters();
         LoadAdapterSettings();
         LoadHoverWindowSettings();
+        LoadThemeSettings();
     }
     
     /// <summary>
@@ -253,5 +265,73 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnHoverWindowVerticalOffsetChanged(decimal value)
     {
         SaveHoverWindowSettings();
+    }
+
+    /// <summary>
+    /// Lädt die verfügbaren Themes und das ausgewählte Theme.
+    /// </summary>
+    private void LoadThemeSettings()
+    {
+        try
+        {
+            var themes = _themeService.GetAllThemes();
+            AvailableThemes.Clear();
+            foreach (var theme in themes)
+            {
+                AvailableThemes.Add(theme.Name);
+            }
+
+            var savedThemeName = _themeService.ReadThemeName();
+            SelectedTheme = savedThemeName;
+        }
+        catch
+        {
+            // Defaults
+            AvailableThemes.Add("Blau");
+            SelectedTheme = "Blau";
+        }
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich das ausgewählte Theme ändert.
+    /// </summary>
+    partial void OnSelectedThemeChanged(string? value)
+    {
+        if (value != null)
+        {
+            SaveThemeSettings(value);
+            ApplyTheme(value);
+        }
+    }
+
+    /// <summary>
+    /// Speichert das ausgewählte Theme.
+    /// </summary>
+    private void SaveThemeSettings(string themeName)
+    {
+        try
+        {
+            _themeService.WriteThemeName(themeName);
+        }
+        catch
+        {
+            // Ignore save errors
+        }
+    }
+
+    /// <summary>
+    /// Wendet das Theme an.
+    /// </summary>
+    private void ApplyTheme(string themeName)
+    {
+        try
+        {
+            var theme = _themeService.GetThemeByName(themeName);
+            ThemeApplier.Apply(theme);
+        }
+        catch
+        {
+            // Ignore apply errors
+        }
     }
 }
