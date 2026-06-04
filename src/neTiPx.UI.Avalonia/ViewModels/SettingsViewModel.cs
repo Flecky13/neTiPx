@@ -10,6 +10,7 @@ namespace neTiPx.UI.Avalonia.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly AdapterStore _adapterStore;
+    private readonly HoverWindowSettings _hoverWindowSettings;
     
     [ObservableProperty]
     private ObservableCollection<string> _availableAdapters;
@@ -22,15 +23,27 @@ public partial class SettingsViewModel : ObservableObject
     
     [ObservableProperty]
     private string? _selectedSecondaryAdapter;
+
+    // Info-Fenster Einstellungen
+    [ObservableProperty]
+    private int _hoverWindowPositionIndex; // 0 = Oben, 1 = Unten
+
+    [ObservableProperty]
+    private decimal _hoverWindowRightOffset;
+
+    [ObservableProperty]
+    private decimal _hoverWindowVerticalOffset;
     
     public SettingsViewModel()
     {
         _adapterStore = new AdapterStore();
+        _hoverWindowSettings = new HoverWindowSettings();
         _availableAdapters = new ObservableCollection<string>();
         _availableSecondaryAdapters = new ObservableCollection<string>();
         
         LoadAvailableAdapters();
         LoadAdapterSettings();
+        LoadHoverWindowSettings();
     }
     
     /// <summary>
@@ -172,5 +185,73 @@ public partial class SettingsViewModel : ObservableObject
         {
             // Ignore save errors
         }
+    }
+
+    /// <summary>
+    /// Lädt die Info-Fenster-Einstellungen.
+    /// </summary>
+    private void LoadHoverWindowSettings()
+    {
+        try
+        {
+            var settings = _hoverWindowSettings.ReadSettings();
+            
+            HoverWindowPositionIndex = settings.VerticalAnchor == "Top" ? 0 : 1;
+            HoverWindowRightOffset = settings.RightOffsetPixels;
+            HoverWindowVerticalOffset = settings.VerticalOffsetPixels;
+        }
+        catch
+        {
+            // Defaults
+            HoverWindowPositionIndex = 1; // Unten
+            HoverWindowRightOffset = 20;
+            HoverWindowVerticalOffset = 50;
+        }
+    }
+
+    /// <summary>
+    /// Speichert die Info-Fenster-Einstellungen.
+    /// </summary>
+    private void SaveHoverWindowSettings()
+    {
+        try
+        {
+            var settings = new HoverWindowSettings.Settings
+            {
+                VerticalAnchor = HoverWindowPositionIndex == 0 ? "Top" : "Bottom",
+                RightOffsetPixels = (int)HoverWindowRightOffset,
+                VerticalOffsetPixels = (int)HoverWindowVerticalOffset
+            };
+            
+            _hoverWindowSettings.WriteSettings(settings);
+        }
+        catch
+        {
+            // Ignore save errors
+        }
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich die Position ändert.
+    /// </summary>
+    partial void OnHoverWindowPositionIndexChanged(int value)
+    {
+        SaveHoverWindowSettings();
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich der rechte Abstand ändert.
+    /// </summary>
+    partial void OnHoverWindowRightOffsetChanged(decimal value)
+    {
+        SaveHoverWindowSettings();
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich der vertikale Abstand ändert.
+    /// </summary>
+    partial void OnHoverWindowVerticalOffsetChanged(decimal value)
+    {
+        SaveHoverWindowSettings();
     }
 }

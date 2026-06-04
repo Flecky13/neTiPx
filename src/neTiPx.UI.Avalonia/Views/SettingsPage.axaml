@@ -219,7 +219,32 @@
                         <TextBlock Text="Info-Fenster" FontWeight="Bold" />
                         <TextBlock Text="Tray Info-Fenster konfigurieren" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
-                        <TextBlock Text="Konfiguration folgt..." FontStyle="Italic" Opacity="0.6" />
+                        <StackPanel Spacing="8">
+                            <!-- Position -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Position" FontWeight="SemiBold" FontSize="12" />
+                                <ComboBox HorizontalAlignment="Stretch" 
+                                          SelectedIndex="{Binding HoverWindowPositionIndex}">
+                                    <ComboBoxItem Content="Oben" />
+                                    <ComboBoxItem Content="Unten" />
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- Abstände -->
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock Text="Horizontal (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <NumericUpDown Value="{Binding HoverWindowRightOffset}" 
+                                                   Minimum="0" Maximum="5000" Increment="10" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock Text="Vertikal (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <NumericUpDown Value="{Binding HoverWindowVerticalOffset}" 
+                                                   Minimum="0" Maximum="5000" Increment="10" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>

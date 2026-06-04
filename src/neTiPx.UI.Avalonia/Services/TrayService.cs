@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using neTiPx.Core.Services;
 using neTiPx.UI.Avalonia.Views;
 using Timer = System.Timers.Timer;
 
@@ -21,6 +22,7 @@ public class TrayService : IDisposable
     private const int DoubleClickMilliseconds = 500;
     private const int AutoHideSeconds = 5;
     private bool _isHoverWindowVisible = false;
+    private double? _cachedWindowHeight = null;
 
     public TrayService()
     {
@@ -121,19 +123,64 @@ public class TrayService : IDisposable
         await Dispatcher.UIThread.InvokeAsync(async () =>
         {
             await _hoverWindow.RefreshAsync();
-            _hoverWindow.Show();
-            _isHoverWindowVisible = true;
             
-            // Position window near cursor (bottom-right corner of screen as default)
+            // Load settings and position window according to configuration
+            var settingsService = new HoverWindowSettings();
+            var settings = settingsService.ReadSettings();
+            
+            // Get or measure window size
+            double windowWidth = 330; // Fixed width from AXAML
+            double windowHeight;
+            
+            // If we don't have cached height, measure it
+            if (_cachedWindowHeight == null)
+            {
+                // Try to measure without showing
+                _hoverWindow.Measure(Size.Infinity);
+                windowHeight = _hoverWindow.DesiredSize.Height;
+                
+                // If measure didn't work (returns 0), use fallback
+                if (windowHeight <= 0)
+                {
+                    windowHeight = 450; // Fallback height
+                }
+                
+                _cachedWindowHeight = windowHeight;
+            }
+            else
+            {
+                windowHeight = _cachedWindowHeight.Value;
+            }
+            
+            // Calculate position based on settings
             var screen = _hoverWindow.Screens.Primary;
             if (screen != null)
             {
                 var workingArea = screen.WorkingArea;
-                var x = workingArea.Right - _hoverWindow.Width - 20;
-                var y = workingArea.Bottom - _hoverWindow.Height - 50;
                 
+                // Calculate X position (from right edge, horizontal offset)
+                var x = workingArea.Right - windowWidth - settings.RightOffsetPixels;
+                
+                // Calculate Y position based on anchor (vertical offset)
+                double y;
+                if (settings.VerticalAnchor == "Top")
+                {
+                    // Position from top edge + vertical offset
+                    y = workingArea.Y + settings.VerticalOffsetPixels;
+                }
+                else
+                {
+                    // Position from bottom edge - window height - vertical offset
+                    y = workingArea.Y + workingArea.Height - windowHeight - settings.VerticalOffsetPixels;
+                }
+                
+                // Set position BEFORE showing
                 _hoverWindow.Position = new PixelPoint((int)x, (int)y);
             }
+
+            // Show the window at the correct position
+            _hoverWindow.Show();
+            _isHoverWindowVisible = true;
 
             _autoHideTimer.Stop();
             _autoHideTimer.Start();
