@@ -65,24 +65,36 @@ public static class ThemeApplier
         // ListBox/ComboBox item resources
         resources["ListBoxItemForeground"] = new SolidColorBrush(textColor);
         resources["ListBoxItemBackgroundPointerOver"] = new SolidColorBrush(Color.FromArgb(15, textColor.R, textColor.G, textColor.B));
-        resources["ListBoxItemBackgroundSelected"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForegroundSelected));
-        resources["ListBoxItemForegroundSelected"] = new SolidColorBrush(Colors.White);
         
-        // CheckBox border - dark for light themes, white for dark themes
-        var isLightTheme = theme.Name == "Prinzessin" || theme.Name == "Weiß";
-        var checkBoxBorderColor = isLightTheme ? textColor : Colors.White;
-        resources["CheckBoxBorderBrush"] = new SolidColorBrush(checkBoxBorderColor);
+        // Selected Background: Verwende die Akzentfarbe mit reduzierter Transparenz für dezentere Hinterlegung
+        var selectedColor = ParseColor(theme.NavigationViewItemForegroundSelected);
+        resources["ListBoxItemBackgroundSelected"] = new SolidColorBrush(Color.FromArgb(30, selectedColor.R, selectedColor.G, selectedColor.B));
+        resources["ListBoxItemForegroundSelected"] = new SolidColorBrush(ParseColor(theme.NavigationViewItemForegroundSelected));
         
-        // Override FluentTheme CheckBox resources
-        resources["CheckBoxCheckBackgroundStrokeUnchecked"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeUncheckedPointerOver"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeUncheckedPressed"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeChecked"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeCheckedPointerOver"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeCheckedPressed"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeIndeterminate"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeIndeterminatePointerOver"] = new SolidColorBrush(checkBoxBorderColor);
-        resources["CheckBoxCheckBackgroundStrokeIndeterminatePressed"] = new SolidColorBrush(checkBoxBorderColor);
+        // CheckBox border - use text color which is already correct for each theme
+        resources["CheckBoxBorderBrush"] = new SolidColorBrush(textColor);
+        
+        // Override FluentTheme CheckBox resources - use text color
+        resources["CheckBoxCheckBackgroundStrokeUnchecked"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeUncheckedPointerOver"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeUncheckedPressed"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeChecked"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeCheckedPointerOver"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeCheckedPressed"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeIndeterminate"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeIndeterminatePointerOver"] = new SolidColorBrush(textColor);
+        resources["CheckBoxCheckBackgroundStrokeIndeterminatePressed"] = new SolidColorBrush(textColor);
+        
+        // NumericUpDown button arrows - use text color
+        resources["TextControlButtonForeground"] = new SolidColorBrush(textColor);
+        resources["TextControlButtonForegroundPointerOver"] = new SolidColorBrush(textColor);
+        resources["TextControlButtonForegroundPressed"] = new SolidColorBrush(textColor);
+        resources["RepeatButtonForeground"] = new SolidColorBrush(textColor);
+        resources["RepeatButtonForegroundPointerOver"] = new SolidColorBrush(textColor);
+        resources["RepeatButtonForegroundPressed"] = new SolidColorBrush(textColor);
+        resources["NumericUpDownButtonForeground"] = new SolidColorBrush(textColor);
+        resources["NumericUpDownButtonForegroundPointerOver"] = new SolidColorBrush(textColor);
+        resources["NumericUpDownButtonForegroundPressed"] = new SolidColorBrush(textColor);
     }
 
     private static Color ParseColor(string hexColor)

@@ -16,15 +16,9 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="40,*">
-        <!-- Title Bar -->
-        <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="12,6">
-            <TextBlock Text="neTiPx" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" />
-        </Border>
-
+    <Grid>
         <!-- Navigation Layout -->
-        <SplitView Grid.Row="1"
-                   IsPaneOpen="{Binding IsPaneOpen}"
+        <SplitView IsPaneOpen="{Binding IsPaneOpen}"
                    DisplayMode="CompactInline"
                    OpenPaneLength="240"
                    CompactPaneLength="48"

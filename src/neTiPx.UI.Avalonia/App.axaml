@@ -58,7 +58,7 @@
         
         <!-- CheckBox Border Style -->
         <Style Selector="CheckBox /template/ Border">
-            <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppTextBrush}" />
         </Style>
         
         <!-- Disable CheckBox text color change on hover -->
@@ -77,11 +77,66 @@
             <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
         </Style>
         
+        <!-- ListBoxItem Styles - Navigation Menu -->
+        <Style Selector="ListBoxItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ListBoxItemBackgroundSelected}" />
+        </Style>
+        
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ListBoxItemBackgroundPointerOver}" />
+        </Style>
+        
+        <!-- Navigation Menu Buttons - transparent, no visual state changes -->
+        <Style Selector="ListBoxItem Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        
+        <Style Selector="ListBoxItem Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        
+        <Style Selector="ListBoxItem Button:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        
         <!-- NumericUpDown Style -->
         <Style Selector="NumericUpDown">
             <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        </Style>
+        
+        <!-- NumericUpDown Button Arrows -->
+        <Style Selector="NumericUpDown /template/ RepeatButton">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="NumericUpDown /template/ RepeatButton:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="NumericUpDown /template/ RepeatButton:pressed">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="NumericUpDown /template/ RepeatButton TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="NumericUpDown /template/ RepeatButton PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        
+        <Style Selector="NumericUpDown /template/ RepeatButton Path">
+            <Setter Property="Stroke" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="Fill" Value="{DynamicResource AppTextBrush}" />
         </Style>
     </Application.Styles>
 

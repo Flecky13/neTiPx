@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -39,6 +40,14 @@ public partial class MainWindowViewModel : ObservableObject
     private void NavigateTo(string pageName)
     {
         CurrentPageName = pageName;
+        
+        // Update SelectedNavigationItem to follow the current page
+        var matchingItem = NavigationItems.FirstOrDefault(item => item.Name == pageName);
+        if (matchingItem != null)
+        {
+            SelectedNavigationItem = matchingItem;
+        }
+        
         UpdateCurrentPage();
     }
 
