@@ -16,27 +16,3 @@ public sealed partial class UncPathProfile : ObservableObject
 
     public ObservableCollection<UncPathEntry> UncPaths { get; } = new();
 }
-
-/// <summary>
-/// Einzelner UNC-Pfad Eintrag
-/// </summary>
-public sealed partial class UncPathEntry : ObservableObject
-{
-    [ObservableProperty]
-    private string _uncPath = string.Empty;
-
-    [ObservableProperty]
-    private string _driveLetter = string.Empty;
-
-    [ObservableProperty]
-    private bool _isPersistent;
-
-    [ObservableProperty]
-    private bool _hasError;
-
-    [ObservableProperty]
-    private string? _errorMessage;
-
-    public bool IsValid => !string.IsNullOrWhiteSpace(UncPath) 
-        && UncPath.StartsWith(@"\\");
-}

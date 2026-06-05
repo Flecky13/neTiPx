@@ -34,6 +34,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // Load language before anything else
+            LoadAndApplyLanguage();
+            
             // Load and apply saved theme before creating window
             LoadAndApplyTheme();
             
@@ -85,6 +88,21 @@ public partial class App : Application
         // services.AddTransient<MainWindowViewModel>();
 
         ServiceProvider = services.BuildServiceProvider();
+    }
+
+    private void LoadAndApplyLanguage()
+    {
+        try
+        {
+            var settingsService = new SettingsService();
+            var languageCode = settingsService.GetLanguageCode() ?? "System";
+            LanguageManager.Instance.LoadLanguage(languageCode);
+        }
+        catch
+        {
+            // Fallback to system language on error
+            LanguageManager.Instance.LoadLanguage("System");
+        }
     }
 
     private void LoadAndApplyTheme()

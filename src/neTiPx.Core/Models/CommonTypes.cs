@@ -28,11 +28,4 @@ public record RecentFileEntry(
     DateTime LastAccessed,
     string? DisplayName = null);
 
-/// <summary>
-/// Mounted UNC Connection (aktiv verbundene Netzlaufwerke)
-/// </summary>
-public record MountedUncConnection(
-    string DriveLetter,
-    string UncPath,
-    bool IsPersistent,
-    string Status);
+// MountedUncConnection is now in its own file (MountedUncConnection.cs)

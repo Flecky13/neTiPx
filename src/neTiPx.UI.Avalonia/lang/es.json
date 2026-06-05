@@ -15,7 +15,7 @@
   "ADAPTER_LBL_IPV6_INFO": "Información IPv6:",
   "ADAPTER_STA_NotConfigured": "No configurado",
   "ADAPTER_STA_Disabled": "Desactivado",
-  "ADAPTER_STA_NotReachable": "No accesible",
+  "ADAPTER_STA_NotReachable": "Sin conexión",
   "ADAPTER_STA_PingInvalidAddress": "Ping: dirección no válida",
   "ADAPTER_STA_Reachable": "Accesible",
   "ADAPTER_STA_Slow": "Lento",

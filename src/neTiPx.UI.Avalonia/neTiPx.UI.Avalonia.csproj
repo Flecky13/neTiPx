@@ -26,6 +26,7 @@
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <None Remove="lang\**\*.json" />
+        <None Remove="**/*.axaml" />
         <EmbeddedResource Include="lang\**\*.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
