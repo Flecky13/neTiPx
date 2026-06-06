@@ -60,7 +60,8 @@ public sealed class UncPathStore
                         UncPath = pathElement.Attribute("path")?.Value ?? string.Empty,
                         Username = pathElement.Attribute("username")?.Value ?? string.Empty,
                         Password = pathElement.Attribute("password")?.Value ?? string.Empty,
-                        DriveLetter = normalizedDrive
+                        DriveLetter = normalizedDrive,
+                        MountPoint = pathElement.Attribute("mountPoint")?.Value ?? string.Empty
                     };
 
                     profile.UncPaths.Add(entry);
@@ -98,7 +99,8 @@ public sealed class UncPathStore
                         new XAttribute("path", path.UncPath ?? string.Empty),
                         new XAttribute("username", path.Username ?? string.Empty),
                         new XAttribute("password", path.Password ?? string.Empty),
-                        new XAttribute("driveLetter", normalizedDriveLetter));
+                        new XAttribute("driveLetter", normalizedDriveLetter),
+                        new XAttribute("mountPoint", path.MountPoint ?? string.Empty));
 
                     profileElement.Add(pathElement);
                 }
@@ -185,7 +187,8 @@ public sealed class UncPathStore
                 UncPath = path.UncPath,
                 Username = path.Username,
                 Password = path.Password,
-                DriveLetter = path.DriveLetter
+                DriveLetter = path.DriveLetter,
+                MountPoint = path.MountPoint
             });
         }
 

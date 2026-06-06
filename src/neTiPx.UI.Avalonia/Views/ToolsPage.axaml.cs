@@ -233,25 +233,8 @@ public partial class ToolsPage : UserControl
         };
     }
 
-    private StackPanel CreateUncPathPanel()
+    private Control CreateUncPathPanel()
     {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "UNC Pfade", FontSize = 20, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "Netzwerkpfade verwalten und verbinden" },
-                new Button { Content = "Neuer UNC-Pfad", Classes = { "accent" } },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 200,
-                    Child = new TextBlock { Text = "Gespeicherte UNC-Pfade werden hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
-        };
+        return new UncPathView();
     }
 }
