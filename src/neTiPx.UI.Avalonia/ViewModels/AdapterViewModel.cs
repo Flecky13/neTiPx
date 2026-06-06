@@ -9,12 +9,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using neTiPx.Core.Services;
+using neTiPx.UI.Avalonia.Services;
 
 namespace neTiPx.UI.Avalonia.ViewModels;
 
 public partial class AdapterViewModel : ObservableObject
 {
     private readonly SynchronizationContext? _uiContext;
+    private readonly SettingsService _settingsService;
+    private readonly UI.Avalonia.Services.NetworkInfoService _networkInfoService;
     private System.Timers.Timer? _pingTimer;
     private bool _isMonitoringActive;
     private CancellationTokenSource? _networkChangeCts;
@@ -91,6 +94,34 @@ public partial class AdapterViewModel : ObservableObject
     [ObservableProperty]
     private GatewayStatusKind _dns2StatusKind = GatewayStatusKind.Unknown;
     
+    // IPv6 Connection Status Properties - Primary
+    [ObservableProperty]
+    private string _gateway6StatusText = "Unbekannt";
+    
+    [ObservableProperty]
+    private string _gateway6PingText = "Ping: -";
+    
+    [ObservableProperty]
+    private GatewayStatusKind _gateway6StatusKind = GatewayStatusKind.Unknown;
+    
+    [ObservableProperty]
+    private string _dns1v6StatusText = "Unbekannt";
+    
+    [ObservableProperty]
+    private string _dns1v6PingText = "Ping: -";
+    
+    [ObservableProperty]
+    private GatewayStatusKind _dns1v6StatusKind = GatewayStatusKind.Unknown;
+    
+    [ObservableProperty]
+    private string _dns2v6StatusText = "Unbekannt";
+    
+    [ObservableProperty]
+    private string _dns2v6PingText = "Ping: -";
+    
+    [ObservableProperty]
+    private GatewayStatusKind _dns2v6StatusKind = GatewayStatusKind.Unknown;
+    
     // Connection Status Properties - Secondary
     [ObservableProperty]
     private string _secondaryGatewayStatusText = "Unbekannt";
@@ -119,6 +150,34 @@ public partial class AdapterViewModel : ObservableObject
     [ObservableProperty]
     private GatewayStatusKind _secondaryDns2StatusKind = GatewayStatusKind.Unknown;
     
+    // IPv6 Connection Status Properties - Secondary
+    [ObservableProperty]
+    private string _secondaryGateway6StatusText = "Unbekannt";
+    
+    [ObservableProperty]
+    private string _secondaryGateway6PingText = "Ping: -";
+    
+    [ObservableProperty]
+    private GatewayStatusKind _secondaryGateway6StatusKind = GatewayStatusKind.Unknown;
+    
+    [ObservableProperty]
+    private string _secondaryDns1v6StatusText = "Unbekannt";
+    
+    [ObservableProperty]
+    private string _secondaryDns1v6PingText = "Ping: -";
+    
+    [ObservableProperty]
+    private GatewayStatusKind _secondaryDns1v6StatusKind = GatewayStatusKind.Unknown;
+    
+    [ObservableProperty]
+    private string _secondaryDns2v6StatusText = "Unbekannt";
+    
+    [ObservableProperty]
+    private string _secondaryDns2v6PingText = "Ping: -";
+    
+    [ObservableProperty]
+    private GatewayStatusKind _secondaryDns2v6StatusKind = GatewayStatusKind.Unknown;
+    
     private string? _selectedAdapterPrimary;
     private string? _selectedAdapterSecondary;
     
@@ -136,6 +195,8 @@ public partial class AdapterViewModel : ObservableObject
     public AdapterViewModel()
     {
         _uiContext = SynchronizationContext.Current;
+        _settingsService = new SettingsService();
+        _networkInfoService = new UI.Avalonia.Services.NetworkInfoService();
         
         LoadSelectionFromConfig();
         RegisterNetworkChangeEvents();
@@ -191,7 +252,7 @@ public partial class AdapterViewModel : ObservableObject
     {
         try
         {
-            var store = new AdapterStore();
+            var store = new Core.Services.AdapterStore();
             var settings = store.ReadAdapters();
             
             // Use configured adapters if available
@@ -299,13 +360,31 @@ public partial class AdapterViewModel : ObservableObject
             .FirstOrDefault(g => g.Address.AddressFamily == AddressFamily.InterNetwork);
         PrimaryAdapterGateway = gateway4?.Address.ToString() ?? "Kein Gateway";
         
-        // DNS4 addresses
-        var dns4Addresses = ipProperties.DnsAddresses
-            .Where(d => d.AddressFamily == AddressFamily.InterNetwork);
-        foreach (var addr in dns4Addresses)
+        // DNS4 addresses - use NetworkInfoService to get correct DNS servers on Linux
+        var ipv4Config = _networkInfoService.GetIpv4Config(adapter.Name);
+        if (ipv4Config != null)
         {
-            PrimaryAdapterDns4List.Add(addr.ToString());
+            if (!string.IsNullOrWhiteSpace(ipv4Config.Dns1))
+            {
+                PrimaryAdapterDns4List.Add(ipv4Config.Dns1);
+            }
+            if (!string.IsNullOrWhiteSpace(ipv4Config.Dns2))
+            {
+                PrimaryAdapterDns4List.Add(ipv4Config.Dns2);
+            }
         }
+        
+        // Fallback to .NET API if NetworkInfoService didn't return DNS servers
+        if (PrimaryAdapterDns4List.Count == 0)
+        {
+            var dns4Addresses = ipProperties.DnsAddresses
+                .Where(d => d.AddressFamily == AddressFamily.InterNetwork);
+            foreach (var addr in dns4Addresses)
+            {
+                PrimaryAdapterDns4List.Add(addr.ToString());
+            }
+        }
+        
         if (PrimaryAdapterDns4List.Count == 0)
         {
             PrimaryAdapterDns4List.Add("Kein DNS");
@@ -335,14 +414,16 @@ public partial class AdapterViewModel : ObservableObject
             ? gateway6?.Address.ToString() ?? "Kein Gateway"
             : "Keine IPv6 Adresse";
         
-        // DNS6 addresses
-        var dns6Addresses = ipProperties.DnsAddresses
-            .Where(d => d.AddressFamily == AddressFamily.InterNetworkV6 
-                     && !d.IsIPv6SiteLocal);
-        foreach (var addr in dns6Addresses)
+        // DNS6 addresses - use NetworkInfoService to get correct DNS servers on Linux
+        if (hasIpv6)
         {
-            PrimaryAdapterDns6List.Add(addr.ToString());
+            var dns6List = _networkInfoService.GetIpv6DnsServers(adapter.Name);
+            foreach (var dns in dns6List)
+            {
+                PrimaryAdapterDns6List.Add(dns);
+            }
         }
+        
         if (PrimaryAdapterDns6List.Count == 0)
         {
             PrimaryAdapterDns6List.Add(hasIpv6 ? "Kein DNS" : "Keine IPv6 Adresse");
@@ -419,13 +500,31 @@ public partial class AdapterViewModel : ObservableObject
             .FirstOrDefault(g => g.Address.AddressFamily == AddressFamily.InterNetwork);
         SecondaryAdapterGateway = gateway4?.Address.ToString() ?? "Kein Gateway";
         
-        // DNS4 addresses
-        var dns4Addresses = ipProperties.DnsAddresses
-            .Where(d => d.AddressFamily == AddressFamily.InterNetwork);
-        foreach (var addr in dns4Addresses)
+        // DNS4 addresses - use NetworkInfoService to get correct DNS servers on Linux
+        var ipv4Config = _networkInfoService.GetIpv4Config(adapter.Name);
+        if (ipv4Config != null)
         {
-            SecondaryAdapterDns4List.Add(addr.ToString());
+            if (!string.IsNullOrWhiteSpace(ipv4Config.Dns1))
+            {
+                SecondaryAdapterDns4List.Add(ipv4Config.Dns1);
+            }
+            if (!string.IsNullOrWhiteSpace(ipv4Config.Dns2))
+            {
+                SecondaryAdapterDns4List.Add(ipv4Config.Dns2);
+            }
         }
+        
+        // Fallback to .NET API if NetworkInfoService didn't return DNS servers
+        if (SecondaryAdapterDns4List.Count == 0)
+        {
+            var dns4Addresses = ipProperties.DnsAddresses
+                .Where(d => d.AddressFamily == AddressFamily.InterNetwork);
+            foreach (var addr in dns4Addresses)
+            {
+                SecondaryAdapterDns4List.Add(addr.ToString());
+            }
+        }
+        
         if (SecondaryAdapterDns4List.Count == 0)
         {
             SecondaryAdapterDns4List.Add("Kein DNS");
@@ -455,14 +554,16 @@ public partial class AdapterViewModel : ObservableObject
             ? gateway6?.Address.ToString() ?? "Kein Gateway"
             : "Keine IPv6 Adresse";
         
-        // DNS6 addresses
-        var dns6Addresses = ipProperties.DnsAddresses
-            .Where(d => d.AddressFamily == AddressFamily.InterNetworkV6 
-                     && !d.IsIPv6SiteLocal);
-        foreach (var addr in dns6Addresses)
+        // DNS6 addresses - use NetworkInfoService to get correct DNS servers on Linux
+        if (hasIpv6)
         {
-            SecondaryAdapterDns6List.Add(addr.ToString());
+            var dns6List = _networkInfoService.GetIpv6DnsServers(adapter.Name);
+            foreach (var dns in dns6List)
+            {
+                SecondaryAdapterDns6List.Add(dns);
+            }
         }
+        
         if (SecondaryAdapterDns6List.Count == 0)
         {
             SecondaryAdapterDns6List.Add(hasIpv6 ? "Kein DNS" : "Keine IPv6 Adresse");
@@ -524,7 +625,7 @@ public partial class AdapterViewModel : ObservableObject
         
         try
         {
-            // Update Primary Adapter Status
+            // Update Primary Adapter Status (IPv4)
             if (IsPrimaryAdapterVisible && !IsPrimaryAdapterDown)
             {
                 await UpdateAdapterStatusAsync(
@@ -534,9 +635,35 @@ public partial class AdapterViewModel : ObservableObject
                     (status, ping, kind) => { Dns1StatusText = status; Dns1PingText = ping; Dns1StatusKind = kind; },
                     (status, ping, kind) => { Dns2StatusText = status; Dns2PingText = ping; Dns2StatusKind = kind; }
                 );
+                
+                // Update Primary Adapter Status (IPv6)
+                if (IsPrimaryIpv6Available)
+                {
+                    await CheckHostStatusAsync(
+                        NormalizeHostAddress(PrimaryAdapterGateway6),
+                        (status, ping, kind) => { Gateway6StatusText = status; Gateway6PingText = ping; Gateway6StatusKind = kind; }
+                    );
+                    
+                    // DNS IPv6
+                    var dns6List = PrimaryAdapterDns6List?.ToList();
+                    if (dns6List != null && dns6List.Count > 0)
+                    {
+                        await CheckHostStatusAsync(
+                            NormalizeHostAddress(dns6List[0]),
+                            (status, ping, kind) => { Dns1v6StatusText = status; Dns1v6PingText = ping; Dns1v6StatusKind = kind; }
+                        );
+                    }
+                    if (dns6List != null && dns6List.Count > 1)
+                    {
+                        await CheckHostStatusAsync(
+                            NormalizeHostAddress(dns6List[1]),
+                            (status, ping, kind) => { Dns2v6StatusText = status; Dns2v6PingText = ping; Dns2v6StatusKind = kind; }
+                        );
+                    }
+                }
             }
             
-            // Update Secondary Adapter Status
+            // Update Secondary Adapter Status (IPv4)
             if (IsSecondaryAdapterVisible && !IsSecondaryAdapterDown)
             {
                 await UpdateAdapterStatusAsync(
@@ -546,6 +673,32 @@ public partial class AdapterViewModel : ObservableObject
                     (status, ping, kind) => { SecondaryDns1StatusText = status; SecondaryDns1PingText = ping; SecondaryDns1StatusKind = kind; },
                     (status, ping, kind) => { SecondaryDns2StatusText = status; SecondaryDns2PingText = ping; SecondaryDns2StatusKind = kind; }
                 );
+                
+                // Update Secondary Adapter Status (IPv6)
+                if (IsSecondaryIpv6Available)
+                {
+                    await CheckHostStatusAsync(
+                        NormalizeHostAddress(SecondaryAdapterGateway6),
+                        (status, ping, kind) => { SecondaryGateway6StatusText = status; SecondaryGateway6PingText = ping; SecondaryGateway6StatusKind = kind; }
+                    );
+                    
+                    // DNS IPv6
+                    var dns6List = SecondaryAdapterDns6List?.ToList();
+                    if (dns6List != null && dns6List.Count > 0)
+                    {
+                        await CheckHostStatusAsync(
+                            NormalizeHostAddress(dns6List[0]),
+                            (status, ping, kind) => { SecondaryDns1v6StatusText = status; SecondaryDns1v6PingText = ping; SecondaryDns1v6StatusKind = kind; }
+                        );
+                    }
+                    if (dns6List != null && dns6List.Count > 1)
+                    {
+                        await CheckHostStatusAsync(
+                            NormalizeHostAddress(dns6List[1]),
+                            (status, ping, kind) => { SecondaryDns2v6StatusText = status; SecondaryDns2v6PingText = ping; SecondaryDns2v6StatusKind = kind; }
+                        );
+                    }
+                }
             }
         }
         catch
@@ -592,15 +745,20 @@ public partial class AdapterViewModel : ObservableObject
             if (reply.Status == IPStatus.Success)
             {
                 var ms = reply.RoundtripTime;
+                
+                // Hole die Schwellwerte aus den Einstellungen
+                int thresholdFast = _settingsService.GetPingThresholdFast();
+                int thresholdNormal = _settingsService.GetPingThresholdNormal();
+                
                 string statusText;
                 GatewayStatusKind statusKind;
                 
-                if (ms <= 50)
+                if (ms <= thresholdFast)
                 {
                     statusText = "Erreichbar";
                     statusKind = GatewayStatusKind.Good;
                 }
-                else if (ms <= 150)
+                else if (ms <= thresholdNormal)
                 {
                     statusText = "Langsam";
                     statusKind = GatewayStatusKind.Warning;

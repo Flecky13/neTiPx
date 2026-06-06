@@ -5,14 +5,16 @@ using System.Net.NetworkInformation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using neTiPx.Core.Models;
 using neTiPx.Core.Services;
+using neTiPx.UI.Avalonia.Services;
 
 namespace neTiPx.UI.Avalonia.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
-    private readonly AdapterStore _adapterStore;
-    private readonly HoverWindowSettings _hoverWindowSettings;
-    private readonly ThemeService _themeService;
+    private readonly Core.Services.AdapterStore _adapterStore;
+    private readonly Core.Services.HoverWindowSettings _hoverWindowSettings;
+    private readonly Core.Services.ThemeService _themeService;
+    private readonly SettingsService _settingsService;
     
     [ObservableProperty]
     private ObservableCollection<string> _availableAdapters;
@@ -42,12 +44,20 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private decimal _hoverWindowVerticalOffset;
+
+    // Verbindungsqualität Einstellungen
+    [ObservableProperty]
+    private int _pingThresholdFast;
+
+    [ObservableProperty]
+    private int _pingThresholdNormal;
     
     public SettingsViewModel()
     {
-        _adapterStore = new AdapterStore();
-        _hoverWindowSettings = new HoverWindowSettings();
-        _themeService = new ThemeService();
+        _adapterStore = new Core.Services.AdapterStore();
+        _hoverWindowSettings = new Core.Services.HoverWindowSettings();
+        _themeService = new Core.Services.ThemeService();
+        _settingsService = new SettingsService();
         _availableAdapters = new ObservableCollection<string>();
         _availableSecondaryAdapters = new ObservableCollection<string>();
         _availableThemes = new ObservableCollection<string>();
@@ -56,6 +66,7 @@ public partial class SettingsViewModel : ObservableObject
         LoadAdapterSettings();
         LoadHoverWindowSettings();
         LoadThemeSettings();
+        LoadConnectionQualitySettings();
     }
     
     /// <summary>
@@ -185,7 +196,7 @@ public partial class SettingsViewModel : ObservableObject
                 secondaryAdapter = null;
             }
             
-            var settings = new AdapterStore.AdapterSettings
+            var settings = new Core.Services.AdapterStore.AdapterSettings
             {
                 PrimaryAdapter = SelectedPrimaryAdapter,
                 SecondaryAdapter = secondaryAdapter
@@ -228,7 +239,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         try
         {
-            var settings = new HoverWindowSettings.Settings
+            var settings = new Core.Services.HoverWindowSettings.Settings
             {
                 VerticalAnchor = HoverWindowPositionIndex == 0 ? "Top" : "Bottom",
                 RightOffsetPixels = (int)HoverWindowRightOffset,
@@ -332,6 +343,46 @@ public partial class SettingsViewModel : ObservableObject
         catch
         {
             // Ignore apply errors
+        }
+    }
+
+    /// <summary>
+    /// Lädt die Verbindungsqualität-Einstellungen (Ping-Schwellwerte).
+    /// </summary>
+    private void LoadConnectionQualitySettings()
+    {
+        try
+        {
+            PingThresholdFast = _settingsService.GetPingThresholdFast();
+            PingThresholdNormal = _settingsService.GetPingThresholdNormal();
+        }
+        catch
+        {
+            // Defaults
+            PingThresholdFast = 20;
+            PingThresholdNormal = 50;
+        }
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich der Fast-Schwellwert ändert.
+    /// </summary>
+    partial void OnPingThresholdFastChanged(int value)
+    {
+        if (value > 0 && value < PingThresholdNormal)
+        {
+            _settingsService.SetPingThresholdFast(value);
+        }
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich der Normal-Schwellwert ändert.
+    /// </summary>
+    partial void OnPingThresholdNormalChanged(int value)
+    {
+        if (value > PingThresholdFast)
+        {
+            _settingsService.SetPingThresholdNormal(value);
         }
     }
 }

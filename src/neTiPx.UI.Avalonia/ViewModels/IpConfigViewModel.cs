@@ -39,6 +39,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         private bool _isLoadingProfile;
         private bool _isMonitoringActive;
         private bool _isApplyingProfile;
+        private bool _isPageLoaded;
 
         private IpProfile? _selectedProfile;
         private string _gatewayStatusText = string.Empty;
@@ -155,9 +156,12 @@ namespace neTiPx.UI.Avalonia.ViewModels
                         _selectedProfileBaseline = BuildProfileFingerprint(_selectedProfile);
                         _selectedProfile.IsDirty = false;
                         
-                        // Verbindungsstatus aktivieren und Monitoring starten
+                        // Verbindungsstatus aktivieren - Monitoring wird nur gestartet wenn Seite sichtbar ist
                         ShowConnectionStatus = true;
-                        StartConnectionMonitoring();
+                        if (_isPageLoaded)
+                        {
+                            StartConnectionMonitoring();
+                        }
                     }
                     else
                     {
@@ -280,6 +284,13 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 OnPropertyChanged(nameof(IsManual));
                 AddIpCommand?.NotifyCanExecuteChanged();
                 RemoveIpCommand?.NotifyCanExecuteChanged();
+                
+                // Wenn auf DHCP gewechselt wird, aktuellen Netzwerkstatus laden
+                if (!IsManual && !_isLoadingProfile)
+                {
+                    ReloadProfileFromNic();
+                }
+                
                 ValidateProfile();
             }
             else if (e.PropertyName == nameof(IpProfile.AdapterName))
@@ -318,6 +329,8 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 ValidateProfile();
                 
                 // DNS2 geändert: Verbindungsstatus neu prüfen (aktualisiert auch Adressen und HasDns2)
+                OnPropertyChanged(nameof(HasDns2));
+                OnPropertyChanged(nameof(Dns2Address));
                 if (ShowConnectionStatus)
                 {
                     _ = UpdateStatusAsync();
@@ -824,9 +837,24 @@ namespace neTiPx.UI.Avalonia.ViewModels
         
         public string Dns1Address => string.IsNullOrWhiteSpace(_currentDns1) ? "-" : _currentDns1;
         
-        public string Dns2Address => string.IsNullOrWhiteSpace(_currentDns2) ? "-" : _currentDns2;
+        public string Dns2Address
+        {
+            get
+            {
+                // Bevorzuge aktuellen Wert vom Adapter, falls vorhanden
+                if (!string.IsNullOrWhiteSpace(_currentDns2))
+                    return _currentDns2;
+                
+                // Ansonsten zeige den Wert aus dem Profil (besonders wichtig im Manual-Modus)
+                if (!string.IsNullOrWhiteSpace(SelectedProfile?.Dns2))
+                    return SelectedProfile.Dns2;
+                
+                return "-";
+            }
+        }
         
-        public bool HasDns2 => !string.IsNullOrWhiteSpace(_currentDns2);
+        public bool HasDns2 => !string.IsNullOrWhiteSpace(_currentDns2) || 
+                                !string.IsNullOrWhiteSpace(SelectedProfile?.Dns2);
 
         public string SystemDnsInfo
         {
@@ -1117,7 +1145,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
         private bool CanSaveProfile()
         {
-            return SelectedProfile != null && SelectedProfile.IsDirty && !HasValidationErrors;
+            return SelectedProfile != null && SelectedProfile.IsDirty;
         }
 
         private void SaveProfile()
@@ -1134,21 +1162,25 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
             _showInputValidationErrors = true;
             ValidateProfile(true);
+            
+            // Speichern ist immer möglich, aber mit Warnung bei Validierungsfehlern
             if (HasValidationErrors)
             {
-                LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil speichern abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
-                LastActionMessage = "Speichern abgebrochen: Validierungsfehler";
+                LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil mit Validierungsfehlern gespeichert: '{SelectedProfile.Name}'");
+                LastActionMessage = $"Profil '{SelectedProfile.Name}' gespeichert (mit Validierungsfehlern).";
                 StatusMessageType = StatusMessageType.Error;
-                return;
+            }
+            else
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
+                LastActionMessage = $"Profil '{SelectedProfile.Name}' erfolgreich gespeichert.";
+                StatusMessageType = StatusMessageType.Success;
             }
 
-            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
             _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
             _selectedProfilePersistedName = SelectedProfile.Name;
 
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
-            LastActionMessage = $"Profil '{SelectedProfile.Name}' erfolgreich gespeichert.";
-            StatusMessageType = StatusMessageType.Success;
             SelectedProfile.IsDirty = false;
             _selectedProfileBaseline = BuildProfileFingerprint(SelectedProfile);
             LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
@@ -1226,8 +1258,13 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 ShowConnectionStatus = true;
                 RefreshSystemDns();
 
-                // After apply: load fresh settings from NIC and save
-                ReloadProfileFromNic();
+                // After apply: In DHCP mode, reload settings from NIC
+                // In Manual mode, keep user's settings and just save them
+                if (profile.Mode.Equals("DHCP", StringComparison.OrdinalIgnoreCase))
+                {
+                    ReloadProfileFromNic();
+                }
+                
                 SaveProfile();
                 profile.IsDirty = false;
 
@@ -2331,6 +2368,27 @@ namespace neTiPx.UI.Avalonia.ViewModels
             _monitoringCts?.Cancel();
             _monitoringCts?.Dispose();
             _monitoringCts = null;
+        }
+
+        public void OnPageLoaded()
+        {
+            _isPageLoaded = true;
+            Debug.WriteLine("[ReachabilityDebug][IpConfigPage] OnPageLoaded");
+            
+            // Starte Monitoring nur wenn ein Profil ausgewählt ist
+            if (SelectedProfile != null && ShowConnectionStatus)
+            {
+                StartConnectionMonitoring();
+            }
+        }
+
+        public void OnPageUnloaded()
+        {
+            _isPageLoaded = false;
+            Debug.WriteLine("[ReachabilityDebug][IpConfigPage] OnPageUnloaded");
+            
+            // Stoppe Monitoring wenn Seite nicht mehr sichtbar
+            StopConnectionMonitoring();
         }
     }
 

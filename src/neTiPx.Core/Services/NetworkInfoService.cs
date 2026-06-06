@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace neTiPx.Core.Services;
 
@@ -88,6 +90,18 @@ public sealed class NetworkInfoService
                 .Where(d => d.AddressFamily == AddressFamily.InterNetwork)
                 .Select(d => d.ToString())
                 .ToList();
+            
+            // On Linux, try to get DNS servers from NetworkManager if we only get the local resolver
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && 
+                dns4.Count > 0 && dns4[0] == "127.0.0.53")
+            {
+                var nmDnsServers = GetDnsFromNetworkManager(adapter.Name);
+                if (nmDnsServers.Count > 0)
+                {
+                    dns4 = nmDnsServers;
+                }
+            }
+            
             infos[index, 0] = "DNS4";
             infos[index++, 1] = dns4.Any() ? string.Join(Environment.NewLine, dns4) : "-";
 
@@ -110,6 +124,17 @@ public sealed class NetworkInfoService
                     && !d.IsIPv6SiteLocal)
                 .Select(d => d.ToString())
                 .ToList();
+            
+            // On Linux, try to get IPv6 DNS servers from NetworkManager
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var nmDnsServers = GetDns6FromNetworkManager(adapter.Name);
+                if (nmDnsServers.Count > 0)
+                {
+                    dns6 = nmDnsServers;
+                }
+            }
+            
             infos[index, 0] = "DNS6";
             infos[index++, 1] = dns6.Any() ? string.Join(Environment.NewLine, dns6) : "-";
 
@@ -216,5 +241,110 @@ public sealed class NetworkInfoService
             .FirstOrDefault(a => a.Name.Equals(adapterName, StringComparison.OrdinalIgnoreCase)
                 || a.Description.Equals(adapterName, StringComparison.OrdinalIgnoreCase)
                 || (a.Name + " - " + a.Description).Equals(adapterName, StringComparison.OrdinalIgnoreCase));
+    }
+    
+    /// <summary>
+    /// Get DNS servers from NetworkManager on Linux
+    /// This bypasses systemd-resolved which often shows only 127.0.0.53
+    /// </summary>
+    private static List<string> GetDnsFromNetworkManager(string deviceName)
+    {
+        var dnsServers = new List<string>();
+        
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            return dnsServers;
+        
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "nmcli",
+                Arguments = $"-g IP4.DNS device show {deviceName}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            
+            using var process = Process.Start(psi);
+            if (process == null)
+                return dnsServers;
+            
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            
+            if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
+            {
+                // nmcli returns DNS servers separated by | or newlines
+                var entries = output.Split(new[] { '|', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var entry in entries)
+                {
+                    // nmcli escapes colons in addresses with backslashes - remove them
+                    var dns = entry.Trim().Replace("\\:", ":");
+                    if (!string.IsNullOrWhiteSpace(dns) && IPAddress.TryParse(dns, out _))
+                    {
+                        dnsServers.Add(dns);
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // If nmcli fails, just return empty list and fall back to .NET API
+        }
+        
+        return dnsServers;
+    }
+    
+    /// <summary>
+    /// Get IPv6 DNS servers from NetworkManager on Linux
+    /// </summary>
+    private static List<string> GetDns6FromNetworkManager(string deviceName)
+    {
+        var dnsServers = new List<string>();
+        
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            return dnsServers;
+        
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "nmcli",
+                Arguments = $"-g IP6.DNS device show {deviceName}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            
+            using var process = Process.Start(psi);
+            if (process == null)
+                return dnsServers;
+            
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            
+            if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
+            {
+                // nmcli returns DNS servers separated by | or newlines
+                var entries = output.Split(new[] { '|', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var entry in entries)
+                {
+                    // nmcli escapes colons in IPv6 addresses with backslashes - remove them
+                    var dns = entry.Trim().Replace("\\:", ":");
+                    if (!string.IsNullOrWhiteSpace(dns) && IPAddress.TryParse(dns, out _))
+                    {
+                        dnsServers.Add(dns);
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // If nmcli fails, just return empty list and fall back to .NET API
+        }
+        
+        return dnsServers;
     }
 }

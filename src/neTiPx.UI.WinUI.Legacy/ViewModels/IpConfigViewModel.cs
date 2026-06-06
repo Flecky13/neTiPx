@@ -208,6 +208,13 @@ namespace neTiPx.ViewModels
                 OnPropertyChanged(nameof(IsManual));
                 AddIpCommand?.RaiseCanExecuteChanged();
                 RemoveIpCommand?.RaiseCanExecuteChanged();
+                
+                // Wenn auf DHCP gewechselt wird, aktuellen Netzwerkstatus laden
+                if (!IsManual && !_isLoadingProfile)
+                {
+                    ReloadProfileFromNic();
+                }
+                
                 ValidateProfile();
             }
             else if (e.PropertyName == nameof(IpProfile.AdapterName))
@@ -964,7 +971,7 @@ namespace neTiPx.ViewModels
 
         private bool CanSaveProfile()
         {
-            return SelectedProfile != null && SelectedProfile.IsDirty && !HasValidationErrors;
+            return SelectedProfile != null && SelectedProfile.IsDirty;
         }
 
         private void SaveProfile()
@@ -981,20 +988,32 @@ namespace neTiPx.ViewModels
 
             _showInputValidationErrors = true;
             ValidateProfile(true);
+            
+            // Speichern ist immer möglich, aber mit Warnung bei Validierungsfehlern
             if (HasValidationErrors)
             {
-                LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil speichern abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
-                return;
+                LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil mit Validierungsfehlern gespeichert: '{SelectedProfile.Name}'");
+            }
+            else
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
             }
 
-            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
             _ipProfileStore.SaveProfile(SelectedProfile, _selectedProfilePersistedName);
             _selectedProfilePersistedName = SelectedProfile.Name;
 
             ValidationMessage = T("IPCONFIG_MSG_PROFILE_SAVED");
             SelectedProfile.IsDirty = false;
             _selectedProfileBaseline = BuildProfileFingerprint(SelectedProfile);
-            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
+            
+            if (HasValidationErrors)
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert (mit Validierungsfehlern): '{SelectedProfile.Name}'");
+            }
+            else
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
+            }
         }
 
         private bool CanApplyProfile()

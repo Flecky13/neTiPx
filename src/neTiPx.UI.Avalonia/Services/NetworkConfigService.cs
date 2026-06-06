@@ -51,7 +51,7 @@ namespace neTiPx.UI.Avalonia.Services
 
         private (bool success, string? error) ApplyProfileWindows(IpProfile profile)
         {
-            var ni = FindNetworkInterface(profile.AdapterName);
+            var ni = FindNetworkInterface(profile.AdapterName!);
             if (ni == null)
             {
                 return (false, "Netzwerkadapter nicht gefunden.");
@@ -161,7 +161,7 @@ namespace neTiPx.UI.Avalonia.Services
 
         private (bool success, string? error) ApplyProfileLinux(IpProfile profile)
         {
-            var ni = FindNetworkInterface(profile.AdapterName);
+            var ni = FindNetworkInterface(profile.AdapterName!);
             if (ni == null)
             {
                 LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", $"Netzwerkadapter '{profile.AdapterName}' nicht gefunden");
@@ -231,7 +231,8 @@ namespace neTiPx.UI.Avalonia.Services
                     ipAddresses.Add($"{entry.IpAddress}/{entryPrefix}");
                 }
 
-                var ipAddressList = string.Join(" ", ipAddresses);
+                // Baue IP-Adress-Liste im Format "ip/prefix,ip2/prefix2,..." (Komma-getrennt für nmcli!)
+                var ipAddressList = string.Join(",", ipAddresses);
 
                 // Baue DNS-Server-Liste
                 var dnsServers = new List<string>();
@@ -243,7 +244,8 @@ namespace neTiPx.UI.Avalonia.Services
                 {
                     dnsServers.Add(profile.Dns2);
                 }
-                var dnsList = dnsServers.Count > 0 ? string.Join(" ", dnsServers) : "";
+                // DNS-Server mit Komma trennen für nmcli
+                var dnsList = dnsServers.Count > 0 ? string.Join(",", dnsServers) : "";
 
                 // Baue einen einzigen nmcli con mod Befehl mit allen IPv4-Einstellungen
                 // Das verhindert Validierungsfehler, wenn method auf manual gesetzt wird
@@ -399,45 +401,79 @@ namespace neTiPx.UI.Avalonia.Services
             try
             {
                 // Unter Linux verwenden wir pkexec für grafische Root-Rechte
-                // Alle Befehle werden in einem einzigen pkexec-Aufruf ausgeführt (nur eine Authentifizierung)
-                // Escape Anführungszeichen in den Befehlen für bash -c
-                var escapedCommands = commands.Select(cmd => cmd.Replace("\"", "\\\""));
-                var combinedCommands = string.Join(" && ", escapedCommands);
+                // Schreibe alle Befehle in ein temporäres Shell-Skript, um Escaping-Probleme zu vermeiden
+                var tempScriptPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"netipx_nmcli_{Guid.NewGuid()}.sh");
                 
-                var psi = new ProcessStartInfo
+                try
                 {
-                    FileName = "pkexec",
-                    Arguments = $"bash -c \"{combinedCommands}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
+                    // Schreibe Shell-Skript mit allen Befehlen
+                    var scriptContent = "#!/bin/bash\nset -e\n" + string.Join("\n", commands);
+                    System.IO.File.WriteAllText(tempScriptPath, scriptContent);
+                    
+                    // Mache Skript ausführbar
+                    var chmodPsi = new ProcessStartInfo
+                    {
+                        FileName = "chmod",
+                        Arguments = $"+x \"{tempScriptPath}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    using (var chmodProcess = Process.Start(chmodPsi))
+                    {
+                        chmodProcess?.WaitForExit();
+                    }
+                    
+                    // Führe Skript mit pkexec aus
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "pkexec",
+                        Arguments = $"\"{tempScriptPath}\"",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    };
 
-                using var process = Process.Start(psi);
-                if (process == null)
-                {
-                    LogHandler.LogErrorMessage("NetConfig", "Prozess konnte nicht gestartet werden");
-                    return (false, "Prozess konnte nicht gestartet werden.");
+                    using var process = Process.Start(psi);
+                    if (process == null)
+                    {
+                        LogHandler.LogErrorMessage("NetConfig", "Prozess konnte nicht gestartet werden");
+                        return (false, "Prozess konnte nicht gestartet werden.");
+                    }
+
+                    var output = process.StandardOutput.ReadToEnd();
+                    var error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+
+                    if (process.ExitCode != 0)
+                    {
+                        LogHandler.LogErrorMessage("NetConfig", $"nmcli fehlgeschlagen (ExitCode={process.ExitCode}): {error}");
+                        return (false, $"Befehl fehlgeschlagen: {error}");
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(output))
+                    {
+                        LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"nmcli output: {output}");
+                    }
+
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", "nmcli-Befehle erfolgreich ausgeführt");
+                    return (true, null);
                 }
-
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
-
-                if (process.ExitCode != 0)
+                finally
                 {
-                    LogHandler.LogErrorMessage("NetConfig", $"nmcli fehlgeschlagen (ExitCode={process.ExitCode}): {error}");
-                    return (false, $"Befehl fehlgeschlagen: {error}");
+                    // Lösche temporäres Skript
+                    try
+                    {
+                        if (System.IO.File.Exists(tempScriptPath))
+                        {
+                            System.IO.File.Delete(tempScriptPath);
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore cleanup errors
+                    }
                 }
-
-                if (!string.IsNullOrWhiteSpace(output))
-                {
-                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"nmcli output: {output}");
-                }
-
-                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", "nmcli-Befehle erfolgreich ausgeführt");
-                return (true, null);
             }
             catch (Exception ex)
             {

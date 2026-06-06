@@ -175,9 +175,8 @@
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Zeile 5: IP-Adressen und Subnetmasken (nur bei Manual) -->
-                            <StackPanel Spacing="8" 
-                                        IsVisible="{Binding IsManual}">
+                            <!-- Zeile 5: IP-Adressen und Subnetmasken -->
+                            <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Grid.Column="0" 
                                                Text="IP-Adressen und Subnetmasken" 
@@ -186,6 +185,7 @@
                                     <Button Grid.Column="1" 
                                             Command="{Binding AddIpCommand}"
                                             Padding="6"
+                                            IsEnabled="{Binding IsManual}"
                                             ToolTip.Tip="IP-Adresse hinzufügen">
                                         <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
                                                   Width="16" Height="16"/>
@@ -198,17 +198,20 @@
                                             <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8" Margin="0,4">
                                                 <TextBox Grid.Column="0" 
                                                          Text="{Binding IpAddress}"
-                                                         Watermark="192.168.1.100"/>
+                                                         Watermark="192.168.1.100"
+                                                         IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"/>
                                                 <TextBox Grid.Column="1" 
                                                          Text="{Binding SubnetMask}"
-                                                         Watermark="255.255.255.0"/>
+                                                         Watermark="255.255.255.0"
+                                                         IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"/>
                                                 <Button Grid.Column="2"
                                                         Command="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).RemoveIpCommand}"
                                                         CommandParameter="{Binding}"
                                                         IsVisible="{Binding CanRemove}"
+                                                        IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"
                                                         Padding="6"
                                                         Background="Transparent">
-                                                    <PathIcon Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
+                                                    <PathIcon Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
                                                               Width="14" Height="14"/>
                                                 </Button>
                                             </Grid>
