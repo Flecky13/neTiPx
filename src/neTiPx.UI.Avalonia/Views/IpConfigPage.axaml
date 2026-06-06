@@ -16,7 +16,9 @@
     <ScrollViewer>
         <StackPanel Spacing="16" Margin="24">
             <!-- Header -->
-            <Border Background="{DynamicResource CardBackgroundBrush}"
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="1"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="8"
                     Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
@@ -35,6 +37,8 @@
                 
                 <!-- Linke Spalte: Profil-Liste -->
                 <Border Grid.Column="0" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
                         Background="{DynamicResource CardBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16">
@@ -93,6 +97,8 @@
 
                 <!-- Mittlere Spalte: Einstellungen -->
                 <Border Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
                         Background="{DynamicResource CardBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16"
@@ -228,6 +234,8 @@
 
                 <!-- Rechte Spalte: Aktionen & Status -->
                 <Border Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
                         Background="{DynamicResource CardBackgroundBrush}"
                         CornerRadius="8"
                         Padding="16">
