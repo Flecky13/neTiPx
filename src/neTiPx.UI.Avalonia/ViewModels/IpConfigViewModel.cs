@@ -959,6 +959,14 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
             IpProfiles.Add(newProfile);
             SelectedProfile = newProfile;
+            
+            // Automatisch speichern
+            _ipProfileStore.SaveProfile(newProfile);
+            _selectedProfilePersistedName = newProfile.Name;
+            _selectedProfileBaseline = BuildProfileFingerprint(newProfile);
+            
+            // Tray-Menü aktualisieren
+            App.TrayService?.RefreshMenu();
         }
 
         private bool CanCopyProfile()
@@ -1015,6 +1023,14 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
             IpProfiles.Add(copiedProfile);
             SelectedProfile = copiedProfile;
+            
+            // Automatisch speichern
+            _ipProfileStore.SaveProfile(copiedProfile);
+            _selectedProfilePersistedName = copiedProfile.Name;
+            _selectedProfileBaseline = BuildProfileFingerprint(copiedProfile);
+            
+            // Tray-Menü aktualisieren
+            App.TrayService?.RefreshMenu();
         }
 
         private string BuildUniqueCopyProfileName(string sourceName)
@@ -1059,6 +1075,9 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
             // Remove from profile storage
             _ipProfileStore.RemoveProfile(profile.Name);
+            
+            // Tray-Menü aktualisieren
+            App.TrayService?.RefreshMenu();
         }
 
         private void AddIpAddress()
@@ -1145,7 +1164,8 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
         private bool CanSaveProfile()
         {
-            return SelectedProfile != null && SelectedProfile.IsDirty;
+            // Speichern ist immer möglich, wenn ein Profil ausgewählt ist
+            return SelectedProfile != null;
         }
 
         private void SaveProfile()
@@ -1184,6 +1204,9 @@ namespace neTiPx.UI.Avalonia.ViewModels
             SelectedProfile.IsDirty = false;
             _selectedProfileBaseline = BuildProfileFingerprint(SelectedProfile);
             LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil gespeichert: '{SelectedProfile.Name}'");
+            
+            // Tray-Menü aktualisieren (z.B. bei Umbenennung)
+            App.TrayService?.RefreshMenu();
             
             // Sofortige Statusprüfung nach Speichern (aktualisiert auch die Adressen-Anzeige)
             if (ShowConnectionStatus)

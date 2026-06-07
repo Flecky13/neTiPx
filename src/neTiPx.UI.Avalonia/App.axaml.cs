@@ -23,6 +23,7 @@ public partial class App : Application
 {
     public static IServiceProvider? ServiceProvider { get; private set; }
     private TrayService? _trayService;
+    public static TrayService? TrayService => ((App?)Current)?._trayService;
 
     public override void Initialize()
     {

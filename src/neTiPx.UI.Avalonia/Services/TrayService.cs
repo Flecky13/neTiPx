@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
@@ -6,7 +8,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using neTiPx.Core.Models;
 using neTiPx.Core.Services;
+using neTiPx.UI.Avalonia.Helpers;
 using neTiPx.UI.Avalonia.Views;
 using Timer = System.Timers.Timer;
 
@@ -18,6 +22,8 @@ public class TrayService : IDisposable
     private readonly HoverWindow _hoverWindow;
     private readonly Timer _autoHideTimer;
     private readonly Timer _singleClickTimer;
+    private readonly IpProfileStore _ipProfileStore;
+    private readonly NetworkConfigService _networkConfigService;
     private int _clickCount = 0;
     private const int DoubleClickMilliseconds = 500;
     private const int AutoHideSeconds = 5;
@@ -27,6 +33,8 @@ public class TrayService : IDisposable
     public TrayService()
     {
         _hoverWindow = new HoverWindow();
+        _ipProfileStore = new IpProfileStore();
+        _networkConfigService = new NetworkConfigService();
 
         _autoHideTimer = new Timer(AutoHideSeconds * 1000) { AutoReset = false };
         _autoHideTimer.Elapsed += AutoHideTimer_Elapsed;
@@ -52,6 +60,16 @@ public class TrayService : IDisposable
         _trayIcon.ToolTipText = "neTiPx";
         
         // Create context menu
+        BuildTrayMenu();
+        
+        // Handle clicks - detect single vs double click
+        _trayIcon.Clicked += OnTrayIconClicked;
+        
+        _trayIcon.IsVisible = true;
+    }
+
+    private void BuildTrayMenu()
+    {
         var menu = new NativeMenu();
         
         var infoItem = new NativeMenuItem("Netzwerk-Info umschalten");
@@ -66,16 +84,27 @@ public class TrayService : IDisposable
         
         menu.Add(new NativeMenuItemSeparator());
         
+        // IP-Profile submenu
+        AddIpProfilesMenu(menu);
+        
+        menu.Add(new NativeMenuItemSeparator());
+        
         var exitItem = new NativeMenuItem("Beenden");
         exitItem.Click += (_, _) => ExitApplication();
         menu.Add(exitItem);
         
         _trayIcon.Menu = menu;
-        
-        // Handle clicks - detect single vs double click
-        _trayIcon.Clicked += OnTrayIconClicked;
-        
-        _trayIcon.IsVisible = true;
+    }
+
+    /// <summary>
+    /// Aktualisiert das Tray-Menü (z.B. nach Änderungen an IP-Profilen)
+    /// </summary>
+    public void RefreshMenu()
+    {
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            BuildTrayMenu();
+        });
     }
 
     private void OnTrayIconClicked(object? sender, EventArgs e)
@@ -241,6 +270,94 @@ public class TrayService : IDisposable
     private void AutoHideTimer_Elapsed(object? sender, ElapsedEventArgs e)
     {
         HideHoverWindow();
+    }
+
+    private void AddIpProfilesMenu(NativeMenu parentMenu)
+    {
+        try
+        {
+            // Load all IP profiles
+            var profiles = _ipProfileStore.ReadAllProfiles();
+            
+            LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"IP-Profile geladen: {profiles.Count}");
+            
+            // Always add the menu item, even if no profiles exist
+            var profilesSubmenu = new NativeMenu();
+            
+            if (profiles.Count == 0)
+            {
+                // Show a message that no profiles exist
+                var noProfilesItem = new NativeMenuItem("(Keine Profile vorhanden)");
+                profilesSubmenu.Add(noProfilesItem);
+            }
+            else
+            {
+                // Add all profiles to submenu
+                foreach (var profile in profiles)
+                {
+                    // Format: "Name (Adapter)" oder nur "Name" wenn kein Adapter
+                    var displayName = profile.Name;
+                    if (!string.IsNullOrWhiteSpace(profile.AdapterName))
+                    {
+                        displayName = $"{profile.Name} ({profile.AdapterName})";
+                    }
+                    
+                    var profileItem = new NativeMenuItem(displayName);
+                    
+                    // Capture profile name for the click handler
+                    var profileName = profile.Name;
+                    profileItem.Click += (_, _) => ApplyIpProfile(profileName);
+                    
+                    profilesSubmenu.Add(profileItem);
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"Profil hinzugefügt: '{displayName}'");
+                }
+            }
+
+            // Create parent menu item with submenu
+            var profilesParentItem = new NativeMenuItem("IP-Profile")
+            {
+                Menu = profilesSubmenu
+            };
+            
+            parentMenu.Add(profilesParentItem);
+        }
+        catch (Exception ex)
+        {
+            LogHandler.LogSystemMessage(LogLevel.ERROR, "TrayService", $"Fehler beim Laden der IP-Profile: {ex.Message}");
+        }
+    }
+
+    private void ApplyIpProfile(string profileName)
+    {
+        try
+        {
+            LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"IP-Profil anwenden aus Tray: '{profileName}'");
+            
+            // Load the profile
+            if (!_ipProfileStore.TryGetProfile(profileName, out var profile))
+            {
+                LogHandler.LogSystemMessage(LogLevel.WARN, "TrayService", $"Profil nicht gefunden: '{profileName}'");
+                return;
+            }
+
+            // Apply the profile
+            var (success, error) = _networkConfigService.ApplyProfile(profile);
+            
+            if (!success)
+            {
+                LogHandler.LogSystemMessage(LogLevel.ERROR, "TrayService", $"Fehler beim Anwenden des Profils '{profileName}': {error}");
+                // TODO: Show notification to user
+            }
+            else
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"Profil '{profileName}' erfolgreich angewendet");
+                // TODO: Show success notification
+            }
+        }
+        catch (Exception ex)
+        {
+            LogHandler.LogSystemMessage(LogLevel.ERROR, "TrayService", $"Ausnahme beim Anwenden des Profils '{profileName}': {ex.Message}");
+        }
     }
 
     public void Dispose()
