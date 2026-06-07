@@ -39,6 +39,7 @@ public partial class ToolsPage : UserControl
         ToolsContentControl.Content = toolName switch
         {
             "NetworkCalculator" => CreateNetworkCalculatorPanel(),
+            "Routes" => CreateRoutesPanel(),
             "UncPath" => CreateUncPathPanel(),
             _ => CreateDraftPanel(toolName)
         };
@@ -52,6 +53,11 @@ public partial class ToolsPage : UserControl
     private Control CreateNetworkCalculatorPanel()
     {
         return new NetworkCalculatorView();
+    }
+
+    private Control CreateRoutesPanel()
+    {
+        return new RoutesView();
     }
 
     private StackPanel CreateDraftPanel(string toolName)

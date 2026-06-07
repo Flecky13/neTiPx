@@ -91,7 +91,7 @@
                         <ListBoxItem Tag="Routes">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🗺️" />
-                                <TextBlock Text="Routen (Draft)" />
+                                <TextBlock Text="Routen" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="LogViewer">

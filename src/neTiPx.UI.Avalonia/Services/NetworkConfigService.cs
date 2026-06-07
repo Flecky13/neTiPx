@@ -486,6 +486,344 @@ namespace neTiPx.UI.Avalonia.Services
         {
             try
             {
+                // Plattformspezifische Implementierung
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return ReadLinuxRoutes();
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return ReadWindowsRoutes();
+                }
+                else
+                {
+                    return (false, new List<RouteEntry>(), "Plattform wird nicht unterstützt");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Routen: " + ex.Message);
+            }
+        }
+
+        private (bool success, List<RouteEntry> routes, string? error) ReadLinuxRoutes()
+        {
+            try
+            {
+                // "ip route show" ausführen
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "/bin/sh",
+                    Arguments = "-c \"ip route show\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, new List<RouteEntry>(), "Prozess konnte nicht gestartet werden");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"ip route show fehlgeschlagen: {error}");
+                    return (false, new List<RouteEntry>(), $"ip route show Fehler: {error}");
+                }
+
+                var routes = ParseLinuxIpRoutes(output);
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Linux Routen gelesen: {routes.Count}");
+                
+                return (true, routes, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"ReadLinuxRoutes Exception: {ex.Message}");
+                return (false, new List<RouteEntry>(), "Fehler beim Lesen der Linux-Routen: " + ex.Message);
+            }
+        }
+
+        private List<RouteEntry> ParseLinuxIpRoutes(string output)
+        {
+            var routes = new List<RouteEntry>();
+            var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
+            {
+                try
+                {
+                    // Beispielzeilen:
+                    // default via 192.168.1.1 dev eth0 proto dhcp metric 100
+                    // 192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.10 metric 100
+                    // 10.0.0.0/8 via 192.168.1.254 dev eth0 metric 200 (keine proto = Benutzerroute)
+                    // 10.10.10.10 via 192.168.1.1 dev eth0 metric 1 (keine proto = Benutzerroute)
+
+                    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length < 2) continue;
+
+                    string destination = "0.0.0.0";
+                    string subnetMask = "0.0.0.0";
+                    string gateway = "0.0.0.0";
+                    int metric = 0;
+                    string? proto = null;
+
+                    // Destination parsen
+                    if (parts[0] == "default")
+                    {
+                        destination = "0.0.0.0";
+                        subnetMask = "0.0.0.0";
+                    }
+                    else if (parts[0].Contains('/'))
+                    {
+                        // CIDR-Notation: 192.168.1.0/24
+                        var cidrParts = parts[0].Split('/');
+                        destination = cidrParts[0];
+                        if (cidrParts.Length > 1 && int.TryParse(cidrParts[1], out int prefix))
+                        {
+                            subnetMask = PrefixLengthToSubnetMask(prefix);
+                        }
+                    }
+                    else
+                    {
+                        destination = parts[0];
+                        subnetMask = "255.255.255.255";
+                    }
+
+                    // Gateway, Metric und Proto parsen
+                    for (int i = 1; i < parts.Length - 1; i++)
+                    {
+                        if (parts[i] == "via" && i + 1 < parts.Length)
+                        {
+                            gateway = parts[i + 1];
+                        }
+                        else if (parts[i] == "metric" && i + 1 < parts.Length)
+                        {
+                            int.TryParse(parts[i + 1], out metric);
+                        }
+                        else if (parts[i] == "proto" && i + 1 < parts.Length)
+                        {
+                            proto = parts[i + 1];
+                        }
+                    }
+
+                    // Entscheiden, ob die Route löschbar ist:
+                    // - kernel, dhcp, boot = Systemrouten (nicht löschbar)
+                    // - static, redirect oder kein proto = Benutzerrouten (löschbar)
+                    bool canDelete = true;
+                    if (proto != null)
+                    {
+                        var protoLower = proto.ToLower();
+                        if (protoLower == "kernel" || protoLower == "dhcp" || protoLower == "boot")
+                        {
+                            canDelete = false;
+                        }
+                        // static, redirect oder andere = löschbar
+                    }
+                    // Keine proto-Angabe = manuell hinzugefügt = löschbar
+
+                    // Route hinzufügen
+                    routes.Add(new RouteEntry
+                    {
+                        Destination = destination,
+                        SubnetMask = subnetMask,
+                        Gateway = gateway,
+                        Metric = metric,
+                        CanDeleteFromSystem = canDelete
+                    });
+                }
+                catch (Exception ex)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", $"Fehler beim Parsen der Route '{line}': {ex.Message}");
+                }
+            }
+
+            return routes;
+        }
+
+        private (bool success, string? error) AddLinuxRoute(string destination, string subnetMask, string gateway, int metric)
+        {
+            try
+            {
+                // Subnetzmaske in CIDR-Präfix umwandeln
+                int prefix = SubnetMaskToPrefix(subnetMask);
+                if (prefix <= 0)
+                {
+                    return (false, "Ungültige Subnetzmaske.");
+                }
+
+                // ip route add Befehl erstellen
+                string command;
+                if (destination == "0.0.0.0" && prefix == 0)
+                {
+                    // Default-Route
+                    command = $"ip route add default via {gateway} metric {metric}";
+                }
+                else
+                {
+                    // Spezifische Route
+                    command = $"ip route add {destination}/{prefix} via {gateway} metric {metric}";
+                }
+
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Linux Route hinzufügen: {command}");
+
+                // Mit pkexec ausführen für Root-Rechte
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "pkexec",
+                    Arguments = $"/bin/sh -c \"{command}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, "Prozess konnte nicht gestartet werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"Route hinzufügen fehlgeschlagen: {error}");
+                    
+                    // Benutzerfreundliche Fehlermeldungen
+                    if (error.Contains("File exists") || error.Contains("RTNETLINK answers: File exists"))
+                    {
+                        return (false, "Route existiert bereits.");
+                    }
+                    else if (error.Contains("Network is unreachable"))
+                    {
+                        return (false, "Netzwerk ist nicht erreichbar.");
+                    }
+                    else if (error.Contains("No route to host"))
+                    {
+                        return (false, "Keine Route zum Gateway.");
+                    }
+                    else if (string.IsNullOrWhiteSpace(error))
+                    {
+                        return (false, "Route konnte nicht hinzugefügt werden.");
+                    }
+                    
+                    return (false, error.Trim());
+                }
+
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", "Route erfolgreich hinzugefügt");
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"AddLinuxRoute Exception: {ex.Message}");
+                return (false, $"Fehler beim Hinzufügen der Route: {ex.Message}");
+            }
+        }
+
+        private (bool success, string? error) DeleteLinuxRoute(string destination, string subnetMask, string gateway)
+        {
+            try
+            {
+                // Subnetzmaske in CIDR-Präfix umwandeln
+                int prefix = SubnetMaskToPrefix(subnetMask);
+                if (prefix <= 0)
+                {
+                    return (false, "Ungültige Subnetzmaske.");
+                }
+
+                // Gateway kann "_gateway" sein (Linux-Platzhalter) oder eine IP-Adresse
+                // Bei "_gateway" sollten wir es so belassen, da ip route das versteht
+                
+                // ip route del Befehl erstellen
+                string command;
+                if (destination == "0.0.0.0" && prefix == 0)
+                {
+                    // Default-Route
+                    if (!string.IsNullOrWhiteSpace(gateway) && gateway != "0.0.0.0")
+                    {
+                        command = $"ip route del default via {gateway}";
+                    }
+                    else
+                    {
+                        command = "ip route del default";
+                    }
+                }
+                else
+                {
+                    // Spezifische Route
+                    if (!string.IsNullOrWhiteSpace(gateway) && gateway != "0.0.0.0")
+                    {
+                        command = $"ip route del {destination}/{prefix} via {gateway}";
+                    }
+                    else
+                    {
+                        // Route ohne Gateway (direkt verbundenes Netzwerk)
+                        command = $"ip route del {destination}/{prefix}";
+                    }
+                }
+
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Linux Route löschen: {command}");
+
+                // Mit pkexec ausführen für Root-Rechte
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "pkexec",
+                    Arguments = $"/bin/sh -c \"{command}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, "Prozess konnte nicht gestartet werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"Route löschen fehlgeschlagen: {error}");
+                    
+                    // Benutzerfreundliche Fehlermeldungen
+                    if (error.Contains("No such process") || error.Contains("RTNETLINK answers: No such process"))
+                    {
+                        return (false, "Route existiert nicht.");
+                    }
+                    else if (string.IsNullOrWhiteSpace(error))
+                    {
+                        return (false, "Route konnte nicht gelöscht werden.");
+                    }
+                    
+                    return (false, error.Trim());
+                }
+
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", "Route erfolgreich gelöscht");
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"DeleteLinuxRoute Exception: {ex.Message}");
+                return (false, $"Fehler beim Löschen der Route: {ex.Message}");
+            }
+        }
+
+        private (bool success, List<RouteEntry> routes, string? error) ReadWindowsRoutes()
+        {
+            try
+            {
                 var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: true);
                 var allRoutes = ParseRoutePrintRoutes(routeSnapshot.RoutePrintOutput, includeActiveRoutes: true, includePersistentRoutes: true);
 
@@ -522,7 +860,7 @@ namespace neTiPx.UI.Avalonia.Services
             }
             catch (Exception ex)
             {
-                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Routen: " + ex.Message);
+                return (false, new List<RouteEntry>(), "Fehler beim Einlesen der Windows-Routen: " + ex.Message);
             }
         }
 
@@ -550,12 +888,23 @@ namespace neTiPx.UI.Avalonia.Services
                 return (false, "Subnetzmaske ist ungültig.");
             }
 
-            var commands = new List<string>
+            // Plattformspezifische Implementierung
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                $"route delete {destination} mask {normalizedSubnetMask} {route.Gateway}"
-            };
-
-            return RunNetshCommandsElevated(commands);
+                return DeleteLinuxRoute(destination, normalizedSubnetMask, route.Gateway);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var commands = new List<string>
+                {
+                    $"route delete {destination} mask {normalizedSubnetMask} {route.Gateway}"
+                };
+                return RunNetshCommandsElevated(commands);
+            }
+            else
+            {
+                return (false, "Plattform wird nicht unterstützt.");
+            }
         }
 
         public (bool success, string? error) AddRouteStandalone(RouteEntry route)
@@ -582,12 +931,23 @@ namespace neTiPx.UI.Avalonia.Services
                 return (false, $"Subnetzmaske '{sanitizedRoute.SubnetMask}' ist ungueltig.");
             }
 
-            var commands = new List<string>
+            // Plattformspezifische Implementierung
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                $"route -p add {sanitizedRoute.Destination} mask {normalizedSubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
-            };
-
-            return RunNetshCommandsElevated(commands);
+                return AddLinuxRoute(sanitizedRoute.Destination, normalizedSubnetMask, sanitizedRoute.Gateway, sanitizedRoute.Metric);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var commands = new List<string>
+                {
+                    $"route -p add {sanitizedRoute.Destination} mask {normalizedSubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
+                };
+                return RunNetshCommandsElevated(commands);
+            }
+            else
+            {
+                return (false, "Plattform wird nicht unterstützt.");
+            }
         }
 
         public (bool success, string? error) RemoveRoute(IpProfile profile, RouteEntry route)

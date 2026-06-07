@@ -1,0 +1,265 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:neTiPx.Core.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="neTiPx.UI.Avalonia.Views.Tools.RoutesView">
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="24">
+
+            <!-- Oberer Bereich: Ständige Routen im System -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Ständige Routen im System" 
+                                       FontSize="16" 
+                                       FontWeight="SemiBold" />
+                            <TextBlock x:Name="RoutesStatusText" 
+                                       Text="Wird eingelesen..."
+                                       FontSize="12"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                        </StackPanel>
+                        <Button x:Name="RefreshRoutesButton" 
+                                Grid.Column="1"
+                                Classes="accent"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="Routen aus dem System neu einlesen">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="🔄" FontSize="14" />
+                                <TextBlock Text="Neu Einlesen" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="DestinationFilterBox"
+                                 Watermark="Ziel-IP-Filter, z.B. 10.10.20.5"
+                                 Margin="0,0,8,0"
+                                 ToolTip.Tip="Zeigt nur Routen, die für diese Ziel-IP gemäß Routing-Entscheidung in Betracht kommen" />
+                        <Button x:Name="ClearFilterButton" 
+                                Grid.Column="1"
+                                Content="✖"
+                                Width="40"
+                                ToolTip.Tip="Ziel-IP-Filter löschen" />
+                    </Grid>
+
+                    <!-- Spaltenköpfe -->
+                    <Grid ColumnDefinitions="2*,2*,2*,70,110" Margin="4,4,0,0">
+                        <Button x:Name="SortDestinationButton" 
+                                HorizontalAlignment="Left" 
+                                Padding="0" 
+                                Background="Transparent"
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Zielnetz" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                                <TextBlock x:Name="DestinationSortIndicator" 
+                                           Text="" 
+                                           FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SortSubnetButton" 
+                                Grid.Column="1" 
+                                HorizontalAlignment="Left" 
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Subnetzmaske" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                                <TextBlock x:Name="SubnetSortIndicator" 
+                                           Text="" 
+                                           FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SortGatewayButton" 
+                                Grid.Column="2" 
+                                HorizontalAlignment="Left" 
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Gateway" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                                <TextBlock x:Name="GatewaySortIndicator" 
+                                           Text="" 
+                                           FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SortMetricButton" 
+                                Grid.Column="3" 
+                                HorizontalAlignment="Left" 
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Metrik" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                                <TextBlock x:Name="MetricSortIndicator" 
+                                           Text="" 
+                                           FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Grid.Column="4" 
+                                   Text="Aktion" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                    </Grid>
+
+                    <!-- Routes Liste -->
+                    <ScrollViewer MaxHeight="280" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="RoutesItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:RouteEntry">
+                                    <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                                            BorderThickness="1" 
+                                            CornerRadius="4" 
+                                            Padding="2" 
+                                            Margin="0,0,0,2">
+                                        <Grid ColumnDefinitions="2*,2*,2*,70,110">
+                                            <TextBlock Text="{Binding Destination}"
+                                                       VerticalAlignment="Center" 
+                                                       Margin="4,4" 
+                                                       FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" 
+                                                       Text="{Binding SubnetMask}"
+                                                       VerticalAlignment="Center" 
+                                                       Margin="4,4" 
+                                                       FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" 
+                                                       Text="{Binding Gateway}"
+                                                       VerticalAlignment="Center" 
+                                                       Margin="4,4" 
+                                                       FontSize="12"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="3" 
+                                                       Text="{Binding Metric}"
+                                                       VerticalAlignment="Center" 
+                                                       Margin="4,4" 
+                                                       FontSize="12"
+                                                       TextAlignment="Right" />
+                                            <Grid Grid.Column="4" MinWidth="110">
+                                                <Button x:Name="DeleteButton"
+                                                        Content="🗑️"
+                                                        Tag="{Binding}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"
+                                                        Padding="8"
+                                                        MinWidth="0"
+                                                        ToolTip.Tip="Ständige Route dauerhaft aus dem System entfernen"
+                                                        IsVisible="{Binding CanDeleteFromSystem}"
+                                                        Loaded="DeleteButton_Loaded" />
+                                                <TextBlock Text="Systemroute"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center"
+                                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                           FontSize="12"
+                                                           IsVisible="{Binding !CanDeleteFromSystem}" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- Unterer Bereich: Route hinzufügen -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Route hinzufügen" 
+                               FontSize="16" 
+                               FontWeight="SemiBold" />
+
+                    <!-- Spaltenköpfe -->
+                    <Grid ColumnDefinitions="2*,2*,2*,Auto">
+                        <TextBlock Text="Zielnetz" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                        <TextBlock Grid.Column="1" 
+                                   Text="Subnetzmaske" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                        <TextBlock Grid.Column="2" 
+                                   Text="Gateway" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                        <TextBlock Grid.Column="3" 
+                                   Text="Metrik" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                    </Grid>
+
+                    <!-- Eingabefelder -->
+                    <Grid ColumnDefinitions="2*,2*,2*,Auto">
+                        <TextBox x:Name="AddDestinationBox"
+                                 Watermark="z.B. 10.10.0.0"
+                                 Margin="0,0,8,0"
+                                 ToolTip.Tip="Zielnetzwerk-Adresse, z.B. 10.10.0.0" />
+                        <TextBox x:Name="AddSubnetBox" 
+                                 Grid.Column="1"
+                                 Watermark="z.B. 255.255.0.0"
+                                 Margin="0,0,8,0"
+                                 ToolTip.Tip="Subnetzmaske, z.B. 255.255.0.0" />
+                        <TextBox x:Name="AddGatewayBox" 
+                                 Grid.Column="2"
+                                 Watermark="z.B. 192.168.1.1"
+                                 Margin="0,0,8,0"
+                                 ToolTip.Tip="Gateway-Adresse, z.B. 192.168.1.1" />
+                        <TextBox x:Name="AddMetricBox" 
+                                 Grid.Column="3"
+                                 Watermark="1"
+                                 Width="80"
+                                 ToolTip.Tip="Metrik, Standard: 1" />
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Button x:Name="AddRouteButton" 
+                                Classes="accent"
+                                ToolTip.Tip="Ständige Route zum System hinzufügen">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="➕" FontSize="14" />
+                                <TextBlock Text="Route hinzufügen" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock x:Name="AddStatusText" 
+                                   Text=""
+                                   Foreground="OrangeRed"
+                                   FontSize="12" 
+                                   VerticalAlignment="Center"
+                                   IsVisible="False" 
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
