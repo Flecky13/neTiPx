@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using neTiPx.UI.Avalonia.Views.Tools;
 
 namespace neTiPx.UI.Avalonia.Views;
 
@@ -37,204 +38,90 @@ public partial class ToolsPage : UserControl
             
         ToolsContentControl.Content = toolName switch
         {
-            "Ping" => CreatePingPanel(),
-            "Wlan" => CreateWlanPanel(),
             "NetworkCalculator" => CreateNetworkCalculatorPanel(),
-            "NetworkScanner" => CreateNetworkScannerPanel(),
-            "Routes" => CreateRoutesPanel(),
-            "LogViewer" => CreateLogViewerPanel(),
             "UncPath" => CreateUncPathPanel(),
-            _ => CreatePingPanel()
-        };
-    }
-
-    private StackPanel CreatePingPanel()
-    {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "PING Tool", FontSize = 20, FontWeight = FontWeight.Bold },
-                new StackPanel
-                {
-                    Spacing = 8,
-                    Children =
-                    {
-                        new TextBlock { Text = "Host/IP-Adresse:", FontWeight = FontWeight.SemiBold },
-                        new TextBox { Watermark = "z.B. google.com oder 8.8.8.8" }
-                    }
-                },
-                new StackPanel
-                {
-                    Spacing = 8,
-                    Children =
-                    {
-                        new TextBlock { Text = "Anzahl:", FontWeight = FontWeight.SemiBold },
-                        new NumericUpDown { Value = 4, Minimum = 1, Maximum = 100 }
-                    }
-                },
-                new Button { Content = "Ping starten", Classes = { "accent" } },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 200,
-                    Child = new TextBlock { Text = "Ping-Ergebnisse werden hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
-        };
-    }
-
-    private StackPanel CreateWlanPanel()
-    {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "WLAN Tool", FontSize = 20, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "WLAN-Netzwerke scannen und verwalten" },
-                new Button { Content = "Netzwerke scannen", Classes = { "accent" } },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 200,
-                    Child = new TextBlock { Text = "Gefundene WLAN-Netzwerke werden hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
-        };
-    }
-
-    private StackPanel CreateNetworkCalculatorPanel()
-    {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "Netzwerk-Rechner", FontSize = 20, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "IP-Adressen und Subnetze berechnen" },
-                new StackPanel
-                {
-                    Spacing = 8,
-                    Children =
-                    {
-                        new TextBlock { Text = "IP-Adresse:", FontWeight = FontWeight.SemiBold },
-                        new TextBox { Watermark = "z.B. 192.168.1.0" }
-                    }
-                },
-                new StackPanel
-                {
-                    Spacing = 8,
-                    Children =
-                    {
-                        new TextBlock { Text = "CIDR / Subnet Mask:", FontWeight = FontWeight.SemiBold },
-                        new TextBox { Watermark = "z.B. 24 oder 255.255.255.0" }
-                    }
-                },
-                new Button { Content = "Berechnen", Classes = { "accent" } },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 150,
-                    Child = new TextBlock { Text = "Berechnungsergebnisse werden hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
-        };
-    }
-
-    private StackPanel CreateNetworkScannerPanel()
-    {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "Netzwerkscanner", FontSize = 20, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "Scannen Sie Ihr Netzwerk nach aktiven Geräten" },
-                new StackPanel
-                {
-                    Spacing = 8,
-                    Children =
-                    {
-                        new TextBlock { Text = "IP-Bereich:", FontWeight = FontWeight.SemiBold },
-                        new TextBox { Watermark = "z.B. 192.168.1.0/24" }
-                    }
-                },
-                new Button { Content = "Scan starten", Classes = { "accent" } },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 200,
-                    Child = new TextBlock { Text = "Gefundene Geräte werden hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
-        };
-    }
-
-    private StackPanel CreateRoutesPanel()
-    {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "Routen", FontSize = 20, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "Netzwerkrouten anzeigen und verwalten" },
-                new Button { Content = "Routen aktualisieren", Classes = { "accent" } },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 200,
-                    Child = new TextBlock { Text = "Routing-Tabelle wird hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
-        };
-    }
-
-    private StackPanel CreateLogViewerPanel()
-    {
-        return new StackPanel
-        {
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = "Log Viewer", FontSize = 20, FontWeight = FontWeight.Bold },
-                new TextBlock { Text = "Anwendungslogs anzeigen" },
-                new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    Spacing = 12,
-                    Children =
-                    {
-                        new Button { Content = "Logs aktualisieren", Classes = { "accent" } },
-                        new Button { Content = "Logs löschen" }
-                    }
-                },
-                new Border
-                {
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(4),
-                    Padding = new Thickness(12),
-                    MinHeight = 300,
-                    Child = new TextBlock { Text = "Log-Einträge werden hier angezeigt...", Foreground = Brushes.Gray }
-                }
-            }
+            _ => CreateDraftPanel(toolName)
         };
     }
 
     private Control CreateUncPathPanel()
     {
         return new UncPathView();
+    }
+
+    private Control CreateNetworkCalculatorPanel()
+    {
+        return new NetworkCalculatorView();
+    }
+
+    private StackPanel CreateDraftPanel(string toolName)
+    {
+        var toolDisplayName = toolName switch
+        {
+            "Ping" => "PING",
+            "Wlan" => "WLAN",
+            "NetworkCalculator" => "Netzwerk-Rechner",
+            "NetworkScanner" => "Netzwerkscanner",
+            "Routes" => "Routen",
+            "LogViewer" => "Log Viewer",
+            _ => toolName
+        };
+
+        return new StackPanel
+        {
+            Spacing = 24,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Children =
+            {
+                new TextBlock 
+                { 
+                    Text = "🚧", 
+                    FontSize = 64,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                },
+                new TextBlock 
+                { 
+                    Text = $"{toolDisplayName}", 
+                    FontSize = 28, 
+                    FontWeight = FontWeight.Bold,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                },
+                new TextBlock 
+                { 
+                    Text = "Draft - In Planung", 
+                    FontSize = 18,
+                    FontWeight = FontWeight.SemiBold,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Foreground = Brushes.Orange
+                },
+                new Border
+                {
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(8),
+                    Padding = new Thickness(24, 16),
+                    Margin = new Thickness(0, 16, 0, 0),
+                    MaxWidth = 500,
+                    Child = new StackPanel
+                    {
+                        Spacing = 12,
+                        Children =
+                        {
+                            new TextBlock 
+                            { 
+                                Text = "ℹ️ Hinweis",
+                                FontSize = 16,
+                                FontWeight = FontWeight.SemiBold
+                            },
+                            new TextBlock 
+                            { 
+                                Text = "Diese Funktion befindet sich noch in der Planungsphase und wird in einer zukünftigen Version implementiert.",
+                                TextWrapping = TextWrapping.Wrap
+                            }
+                        }
+                    }
+                }
+            }
+        };
     }
 }

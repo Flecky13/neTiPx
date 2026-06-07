@@ -1,0 +1,294 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="neTiPx.UI.Avalonia.Views.Tools.NetworkCalculatorView">
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="24">
+            <!-- Header mit RadioButtons -->
+            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+                <TextBlock Grid.Column="0" 
+                           Text="Netzwerk-Rechner" 
+                           FontSize="20" 
+                           FontWeight="SemiBold" 
+                           VerticalAlignment="Center" />
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            Spacing="16" 
+                            VerticalAlignment="Center">
+                    <RadioButton x:Name="Ipv4RadioButton" 
+                                 Content="IPv4" 
+                                 IsChecked="True"
+                                 GroupName="IpVersion" />
+                    <RadioButton x:Name="Ipv6RadioButton" 
+                                 Content="IPv6"
+                                 GroupName="IpVersion" />
+                </StackPanel>
+            </Grid>
+
+            <!-- IPv4 Eingabefelder -->
+            <Border x:Name="Ipv4InputBorder"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,*,*">
+                        <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,8,0">
+                            <TextBlock Text="IP-Adresse" FontWeight="SemiBold" />
+                            <TextBox x:Name="IpAddressTextBox"
+                                     Watermark="z.B. 192.168.1.0" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" Margin="8,0">
+                            <TextBlock Text="Subnetzmaske" FontWeight="SemiBold" />
+                            <TextBox x:Name="SubnetTextBox"
+                                     Watermark="z.B. 255.255.255.0" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="8" Margin="8,0,0,0">
+                            <TextBlock Text="CIDR-Suffix" FontWeight="SemiBold" />
+                            <TextBox x:Name="CidrTextBox"
+                                     Watermark="z.B. 24" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Max. Anzahl Hosts" FontWeight="SemiBold" />
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+                            <TextBox x:Name="MaxHostsTextBox"
+                                     Grid.Column="0"
+                                     IsReadOnly="True"
+                                     Watermark="z.B. 254"
+                                     Margin="0,0,8,0" />
+                            <Button x:Name="HostsMinusButton" 
+                                    Grid.Column="1"
+                                    Content="-"
+                                    Width="40"
+                                    Margin="0,0,4,0"
+                                    ToolTip.Tip="Anzahl Hosts reduzieren" />
+                            <Button x:Name="HostsPlusButton" 
+                                    Grid.Column="2"
+                                    Content="+"
+                                    Width="40"
+                                    Margin="4,0,0,0"
+                                    ToolTip.Tip="Anzahl Hosts erhöhen" />
+                        </Grid>
+                        <TextBlock x:Name="IpScopeTextBlock"
+                                   Text="IP-Bereich: -"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- IPv6 Eingabefelder -->
+            <Border x:Name="Ipv6InputBorder"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    IsVisible="False">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,16,0">
+                            <TextBlock Text="IPv6-Adresse" FontWeight="SemiBold" />
+                            <TextBox x:Name="Ipv6AddressTextBox"
+                                     Watermark="z.B. 2001:db8::" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" MinWidth="150">
+                            <TextBlock Text="Präfixlänge" FontWeight="SemiBold" />
+                            <TextBox x:Name="Ipv6PrefixTextBox"
+                                     Watermark="z.B. 64" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock x:Name="Ipv6ScopeTextBlock"
+                               Text="IP-Bereich: -"
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                </StackPanel>
+            </Border>
+
+            <!-- IPv4 Ergebnisse -->
+            <Border x:Name="Ipv4ResultsBorder"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    IsVisible="False">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Berechnungsergebnisse" 
+                               FontWeight="SemiBold" 
+                               FontSize="14" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <StackPanel Grid.Column="0" Grid.Row="0" Spacing="4" Margin="0,0,8,12">
+                            <TextBlock Text="Netzwerkadresse:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="NetworkAddress" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4" Margin="8,0,0,12">
+                            <TextBlock Text="Broadcast-Adresse:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="BroadcastAddress" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Spacing="4" Margin="0,0,8,12">
+                            <TextBlock Text="Erste verwendbare IP:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="FirstUsableIp" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Grid.Row="1" Spacing="4" Margin="8,0,0,12">
+                            <TextBlock Text="Letzte verwendbare IP:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="LastUsableIp" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Spacing="4" Margin="0,0,8,12">
+                            <TextBlock Text="Subnetzmaske:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="SubnetMask" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Grid.Row="2" Spacing="4" Margin="8,0,0,12">
+                            <TextBlock Text="CIDR-Suffix:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="CidrNotation" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="3" Spacing="4" Margin="0,0,8,0">
+                            <TextBlock Text="Anzahl Hosts:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="HostCount" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Grid.Row="3" Spacing="4" Margin="8,0,0,0">
+                            <TextBlock Text="Wildcard-Maske:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="WildcardMask" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- IPv6 Ergebnisse -->
+            <Border x:Name="Ipv6ResultsBorder"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    IsVisible="False">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Berechnungsergebnisse" 
+                               FontWeight="SemiBold" 
+                               FontSize="14" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                        <StackPanel Grid.Column="0" Grid.Row="0" Spacing="4" Margin="0,0,8,12">
+                            <TextBlock Text="Netzwerkadresse:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="NetworkAddressIpv6" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4" Margin="8,0,0,12">
+                            <TextBlock Text="Präfixlänge:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="PrefixLengthIpv6" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Spacing="4" Margin="0,0,8,12">
+                            <TextBlock Text="Erste Adresse:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="FirstAddressIpv6" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Grid.Row="1" Spacing="4" Margin="8,0,0,12">
+                            <TextBlock Text="Letzte Adresse:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="LastAddressIpv6" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Spacing="4">
+                            <TextBlock Text="Anzahl Adressen:" 
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
+                                       FontSize="12" />
+                            <TextBlock x:Name="AddressCountIpv6" 
+                                       Text="-" 
+                                       FontWeight="SemiBold" 
+                                       FontSize="14" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Fehlerbehandlung -->
+            <Border x:Name="ErrorBorder"
+                    BorderBrush="OrangeRed"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="12"
+                    Background="#20FF4500"
+                    IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="⚠️" FontSize="16" VerticalAlignment="Center" />
+                    <TextBlock x:Name="ErrorMessage" 
+                               Text="" 
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

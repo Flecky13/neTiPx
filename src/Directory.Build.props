@@ -1,13 +1,13 @@
 <Project>
     <PropertyGroup>
         <!-- Zentrale Versionsangabe für alle Projekte -->
-        <Version>2.0.2.0</Version>
-        <AssemblyVersion>2.0.2.0</AssemblyVersion>
-        <FileVersion>2.0.2.0</FileVersion>
+        <Version>2.0.3.1</Version>
+        <AssemblyVersion>2.0.3.1</AssemblyVersion>
+        <FileVersion>2.0.3.1</FileVersion>
         
         <!-- Gemeinsame Metadaten -->
         <Authors>Pedro</Authors>
-        <Company>neTiPx</Company>
+        <Company>PeTe Tools</Company>
         <Product>neTiPx - Network Tools</Product>
         <Copyright>© 2026 neTiPx by Pedro</Copyright>
         <Description>Cross-platform network configuration and diagnostic tool</Description>
