@@ -69,15 +69,47 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <!-- Footer -->
-                    <TextBlock Grid.Row="2"
-                               Text="© neTiPx by Pedro"
-                               Margin="16,8"
-                               FontSize="12"
-                               Opacity="0.7"
-                               VerticalAlignment="Bottom"
-                               IsVisible="{Binding IsPaneOpen}"
-                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                    <!-- Footer Navigation and Copyright -->
+                    <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
+                        <!-- Footer Navigation Items -->
+                        <ListBox ItemsSource="{Binding FooterNavigationItems}"
+                                 SelectedItem="{Binding SelectedNavigationItem}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Margin="0,0,0,8">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding $parent[Window].DataContext.NavigateToCommand}"
+                                            CommandParameter="{Binding Name}"
+                                            Background="Transparent"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Left"
+                                            Padding="2,6">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{Binding Icon}" 
+                                                       FontSize="16" 
+                                                       VerticalAlignment="Center" 
+                                                       Width="20" 
+                                                       TextAlignment="Center"
+                                                       Foreground="{DynamicResource NavigationViewItemForeground}" />
+                                            <TextBlock Text="{Binding DisplayName}" 
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding $parent[Window].DataContext.IsPaneOpen}"
+                                                       Foreground="{DynamicResource NavigationViewItemForeground}" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        
+                        <!-- Copyright -->
+                        <TextBlock Text="© neTiPx by Pedro"
+                                   Margin="16,8"
+                                   FontSize="12"
+                                   Opacity="0.7"
+                                   IsVisible="{Binding IsPaneOpen}"
+                                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                    </StackPanel>
                 </Grid>
             </SplitView.Pane>
 

@@ -44,31 +44,33 @@
                     <StackPanel Grid.Column="0" Spacing="12" VerticalAlignment="Center">
                         <TextBlock Text="neTiPx - Network Tools" FontSize="18" FontWeight="SemiBold" />
                         
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
-                            <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" />
-                        </StackPanel>
+                        <!-- Versionen in einer Zeile -->
+                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="24" RowDefinitions="Auto,Auto">
+                            <!-- Installierte Version -->
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
+                                <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" />
+                            </StackPanel>
 
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
-                            <TextBlock Text="{Binding LatestVersion}" FontSize="16" FontWeight="SemiBold" />
-                        </StackPanel>
+                            <!-- Latest Version -->
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
+                                <TextBlock Text="{Binding LatestVersion}" FontSize="16" FontWeight="SemiBold" />
+                            </StackPanel>
+
+                            <!-- Update Status -->
+                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Text="Status" Opacity="0.7" FontSize="12" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Ellipse Width="10" Height="10" Fill="{Binding UpdateStatusColor}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" Opacity="0.8" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
 
                         <StackPanel Spacing="4">
                             <TextBlock Text="Plattform" Opacity="0.7" FontSize="12" />
                             <TextBlock Text="{Binding PlatformInfo}" FontSize="14" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Ellipse Width="10" Height="10" Fill="{Binding UpdateStatusColor}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" Opacity="0.8" VerticalAlignment="Center" />
-                        </StackPanel>
-
-                        <StackPanel Spacing="4" Margin="0,8,0,0">
-                            <Button Content="GitHub Releases →" HorizontalAlignment="Left" 
-                                    Command="{Binding OpenGitHubReleasesCommand}" />
-                            <Button Content="Latest Release →" HorizontalAlignment="Left"
-                                    Command="{Binding OpenLatestReleaseCommand}" />
                         </StackPanel>
                     </StackPanel>
 
@@ -102,48 +104,58 @@
                     CornerRadius="8" 
                     Padding="24"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-                <StackPanel Spacing="12">
-                    <TextBlock Text="Über neTiPx" FontSize="18" FontWeight="Bold" />
-                    <TextBlock Text="neTiPx ist ein umfassendes Netzwerk-Konfigurations- und Diagnose-Tool für Windows, macOS und Linux." TextWrapping="Wrap" />
-                    
-                    <Separator Margin="0,8" />
-                    
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Entwickelt von: Pedro" FontWeight="SemiBold" />
-                        <TextBlock Text="© 2026 neTiPx" Opacity="0.7" />
+                <Grid ColumnDefinitions="*,Auto">
+                    <!-- Linke Seite: Text und Features -->
+                    <StackPanel Grid.Column="0" Spacing="12" Margin="0,0,24,0">
+                        <TextBlock Text="Über neTiPx" FontSize="18" FontWeight="Bold" />
+                        <TextBlock Text="neTiPx ist ein umfassendes Netzwerk-Konfigurations- und Diagnose-Tool für Windows, macOS und Linux." TextWrapping="Wrap" />
+                        
+                        <Separator Margin="0,8" />
+                        
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Entwickelt von: Pedro" FontWeight="SemiBold" />
+                            <TextBlock Text="© 2026 neTiPx" Opacity="0.7" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="Features:" FontWeight="SemiBold" />
+                            <TextBlock Text="• IP-Profile verwalten und schnell wechseln" />
+                            <TextBlock Text="• Netzwerk-Scanner und PING-Tools" />
+                            <TextBlock Text="• WLAN-Management" />
+                            <TextBlock Text="• Netzwerk-Rechner und Routing" />
+                            <TextBlock Text="• UNC-Pfade verwalten" />
+                            <TextBlock Text="• Plattformübergreifend (Windows, macOS, Linux)" />
+                        </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Spacing="4" Margin="0,8,0,0">
-                        <TextBlock Text="Features:" FontWeight="SemiBold" />
-                        <TextBlock Text="• IP-Profile verwalten und schnell wechseln" />
-                        <TextBlock Text="• Netzwerk-Scanner und PING-Tools" />
-                        <TextBlock Text="• WLAN-Management" />
-                        <TextBlock Text="• Netzwerk-Rechner und Routing" />
-                        <TextBlock Text="• UNC-Pfade verwalten" />
-                        <TextBlock Text="• Plattformübergreifend (Windows, macOS, Linux)" />
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
-                        <Button Classes="accent" Command="{Binding OpenDocumentationCommand}">
+                    <!-- Rechte Seite: Buttons untereinander -->
+                    <StackPanel Grid.Column="1" Spacing="12" VerticalAlignment="Center">
+                        <Button Classes="accent" Command="{Binding OpenDocumentationCommand}" HorizontalAlignment="Stretch" MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📄" />
                                 <TextBlock Text="Dokumentation" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding OpenBugReportCommand}">
+                        <Button Command="{Binding OpenBugReportCommand}" HorizontalAlignment="Stretch" MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🐛" />
                                 <TextBlock Text="Bug melden" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding OpenGitHubRepositoryCommand}">
+                        <Button Command="{Binding OpenGitHubRepositoryCommand}" HorizontalAlignment="Stretch" MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="⭐" />
                                 <TextBlock Text="GitHub Repository" />
                             </StackPanel>
                         </Button>
+                        <Button Command="{Binding OpenSupportCommand}" HorizontalAlignment="Stretch" MinWidth="200" Background="#756600" Foreground="#000000">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="☕" />
+                                <TextBlock Text="Buy me a coffee" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Lizenz & Kontakt -->
@@ -161,24 +173,6 @@
                                    Opacity="0.8"
                                    TextWrapping="Wrap" />
                     </StackPanel>
-
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
-                        <TextBlock Text="Kontakt:" Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
-                        <Button Grid.Row="0" Grid.Column="1" 
-                                Content="https://github.com/Flecky13"
-                                Command="{Binding OpenContactCommand}"
-                                HorizontalAlignment="Left"
-                                Padding="4,2"
-                                Classes="hyperlink" />
-
-                        <TextBlock Text="Support:" Grid.Row="1" Grid.Column="0" FontWeight="SemiBold" Opacity="0.7" />
-                        <Button Grid.Row="1" Grid.Column="1" 
-                                Content="https://buymeacoffee.com/pedrotepe"
-                                Command="{Binding OpenSupportCommand}"
-                                HorizontalAlignment="Left"
-                                Padding="4,2"
-                                Classes="hyperlink" />
-                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

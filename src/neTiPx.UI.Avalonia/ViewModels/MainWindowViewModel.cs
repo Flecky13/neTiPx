@@ -28,7 +28,11 @@ public partial class MainWindowViewModel : ObservableObject
         new NavigationItem { Name = "IpConfig", DisplayName = "IP Konfiguration", Icon = "⚙️" },
         new NavigationItem { Name = "Routes", DisplayName = "Routen", Icon = "🗺️" },
         new NavigationItem { Name = "UncPath", DisplayName = "UNC Pfade", Icon = "🗂️" },
-        new NavigationItem { Name = "Tools", DisplayName = "Tools", Icon = "🔧" },
+        new NavigationItem { Name = "Tools", DisplayName = "Tools", Icon = "🔧" }
+    };
+
+    public ObservableCollection<NavigationItem> FooterNavigationItems { get; } = new()
+    {
         new NavigationItem { Name = "Info", DisplayName = "Info", Icon = "ℹ️" },
         new NavigationItem { Name = "Settings", DisplayName = "Einstellungen", Icon = "⚙️" }
     };
@@ -46,6 +50,10 @@ public partial class MainWindowViewModel : ObservableObject
         
         // Update SelectedNavigationItem to follow the current page
         var matchingItem = NavigationItems.FirstOrDefault(item => item.Name == pageName);
+        if (matchingItem == null)
+        {
+            matchingItem = FooterNavigationItems.FirstOrDefault(item => item.Name == pageName);
+        }
         if (matchingItem != null)
         {
             SelectedNavigationItem = matchingItem;
