@@ -15,6 +15,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly Core.Services.HoverWindowSettings _hoverWindowSettings;
     private readonly Core.Services.ThemeService _themeService;
     private readonly SettingsService _settingsService;
+    private readonly AutostartService _autostartService;
     
     [ObservableProperty]
     private ObservableCollection<string> _availableAdapters;
@@ -51,6 +52,10 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private int _pingThresholdNormal;
+
+    // Autostart Einstellungen
+    [ObservableProperty]
+    private bool _isAutostartEnabled;
     
     public SettingsViewModel()
     {
@@ -58,6 +63,7 @@ public partial class SettingsViewModel : ObservableObject
         _hoverWindowSettings = new Core.Services.HoverWindowSettings();
         _themeService = new Core.Services.ThemeService();
         _settingsService = new SettingsService();
+        _autostartService = new AutostartService();
         _availableAdapters = new ObservableCollection<string>();
         _availableSecondaryAdapters = new ObservableCollection<string>();
         _availableThemes = new ObservableCollection<string>();
@@ -67,6 +73,7 @@ public partial class SettingsViewModel : ObservableObject
         LoadHoverWindowSettings();
         LoadThemeSettings();
         LoadConnectionQualitySettings();
+        LoadAutostartSettings();
     }
     
     /// <summary>
@@ -383,6 +390,37 @@ public partial class SettingsViewModel : ObservableObject
         if (value > PingThresholdFast)
         {
             _settingsService.SetPingThresholdNormal(value);
+        }
+    }
+
+    /// <summary>
+    /// Lädt die Autostart-Einstellungen.
+    /// </summary>
+    private void LoadAutostartSettings()
+    {
+        try
+        {
+            IsAutostartEnabled = _autostartService.IsAutostartEnabled();
+        }
+        catch
+        {
+            IsAutostartEnabled = false;
+        }
+    }
+
+    /// <summary>
+    /// Wird aufgerufen, wenn sich die Autostart-Einstellung ändert.
+    /// </summary>
+    partial void OnIsAutostartEnabledChanged(bool value)
+    {
+        try
+        {
+            _autostartService.SetAutostart(value);
+        }
+        catch
+        {
+            // Bei Fehler: Wert zurücksetzen
+            IsAutostartEnabled = _autostartService.IsAutostartEnabled();
         }
     }
 }

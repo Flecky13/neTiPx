@@ -7,6 +7,7 @@ using neTiPx.UI.Avalonia.Services;
 using neTiPx.UI.Avalonia.ViewModels;
 using neTiPx.UI.Avalonia.Views;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 #if WINDOWS
@@ -46,8 +47,16 @@ public partial class App : Application
             // Initialize TrayService
             _trayService = new TrayService();
             
-            // Start minimized to tray (window is created but not shown)
-            // User can open it from tray icon
+            // Prüfe auf --minimized Parameter
+            var args = Environment.GetCommandLineArgs();
+            bool startMinimized = args.Any(arg => arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase));
+            
+            if (!startMinimized)
+            {
+                // Nur anzeigen, wenn nicht minimiert gestartet werden soll
+                desktop.MainWindow.Show();
+            }
+            // Wenn minimiert gestartet, bleibt das Fenster versteckt (nur im Tray)
             
             desktop.ShutdownRequested += (sender, e) =>
             {

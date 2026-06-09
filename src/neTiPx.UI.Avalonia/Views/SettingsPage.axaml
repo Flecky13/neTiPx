@@ -223,9 +223,13 @@
                         <TextBlock Text="Autostart" FontWeight="Bold" />
                         <TextBlock Text="Anwendung beim Systemstart" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
-                        <CheckBox Content="Autostart aktivieren" />
-                        <CheckBox Content="Minimiert starten" />
-                        <CheckBox Content="Im Tray starten" />
+                        <CheckBox Content="Autostart aktivieren" 
+                                  IsChecked="{Binding IsAutostartEnabled}" />
+                        <TextBlock Text="Die App startet automatisch nach der Anmeldung und wird im Systray minimiert." 
+                                   FontSize="11" 
+                                   Opacity="0.6" 
+                                   TextWrapping="Wrap" 
+                                   Margin="24,0,0,0" />
                     </StackPanel>
                 </Border>
 
