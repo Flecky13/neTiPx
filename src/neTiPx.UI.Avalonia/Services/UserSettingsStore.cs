@@ -23,6 +23,7 @@ namespace neTiPx.UI.Avalonia.Services
             public int PingThresholdFast { get; set; } = 20;
             public int PingThresholdNormal { get; set; } = 50;
             public bool CloseToTrayOnClose { get; set; } = true;
+            public bool StartMinimizedToTray { get; set; } = false;
             public string? LastCheckedLatestVersion { get; set; }
             public DateTime? LastCheckedAt { get; set; }
             public string PingLogFolderPath { get; set; } = string.Empty;
@@ -141,7 +142,8 @@ namespace neTiPx.UI.Avalonia.Services
             );
 
             var appBehaviorElement = new XElement("appBehavior",
-                new XAttribute("closeToTrayOnClose", settings.CloseToTrayOnClose)
+                new XAttribute("closeToTrayOnClose", settings.CloseToTrayOnClose),
+                new XAttribute("startMinimizedToTray", settings.StartMinimizedToTray)
             );
 
             var updateCheckElement = new XElement("updateCheck");
@@ -274,6 +276,10 @@ namespace neTiPx.UI.Avalonia.Services
                     if (bool.TryParse((string?)appBehaviorElement.Attribute("closeToTrayOnClose"), out var closeToTrayOnClose))
                     {
                         settings.CloseToTrayOnClose = closeToTrayOnClose;
+                    }
+                    if (bool.TryParse((string?)appBehaviorElement.Attribute("startMinimizedToTray"), out var startMinimizedToTray))
+                    {
+                        settings.StartMinimizedToTray = startMinimizedToTray;
                     }
                 }
 

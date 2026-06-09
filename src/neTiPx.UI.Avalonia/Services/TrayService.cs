@@ -238,6 +238,8 @@ public class TrayService : IDisposable
                     else
                     {
                         // Window is closed - show it
+                        mainWindow.ShowInTaskbar = true; // Sicherstellen, dass Taskleisten-Icon angezeigt wird
+                        mainWindow.ShowActivated = true; // Fenster soll aktiviert werden
                         mainWindow.Show();
                         mainWindow.Activate();
                         mainWindow.WindowState = WindowState.Normal;

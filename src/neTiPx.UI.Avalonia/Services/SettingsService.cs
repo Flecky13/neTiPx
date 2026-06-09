@@ -142,6 +142,17 @@ namespace neTiPx.UI.Avalonia.Services
                 : "Bottom";
         }
 
+        public bool GetStartMinimizedToTray()
+        {
+            var settings = LoadUserSettings();
+            return settings.StartMinimizedToTray;
+        }
+
+        public void SetStartMinimizedToTray(bool enabled)
+        {
+            UpdateUserSettings(settings => settings.StartMinimizedToTray = enabled);
+        }
+
         public bool GetCheckConnectionGateway()
         {
             var settings = LoadUserSettings();

@@ -57,6 +57,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isAutostartEnabled;
     
+    [ObservableProperty]
+    private bool _startMinimizedToTray;
+    
     public SettingsViewModel()
     {
         _adapterStore = new Core.Services.AdapterStore();
@@ -401,10 +404,12 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             IsAutostartEnabled = _autostartService.IsAutostartEnabled();
+            StartMinimizedToTray = _settingsService.GetStartMinimizedToTray();
         }
         catch
         {
             IsAutostartEnabled = false;
+            StartMinimizedToTray = false;
         }
     }
 
@@ -421,6 +426,22 @@ public partial class SettingsViewModel : ObservableObject
         {
             // Bei Fehler: Wert zurücksetzen
             IsAutostartEnabled = _autostartService.IsAutostartEnabled();
+        }
+    }
+    
+    /// <summary>
+    /// Wird aufgerufen, wenn sich die "Minimiert starten" Einstellung ändert.
+    /// </summary>
+    partial void OnStartMinimizedToTrayChanged(bool value)
+    {
+        try
+        {
+            _settingsService.SetStartMinimizedToTray(value);
+        }
+        catch
+        {
+            // Bei Fehler: Wert zurücksetzen
+            StartMinimizedToTray = _settingsService.GetStartMinimizedToTray();
         }
     }
 }

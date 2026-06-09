@@ -225,7 +225,16 @@
 
                         <CheckBox Content="Autostart aktivieren" 
                                   IsChecked="{Binding IsAutostartEnabled}" />
-                        <TextBlock Text="Die App startet automatisch nach der Anmeldung und wird im Systray minimiert." 
+                        <TextBlock Text="Die App startet automatisch nach der Anmeldung." 
+                                   FontSize="11" 
+                                   Opacity="0.6" 
+                                   TextWrapping="Wrap" 
+                                   Margin="24,0,0,0" />
+                        
+                        <CheckBox Content="Minimiert starten" 
+                                  IsChecked="{Binding StartMinimizedToTray}"
+                                  IsEnabled="{Binding IsAutostartEnabled}" />
+                        <TextBlock Text="Die App startet minimiert im Systray (nur wenn Autostart aktiviert)." 
                                    FontSize="11" 
                                    Opacity="0.6" 
                                    TextWrapping="Wrap" 

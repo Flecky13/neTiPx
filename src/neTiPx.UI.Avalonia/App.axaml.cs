@@ -1,6 +1,8 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using neTiPx.Core.Services;
 using neTiPx.UI.Avalonia.Services;
@@ -42,21 +44,42 @@ public partial class App : Application
             // Load and apply saved theme before creating window
             LoadAndApplyTheme();
             
-            desktop.MainWindow = new MainWindow();
+            // Prüfe auf --minimized Parameter und User-Einstellung
+            var args = Environment.GetCommandLineArgs();
+            bool hasMinimizedParam = args.Any(arg => arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase));
+            
+            var settingsService = new SettingsService();
+            bool startMinimizedSetting = settingsService.GetStartMinimizedToTray();
+            
+            // Nur minimiert starten, wenn BEIDE Bedingungen erfüllt sind
+            bool startMinimized = hasMinimizedParam && startMinimizedSetting;
+            
+            // Setze ShutdownMode auf ExplicitShutdown, damit die App nicht beendet wird, wenn kein Fenster sichtbar ist
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            
+            // Erstelle MainWindow
+            var mainWindow = new MainWindow();
+            
+            // Weise das Fenster zu
+            desktop.MainWindow = mainWindow;
             
             // Initialize TrayService
             _trayService = new TrayService();
             
-            // Prüfe auf --minimized Parameter
-            var args = Environment.GetCommandLineArgs();
-            bool startMinimized = args.Any(arg => arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase));
-            
-            if (!startMinimized)
+            if (startMinimized)
             {
-                // Nur anzeigen, wenn nicht minimiert gestartet werden soll
+                // Bei minimized: Verzögert verstecken (nach vollständiger Initialisierung)
+                mainWindow.ShowInTaskbar = false;
+                Dispatcher.UIThread.Post(() => 
+                {
+                    desktop.MainWindow?.Hide();
+                }, DispatcherPriority.Loaded);
+            }
+            else
+            {
+                // Normal starten: Fenster anzeigen
                 desktop.MainWindow.Show();
             }
-            // Wenn minimiert gestartet, bleibt das Fenster versteckt (nur im Tray)
             
             desktop.ShutdownRequested += (sender, e) =>
             {
