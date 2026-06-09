@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using neTiPx.UI.Avalonia.Views;
+using neTiPx.UI.Avalonia.Views.Tools;
 
 namespace neTiPx.UI.Avalonia.ViewModels;
 
@@ -25,6 +26,8 @@ public partial class MainWindowViewModel : ObservableObject
     {
         new NavigationItem { Name = "Adapters", DisplayName = "Adapter Infos", Icon = "🔌" },
         new NavigationItem { Name = "IpConfig", DisplayName = "IP Konfiguration", Icon = "⚙️" },
+        new NavigationItem { Name = "Routes", DisplayName = "Routen", Icon = "🗺️" },
+        new NavigationItem { Name = "UncPath", DisplayName = "UNC Pfade", Icon = "🗂️" },
         new NavigationItem { Name = "Tools", DisplayName = "Tools", Icon = "🔧" },
         new NavigationItem { Name = "Info", DisplayName = "Info", Icon = "ℹ️" },
         new NavigationItem { Name = "Settings", DisplayName = "Einstellungen", Icon = "⚙️" }
@@ -63,6 +66,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             "Adapters" => new AdapterPage(),
             "IpConfig" => new IpConfigPage(),
+            "Routes" => new RoutesView(),
+            "UncPath" => new UncPathView(),
             "Tools" => new ToolsPage(),
             "Info" => new InfoPage(),
             "Settings" => new SettingsPage(),

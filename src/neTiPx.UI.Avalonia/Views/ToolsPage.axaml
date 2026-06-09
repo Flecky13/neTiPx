@@ -88,22 +88,10 @@
                                 <TextBlock Text="Netzwerkscanner (Draft)" />
                             </StackPanel>
                         </ListBoxItem>
-                        <ListBoxItem Tag="Routes">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="🗺️" />
-                                <TextBlock Text="Routen" />
-                            </StackPanel>
-                        </ListBoxItem>
                         <ListBoxItem Tag="LogViewer">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📄" />
                                 <TextBlock Text="Log Viewer (Draft)" />
-                            </StackPanel>
-                        </ListBoxItem>
-                        <ListBoxItem Tag="UncPath">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="🗂️" />
-                                <TextBlock Text="UNC Pfade" />
                             </StackPanel>
                         </ListBoxItem>
                     </ListBox>
