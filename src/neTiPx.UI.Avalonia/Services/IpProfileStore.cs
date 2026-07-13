@@ -126,6 +126,8 @@ namespace neTiPx.UI.Avalonia.Services
                 foreach (var profileElement in root.Elements("profile"))
                 {
                     var adapterNameAttr = (string?)profileElement.Attribute("adapterName");
+                    var linkedRouteProfileName = (string?)profileElement.Attribute("linkedRouteProfile") ?? string.Empty;
+                    
                     var profile = new IpProfile
                     {
                         Name = (string?)profileElement.Attribute("name") ?? "IP #1",
@@ -135,8 +137,8 @@ namespace neTiPx.UI.Avalonia.Services
                         Dns1 = (string?)profileElement.Attribute("dns1") ?? string.Empty,
                         Dns2 = (string?)profileElement.Attribute("dns2") ?? string.Empty,
                         LinkedUncProfileName = (string?)profileElement.Attribute("linkedUncProfile") ?? string.Empty,
-                        RoutesEnabled = bool.TryParse((string?)profileElement.Attribute("routesEnabled"), out var routesEnabled) && routesEnabled,
-                        AddRoutesOnApply = !bool.TryParse((string?)profileElement.Attribute("addRoutesOnApply"), out var addRoutesOnApply) || addRoutesOnApply,
+                        LinkedRouteProfileName = linkedRouteProfileName,
+                        RoutesEnabled = !string.IsNullOrWhiteSpace(linkedRouteProfileName),
                         IsDirty = false
                     };
 
@@ -177,7 +179,11 @@ namespace neTiPx.UI.Avalonia.Services
         {
             var root = new XElement("ipProfiles",
                 profiles.Select(profile =>
-                    new XElement("profile",
+                {
+                    var isDhcp = NormalizeMode(profile.Mode).Equals("DHCP", StringComparison.OrdinalIgnoreCase);
+                    var hasLinkedRouteProfile = !string.IsNullOrWhiteSpace(profile.LinkedRouteProfileName);
+
+                    return new XElement("profile",
                         new XAttribute("name", profile.Name ?? string.Empty),
                         new XAttribute("adapterName", profile.AdapterName ?? string.Empty),
                         new XAttribute("mode", NormalizeMode(profile.Mode)),
@@ -185,9 +191,10 @@ namespace neTiPx.UI.Avalonia.Services
                         new XAttribute("dns1", profile.Dns1 ?? string.Empty),
                         new XAttribute("dns2", profile.Dns2 ?? string.Empty),
                         new XAttribute("linkedUncProfile", profile.LinkedUncProfileName ?? string.Empty),
-                        new XAttribute("routesEnabled", profile.RoutesEnabled),
-                        new XAttribute("addRoutesOnApply", profile.AddRoutesOnApply),
+                        new XAttribute("linkedRouteProfile", profile.LinkedRouteProfileName ?? string.Empty),
                         new XElement("ipAddresses",
+                            // IP-Adressen nur bei Manual-Modus speichern
+                            isDhcp ? Enumerable.Empty<XElement>() :
                             profile.IpAddresses
                                 .Where(entry => !string.IsNullOrWhiteSpace(entry.IpAddress))
                                 .Select(entry =>
@@ -195,6 +202,8 @@ namespace neTiPx.UI.Avalonia.Services
                                         new XAttribute("ipAddress", entry.IpAddress ?? string.Empty),
                                         new XAttribute("subnetMask", entry.SubnetMask ?? string.Empty)))),
                         new XElement("routes",
+                            // Routen nur speichern, wenn kein Routen-Profil verlinkt ist
+                            hasLinkedRouteProfile ? Enumerable.Empty<XElement>() :
                             profile.Routes
                                 .Where(route => !string.IsNullOrWhiteSpace(route.Destination))
                                 .Select(route =>
@@ -202,7 +211,8 @@ namespace neTiPx.UI.Avalonia.Services
                                         new XAttribute("destination", route.Destination ?? string.Empty),
                                         new XAttribute("subnetMask", route.SubnetMask ?? string.Empty),
                                         new XAttribute("gateway", route.Gateway ?? string.Empty),
-                                        new XAttribute("metric", route.Metric > 0 ? route.Metric : 1)))))));
+                                        new XAttribute("metric", route.Metric > 0 ? route.Metric : 1)))));
+                }));
 
             var doc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root);
             var path = ConfigFileHelper.GetIpProfilesXmlPath();
@@ -374,8 +384,8 @@ namespace neTiPx.UI.Avalonia.Services
                 Dns1 = source.Dns1,
                 Dns2 = source.Dns2,
                 LinkedUncProfileName = source.LinkedUncProfileName,
-                RoutesEnabled = source.RoutesEnabled,
-                AddRoutesOnApply = source.AddRoutesOnApply,
+                LinkedRouteProfileName = source.LinkedRouteProfileName,
+                RoutesEnabled = !string.IsNullOrWhiteSpace(source.LinkedRouteProfileName),
                 IsDirty = false
             };
 

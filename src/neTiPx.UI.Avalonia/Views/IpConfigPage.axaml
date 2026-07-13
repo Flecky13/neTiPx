@@ -106,29 +106,12 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="16" IsVisible="{Binding SelectedProfile, Converter={x:Static ObjectConverters.IsNotNull}}">
                             
-                            <!-- Zeile 1: Profil-Name und Netzwerkadapter -->
+                            <!-- Zeile 1: Profil-Name und UNC-Profil -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <StackPanel Grid.Column="0" Spacing="4">
                                     <TextBlock Text="Profil-Name" FontWeight="SemiBold"/>
                                     <TextBox Text="{Binding SelectedProfile.Name}" 
                                              Watermark="z.B. Home, Office"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Netzwerkadapter" FontWeight="SemiBold"/>
-                                    <ComboBox ItemsSource="{Binding AdapterList}"
-                                              SelectedItem="{Binding SelectedProfile.AdapterName}"
-                                              HorizontalAlignment="Stretch"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Zeile 2: IP-Modus und UNC-Profil -->
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="IP-Modus" FontWeight="SemiBold"/>
-                                    <ComboBox ItemsSource="{Binding IpModeOptions}"
-                                              SelectedItem="{Binding SelectedProfile.Mode}"
-                                              HorizontalAlignment="Stretch"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
@@ -145,26 +128,46 @@
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Zeile 3: Gateway und Routen -->
+                            <!-- Zeile 2: Netzwerkadapter und Routen-Profil -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Standard-Gateway" FontWeight="SemiBold"/>
-                                    <TextBox Text="{Binding SelectedProfile.Gateway}"
-                                             Watermark="192.168.1.1"
-                                             IsEnabled="{Binding IsManual}"/>
+                                    <TextBlock Text="Netzwerkadapter" FontWeight="SemiBold"/>
+                                    <ComboBox ItemsSource="{Binding AdapterList}"
+                                              SelectedItem="{Binding SelectedProfile.AdapterName}"
+                                              HorizontalAlignment="Stretch"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Routen" FontWeight="SemiBold"/>
-                                    <CheckBox Content="Aktivieren"
-                                              IsChecked="{Binding SelectedProfile.RoutesEnabled}"/>
-                                    <CheckBox Content="Beim Anwenden hinzufügen"
-                                              IsChecked="{Binding SelectedProfile.AddRoutesOnApply}"
-                                              IsEnabled="{Binding SelectedProfile.RoutesEnabled}"/>
+                                    <TextBlock Text="Routen-Profil" FontWeight="SemiBold"/>
+                                    <ComboBox ItemsSource="{Binding RouteProfileOptions}"
+                                              SelectedItem="{Binding SelectedRouteProfileOption}"
+                                              HorizontalAlignment="Stretch">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DisplayName}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Zeile 4: DNS 1 und DNS 2 -->
+                            <!-- Zeile 3: IP-Modus -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="IP-Modus" FontWeight="SemiBold"/>
+                                <ComboBox ItemsSource="{Binding IpModeOptions}"
+                                          SelectedItem="{Binding SelectedProfile.Mode}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+
+                            <!-- Zeile 4: Standard-Gateway -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Standard-Gateway" FontWeight="SemiBold"/>
+                                <TextBox Text="{Binding SelectedProfile.Gateway}"
+                                         Watermark="192.168.1.1"
+                                         IsEnabled="{Binding IsManual}"/>
+                            </StackPanel>
+
+                            <!-- Zeile 5: Primärer DNS und Sekundärer DNS -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <StackPanel Grid.Column="0" Spacing="4">
                                     <TextBlock Text="Primärer DNS" FontWeight="SemiBold"/>
@@ -181,7 +184,7 @@
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Zeile 5: IP-Adressen und Subnetmasken -->
+                            <!-- Zeile 6: IP-Adressen und Subnetmasken -->
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Grid.Column="0" 
@@ -204,11 +207,11 @@
                                             <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8" Margin="0,4">
                                                 <TextBox Grid.Column="0" 
                                                          Text="{Binding IpAddress}"
-                                                         Watermark="192.168.1.100"
+                                                         Watermark="IP-Adresse (z.B. 192.168.1.100)"
                                                          IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"/>
                                                 <TextBox Grid.Column="1" 
                                                          Text="{Binding SubnetMask}"
-                                                         Watermark="255.255.255.0"
+                                                         Watermark="Subnetzmaske (z.B. 255.255.255.0)"
                                                          IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"/>
                                                 <Button Grid.Column="2"
                                                         Command="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).RemoveIpCommand}"

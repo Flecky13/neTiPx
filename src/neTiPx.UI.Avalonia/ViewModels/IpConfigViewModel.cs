@@ -29,6 +29,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         private static string T(string key) => _lm.Lang(key);
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly UncPathStore _uncPathStore = new UncPathStore();
+        private readonly RouteProfileStore _routeProfileStore = new RouteProfileStore();
         private readonly UncPathService _uncPathService = new UncPathService();
         private readonly NetworkConfigService _networkService = new NetworkConfigService();
         private readonly NetworkInfoService _networkInfoService = new NetworkInfoService();
@@ -78,16 +79,24 @@ namespace neTiPx.UI.Avalonia.ViewModels
             public string DisplayName { get; set; } = string.Empty;
         }
 
+        public sealed class RouteProfileOption
+        {
+            public string Value { get; set; } = string.Empty;
+            public string DisplayName { get; set; } = string.Empty;
+        }
+
         public IpConfigViewModel()
         {
             AdapterList = new ObservableCollection<string>();
             IpModeOptions = new ObservableCollection<string> { "DHCP", "Manual" };
             IpProfiles = new ObservableCollection<IpProfile>();
             UncProfileOptions = new ObservableCollection<UncProfileOption>();
+            RouteProfileOptions = new ObservableCollection<RouteProfileOption>();
 
             LoadAdapters();
             LoadProfilesFromConfig();
             RefreshUncProfileOptions();
+            RefreshRouteProfileOptions();
 
             AddIpCommand = new RelayCommand(AddIpAddress, CanAddIpAddress);
             RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress, CanRemoveIpAddress);
@@ -118,6 +127,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         public ObservableCollection<string> IpModeOptions { get; }
         public ObservableCollection<IpProfile> IpProfiles { get; }
         public ObservableCollection<UncProfileOption> UncProfileOptions { get; }
+        public ObservableCollection<RouteProfileOption> RouteProfileOptions { get; }
 
         public IpProfile? SelectedProfile
         {
@@ -146,6 +156,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                         try
                         {
                             EnsureLinkedUncProfileSelection(_selectedProfile);
+                            EnsureLinkedRouteProfileSelection(_selectedProfile);
                             LoadProfileSettingsOnProfileChange(_selectedProfile);
                         }
                         finally
@@ -175,6 +186,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                     OnPropertyChanged(nameof(ConfiguredRoutesText));
                     OnPropertyChanged(nameof(RouteApplicationModeText));
                     OnPropertyChanged(nameof(SelectedUncProfileOption));
+                    OnPropertyChanged(nameof(SelectedRouteProfileOption));
                     
                     // Lade die echten Netzwerkwerte vom Adapter für die Anzeige
                     if (_selectedProfile != null && !string.IsNullOrWhiteSpace(_selectedProfile.AdapterName))
@@ -227,6 +239,60 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 {
                     SelectedProfile.LinkedUncProfileName = value?.Value ?? string.Empty;
                     OnPropertyChanged(nameof(SelectedUncProfileOption));
+                }
+            }
+        }
+
+        public RouteProfileOption? SelectedRouteProfileOption
+        {
+            get
+            {
+                if (SelectedProfile == null) return null;
+                var linkedName = SelectedProfile.LinkedRouteProfileName?.Trim() ?? string.Empty;
+                return RouteProfileOptions.FirstOrDefault(o => o.Value == linkedName);
+            }
+            set
+            {
+                if (SelectedProfile != null)
+                {
+                    SelectedProfile.LinkedRouteProfileName = value?.Value ?? string.Empty;
+                    
+                    // RoutesEnabled automatisch setzen basierend auf Routen-Profil-Auswahl
+                    SelectedProfile.RoutesEnabled = !string.IsNullOrWhiteSpace(value?.Value);
+                    
+                    // Lade Routen aus dem ausgewählten Routen-Profil
+                    if (!string.IsNullOrWhiteSpace(value?.Value))
+                    {
+                        var routeProfiles = _routeProfileStore.LoadProfiles();
+                        var selectedRouteProfile = routeProfiles.FirstOrDefault(p =>
+                            string.Equals(p.Name, value.Value, StringComparison.OrdinalIgnoreCase));
+
+                        if (selectedRouteProfile != null)
+                        {
+                            LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Lade Routen aus Profil '{value.Value}': {selectedRouteProfile.Routes.Count} Routen");
+                            
+                            // Kopiere Routen aus dem Routen-Profil in das IP-Profil
+                            SelectedProfile.Routes.Clear();
+                            foreach (var route in selectedRouteProfile.Routes)
+                            {
+                                SelectedProfile.Routes.Add(new RouteEntry
+                                {
+                                    Destination = route.Destination,
+                                    SubnetMask = route.SubnetMask,
+                                    Gateway = route.Gateway,
+                                    Metric = route.Metric
+                                });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Wenn kein Routen-Profil ausgewählt ist, lösche alle Routen
+                        SelectedProfile.Routes.Clear();
+                    }
+                    
+                    OnPropertyChanged(nameof(SelectedRouteProfileOption));
+                    OnPropertyChanged(nameof(ConfiguredRoutesText));
                 }
             }
         }
@@ -339,12 +405,6 @@ namespace neTiPx.UI.Avalonia.ViewModels
             else
             {
                 ValidateProfile();
-            }
-
-            if (e.PropertyName == nameof(IpProfile.AddRoutesOnApply))
-            {
-                OnPropertyChanged(nameof(RouteApplicationModeText));
-                OnPropertyChanged(nameof(SelectedProfile));
             }
 
             if (e.PropertyName == nameof(IpProfile.RoutesEnabled))
@@ -472,7 +532,6 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 NormalizeDirtyValue(profile.Dns1),
                 NormalizeDirtyValue(profile.Dns2),
                 profile.RoutesEnabled ? "1" : "0",
-                profile.AddRoutesOnApply ? "1" : "0",
                 NormalizeDirtyValue(profile.LinkedUncProfileName).ToLowerInvariant(),
                 string.Join(";", ipParts),
                 string.Join(";", routeParts)
@@ -526,8 +585,8 @@ namespace neTiPx.UI.Avalonia.ViewModels
             profile.Mode = storedProfile.Mode;
             profile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
             profile.RoutesEnabled = storedProfile.RoutesEnabled;
-            profile.AddRoutesOnApply = storedProfile.AddRoutesOnApply;
             profile.LinkedUncProfileName = storedProfile.LinkedUncProfileName;
+            profile.LinkedRouteProfileName = storedProfile.LinkedRouteProfileName;
             profile.Routes.Clear();
             foreach (var route in storedProfile.Routes)
             {
@@ -538,6 +597,32 @@ namespace neTiPx.UI.Avalonia.ViewModels
                     Gateway = route.Gateway,
                     Metric = route.Metric > 0 ? route.Metric : 1
                 });
+            }
+
+            // Wenn ein Routen-Profil verlinkt ist und keine Routen geladen wurden,
+            // lade die Routen aus dem Routen-Profil
+            var linkedRouteProfileName = profile.LinkedRouteProfileName?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(linkedRouteProfileName) && profile.Routes.Count == 0)
+            {
+                var routeProfiles = _routeProfileStore.LoadProfiles();
+                var linkedRouteProfile = routeProfiles.FirstOrDefault(p =>
+                    string.Equals(p.Name, linkedRouteProfileName, StringComparison.OrdinalIgnoreCase));
+
+                if (linkedRouteProfile != null)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Lade Routen aus verlinktem Profil '{linkedRouteProfileName}': {linkedRouteProfile.Routes.Count} Routen");
+                    
+                    foreach (var route in linkedRouteProfile.Routes)
+                    {
+                        profile.Routes.Add(new RouteEntry
+                        {
+                            Destination = route.Destination,
+                            SubnetMask = route.SubnetMask,
+                            Gateway = route.Gateway,
+                            Metric = route.Metric
+                        });
+                    }
+                }
             }
 
             // If mode is DHCP, load remaining settings from NIC
@@ -703,7 +788,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
         public string ConfiguredRoutesText => $"{SelectedProfile?.Routes.Count ?? 0}{T("IPCONFIG_ROUTES_COUNT_SUFFIX")}";
 
-        public string RouteApplicationModeText => SelectedProfile?.AddRoutesOnApply == true ? T("IPCONFIG_ROUTE_ADD") : T("IPCONFIG_ROUTE_SET");
+        public string RouteApplicationModeText => T("IPCONFIG_ROUTE_ADD");
 
         public string ValidationMessage
         {
@@ -992,7 +1077,6 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 Dns2 = source.Dns2,
                 LinkedUncProfileName = source.LinkedUncProfileName,
                 RoutesEnabled = source.RoutesEnabled,
-                AddRoutesOnApply = source.AddRoutesOnApply,
                 IsDirty = false
             };
 
@@ -1259,6 +1343,41 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
             var profile = SelectedProfile;
 
+            // Lade Routen aus dem verlinkten Routen-Profil, falls vorhanden
+            var linkedRouteProfileName = profile.LinkedRouteProfileName?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(linkedRouteProfileName))
+            {
+                var routeProfiles = _routeProfileStore.LoadProfiles();
+                var linkedRouteProfile = routeProfiles.FirstOrDefault(p =>
+                    string.Equals(p.Name, linkedRouteProfileName, StringComparison.OrdinalIgnoreCase));
+
+                if (linkedRouteProfile != null)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Lade Routen aus Profil '{linkedRouteProfileName}': {linkedRouteProfile.Routes.Count} Routen");
+                    
+                    // Kopiere Routen aus dem Routen-Profil in das IP-Profil
+                    profile.Routes.Clear();
+                    foreach (var route in linkedRouteProfile.Routes)
+                    {
+                        profile.Routes.Add(new RouteEntry
+                        {
+                            Destination = route.Destination,
+                            SubnetMask = route.SubnetMask,
+                            Gateway = route.Gateway,
+                            Metric = route.Metric
+                        });
+                    }
+                    
+                    // Aktiviere Routen, wenn welche geladen wurden
+                    profile.RoutesEnabled = profile.Routes.Count > 0;
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"RoutesEnabled={profile.RoutesEnabled}, Route Count={profile.Routes.Count}");
+                }
+                else
+                {
+                    LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Routen-Profil '{linkedRouteProfileName}' nicht gefunden");
+                }
+            }
+
             try
             {
                 var (success, error) = await Task.Run(() => _networkService.ApplyProfile(profile));
@@ -1363,7 +1482,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             UncProfileOptions.Add(new UncProfileOption
             {
                 Value = string.Empty,
-                DisplayName = T("IPCONFIG_UNC_PROFILE_NONE")
+                DisplayName = "keine"
             });
 
             foreach (var profileName in profiles)
@@ -1378,6 +1497,37 @@ namespace neTiPx.UI.Avalonia.ViewModels
             if (SelectedProfile != null)
             {
                 EnsureLinkedUncProfileSelection(SelectedProfile);
+            }
+        }
+
+        public void RefreshRouteProfileOptions()
+        {
+            var profiles = _routeProfileStore.LoadProfiles()
+                .Select(p => p.Name?.Trim() ?? string.Empty)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            RouteProfileOptions.Clear();
+            RouteProfileOptions.Add(new RouteProfileOption
+            {
+                Value = string.Empty,
+                DisplayName = "keine"
+            });
+
+            foreach (var profileName in profiles)
+            {
+                RouteProfileOptions.Add(new RouteProfileOption
+                {
+                    Value = profileName,
+                    DisplayName = profileName
+                });
+            }
+
+            if (SelectedProfile != null)
+            {
+                EnsureLinkedRouteProfileSelection(SelectedProfile);
             }
         }
 
@@ -1398,6 +1548,28 @@ namespace neTiPx.UI.Avalonia.ViewModels
             }
 
             profile.LinkedUncProfileName = string.Empty;
+        }
+
+        private void EnsureLinkedRouteProfileSelection(IpProfile profile)
+        {
+            var linkedName = profile.LinkedRouteProfileName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(linkedName))
+            {
+                profile.LinkedRouteProfileName = string.Empty;
+                profile.RoutesEnabled = false;
+                return;
+            }
+
+            if (RouteProfileOptions.Any(option =>
+                !string.IsNullOrWhiteSpace(option.Value) &&
+                string.Equals(option.Value, linkedName, StringComparison.OrdinalIgnoreCase)))
+            {
+                profile.RoutesEnabled = true;
+                return;
+            }
+
+            profile.LinkedRouteProfileName = string.Empty;
+            profile.RoutesEnabled = false;
         }
 
         private static async Task<bool> WaitForAdapterAfterApplyAsync(IpProfile profile, TimeSpan timeout, CancellationToken cancellationToken)

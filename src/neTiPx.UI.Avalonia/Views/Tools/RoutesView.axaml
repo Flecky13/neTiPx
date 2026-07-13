@@ -2,12 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              xmlns:models="using:neTiPx.Core.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.Tools.RoutesView">
 
-    <ScrollViewer>
-        <StackPanel Spacing="16" Margin="24">
+    <TabControl Margin="16">
+        <TabItem Header="System-Routen">
+            <ScrollViewer>
+                <StackPanel Spacing="16" Margin="24">
 
             <!-- Oberer Bereich: Ständige Routen im System -->
             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
@@ -260,6 +263,226 @@
                 </StackPanel>
             </Border>
 
-        </StackPanel>
-    </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </TabItem>
+
+        <!-- Tab 2: Profil-Routen -->
+        <TabItem Header="Profil-Routen">
+            <Grid ColumnDefinitions="220,*,240" ColumnSpacing="16" Margin="24">
+                
+                <!-- Linke Spalte: Profil-Liste -->
+                <Border Grid.Column="0" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Routen-Profile" 
+                                   FontWeight="Bold"
+                                   FontSize="16"/>
+
+                        <!-- Profil-Liste -->
+                        <ListBox x:Name="RouteProfileListBox"
+                                 MinHeight="300"
+                                 MaxHeight="400"
+                                 Background="Transparent"
+                                 BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="models:RouteProfile">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding DisplayName}"
+                                                   VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1"
+                                                x:Name="DeleteProfileButton"
+                                                Padding="4"
+                                                Background="Transparent">
+                                            <PathIcon Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                                      Width="14" Height="14"/>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Buttons -->
+                        <Button x:Name="AddRouteProfileButton"
+                                HorizontalAlignment="Stretch"
+                                Classes="accent">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
+                                          Width="16" Height="16"/>
+                                <TextBlock Text="Neues Profil"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="CopyRouteProfileButton"
+                                HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" 
+                                          Width="16" Height="16"/>
+                                <TextBlock Text="Kopieren"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mittlere Spalte: Profil-Konfiguration -->
+                <Border Grid.Column="1" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        x:Name="ProfileConfigBorder">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="16" x:Name="ProfileConfigPanel">
+                            
+                            <!-- Profilname -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Profilname" FontWeight="SemiBold"/>
+                                <TextBox x:Name="RouteProfileNameBox" 
+                                         Watermark="z.B. Office-Netz"/>
+                                <TextBlock x:Name="RouteProfileNameError"
+                                           Foreground="Red"
+                                           FontSize="11"
+                                           IsVisible="False"/>
+                            </StackPanel>
+
+                            <!-- Routen Liste -->
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" 
+                                               Text="Routen" 
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                    <Button Grid.Column="1"
+                                            x:Name="AddRouteToProfileButton"
+                                            Content="+ Hinzufügen"
+                                            Padding="8,4"
+                                            FontSize="12"/>
+                                </Grid>
+
+                                <ItemsControl x:Name="ProfileRoutesItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="models:RouteEntry">
+                                            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="12"
+                                                    Margin="0,4">
+                                                <StackPanel Spacing="8">
+                                                    <!-- Zeile 1: Zielnetz + Subnetzmaske -->
+                                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                                        <StackPanel Grid.Column="0" Spacing="4">
+                                                            <TextBlock Text="Zielnetz" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBox Text="{Binding Destination}"
+                                                                     Watermark="10.10.0.0"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1" Spacing="4">
+                                                            <TextBlock Text="Subnetzmaske" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBox Text="{Binding SubnetMask}"
+                                                                     Watermark="255.255.0.0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <!-- Zeile 2: Gateway + Metrik -->
+                                                    <Grid ColumnDefinitions="*,120" ColumnSpacing="8">
+                                                        <StackPanel Grid.Column="0" Spacing="4">
+                                                            <TextBlock Text="Gateway" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBox Text="{Binding Gateway}"
+                                                                     Watermark="192.168.1.1"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1" Spacing="4">
+                                                            <TextBlock Text="Metrik" FontSize="12" FontWeight="SemiBold"/>
+                                                            <NumericUpDown Value="{Binding Metric}"
+                                                                           Minimum="1"
+                                                                           Maximum="9999"
+                                                                           Increment="1"/>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <!-- Entfernen Button -->
+                                                    <Button x:Name="RemoveRouteFromProfileButton"
+                                                            Content="Entfernen"
+                                                            Tag="{Binding}"
+                                                            HorizontalAlignment="Right"
+                                                            Loaded="RemoveRouteButton_Loaded"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Rechte Spalte: Aktionen -->
+                <Border Grid.Column="2" 
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Aktionen" 
+                                   FontWeight="Bold"
+                                   FontSize="16"/>
+
+                        <Button x:Name="SaveRouteProfileButton"
+                                HorizontalAlignment="Stretch"
+                                Classes="accent">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" 
+                                          Width="16" Height="16"/>
+                                <TextBlock Text="Speichern"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Separator/>
+
+                        <!-- Status -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Status" 
+                                       FontWeight="Bold"
+                                       FontSize="14"/>
+                            
+                            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8"
+                                    MinHeight="60"
+                                    Background="{DynamicResource CardBackgroundBrush}">
+                                <TextBlock x:Name="RouteProfileStatusText" 
+                                           Text="Bereit" 
+                                           TextWrapping="Wrap"
+                                           FontSize="11"
+                                           Opacity="0.8"/>
+                            </Border>
+                        </StackPanel>
+
+                        <Separator Margin="0,8"/>
+
+                        <!-- Hinweis -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="💡 Hinweis" 
+                                       FontWeight="Bold"
+                                       FontSize="12"/>
+                            <TextBlock Text="Routen-Profile können in der IP-Konfiguration mit IP-Profilen verknüpft werden."
+                                       TextWrapping="Wrap"
+                                       FontSize="11"
+                                       Opacity="0.7"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+        </TabItem>
+    </TabControl>
 </UserControl>

@@ -9,6 +9,7 @@ using neTiPx.Core.Helpers;
 using neTiPx.Core.Models;
 using neTiPx.UI.Avalonia.Helpers;
 using neTiPx.UI.Avalonia.Services;
+using neTiPx.UI.Avalonia.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,9 +23,12 @@ public partial class RoutesView : UserControl
 {
     private readonly NetworkConfigService _networkConfigService = new();
     private readonly List<RouteEntry> _allRoutes = new();
+    private readonly RouteProfileViewModel _routeProfileViewModel = new();
 
     private SortColumn _sortColumn = SortColumn.Destination;
     private bool _sortAscending = true;
+    private RouteProfile? _subscribedProfile;
+    private bool _updatingNameBox; // Flag um Loops zu vermeiden
 
     public ObservableCollection<RouteEntry> FilteredRoutes { get; } = new();
 
@@ -40,9 +44,10 @@ public partial class RoutesView : UserControl
     {
         InitializeComponent();
 
+        // System-Routen Tab initialisieren
         RoutesItemsControl.ItemsSource = FilteredRoutes;
 
-        // Event-Handler registrieren
+        // Event-Handler für System-Routen registrieren
         RefreshRoutesButton.Click += RefreshRoutes_Click;
         DestinationFilterBox.TextChanged += DestinationFilterBox_TextChanged;
         ClearFilterButton.Click += ClearFilter_Click;
@@ -56,8 +61,148 @@ public partial class RoutesView : UserControl
 
         UpdateSortIndicators();
 
+        // Routen-Profile Tab initialisieren
+        InitializeRouteProfileTab();
+
         // Routen beim Laden abrufen
         Loaded += async (s, e) => await LoadRoutesAsync();
+    }
+
+    private void InitializeRouteProfileTab()
+    {
+        // Profil-Liste DataContext setzen
+        RouteProfileListBox.ItemsSource = _routeProfileViewModel.RouteProfiles;
+        RouteProfileListBox.SelectionChanged += RouteProfileListBox_SelectionChanged;
+
+        // Buttons
+        AddRouteProfileButton.Click += (s, e) => _routeProfileViewModel.AddProfileCommand.Execute(null);
+        CopyRouteProfileButton.Click += (s, e) => _routeProfileViewModel.CopyProfileCommand.Execute(null);
+        SaveRouteProfileButton.Click += (s, e) => _routeProfileViewModel.SaveProfileCommand.Execute(null);
+
+        // Profilname-Textbox - TextChanged statt PropertyChanged verwenden
+        RouteProfileNameBox.TextChanged += (s, e) =>
+        {
+            if (!_updatingNameBox && _routeProfileViewModel.SelectedProfile != null)
+            {
+                var newName = RouteProfileNameBox.Text ?? string.Empty;
+                System.Diagnostics.Debug.WriteLine($"[RoutesView] TextChanged: '{newName}', Current: '{_routeProfileViewModel.SelectedProfile.Name}'");
+                _routeProfileViewModel.SelectedProfile.Name = newName;
+            }
+        };
+
+        // Route hinzufügen Button
+        AddRouteToProfileButton.Click += (s, e) => _routeProfileViewModel.AddRouteCommand.Execute(null);
+
+        // ViewModel Property Changed Handler
+        _routeProfileViewModel.PropertyChanged += RouteProfileViewModel_PropertyChanged;
+
+        // Initial-Update
+        UpdateRouteProfileUI();
+        
+        // Initiale Subscription zum ersten Profil (falls vorhanden)
+        if (_routeProfileViewModel.SelectedProfile != null)
+        {
+            _routeProfileViewModel.SelectedProfile.PropertyChanged += SelectedProfile_PropertyChanged;
+            _subscribedProfile = _routeProfileViewModel.SelectedProfile;
+        }
+    }
+
+    private void RouteProfileListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (RouteProfileListBox.SelectedItem is RouteProfile selected)
+        {
+            _routeProfileViewModel.SelectedProfile = selected;
+        }
+    }
+
+    private void RouteProfileViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(RouteProfileViewModel.SelectedProfile))
+        {
+            // Unsubscribe vom alten Profil
+            if (_subscribedProfile != null)
+            {
+                _subscribedProfile.PropertyChanged -= SelectedProfile_PropertyChanged;
+            }
+            
+            // Subscribe zum neuen Profil
+            if (_routeProfileViewModel.SelectedProfile != null)
+            {
+                _routeProfileViewModel.SelectedProfile.PropertyChanged += SelectedProfile_PropertyChanged;
+                _subscribedProfile = _routeProfileViewModel.SelectedProfile;
+            }
+            else
+            {
+                _subscribedProfile = null;
+            }
+            
+            UpdateRouteProfileUI();
+        }
+        else if (e.PropertyName == nameof(RouteProfileViewModel.StatusMessage))
+        {
+            RouteProfileStatusText.Text = _routeProfileViewModel.StatusMessage;
+        }
+        else if (e.PropertyName == nameof(RouteProfileViewModel.HasNameError))
+        {
+            RouteProfileNameError.IsVisible = _routeProfileViewModel.HasNameError;
+            RouteProfileNameError.Text = _routeProfileViewModel.NameErrorMessage;
+        }
+    }
+
+    private void SelectedProfile_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine($"[RoutesView] SelectedProfile PropertyChanged: {e.PropertyName}");
+        if (e.PropertyName == nameof(RouteProfile.IsDirty))
+        {
+            // Button-Status aktualisieren wenn IsDirty sich ändert
+            var canExecute = _routeProfileViewModel.SaveProfileCommand.CanExecute(null);
+            System.Diagnostics.Debug.WriteLine($"[RoutesView] IsDirty changed, CanExecute={canExecute}");
+            SaveRouteProfileButton.IsEnabled = canExecute;
+        }
+    }
+
+    private void UpdateRouteProfileUI()
+    {
+        var hasProfile = _routeProfileViewModel.SelectedProfile != null;
+
+        ProfileConfigBorder.IsEnabled = hasProfile;
+
+        if (hasProfile)
+        {
+            _updatingNameBox = true;
+            RouteProfileNameBox.Text = _routeProfileViewModel.SelectedProfile!.Name;
+            _updatingNameBox = false;
+            ProfileRoutesItemsControl.ItemsSource = _routeProfileViewModel.SelectedProfile.Routes;
+        }
+        else
+        {
+            _updatingNameBox = true;
+            RouteProfileNameBox.Text = string.Empty;
+            _updatingNameBox = false;
+            ProfileRoutesItemsControl.ItemsSource = null;
+        }
+
+        // Command-States aktualisieren
+        CopyRouteProfileButton.IsEnabled = _routeProfileViewModel.CopyProfileCommand.CanExecute(null);
+        AddRouteToProfileButton.IsEnabled = _routeProfileViewModel.AddRouteCommand.CanExecute(null);
+        SaveRouteProfileButton.IsEnabled = _routeProfileViewModel.SaveProfileCommand.CanExecute(null);
+    }
+
+    private void RemoveRouteButton_Loaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is RouteEntry route)
+        {
+            button.Click -= RemoveRouteFromProfile_Click;
+            button.Click += RemoveRouteFromProfile_Click;
+        }
+    }
+
+    private void RemoveRouteFromProfile_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is RouteEntry route)
+        {
+            _routeProfileViewModel.RemoveRouteCommand.Execute(route);
+        }
     }
 
     private void DeleteButton_Loaded(object? sender, RoutedEventArgs e)

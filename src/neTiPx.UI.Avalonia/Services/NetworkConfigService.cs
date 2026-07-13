@@ -116,22 +116,6 @@ namespace neTiPx.UI.Avalonia.Services
 
             if (profile.RoutesEnabled)
             {
-                if (!profile.AddRoutesOnApply)
-                {
-                    var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: false);
-                    var persistentRoutes = GetPersistentRoutesFromSnapshot(routeSnapshot);
-
-                    foreach (var persistentRoute in persistentRoutes)
-                    {
-                        if (!IsValidIPv4(persistentRoute.Destination) || SubnetMaskToPrefix(persistentRoute.SubnetMask) <= 0)
-                        {
-                            continue;
-                        }
-
-                        commands.Add($"route delete {persistentRoute.Destination} mask {persistentRoute.SubnetMask} {persistentRoute.Gateway}");
-                    }
-                }
-
                 for (int i = 0; i < profile.Routes.Count; i++)
                 {
                     var route = profile.Routes[i];
@@ -184,6 +168,41 @@ namespace neTiPx.UI.Avalonia.Services
             {
                 // DHCP-Modus: Setze automatische IP-Konfiguration in einem Befehl
                 commands.Add($"nmcli con mod \"{connectionName}\" ipv4.method auto ipv4.addresses \"\" ipv4.gateway \"\" ipv4.dns \"\"");
+                
+                // Routen verwalten auch im DHCP-Modus
+                if (profile.RoutesEnabled && profile.Routes.Count > 0)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Setze {profile.Routes.Count} Routen (DHCP-Modus)");
+                    
+                    // Lösche alle bestehenden Routen
+                    commands.Add($"nmcli con mod \"{connectionName}\" ipv4.routes \"\"");
+                    
+                    foreach (var route in profile.Routes)
+                    {
+                        if (string.IsNullOrWhiteSpace(route.Destination) || 
+                            string.IsNullOrWhiteSpace(route.SubnetMask) || 
+                            string.IsNullOrWhiteSpace(route.Gateway))
+                        {
+                            continue;
+                        }
+
+                        var routePrefixLength = SubnetMaskToPrefix(route.SubnetMask);
+                        if (routePrefixLength <= 0)
+                        {
+                            continue;
+                        }
+
+                        var metric = route.Metric > 0 ? route.Metric : 100;
+                        var routeSpec = $"{route.Destination}/{routePrefixLength} {route.Gateway} {metric}";
+                        commands.Add($"nmcli con mod \"{connectionName}\" +ipv4.routes \"{routeSpec}\"");
+                    }
+                }
+                else
+                {
+                    // Lösche alle Routen, wenn keine aktiv sind
+                    commands.Add($"nmcli con mod \"{connectionName}\" ipv4.routes \"\"");
+                }
+                
                 commands.Add($"nmcli con up \"{connectionName}\"");
             }
             else
@@ -271,15 +290,42 @@ namespace neTiPx.UI.Avalonia.Services
 
                 commands.Add(modCommand);
 
+                // Routen verwalten (vor dem Aktivieren der Verbindung)
+                if (profile.RoutesEnabled && profile.Routes.Count > 0)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Setze {profile.Routes.Count} Routen (Static-Modus)");
+                    
+                    // Lösche alle bestehenden Routen
+                    commands.Add($"nmcli con mod \"{connectionName}\" ipv4.routes \"\"");
+                    
+                    foreach (var route in profile.Routes)
+                    {
+                        if (string.IsNullOrWhiteSpace(route.Destination) || 
+                            string.IsNullOrWhiteSpace(route.SubnetMask) || 
+                            string.IsNullOrWhiteSpace(route.Gateway))
+                        {
+                            continue;
+                        }
+
+                        var routePrefixLength = SubnetMaskToPrefix(route.SubnetMask);
+                        if (routePrefixLength <= 0)
+                        {
+                            continue;
+                        }
+
+                        var metric = route.Metric > 0 ? route.Metric : 100;
+                        var routeSpec = $"{route.Destination}/{routePrefixLength} {route.Gateway} {metric}";
+                        commands.Add($"nmcli con mod \"{connectionName}\" +ipv4.routes \"{routeSpec}\"");
+                    }
+                }
+                else
+                {
+                    // Lösche alle Routen, wenn keine aktiv sind
+                    commands.Add($"nmcli con mod \"{connectionName}\" ipv4.routes \"\"");
+                }
+
                 // Aktiviere die Verbindung
                 commands.Add($"nmcli con up \"{connectionName}\"");
-            }
-
-            // Routen werden unter Linux aktuell nicht unterstützt
-            if (profile.RoutesEnabled && profile.Routes.Count > 0)
-            {
-                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", "Routen werden unter Linux aktuell noch nicht unterstützt");
-                // Hinweis: Routen könnten mit nmcli con mod "<connection>" +ipv4.routes "<destination>/<prefix> <gateway> <metric>" hinzugefügt werden
             }
 
             return RunNmcliCommandsElevated(commands);

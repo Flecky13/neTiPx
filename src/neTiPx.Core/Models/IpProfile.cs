@@ -30,10 +30,10 @@ public sealed partial class IpProfile : ObservableObject
     private bool _routesEnabled;
 
     [ObservableProperty]
-    private bool _addRoutesOnApply = true;
+    private string _linkedUncProfileName = string.Empty;
 
     [ObservableProperty]
-    private string _linkedUncProfileName = string.Empty;
+    private string _linkedRouteProfileName = string.Empty;
 
     [ObservableProperty]
     private bool _isDirty;
