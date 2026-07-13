@@ -10,8 +10,6 @@ Dieser Branch (`rewrite`) enthält die neue **Cross-Platform Version** von neTiP
 - ✅ **Linux** (x64, ARM64)
 - ✅ **macOS** (x64, ARM64 / Apple Silicon)
 
-Das alte WinUI3-Projekt befindet sich in `src/neTiPx.UI.WinUI.Legacy/`.
-
 ---
 
 ## 📁 Projektstruktur
@@ -35,8 +33,6 @@ neTiPx-CrossPlatform/
 │   ├── neTiPx.Services.Windows/        # 🪟 Windows-spezifische Services
 │   ├── neTiPx.Services.Linux/          # 🐧 Linux-spezifische Services
 │   ├── neTiPx.Services.macOS/          # 🍎 macOS-spezifische Services
-│   │
-│   └── neTiPx.UI.WinUI.Legacy/         # 🗄️ Altes WinUI3 Projekt (Legacy)
 │
 ├── .github/workflows/                  # CI/CD GitHub Actions
 ├── AVALONIA_MIGRATION_PLAN.md          # Detaillierter Migrationsplan

@@ -360,19 +360,10 @@ zurück zum
 
 ## 💻 Systemanforderungen
 
-- **Betriebssystem**: Windows 10 Version 1809 (Build 17763) oder höher
+- **Betriebssystem**: Windows, Linux oder macOS
 - **Framework**: .NET 8.0 Runtime
-- **UI-Framework**: WinUI 3 (Windows App SDK) - **erforderlich**
+- **UI-Framework**: Avalonia UI
 - **Berechtigungen**: Administrator-Rechte für Änderungen an Netzwerkeinstellungen
-
-### Windows App SDK
-
-neTiPx erfordert das **Windows App SDK 1.8.5** zur Ausführung. Wenn Sie den folgenden Fehler erhalten:
-
-![Fehlendes Windows App SDK](Bilder/FehlendeMSIX.png)
-
-Laden Sie das Windows App SDK herunter und installieren Sie es von:
-[Microsoft Windows App SDK Downloads](https://docs.microsoft.com/windows/apps/windows-app-sdk/downloads)
 
 ---
 
@@ -380,7 +371,7 @@ Laden Sie das Windows App SDK herunter und installieren Sie es von:
 
 ### Installation
 
-1. **Systemanforderungen prüfen**: Stellen Sie sicher, dass das Windows App SDK installiert ist (siehe [Systemanforderungen](#-systemanforderungen))
+1. **Systemanforderungen prüfen**: Stellen Sie sicher, dass die .NET 8 Runtime installiert ist (siehe [Systemanforderungen](#-systemanforderungen))
 2. Laden Sie das neueste Setup-Paket aus dem [Releases](../../releases)-Bereich herunter
 3. Führen Sie `neTiPx_Setup_Vx.x.x.x.exe` aus
 4. Folgen Sie den Anweisungen des Installationsassistenten
