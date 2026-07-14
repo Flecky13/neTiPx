@@ -85,6 +85,12 @@ namespace neTiPx.UI.Avalonia.ViewModels
             public string DisplayName { get; set; } = string.Empty;
         }
 
+        public sealed class RoutePersistenceOption
+        {
+            public string Value { get; set; } = string.Empty;
+            public string DisplayName { get; set; } = string.Empty;
+        }
+
         public IpConfigViewModel()
         {
             AdapterList = new ObservableCollection<string>();
@@ -92,11 +98,13 @@ namespace neTiPx.UI.Avalonia.ViewModels
             IpProfiles = new ObservableCollection<IpProfile>();
             UncProfileOptions = new ObservableCollection<UncProfileOption>();
             RouteProfileOptions = new ObservableCollection<RouteProfileOption>();
+            RoutePersistenceOptions = new ObservableCollection<RoutePersistenceOption>();
 
             LoadAdapters();
             LoadProfilesFromConfig();
             RefreshUncProfileOptions();
             RefreshRouteProfileOptions();
+            RefreshRoutePersistenceOptions();
 
             AddIpCommand = new RelayCommand(AddIpAddress, CanAddIpAddress);
             RemoveIpCommand = new RelayCommand<IpAddressEntry>(RemoveIpAddress, CanRemoveIpAddress);
@@ -128,6 +136,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         public ObservableCollection<IpProfile> IpProfiles { get; }
         public ObservableCollection<UncProfileOption> UncProfileOptions { get; }
         public ObservableCollection<RouteProfileOption> RouteProfileOptions { get; }
+        public ObservableCollection<RoutePersistenceOption> RoutePersistenceOptions { get; }
 
         public IpProfile? SelectedProfile
         {
@@ -187,6 +196,9 @@ namespace neTiPx.UI.Avalonia.ViewModels
                     OnPropertyChanged(nameof(RouteApplicationModeText));
                     OnPropertyChanged(nameof(SelectedUncProfileOption));
                     OnPropertyChanged(nameof(SelectedRouteProfileOption));
+                    OnPropertyChanged(nameof(SelectedRoutePersistenceOption));
+                    OnPropertyChanged(nameof(IsPersistentRouteMode));
+                    OnPropertyChanged(nameof(RouteModeCheckboxText));
                     
                     // Lade die echten Netzwerkwerte vom Adapter für die Anzeige
                     if (_selectedProfile != null && !string.IsNullOrWhiteSpace(_selectedProfile.AdapterName))
@@ -296,6 +308,53 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 }
             }
         }
+
+        public RoutePersistenceOption? SelectedRoutePersistenceOption
+        {
+            get
+            {
+                if (SelectedProfile == null) return null;
+                var value = NormalizeRoutePersistenceMode(SelectedProfile.RoutePersistenceMode);
+                return RoutePersistenceOptions.FirstOrDefault(o =>
+                    string.Equals(o.Value, value, StringComparison.OrdinalIgnoreCase));
+            }
+            set
+            {
+                if (SelectedProfile == null || value == null)
+                {
+                    return;
+                }
+
+                SelectedProfile.RoutePersistenceMode = NormalizeRoutePersistenceMode(value.Value);
+                OnPropertyChanged(nameof(SelectedRoutePersistenceOption));
+                OnPropertyChanged(nameof(RouteApplicationModeText));
+                OnPropertyChanged(nameof(IsPersistentRouteMode));
+                OnPropertyChanged(nameof(RouteModeCheckboxText));
+            }
+        }
+
+        public bool IsPersistentRouteMode
+        {
+            get => !string.Equals(SelectedProfile?.RoutePersistenceMode, "Temporary", StringComparison.OrdinalIgnoreCase);
+            set
+            {
+                if (SelectedProfile == null)
+                {
+                    return;
+                }
+
+                SelectedProfile.RoutePersistenceMode = value ? "Persistent" : "Temporary";
+                OnPropertyChanged(nameof(IsPersistentRouteMode));
+                OnPropertyChanged(nameof(RouteModeCheckboxText));
+                OnPropertyChanged(nameof(SelectedRoutePersistenceOption));
+                OnPropertyChanged(nameof(RouteApplicationModeText));
+            }
+        }
+
+        public string RouteModeCheckboxText =>
+            IsPersistentRouteMode
+                ? T("IPCONFIG_ROUTE_MODE_PERSISTENT")
+                : T("IPCONFIG_ROUTE_MODE_TEMPORARY");
 
         private void AttachProfileHandlers(IpProfile profile)
         {
@@ -410,6 +469,14 @@ namespace neTiPx.UI.Avalonia.ViewModels
             if (e.PropertyName == nameof(IpProfile.RoutesEnabled))
             {
                 OnPropertyChanged(nameof(SelectedProfile));
+            }
+
+            if (e.PropertyName == nameof(IpProfile.RoutePersistenceMode))
+            {
+                OnPropertyChanged(nameof(SelectedRoutePersistenceOption));
+                OnPropertyChanged(nameof(RouteApplicationModeText));
+                OnPropertyChanged(nameof(IsPersistentRouteMode));
+                OnPropertyChanged(nameof(RouteModeCheckboxText));
             }
 
             MarkSelectedProfileDirty();
@@ -528,6 +595,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 NormalizeDirtyValue(profile.Name),
                 NormalizeMode(profile.Mode),
                 NormalizeDirtyValue(NormalizeAdapterName(profile.AdapterName)),
+                NormalizeRoutePersistenceMode(profile.RoutePersistenceMode),
                 NormalizeDirtyValue(profile.Gateway),
                 NormalizeDirtyValue(profile.Dns1),
                 NormalizeDirtyValue(profile.Dns2),
@@ -584,6 +652,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             // Copy mode and basic settings from XML
             profile.Mode = storedProfile.Mode;
             profile.AdapterName = NormalizeAdapterName(storedProfile.AdapterName);
+            profile.RoutePersistenceMode = NormalizeRoutePersistenceMode(storedProfile.RoutePersistenceMode);
             profile.RoutesEnabled = storedProfile.RoutesEnabled;
             profile.LinkedUncProfileName = storedProfile.LinkedUncProfileName;
             profile.LinkedRouteProfileName = storedProfile.LinkedRouteProfileName;
@@ -685,6 +754,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         private static void LoadProfileFromStore(IpProfile sourceProfile, IpProfile targetProfile)
         {
             targetProfile.Mode = sourceProfile.Mode;
+            targetProfile.RoutePersistenceMode = NormalizeRoutePersistenceMode(sourceProfile.RoutePersistenceMode);
             targetProfile.Gateway = sourceProfile.Gateway;
             targetProfile.Dns1 = sourceProfile.Dns1;
             targetProfile.Dns2 = sourceProfile.Dns2;
@@ -788,7 +858,10 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
         public string ConfiguredRoutesText => $"{SelectedProfile?.Routes.Count ?? 0}{T("IPCONFIG_ROUTES_COUNT_SUFFIX")}";
 
-        public string RouteApplicationModeText => T("IPCONFIG_ROUTE_ADD");
+        public string RouteApplicationModeText =>
+            string.Equals(SelectedProfile?.RoutePersistenceMode, "Temporary", StringComparison.OrdinalIgnoreCase)
+                ? T("IPCONFIG_ROUTE_MODE_TEMPORARY")
+                : T("IPCONFIG_ROUTE_MODE_PERSISTENT");
 
         public string ValidationMessage
         {
@@ -999,6 +1072,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             {
                 // Create default profile
                 var defaultProfile = new IpProfile { Name = "IP #1" };
+                defaultProfile.RoutePersistenceMode = "Persistent";
                 defaultProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
                 defaultProfile.IsDirty = false;
                 IpProfiles.Add(defaultProfile);
@@ -1037,6 +1111,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 Name = newName,
                 Mode = "DHCP",
                 AdapterName = null,
+                RoutePersistenceMode = "Persistent",
                 LinkedUncProfileName = string.Empty
             };
             newProfile.IpAddresses.Add(new IpAddressEntry { SubnetMask = "255.255.255.0" });
@@ -1075,6 +1150,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 Gateway = source.Gateway,
                 Dns1 = source.Dns1,
                 Dns2 = source.Dns2,
+                RoutePersistenceMode = NormalizeRoutePersistenceMode(source.RoutePersistenceMode),
                 LinkedUncProfileName = source.LinkedUncProfileName,
                 RoutesEnabled = source.RoutesEnabled,
                 IsDirty = false
@@ -1531,6 +1607,28 @@ namespace neTiPx.UI.Avalonia.ViewModels
             }
         }
 
+        public void RefreshRoutePersistenceOptions()
+        {
+            RoutePersistenceOptions.Clear();
+            RoutePersistenceOptions.Add(new RoutePersistenceOption
+            {
+                Value = "Persistent",
+                DisplayName = T("IPCONFIG_ROUTE_MODE_PERSISTENT")
+            });
+            RoutePersistenceOptions.Add(new RoutePersistenceOption
+            {
+                Value = "Temporary",
+                DisplayName = T("IPCONFIG_ROUTE_MODE_TEMPORARY")
+            });
+
+            if (SelectedProfile != null)
+            {
+                SelectedProfile.RoutePersistenceMode = NormalizeRoutePersistenceMode(SelectedProfile.RoutePersistenceMode);
+                OnPropertyChanged(nameof(SelectedRoutePersistenceOption));
+                OnPropertyChanged(nameof(RouteApplicationModeText));
+            }
+        }
+
         private void EnsureLinkedUncProfileSelection(IpProfile profile)
         {
             var linkedName = profile.LinkedUncProfileName?.Trim() ?? string.Empty;
@@ -1741,6 +1839,16 @@ namespace neTiPx.UI.Avalonia.ViewModels
             }
 
             return "DHCP";
+        }
+
+        private static string NormalizeRoutePersistenceMode(string? mode)
+        {
+            if (string.Equals(mode, "Temporary", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Temporary";
+            }
+
+            return "Persistent";
         }
 
         private string? NormalizeAdapterName(string? adapter)

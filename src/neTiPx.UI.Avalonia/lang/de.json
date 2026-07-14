@@ -88,6 +88,8 @@
   "IPCONFIG_PLACEHOLDER_DNS2": "Sekundärer DNS (z.B. 8.8.4.4)",
   "IPCONFIG_ROUTE_SET": "setzen",
   "IPCONFIG_ROUTE_ADD": "hinzufügen",
+  "IPCONFIG_ROUTE_MODE_PERSISTENT": "Persistent",
+  "IPCONFIG_ROUTE_MODE_TEMPORARY": "Temporär",
   "IPCONFIG_TOOLTIP_DELETE_PROFILE": "Profil löschen",
   "IPCONFIG_TOOLTIP_ROUTES": "Aktiviert routen Funktion",
   "IPCONFIG_TOOLTIP_GATEWAY": "Gateway eingeben zb:192.168.1.254",

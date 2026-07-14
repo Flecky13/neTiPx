@@ -139,15 +139,24 @@
 
                                 <StackPanel Grid.Column="1" Spacing="4">
                                     <TextBlock Text="Routen-Profil" FontWeight="SemiBold"/>
-                                    <ComboBox ItemsSource="{Binding RouteProfileOptions}"
-                                              SelectedItem="{Binding SelectedRouteProfileOption}"
-                                              HorizontalAlignment="Stretch">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding DisplayName}"/>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <ComboBox Grid.Column="0"
+                                                  ItemsSource="{Binding RouteProfileOptions}"
+                                                  SelectedItem="{Binding SelectedRouteProfileOption}"
+                                                  HorizontalAlignment="Stretch">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DisplayName}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+
+                                        <CheckBox Grid.Column="1"
+                                                  Content="{Binding RouteModeCheckboxText}"
+                                                  IsChecked="{Binding IsPersistentRouteMode}"
+                                                  IsEnabled="{Binding SelectedProfile.RoutesEnabled}"
+                                                  VerticalAlignment="Center"/>
+                                    </Grid>
                                 </StackPanel>
                             </Grid>
 

@@ -133,6 +133,7 @@ namespace neTiPx.UI.Avalonia.Services
                         Name = (string?)profileElement.Attribute("name") ?? "IP #1",
                         AdapterName = string.IsNullOrWhiteSpace(adapterNameAttr) ? null : adapterNameAttr,
                         Mode = NormalizeMode((string?)profileElement.Attribute("mode") ?? "DHCP"),
+                        RoutePersistenceMode = NormalizeRoutePersistenceMode((string?)profileElement.Attribute("routePersistenceMode") ?? "Persistent"),
                         Gateway = (string?)profileElement.Attribute("gateway") ?? string.Empty,
                         Dns1 = (string?)profileElement.Attribute("dns1") ?? string.Empty,
                         Dns2 = (string?)profileElement.Attribute("dns2") ?? string.Empty,
@@ -187,6 +188,7 @@ namespace neTiPx.UI.Avalonia.Services
                         new XAttribute("name", profile.Name ?? string.Empty),
                         new XAttribute("adapterName", profile.AdapterName ?? string.Empty),
                         new XAttribute("mode", NormalizeMode(profile.Mode)),
+                        new XAttribute("routePersistenceMode", NormalizeRoutePersistenceMode(profile.RoutePersistenceMode)),
                         new XAttribute("gateway", profile.Gateway ?? string.Empty),
                         new XAttribute("dns1", profile.Dns1 ?? string.Empty),
                         new XAttribute("dns2", profile.Dns2 ?? string.Empty),
@@ -373,6 +375,16 @@ namespace neTiPx.UI.Avalonia.Services
             return "DHCP";
         }
 
+        private static string NormalizeRoutePersistenceMode(string mode)
+        {
+            if (mode.Equals("Temporary", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Temporary";
+            }
+
+            return "Persistent";
+        }
+
         private static IpProfile CloneProfile(IpProfile source)
         {
             var clone = new IpProfile
@@ -380,6 +392,7 @@ namespace neTiPx.UI.Avalonia.Services
                 Name = source.Name,
                 AdapterName = source.AdapterName,
                 Mode = NormalizeMode(source.Mode),
+                RoutePersistenceMode = NormalizeRoutePersistenceMode(source.RoutePersistenceMode),
                 Gateway = source.Gateway,
                 Dns1 = source.Dns1,
                 Dns2 = source.Dns2,

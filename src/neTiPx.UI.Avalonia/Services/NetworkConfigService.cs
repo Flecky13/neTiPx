@@ -116,6 +116,7 @@ namespace neTiPx.UI.Avalonia.Services
 
             if (profile.RoutesEnabled)
             {
+                var routeStore = IsPersistentRouteMode(profile.RoutePersistenceMode) ? "persistent" : "active";
                 for (int i = 0; i < profile.Routes.Count; i++)
                 {
                     var route = profile.Routes[i];
@@ -136,7 +137,7 @@ namespace neTiPx.UI.Avalonia.Services
 
                     // Replace existing route if present.
                     commands.Add($"netsh interface ipv4 delete route prefix={prefix} interface=\"{ni.Name}\" >nul 2>&1");
-                    commands.Add($"netsh interface ipv4 add route prefix={prefix} interface=\"{ni.Name}\" nexthop={route.Gateway} metric={metric}");
+                    commands.Add($"netsh interface ipv4 add route prefix={prefix} interface=\"{ni.Name}\" nexthop={route.Gateway} metric={metric} store={routeStore}");
                 }
             }
 
@@ -163,6 +164,8 @@ namespace neTiPx.UI.Avalonia.Services
             LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Verwende NetworkManager Connection: '{connectionName}' für Device: '{ni.Name}'");
 
             var commands = new List<string>();
+            var runtimeRouteCommands = new List<string>();
+            var usePersistentRoutes = IsPersistentRouteMode(profile.RoutePersistenceMode);
 
             if (profile.Mode.Equals("DHCP", StringComparison.OrdinalIgnoreCase))
             {
@@ -172,29 +175,22 @@ namespace neTiPx.UI.Avalonia.Services
                 // Routen verwalten auch im DHCP-Modus
                 if (profile.RoutesEnabled && profile.Routes.Count > 0)
                 {
-                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Setze {profile.Routes.Count} Routen (DHCP-Modus)");
+                    var modeText = usePersistentRoutes ? "Persistent" : "Temporary";
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Setze {profile.Routes.Count} Routen (DHCP-Modus, {modeText})");
                     
                     // Lösche alle bestehenden Routen
                     commands.Add($"nmcli con mod \"{connectionName}\" ipv4.routes \"\"");
                     
-                    foreach (var route in profile.Routes)
+                    foreach (var routeSpec in BuildLinuxRouteSpecs(profile.Routes))
                     {
-                        if (string.IsNullOrWhiteSpace(route.Destination) || 
-                            string.IsNullOrWhiteSpace(route.SubnetMask) || 
-                            string.IsNullOrWhiteSpace(route.Gateway))
+                        if (usePersistentRoutes)
                         {
-                            continue;
+                            commands.Add($"nmcli con mod \"{connectionName}\" +ipv4.routes \"{EscapeShellDoubleQuoted(routeSpec)}\"");
                         }
-
-                        var routePrefixLength = SubnetMaskToPrefix(route.SubnetMask);
-                        if (routePrefixLength <= 0)
+                        else
                         {
-                            continue;
+                            runtimeRouteCommands.Add(BuildLinuxRuntimeRouteCommand(routeSpec));
                         }
-
-                        var metric = route.Metric > 0 ? route.Metric : 100;
-                        var routeSpec = $"{route.Destination}/{routePrefixLength} {route.Gateway} {metric}";
-                        commands.Add($"nmcli con mod \"{connectionName}\" +ipv4.routes \"{routeSpec}\"");
                     }
                 }
                 else
@@ -293,29 +289,22 @@ namespace neTiPx.UI.Avalonia.Services
                 // Routen verwalten (vor dem Aktivieren der Verbindung)
                 if (profile.RoutesEnabled && profile.Routes.Count > 0)
                 {
-                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Setze {profile.Routes.Count} Routen (Static-Modus)");
+                    var modeText = usePersistentRoutes ? "Persistent" : "Temporary";
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Setze {profile.Routes.Count} Routen (Static-Modus, {modeText})");
                     
                     // Lösche alle bestehenden Routen
                     commands.Add($"nmcli con mod \"{connectionName}\" ipv4.routes \"\"");
                     
-                    foreach (var route in profile.Routes)
+                    foreach (var routeSpec in BuildLinuxRouteSpecs(profile.Routes))
                     {
-                        if (string.IsNullOrWhiteSpace(route.Destination) || 
-                            string.IsNullOrWhiteSpace(route.SubnetMask) || 
-                            string.IsNullOrWhiteSpace(route.Gateway))
+                        if (usePersistentRoutes)
                         {
-                            continue;
+                            commands.Add($"nmcli con mod \"{connectionName}\" +ipv4.routes \"{EscapeShellDoubleQuoted(routeSpec)}\"");
                         }
-
-                        var routePrefixLength = SubnetMaskToPrefix(route.SubnetMask);
-                        if (routePrefixLength <= 0)
+                        else
                         {
-                            continue;
+                            runtimeRouteCommands.Add(BuildLinuxRuntimeRouteCommand(routeSpec));
                         }
-
-                        var metric = route.Metric > 0 ? route.Metric : 100;
-                        var routeSpec = $"{route.Destination}/{routePrefixLength} {route.Gateway} {metric}";
-                        commands.Add($"nmcli con mod \"{connectionName}\" +ipv4.routes \"{routeSpec}\"");
                     }
                 }
                 else
@@ -328,7 +317,72 @@ namespace neTiPx.UI.Avalonia.Services
                 commands.Add($"nmcli con up \"{connectionName}\"");
             }
 
-            return RunNmcliCommandsElevated(commands);
+            var nmcliResult = RunNmcliCommandsElevated(commands);
+            if (!nmcliResult.success)
+            {
+                return nmcliResult;
+            }
+
+            if (runtimeRouteCommands.Count == 0)
+            {
+                return (true, null);
+            }
+
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Wende {runtimeRouteCommands.Count} temporäre Route(n) per ip route an");
+            return RunShellCommandsElevated(runtimeRouteCommands);
+        }
+
+        private static bool IsPersistentRouteMode(string? routePersistenceMode)
+        {
+            return !string.Equals(routePersistenceMode, "Temporary", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static List<string> BuildLinuxRouteSpecs(IEnumerable<RouteEntry> routes)
+        {
+            var result = new List<string>();
+            foreach (var route in routes)
+            {
+                if (string.IsNullOrWhiteSpace(route.Destination) ||
+                    string.IsNullOrWhiteSpace(route.SubnetMask) ||
+                    string.IsNullOrWhiteSpace(route.Gateway))
+                {
+                    continue;
+                }
+
+                var routePrefixLength = SubnetMaskToPrefix(route.SubnetMask);
+                if (routePrefixLength <= 0)
+                {
+                    continue;
+                }
+
+                var metric = route.Metric > 0 ? route.Metric : 100;
+                result.Add($"{route.Destination}/{routePrefixLength} {route.Gateway} {metric}");
+            }
+
+            return result;
+        }
+
+        private static string BuildLinuxRuntimeRouteCommand(string nmcliRouteSpec)
+        {
+            var parts = nmcliRouteSpec
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length < 2)
+            {
+                return $"ip route replace {nmcliRouteSpec}";
+            }
+
+            var destinationPrefix = parts[0];
+            var gateway = parts[1];
+            var metric = parts.Length >= 3 && int.TryParse(parts[2], out var parsedMetric) && parsedMetric > 0
+                ? parsedMetric
+                : 100;
+
+            return $"ip route replace {destinationPrefix} via {gateway} metric {metric}";
+        }
+
+        private static string EscapeShellDoubleQuoted(string input)
+        {
+            return input.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
 
         private static string? FindNmcliConnection(string deviceName)
@@ -525,6 +579,91 @@ namespace neTiPx.UI.Avalonia.Services
             {
                 LogHandler.LogErrorMessage("NetConfig", "RunNmcliCommandsElevated fehlgeschlagen", ex);
                 return (false, "Fehler beim Anwenden: " + ex.Message);
+            }
+        }
+
+        private static (bool success, string? error) RunShellCommandsElevated(IReadOnlyList<string> commands)
+        {
+            if (commands.Count == 0)
+            {
+                return (true, null);
+            }
+
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Shell-Befehle starten ({commands.Count} Befehl(e))");
+            foreach (var cmd in commands)
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"  CMD: {cmd}");
+            }
+
+            var tempScriptPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"netipx_shell_{Guid.NewGuid()}.sh");
+            try
+            {
+                var scriptContent = "#!/bin/bash\nset -e\n" + string.Join("\n", commands);
+                System.IO.File.WriteAllText(tempScriptPath, scriptContent);
+
+                var chmodPsi = new ProcessStartInfo
+                {
+                    FileName = "chmod",
+                    Arguments = $"+x \"{tempScriptPath}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using (var chmodProcess = Process.Start(chmodPsi))
+                {
+                    chmodProcess?.WaitForExit();
+                }
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "pkexec",
+                    Arguments = $"\"{tempScriptPath}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, "Prozess konnte nicht gestartet werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    LogHandler.LogErrorMessage("NetConfig", $"Shell-Befehle fehlgeschlagen (ExitCode={process.ExitCode}): {error}");
+                    return (false, string.IsNullOrWhiteSpace(error) ? "Shell-Befehle fehlgeschlagen." : error.Trim());
+                }
+
+                if (!string.IsNullOrWhiteSpace(output))
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"shell output: {output}");
+                }
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogErrorMessage("NetConfig", "RunShellCommandsElevated fehlgeschlagen", ex);
+                return (false, "Fehler beim Ausführen von Shell-Befehlen: " + ex.Message);
+            }
+            finally
+            {
+                try
+                {
+                    if (System.IO.File.Exists(tempScriptPath))
+                    {
+                        System.IO.File.Delete(tempScriptPath);
+                    }
+                }
+                catch
+                {
+                    // Ignore cleanup errors
+                }
             }
         }
 
@@ -937,7 +1076,27 @@ namespace neTiPx.UI.Avalonia.Services
             // Plattformspezifische Implementierung
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return DeleteLinuxRoute(destination, normalizedSubnetMask, route.Gateway);
+                var runtimeDelete = DeleteLinuxRoute(destination, normalizedSubnetMask, route.Gateway);
+                var persistentDelete = RemoveLinuxPersistentRoute(destination, normalizedSubnetMask, route.Gateway);
+
+                if (!runtimeDelete.success &&
+                    !IsLinuxRouteNotFoundError(runtimeDelete.error) &&
+                    !persistentDelete.success)
+                {
+                    return runtimeDelete;
+                }
+
+                if (!persistentDelete.success)
+                {
+                    return persistentDelete;
+                }
+
+                if (!runtimeDelete.success && IsLinuxRouteNotFoundError(runtimeDelete.error))
+                {
+                    return (true, null);
+                }
+
+                return runtimeDelete;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -950,6 +1109,167 @@ namespace neTiPx.UI.Avalonia.Services
             else
             {
                 return (false, "Plattform wird nicht unterstützt.");
+            }
+        }
+
+        private static bool IsLinuxRouteNotFoundError(string? error)
+        {
+            if (string.IsNullOrWhiteSpace(error))
+            {
+                return false;
+            }
+
+            return error.Contains("No such process", StringComparison.OrdinalIgnoreCase)
+                   || error.Contains("Route existiert nicht", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private (bool success, string? error) RemoveLinuxPersistentRoute(string destination, string subnetMask, string gateway)
+        {
+            try
+            {
+                var prefix = SubnetMaskToPrefix(subnetMask);
+                if (prefix < 0)
+                {
+                    return (false, "Subnetzmaske ist ungültig.");
+                }
+
+                var targetPrefix = $"{destination}/{prefix}";
+                var listResult = RunProcessCapture("nmcli", "-t -f NAME connection show");
+                if (!listResult.success)
+                {
+                    return (false, $"Konnte NM-Verbindungen nicht lesen: {listResult.error}");
+                }
+
+                var connectionNames = listResult.output
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var changedCommands = new List<string>();
+                var removedFromConnections = 0;
+
+                foreach (var connectionName in connectionNames)
+                {
+                    var routesResult = RunProcessCapture("nmcli", $"-g ipv4.routes connection show \"{EscapeShellDoubleQuoted(connectionName)}\"");
+                    if (!routesResult.success)
+                    {
+                        continue;
+                    }
+
+                    var parsedRoutes = ParseNmcliRoutes(routesResult.output);
+                    if (parsedRoutes.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var remaining = new List<string>();
+                    var removedForCurrentConnection = false;
+                    foreach (var routeSpec in parsedRoutes)
+                    {
+                        if (NmcliRouteMatches(routeSpec, targetPrefix, gateway))
+                        {
+                            removedForCurrentConnection = true;
+                            continue;
+                        }
+
+                        remaining.Add(routeSpec);
+                    }
+
+                    if (!removedForCurrentConnection)
+                    {
+                        continue;
+                    }
+
+                    removedFromConnections++;
+                    changedCommands.Add($"nmcli con mod \"{EscapeShellDoubleQuoted(connectionName)}\" ipv4.routes \"\"");
+                    foreach (var routeSpec in remaining)
+                    {
+                        changedCommands.Add($"nmcli con mod \"{EscapeShellDoubleQuoted(connectionName)}\" +ipv4.routes \"{EscapeShellDoubleQuoted(routeSpec)}\"");
+                    }
+                }
+
+                if (changedCommands.Count == 0)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", "Keine persistente NM-Route zum Entfernen gefunden.");
+                    return (true, null);
+                }
+
+                var applyResult = RunNmcliCommandsElevated(changedCommands);
+                if (!applyResult.success)
+                {
+                    return applyResult;
+                }
+
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Persistente Route aus {removedFromConnections} NM-Verbindung(en) entfernt.");
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogErrorMessage("NetConfig", "RemoveLinuxPersistentRoute fehlgeschlagen", ex);
+                return (false, "Fehler beim Entfernen der persistenten Route: " + ex.Message);
+            }
+        }
+
+        private static List<string> ParseNmcliRoutes(string output)
+        {
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                return new List<string>();
+            }
+
+            return output
+                .Split(new[] { '\n', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(route => !string.IsNullOrWhiteSpace(route))
+                .ToList();
+        }
+
+        private static bool NmcliRouteMatches(string routeSpec, string targetPrefix, string gateway)
+        {
+            var parts = routeSpec.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length < 2)
+            {
+                return false;
+            }
+
+            return string.Equals(parts[0], targetPrefix, StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(parts[1], gateway, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static (bool success, string output, string? error) RunProcessCapture(string fileName, string arguments)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = fileName,
+                    Arguments = arguments,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, string.Empty, "Prozess konnte nicht gestartet werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    return (false, output, string.IsNullOrWhiteSpace(error) ? "Befehl fehlgeschlagen." : error.Trim());
+                }
+
+                return (true, output, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, string.Empty, ex.Message);
             }
         }
 

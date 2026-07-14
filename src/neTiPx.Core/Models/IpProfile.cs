@@ -30,6 +30,9 @@ public sealed partial class IpProfile : ObservableObject
     private bool _routesEnabled;
 
     [ObservableProperty]
+    private string _routePersistenceMode = "Persistent";
+
+    [ObservableProperty]
     private string _linkedUncProfileName = string.Empty;
 
     [ObservableProperty]
