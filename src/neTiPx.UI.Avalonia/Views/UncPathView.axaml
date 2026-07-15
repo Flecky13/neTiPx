@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              xmlns:models="using:neTiPx.Core.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
@@ -9,7 +10,7 @@
              x:DataType="vm:UncPathViewModel">
     
     <StackPanel Spacing="16">
-        <TextBlock Text="UNC Pfade" FontSize="20" FontWeight="SemiBold" />
+           <TextBlock Text="{loc:Loc TOOLS_UNC_PATH}" FontSize="20" FontWeight="SemiBold" />
 
         <!-- Hauptbereich: Profile (Links) | Konfiguration (Mitte) | Status (Rechts) -->
         <Grid ColumnDefinitions="200,*,210" ColumnSpacing="16">
@@ -21,7 +22,7 @@
                     Padding="16"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="UNC Profile" FontWeight="Bold" />
+                    <TextBlock Text="{loc:Loc IPCONFIG_UNC_PROFILE}" FontWeight="Bold" />
 
                     <!-- Profil-Liste -->
                     <ListBox ItemsSource="{Binding UncPathProfiles}"
@@ -56,7 +57,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
                                       Width="16" Height="16"/>
-                            <TextBlock Text="Neues Profil"/>
+                            <TextBlock Text="{loc:Loc IPCONFIG_NEW_PROFILE}"/>
                         </StackPanel>
                     </Button>
 
@@ -65,7 +66,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" 
                                       Width="16" Height="16"/>
-                            <TextBlock Text="Kopieren"/>
+                            <TextBlock Text="{loc:Loc IPCONFIG_COPY_PROFILE}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -84,9 +85,9 @@
                         
                         <!-- Profilname -->
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Profilname" FontWeight="SemiBold"/>
+                            <TextBlock Text="{loc:Loc IPCONFIG_PROFILE_NAME}" FontWeight="SemiBold"/>
                             <TextBox Text="{Binding SelectedProfile.Name}" 
-                                     Watermark="z.B. Office Server"
+                                     Watermark="{loc:Loc UNC_PROFILE_PLACEHOLDER}"
                                      Classes.error="{Binding HasNameError}"/>
                             <TextBlock Text="{Binding NameErrorMessage}"
                                        Foreground="Red"
@@ -96,9 +97,9 @@
                         <!-- UNC Pfade Liste -->
                         <StackPanel Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Grid.Column="0" Text="UNC Pfade" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="0" Text="{loc:Loc TOOLS_UNC_PATH}" FontWeight="SemiBold"/>
                                 <Button Grid.Column="1"
-                                        Content="+ Hinzufügen"
+                                    Content="{loc:Loc UNC_ADD}"
                                         Command="{Binding AddUncPathCommand}"
                                         Padding="8,4"
                                         FontSize="12"/>
@@ -138,9 +139,9 @@
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="1" Spacing="4">
-                                                        <TextBlock Text="UNC Pfad" FontSize="12" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{loc:Loc UNC_PATH_LABEL}" FontSize="12" FontWeight="SemiBold"/>
                                                         <TextBox Text="{Binding UncPath}"
-                                                                 Watermark="\\server\share oder //server/share"
+                                                                 Watermark="{loc:Loc UNC_PATH_PLACEHOLDER}"
                                                                  Classes.error="{Binding HasUncPathError}"/>
                                                     </StackPanel>
                                                 </Grid>
@@ -148,21 +149,21 @@
                                                 <!-- Zweite Zeile: Benutzername + Passwort -->
                                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                                                     <StackPanel Grid.Column="0" Spacing="4">
-                                                        <TextBlock Text="Benutzername" FontSize="12"/>
+                                                        <TextBlock Text="{loc:Loc UNC_USERNAME}" FontSize="12"/>
                                                         <TextBox Text="{Binding Username}"
-                                                                 Watermark="domain\benutzer"/>
+                                                                 Watermark="{loc:Loc UNC_USERNAME_PLACEHOLDER}"/>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="1" Spacing="4">
-                                                        <TextBlock Text="Passwort" FontSize="12"/>
+                                                        <TextBlock Text="{loc:Loc UNC_PASSWORD}" FontSize="12"/>
                                                         <TextBox Text="{Binding Password}"
                                                                  PasswordChar="●"
-                                                                 Watermark="Passwort"/>
+                                                                 Watermark="{loc:Loc UNC_PASSWORD}"/>
                                                     </StackPanel>
                                                 </Grid>
 
                                                 <!-- Entfernen Button -->
-                                                <Button Content="Entfernen"
+                                                <Button Content="{loc:Loc UNC_REMOVE}"
                                                         Command="{Binding $parent[UserControl].((vm:UncPathViewModel)DataContext).RemoveUncPathCommand}"
                                                         CommandParameter="{Binding}"
                                                         HorizontalAlignment="Right"
@@ -186,7 +187,7 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Aktionen" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc IPCONFIG_ACTIONS}" FontWeight="Bold" />
 
                         <StackPanel Spacing="8">
                             <Button Command="{Binding ApplyProfileCommand}"
@@ -195,7 +196,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                     <PathIcon Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" 
                                               Width="14" Height="14"/>
-                                    <TextBlock Text="Anwenden" />
+                                    <TextBlock Text="{loc:Loc IPCONFIG_APPLY}" />
                                 </StackPanel>
                             </Button>
 
@@ -204,7 +205,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                                     <PathIcon Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" 
                                               Width="14" Height="14"/>
-                                    <TextBlock Text="Speichern" />
+                                    <TextBlock Text="{loc:Loc IPCONFIG_SAVE}" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -234,13 +235,13 @@
                     <StackPanel Spacing="10">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Grid.Column="0" 
-                                       Text="Verbundene UNC-Pfade" 
+                                       Text="{loc:Loc UNC_CONNECTED_PATHS}" 
                                        FontWeight="Bold" 
                                        VerticalAlignment="Center"/>
                             <Button Grid.Column="1"
                                     Command="{Binding RefreshMountedConnectionsCommand}"
                                     Padding="6"
-                                    ToolTip.Tip="Liste aktualisieren">
+                                    ToolTip.Tip="{loc:Loc LOGVIEWER_BUTTON_RELOAD}">
                                 <PathIcon Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" 
                                           Width="14" Height="14"/>
                             </Button>
@@ -264,7 +265,7 @@
                                                 Padding="4"
                                                 Command="{Binding $parent[UserControl].((vm:UncPathViewModel)DataContext).DisconnectMountedConnectionCommand}"
                                                 CommandParameter="{Binding}"
-                                                ToolTip.Tip="Trennen">
+                                                ToolTip.Tip="{loc:Loc UNC_DISCONNECT}">
                                             <PathIcon Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" 
                                                       Width="14" Height="14"/>
                                         </Button>
@@ -273,7 +274,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                         
-                        <TextBlock Text="Keine verbundenen UNC-Pfade"
+                        <TextBlock Text="{loc:Loc UNC_NONE_CONNECTED}"
                                    Opacity="0.6"
                                    HorizontalAlignment="Center"
                                    Margin="0,20"

@@ -15,6 +15,9 @@ namespace neTiPx.UI.Avalonia.ViewModels;
 
 public partial class AdapterViewModel : ObservableObject
 {
+    private static readonly LanguageManager _lm = LanguageManager.Instance;
+    private static string T(string key) => _lm.Lang(key);
+
     private readonly SynchronizationContext? _uiContext;
     private readonly SettingsService _settingsService;
     private readonly UI.Avalonia.Services.NetworkInfoService _networkInfoService;
@@ -68,7 +71,7 @@ public partial class AdapterViewModel : ObservableObject
     
     // Connection Status Properties - Primary
     [ObservableProperty]
-    private string _gatewayStatusText = "Unbekannt";
+    private string _gatewayStatusText = "";
     
     [ObservableProperty]
     private string _gatewayPingText = "Ping: -";
@@ -77,7 +80,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _gatewayStatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _dns1StatusText = "Unbekannt";
+    private string _dns1StatusText = "";
     
     [ObservableProperty]
     private string _dns1PingText = "Ping: -";
@@ -86,7 +89,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _dns1StatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _dns2StatusText = "Unbekannt";
+    private string _dns2StatusText = "";
     
     [ObservableProperty]
     private string _dns2PingText = "Ping: -";
@@ -96,7 +99,7 @@ public partial class AdapterViewModel : ObservableObject
     
     // IPv6 Connection Status Properties - Primary
     [ObservableProperty]
-    private string _gateway6StatusText = "Unbekannt";
+    private string _gateway6StatusText = "";
     
     [ObservableProperty]
     private string _gateway6PingText = "Ping: -";
@@ -105,7 +108,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _gateway6StatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _dns1v6StatusText = "Unbekannt";
+    private string _dns1v6StatusText = "";
     
     [ObservableProperty]
     private string _dns1v6PingText = "Ping: -";
@@ -114,7 +117,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _dns1v6StatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _dns2v6StatusText = "Unbekannt";
+    private string _dns2v6StatusText = "";
     
     [ObservableProperty]
     private string _dns2v6PingText = "Ping: -";
@@ -124,7 +127,7 @@ public partial class AdapterViewModel : ObservableObject
     
     // Connection Status Properties - Secondary
     [ObservableProperty]
-    private string _secondaryGatewayStatusText = "Unbekannt";
+    private string _secondaryGatewayStatusText = "";
     
     [ObservableProperty]
     private string _secondaryGatewayPingText = "Ping: -";
@@ -133,7 +136,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _secondaryGatewayStatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _secondaryDns1StatusText = "Unbekannt";
+    private string _secondaryDns1StatusText = "";
     
     [ObservableProperty]
     private string _secondaryDns1PingText = "Ping: -";
@@ -142,7 +145,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _secondaryDns1StatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _secondaryDns2StatusText = "Unbekannt";
+    private string _secondaryDns2StatusText = "";
     
     [ObservableProperty]
     private string _secondaryDns2PingText = "Ping: -";
@@ -152,7 +155,7 @@ public partial class AdapterViewModel : ObservableObject
     
     // IPv6 Connection Status Properties - Secondary
     [ObservableProperty]
-    private string _secondaryGateway6StatusText = "Unbekannt";
+    private string _secondaryGateway6StatusText = "";
     
     [ObservableProperty]
     private string _secondaryGateway6PingText = "Ping: -";
@@ -161,7 +164,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _secondaryGateway6StatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _secondaryDns1v6StatusText = "Unbekannt";
+    private string _secondaryDns1v6StatusText = "";
     
     [ObservableProperty]
     private string _secondaryDns1v6PingText = "Ping: -";
@@ -170,7 +173,7 @@ public partial class AdapterViewModel : ObservableObject
     private GatewayStatusKind _secondaryDns1v6StatusKind = GatewayStatusKind.Unknown;
     
     [ObservableProperty]
-    private string _secondaryDns2v6StatusText = "Unbekannt";
+    private string _secondaryDns2v6StatusText = "";
     
     [ObservableProperty]
     private string _secondaryDns2v6PingText = "Ping: -";
@@ -197,6 +200,20 @@ public partial class AdapterViewModel : ObservableObject
         _uiContext = SynchronizationContext.Current;
         _settingsService = new SettingsService();
         _networkInfoService = new UI.Avalonia.Services.NetworkInfoService();
+
+        var unknown = T("ADAPTER_STA_Unknown");
+        GatewayStatusText = unknown;
+        Dns1StatusText = unknown;
+        Dns2StatusText = unknown;
+        Gateway6StatusText = unknown;
+        Dns1v6StatusText = unknown;
+        Dns2v6StatusText = unknown;
+        SecondaryGatewayStatusText = unknown;
+        SecondaryDns1StatusText = unknown;
+        SecondaryDns2StatusText = unknown;
+        SecondaryGateway6StatusText = unknown;
+        SecondaryDns1v6StatusText = unknown;
+        SecondaryDns2v6StatusText = unknown;
         
         LoadSelectionFromConfig();
         RegisterNetworkChangeEvents();
@@ -727,13 +744,13 @@ public partial class AdapterViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(address))
         {
-            PostToUI(() => callback("Nicht konfiguriert", "Ping: -", GatewayStatusKind.Unknown));
+            PostToUI(() => callback(T("ADAPTER_STA_NotConfigured"), "Ping: -", GatewayStatusKind.Unknown));
             return;
         }
         
         if (!IPAddress.TryParse(address, out var parsedAddress))
         {
-            PostToUI(() => callback("Nicht erreichbar", "Ungültige Adresse", GatewayStatusKind.Bad));
+            PostToUI(() => callback(T("ADAPTER_STA_NotReachable"), T("ADAPTER_STA_PingInvalidAddress"), GatewayStatusKind.Bad));
             return;
         }
         
@@ -755,17 +772,17 @@ public partial class AdapterViewModel : ObservableObject
                 
                 if (ms <= thresholdFast)
                 {
-                    statusText = "Erreichbar";
+                    statusText = T("ADAPTER_STA_Reachable");
                     statusKind = GatewayStatusKind.Good;
                 }
                 else if (ms <= thresholdNormal)
                 {
-                    statusText = "Langsam";
+                    statusText = T("ADAPTER_STA_Slow");
                     statusKind = GatewayStatusKind.Warning;
                 }
                 else
                 {
-                    statusText = "Sehr langsam";
+                    statusText = T("ADAPTER_STA_VerySlow");
                     statusKind = GatewayStatusKind.Bad;
                 }
                 
@@ -773,12 +790,12 @@ public partial class AdapterViewModel : ObservableObject
             }
             else
             {
-                PostToUI(() => callback("Nicht erreichbar", "Timeout", GatewayStatusKind.Bad));
+                PostToUI(() => callback(T("ADAPTER_STA_NotReachable"), T("ADAPTER_STA_PingTimeout"), GatewayStatusKind.Bad));
             }
         }
         catch
         {
-            PostToUI(() => callback("Nicht erreichbar", "Fehler", GatewayStatusKind.Bad));
+            PostToUI(() => callback(T("ADAPTER_STA_Error"), T("ADAPTER_STA_PingError"), GatewayStatusKind.Bad));
         }
     }
     

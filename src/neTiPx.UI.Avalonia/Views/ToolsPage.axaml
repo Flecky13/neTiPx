@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.ToolsPage">
     
@@ -36,8 +37,8 @@
                 Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Tools" FontSize="24" FontWeight="Bold" />
-                    <TextBlock Text="Netzwerk-Utilities und Diagnose-Tools" />
+                    <TextBlock Text="{loc:Loc TOOLS_TITLE}" FontSize="24" FontWeight="Bold" />
+                    <TextBlock Text="{loc:Loc TOOLS_SUBTITLE}" />
                 </StackPanel>
                 <Image Grid.Column="1"
                        Source="/Assets/toolicon.ico"
@@ -67,31 +68,31 @@
                         <ListBoxItem Tag="Ping" IsSelected="True">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📡" />
-                                <TextBlock Text="PING (Draft)" />
+                                <TextBlock Text="{loc:Loc TOOLS_PING}" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="Wlan">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📶" />
-                                <TextBlock Text="WLAN (Draft)" />
+                                <TextBlock Text="{loc:Loc TOOLS_WLAN}" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="NetworkCalculator">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🔢" />
-                                <TextBlock Text="Netzwerk-Rechner" />
+                                <TextBlock Text="{loc:Loc TOOLS_NET_CALC}" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="NetworkScanner">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🔍" />
-                                <TextBlock Text="Netzwerkscanner (Draft)" />
+                                <TextBlock Text="{loc:Loc TOOLS_NET_SCAN}" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="LogViewer">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📄" />
-                                <TextBlock Text="Log Viewer (Draft)" />
+                                <TextBlock Text="{loc:Loc TOOLS_LOG_VIEWER}" />
                             </StackPanel>
                         </ListBoxItem>
                     </ListBox>

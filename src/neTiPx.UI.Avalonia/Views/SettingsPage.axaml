@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.SettingsPage"
@@ -17,8 +18,8 @@
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Einstellungen" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Konfiguriere dein Tool nach deinen Wünschen" />
+                        <TextBlock Text="{loc:Loc SETTINGS_TITLE}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_SUBTITLE_PRE}" />
                     </StackPanel>
                     <Image Grid.Column="1"
                            Source="/Assets/toolicon.ico"
@@ -39,18 +40,18 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Netzwerkadapter" FontWeight="Bold" />
-                        <TextBlock Text="Wählen Sie die primären und sekundären Adapter" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_ADAPTER_CARD}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_ADAPTER_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Primärer Adapter (NIC 1):" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{loc:Loc SETTINGS_PRIMARY_ADAPTER}" FontWeight="SemiBold" FontSize="12" />
                             <ComboBox HorizontalAlignment="Stretch" 
                                       ItemsSource="{Binding AvailableAdapters}"
                                       SelectedItem="{Binding SelectedPrimaryAdapter}" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Sekundärer Adapter (NIC 2):" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{loc:Loc SETTINGS_SECONDARY_ADAPTER}" FontWeight="SemiBold" FontSize="12" />
                             <ComboBox HorizontalAlignment="Stretch" 
                                       ItemsSource="{Binding AvailableSecondaryAdapters}"
                                       SelectedItem="{Binding SelectedSecondaryAdapter}" />
@@ -66,13 +67,13 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Verbindungsqualität" FontWeight="Bold" />
-                        <TextBlock Text="Schwellwerte für die Status-Ampel (Gateway/DNS Ping)" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_CONNECTION_QUALITY_TITLE}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_CONNECTION_QUALITY_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🟢" FontSize="16" VerticalAlignment="Center" />
-                                <TextBlock Text="Schnell (ms):" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="{loc:Loc SETTINGS_FAST_MS}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
                             <NumericUpDown Value="{Binding PingThresholdFast}" 
                                            Minimum="1" 
@@ -84,7 +85,7 @@
                         <StackPanel Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🟡" FontSize="16" VerticalAlignment="Center" />
-                                <TextBlock Text="Normal (ms):" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock Text="{loc:Loc SETTINGS_NORMAL}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
                             <NumericUpDown Value="{Binding PingThresholdNormal}" 
                                            Minimum="10" 
@@ -93,7 +94,7 @@
                                            HorizontalAlignment="Stretch" />
                         </StackPanel>
 
-                        <TextBlock Text="🔴 Langsam: &gt; Normal" FontSize="11" Opacity="0.6" />
+                        <TextBlock Text="{loc:Loc SETTINGS_SLOW_MS}" FontSize="11" Opacity="0.6" />
                     </StackPanel>
                 </Border>
 
@@ -105,16 +106,16 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Netzwerk" FontWeight="Bold" />
-                        <TextBlock Text="Netzwerk-Timeouts und Optionen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_NETWORK}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_NETWORK_TIMEOUT_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Ping Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{loc:Loc SETTINGS_PING_TIMEOUT_MS}" FontWeight="SemiBold" FontSize="12" />
                             <NumericUpDown Value="1000" Minimum="100" Maximum="10000" Increment="100" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Scan Timeout (ms):" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{loc:Loc SETTINGS_SCAN_TIMEOUT_MS}" FontWeight="SemiBold" FontSize="12" />
                             <NumericUpDown Value="5000" Minimum="1000" Maximum="60000" Increment="1000" />
                         </StackPanel>
                     </StackPanel>
@@ -128,21 +129,21 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Ping-Logging" FontWeight="Bold" />
-                        <TextBlock Text="Speicherort für Ping-Logdateien" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_PING_LOG}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_PING_LOG_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Log-Ordner" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{loc:Loc SETTINGS_LOG_FOLDER}" FontWeight="SemiBold" FontSize="12" />
                             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                                     BorderThickness="1" 
                                     CornerRadius="6" 
                                     Padding="10,8">
-                                <TextBlock Text="C:\Users\...\Documents\neTiPx\Logs" Opacity="0.8" />
+                                <TextBlock Text="{loc:Loc SETTINGS_LOG_FOLDER_PATH_PLACEHOLDER}" Opacity="0.8" />
                             </Border>
                         </StackPanel>
 
                         <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="📁 Ordner ändern" />
+                            <TextBlock Text="{loc:Loc SETTINGS_SELECT_FOLDER}" />
                         </Button>
                     </StackPanel>
                 </Border>
@@ -155,8 +156,8 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Reserviert" FontWeight="Bold" />
-                        <TextBlock Text="Für zukünftige Features" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_PLACEHOLDER}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_PLACEHOLDER_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
@@ -168,17 +169,17 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Daten" FontWeight="Bold" />
-                        <TextBlock Text="Anwendungsdaten verwalten" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_DATA}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_DATA_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="📤 Einstellungen exportieren" />
+                            <TextBlock Text="{loc:Loc SETTINGS_EXPORT}" />
                         </Button>
                         <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="📥 Einstellungen importieren" />
+                            <TextBlock Text="{loc:Loc SETTINGS_IMPORT}" />
                         </Button>
                         <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="🗑️ Zurücksetzen" Foreground="Red" />
+                            <TextBlock Text="{loc:Loc SETTINGS_RESET}" Foreground="Red" />
                         </Button>
                     </StackPanel>
                 </Border>
@@ -191,23 +192,21 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Erscheinungsbild" FontWeight="Bold" />
-                        <TextBlock Text="Theme und Sprache anpassen" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_DISPLAY}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_LANGUAGE_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Farbschema:" FontWeight="SemiBold" FontSize="12" />
+                            <TextBlock Text="{loc:Loc SETTINGS_COLORSCHEME}" FontWeight="SemiBold" FontSize="12" />
                             <ComboBox HorizontalAlignment="Stretch" 
                                       ItemsSource="{Binding AvailableThemes}"
                                       SelectedItem="{Binding SelectedTheme}" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Sprache:" FontWeight="SemiBold" FontSize="12" />
-                            <ComboBox HorizontalAlignment="Stretch" SelectedIndex="0">
-                                <ComboBoxItem Content="Deutsch" />
-                                <ComboBoxItem Content="English" />
-                                <ComboBoxItem Content="Français" />
-                            </ComboBox>
+                            <TextBlock Text="{loc:Loc SETTINGS_LANGUAGE}" FontWeight="SemiBold" FontSize="12" />
+                            <ComboBox HorizontalAlignment="Stretch"
+                                      ItemsSource="{Binding AvailableLanguages}"
+                                      SelectedItem="{Binding SelectedLanguage}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -220,21 +219,21 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Autostart" FontWeight="Bold" />
-                        <TextBlock Text="Anwendung beim Systemstart" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_AUTOSTART}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_AUTOSTART_WINDOWS}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
-                        <CheckBox Content="Autostart aktivieren" 
+                        <CheckBox Content="{loc:Loc SETTINGS_AUTOSTART_ENABLE}" 
                                   IsChecked="{Binding IsAutostartEnabled}" />
-                        <TextBlock Text="Die App startet automatisch nach der Anmeldung." 
+                        <TextBlock Text="{loc:Loc SETTINGS_AUTOSTART_HINT}" 
                                    FontSize="11" 
                                    Opacity="0.6" 
                                    TextWrapping="Wrap" 
                                    Margin="24,0,0,0" />
                         
-                        <CheckBox Content="Minimiert starten" 
+                        <CheckBox Content="{loc:Loc SETTINGS_START_MINIMIZED}" 
                                   IsChecked="{Binding StartMinimizedToTray}"
                                   IsEnabled="{Binding IsAutostartEnabled}" />
-                        <TextBlock Text="Die App startet minimiert im Systray (nur wenn Autostart aktiviert)." 
+                        <TextBlock Text="{loc:Loc SETTINGS_START_MINIMIZED_HINT}" 
                                    FontSize="11" 
                                    Opacity="0.6" 
                                    TextWrapping="Wrap" 
@@ -250,30 +249,30 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Info-Fenster" FontWeight="Bold" />
-                        <TextBlock Text="Tray Info-Fenster konfigurieren" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc SETTINGS_HOVER_WINDOW}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_HOVER_WINDOW_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
                         <StackPanel Spacing="8">
                             <!-- Position -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Position" FontWeight="SemiBold" FontSize="12" />
+                                <TextBlock Text="{loc:Loc SETTINGS_POSITION}" FontWeight="SemiBold" FontSize="12" />
                                 <ComboBox HorizontalAlignment="Stretch" 
                                           SelectedIndex="{Binding HoverWindowPositionIndex}">
-                                    <ComboBoxItem Content="Oben" />
-                                    <ComboBoxItem Content="Unten" />
+                                    <ComboBoxItem Content="{loc:Loc SETTINGS_POS_TOP}" />
+                                    <ComboBoxItem Content="{loc:Loc SETTINGS_POS_BOTTOM}" />
                                 </ComboBox>
                             </StackPanel>
 
                             <!-- Abstände -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Horizontal (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock Text="{loc:Loc SETTINGS_OFFSET_HORIZONTAL}" FontWeight="SemiBold" FontSize="12" />
                                     <NumericUpDown Value="{Binding HoverWindowRightOffset}" 
                                                    Minimum="0" Maximum="5000" Increment="10" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Vertikal (px)" FontWeight="SemiBold" FontSize="12" />
+                                    <TextBlock Text="{loc:Loc SETTINGS_OFFSET_VERTICAL}" FontWeight="SemiBold" FontSize="12" />
                                     <NumericUpDown Value="{Binding HoverWindowVerticalOffset}" 
                                                    Minimum="0" Maximum="5000" Increment="10" />
                                 </StackPanel>

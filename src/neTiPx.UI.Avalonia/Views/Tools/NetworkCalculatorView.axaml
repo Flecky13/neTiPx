@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.Tools.NetworkCalculatorView">
 
@@ -10,7 +11,7 @@
             <!-- Header mit RadioButtons -->
             <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
                 <TextBlock Grid.Column="0" 
-                           Text="Netzwerk-Rechner" 
+                           Text="{loc:Loc TOOLS_NET_CALC}" 
                            FontSize="20" 
                            FontWeight="SemiBold" 
                            VerticalAlignment="Center" />
@@ -19,11 +20,11 @@
                             Spacing="16" 
                             VerticalAlignment="Center">
                     <RadioButton x:Name="Ipv4RadioButton" 
-                                 Content="IPv4" 
+                                 Content="{loc:Loc NETCALC_TAB_IPV4}" 
                                  IsChecked="True"
                                  GroupName="IpVersion" />
                     <RadioButton x:Name="Ipv6RadioButton" 
-                                 Content="IPv6"
+                                 Content="{loc:Loc NETCALC_TAB_IPV6}"
                                  GroupName="IpVersion" />
                 </StackPanel>
             </Grid>
@@ -38,45 +39,45 @@
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,*,*">
                         <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,8,0">
-                            <TextBlock Text="IP-Adresse" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc NETCALC_LABEL_IP_ADDRESS}" FontWeight="SemiBold" />
                             <TextBox x:Name="IpAddressTextBox"
-                                     Watermark="z.B. 192.168.1.0" />
+                                     Watermark="{loc:Loc NETCALC_PLACEHOLDER_IPV4_ADDRESS}" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8" Margin="8,0">
-                            <TextBlock Text="Subnetzmaske" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc NETCALC_LABEL_SUBNET_MASK}" FontWeight="SemiBold" />
                             <TextBox x:Name="SubnetTextBox"
-                                     Watermark="z.B. 255.255.255.0" />
+                                     Watermark="{loc:Loc NETCALC_PLACEHOLDER_SUBNET_MASK}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Spacing="8" Margin="8,0,0,0">
-                            <TextBlock Text="CIDR-Suffix" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc NETCALC_LABEL_CIDR_SUFFIX}" FontWeight="SemiBold" />
                             <TextBox x:Name="CidrTextBox"
-                                     Watermark="z.B. 24" />
+                                     Watermark="{loc:Loc NETCALC_PLACEHOLDER_CIDR_SUFFIX}" />
                         </StackPanel>
                     </Grid>
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Max. Anzahl Hosts" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc NETCALC_LABEL_MAX_HOSTS}" FontWeight="SemiBold" />
                         <Grid ColumnDefinitions="*,Auto,Auto">
                             <TextBox x:Name="MaxHostsTextBox"
                                      Grid.Column="0"
                                      IsReadOnly="True"
-                                     Watermark="z.B. 254"
+                                     Watermark="{loc:Loc NETCALC_PLACEHOLDER_MAX_HOSTS}"
                                      Margin="0,0,8,0" />
                             <Button x:Name="HostsMinusButton" 
                                     Grid.Column="1"
                                     Content="-"
                                     Width="40"
                                     Margin="0,0,4,0"
-                                    ToolTip.Tip="Anzahl Hosts reduzieren" />
+                                    ToolTip.Tip="{loc:Loc NETCALC_TOOLTIP_HOSTS_MINUS}" />
                             <Button x:Name="HostsPlusButton" 
                                     Grid.Column="2"
                                     Content="+"
                                     Width="40"
                                     Margin="4,0,0,0"
-                                    ToolTip.Tip="Anzahl Hosts erhöhen" />
+                                    ToolTip.Tip="{loc:Loc NETCALC_TOOLTIP_HOSTS_PLUS}" />
                         </Grid>
                         <TextBlock x:Name="IpScopeTextBlock"
-                                   Text="IP-Bereich: -"
+                                   Text="{loc:Loc NETCALC_SCOPE_EMPTY}"
                                    FontSize="12"
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                     </StackPanel>
@@ -94,19 +95,19 @@
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,16,0">
-                            <TextBlock Text="IPv6-Adresse" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc NETCALC_LABEL_IPV6_ADDRESS}" FontWeight="SemiBold" />
                             <TextBox x:Name="Ipv6AddressTextBox"
-                                     Watermark="z.B. 2001:db8::" />
+                                     Watermark="{loc:Loc NETCALC_PLACEHOLDER_IPV6_ADDRESS}" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="8" MinWidth="150">
-                            <TextBlock Text="Präfixlänge" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc NETCALC_LABEL_PREFIX_LENGTH}" FontWeight="SemiBold" />
                             <TextBox x:Name="Ipv6PrefixTextBox"
-                                     Watermark="z.B. 64" />
+                                     Watermark="{loc:Loc NETCALC_PLACEHOLDER_PREFIX_LENGTH}" />
                         </StackPanel>
                     </Grid>
 
                     <TextBlock x:Name="Ipv6ScopeTextBlock"
-                               Text="IP-Bereich: -"
+                               Text="{loc:Loc NETCALC_SCOPE_EMPTY}"
                                FontSize="12"
                                Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                 </StackPanel>
@@ -121,13 +122,13 @@
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                     IsVisible="False">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Berechnungsergebnisse" 
+                    <TextBlock Text="{loc:Loc NETCALC_RESULTS_TITLE}" 
                                FontWeight="SemiBold" 
                                FontSize="14" />
 
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
                         <StackPanel Grid.Column="0" Grid.Row="0" Spacing="4" Margin="0,0,8,12">
-                            <TextBlock Text="Netzwerkadresse:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_NETWORK_ADDRESS}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="NetworkAddress" 
@@ -136,7 +137,7 @@
                                        FontSize="14" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4" Margin="8,0,0,12">
-                            <TextBlock Text="Broadcast-Adresse:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_BROADCAST_ADDRESS}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="BroadcastAddress" 
@@ -146,7 +147,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="1" Spacing="4" Margin="0,0,8,12">
-                            <TextBlock Text="Erste verwendbare IP:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_FIRST_USABLE}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="FirstUsableIp" 
@@ -155,7 +156,7 @@
                                        FontSize="14" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="1" Spacing="4" Margin="8,0,0,12">
-                            <TextBlock Text="Letzte verwendbare IP:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_LAST_USABLE}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="LastUsableIp" 
@@ -165,7 +166,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="2" Spacing="4" Margin="0,0,8,12">
-                            <TextBlock Text="Subnetzmaske:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_SUBNET_MASK}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="SubnetMask" 
@@ -174,7 +175,7 @@
                                        FontSize="14" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="2" Spacing="4" Margin="8,0,0,12">
-                            <TextBlock Text="CIDR-Suffix:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_CIDR_SUFFIX}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="CidrNotation" 
@@ -184,7 +185,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="3" Spacing="4" Margin="0,0,8,0">
-                            <TextBlock Text="Anzahl Hosts:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_HOST_COUNT}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="HostCount" 
@@ -193,7 +194,7 @@
                                        FontSize="14" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="3" Spacing="4" Margin="8,0,0,0">
-                            <TextBlock Text="Wildcard-Maske:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_WILDCARD_MASK}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="WildcardMask" 
@@ -214,13 +215,13 @@
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                     IsVisible="False">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Berechnungsergebnisse" 
+                    <TextBlock Text="{loc:Loc NETCALC_RESULTS_TITLE}" 
                                FontWeight="SemiBold" 
                                FontSize="14" />
 
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
                         <StackPanel Grid.Column="0" Grid.Row="0" Spacing="4" Margin="0,0,8,12">
-                            <TextBlock Text="Netzwerkadresse:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_NETWORK_ADDRESS}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="NetworkAddressIpv6" 
@@ -230,7 +231,7 @@
                                        TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="0" Spacing="4" Margin="8,0,0,12">
-                            <TextBlock Text="Präfixlänge:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_PREFIX_LENGTH}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="PrefixLengthIpv6" 
@@ -240,7 +241,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="1" Spacing="4" Margin="0,0,8,12">
-                            <TextBlock Text="Erste Adresse:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_FIRST_ADDRESS}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="FirstAddressIpv6" 
@@ -250,7 +251,7 @@
                                        TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Grid.Row="1" Spacing="4" Margin="8,0,0,12">
-                            <TextBlock Text="Letzte Adresse:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_LAST_ADDRESS}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="LastAddressIpv6" 
@@ -261,7 +262,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Spacing="4">
-                            <TextBlock Text="Anzahl Adressen:" 
+                            <TextBlock Text="{loc:Loc NETCALC_RESULT_ADDRESS_COUNT}" 
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                        FontSize="12" />
                             <TextBlock x:Name="AddressCountIpv6" 

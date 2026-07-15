@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              xmlns:models="using:neTiPx.Core.Models"
              xmlns:converters="using:neTiPx.UI.Avalonia.Converters"
@@ -23,10 +24,10 @@
                     Padding="24">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="IP Konfiguration" 
+                        <TextBlock Text="{loc:Loc IPCONFIG_TITLE}" 
                                    FontSize="24" 
                                    FontWeight="Bold"/>
-                        <TextBlock Text="Verwalte mehrere IP-Profile und Netzwerkeinstellungen"
+                        <TextBlock Text="{loc:Loc IPCONFIG_SUBTITLE}"
                                    Opacity="0.7"/>
                     </StackPanel>
                 </Grid>
@@ -43,7 +44,7 @@
                         CornerRadius="8"
                         Padding="16">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="IP Profile" 
+                        <TextBlock Text="{loc:Loc IPCONFIG_IP_PROFILES}" 
                                    FontWeight="Bold"
                                    FontSize="16"/>
 
@@ -80,7 +81,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Neues Profil"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_NEW_PROFILE}"/>
                             </StackPanel>
                         </Button>
 
@@ -89,7 +90,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Kopie erstellen"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_COPY_PROFILE}"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -109,13 +110,13 @@
                             <!-- Zeile 1: Profil-Name und UNC-Profil -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Profil-Name" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{loc:Loc IPCONFIG_PROFILE_NAME}" FontWeight="SemiBold"/>
                                     <TextBox Text="{Binding SelectedProfile.Name}" 
-                                             Watermark="z.B. Home, Office"/>
+                                             Watermark="{loc:Loc IPCONFIG_PLACEHOLDER_PROFILE}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="UNC-Profil" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{loc:Loc IPCONFIG_UNC_PROFILE}" FontWeight="SemiBold"/>
                                     <ComboBox ItemsSource="{Binding UncProfileOptions}"
                                               SelectedItem="{Binding SelectedUncProfileOption}"
                                               HorizontalAlignment="Stretch">
@@ -131,14 +132,14 @@
                             <!-- Zeile 2: Netzwerkadapter und Routen-Profil -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Netzwerkadapter" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{loc:Loc IPCONFIG_ADAPTER}" FontWeight="SemiBold"/>
                                     <ComboBox ItemsSource="{Binding AdapterList}"
                                               SelectedItem="{Binding SelectedProfile.AdapterName}"
                                               HorizontalAlignment="Stretch"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Routen-Profil" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{loc:Loc TOOLS_ROUTES}" FontWeight="SemiBold"/>
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <ComboBox Grid.Column="0"
                                                   ItemsSource="{Binding RouteProfileOptions}"
@@ -162,7 +163,7 @@
 
                             <!-- Zeile 3: IP-Modus -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="IP-Modus" FontWeight="SemiBold"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_IP_MODE}" FontWeight="SemiBold"/>
                                 <ComboBox ItemsSource="{Binding IpModeOptions}"
                                           SelectedItem="{Binding SelectedProfile.Mode}"
                                           HorizontalAlignment="Stretch"/>
@@ -170,25 +171,25 @@
 
                             <!-- Zeile 4: Standard-Gateway -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Standard-Gateway" FontWeight="SemiBold"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_LABEL_GATEWAY}" FontWeight="SemiBold"/>
                                 <TextBox Text="{Binding SelectedProfile.Gateway}"
-                                         Watermark="192.168.1.1"
+                                         Watermark="{loc:Loc IPCONFIG_PLACEHOLDER_GATEWAY}"
                                          IsEnabled="{Binding IsManual}"/>
                             </StackPanel>
 
                             <!-- Zeile 5: Primärer DNS und Sekundärer DNS -->
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                                 <StackPanel Grid.Column="0" Spacing="4">
-                                    <TextBlock Text="Primärer DNS" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{loc:Loc IPCONFIG_LABEL_DNS1}" FontWeight="SemiBold"/>
                                     <TextBox Text="{Binding SelectedProfile.Dns1}"
-                                             Watermark="8.8.8.8"
+                                             Watermark="{loc:Loc IPCONFIG_PLACEHOLDER_DNS1}"
                                              IsEnabled="{Binding IsManual}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="Sekundärer DNS" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{loc:Loc IPCONFIG_LABEL_DNS2}" FontWeight="SemiBold"/>
                                     <TextBox Text="{Binding SelectedProfile.Dns2}"
-                                             Watermark="8.8.4.4"
+                                             Watermark="{loc:Loc IPCONFIG_PLACEHOLDER_DNS2}"
                                              IsEnabled="{Binding IsManual}"/>
                                 </StackPanel>
                             </Grid>
@@ -197,14 +198,14 @@
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Grid.Column="0" 
-                                               Text="IP-Adressen und Subnetmasken" 
+                                               Text="{loc:Loc IPCONFIG_IP_ADDRESSES}" 
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center"/>
                                     <Button Grid.Column="1" 
                                             Command="{Binding AddIpCommand}"
                                             Padding="6"
                                             IsEnabled="{Binding IsManual}"
-                                            ToolTip.Tip="IP-Adresse hinzufügen">
+                                            ToolTip.Tip="{loc:Loc IPCONFIG_TOOLTIP_IP}">
                                         <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
                                                   Width="16" Height="16"/>
                                     </Button>
@@ -216,11 +217,11 @@
                                             <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8" Margin="0,4">
                                                 <TextBox Grid.Column="0" 
                                                          Text="{Binding IpAddress}"
-                                                         Watermark="IP-Adresse (z.B. 192.168.1.100)"
+                                                         Watermark="{loc:Loc IPCONFIG_TOOLTIP_IP}"
                                                          IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"/>
                                                 <TextBox Grid.Column="1" 
                                                          Text="{Binding SubnetMask}"
-                                                         Watermark="Subnetzmaske (z.B. 255.255.255.0)"
+                                                         Watermark="{loc:Loc IPCONFIG_TOOLTIP_SUBNET}"
                                                          IsEnabled="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).IsManual}"/>
                                                 <Button Grid.Column="2"
                                                         Command="{Binding $parent[UserControl].((vm:IpConfigViewModel)DataContext).RemoveIpCommand}"
@@ -260,7 +261,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Anwenden"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_APPLY}"/>
                             </StackPanel>
                         </Button>
 
@@ -269,7 +270,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Speichern"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_SAVE}"/>
                             </StackPanel>
                         </Button>
 
@@ -277,7 +278,7 @@
 
                         <!-- Log / Feedback -->
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Status" 
+                            <TextBlock Text="{loc:Loc IPCONFIG_CONNECTION_STATUS}" 
                                        FontWeight="Bold"
                                        FontSize="14"/>
                             
@@ -326,12 +327,12 @@
 
                         <!-- Verbindungsstatus -->
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Verbindungsstatus" 
+                            <TextBlock Text="{loc:Loc IPCONFIG_CONNECTION_STATUS}" 
                                        FontWeight="Bold"
                                        FontSize="14"/>
                             
                             <!-- Hinweis wenn keine Daten -->
-                            <TextBlock Text="Kein Profil angewendet" 
+                            <TextBlock Text="{loc:Loc IPCONFIG_MSG_NO_SETTINGS}" 
                                        FontSize="12"
                                        Opacity="0.6"
                                        FontStyle="Italic"
@@ -342,7 +343,7 @@
                                 
                                 <!-- Gateway Erreichbarkeit -->
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="Gateway" 
+                                    <TextBlock Text="{loc:Loc IPCONFIG_LABEL_GATEWAY}" 
                                                FontSize="12" 
                                                FontWeight="SemiBold"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -365,7 +366,7 @@
 
                                 <!-- DNS 1 Erreichbarkeit -->
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="DNS 1" 
+                                    <TextBlock Text="{loc:Loc IPCONFIG_LABEL_DNS1}" 
                                                FontSize="12" 
                                                FontWeight="SemiBold"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -388,7 +389,7 @@
 
                                 <!-- DNS 2 Erreichbarkeit -->
                                 <StackPanel Spacing="4" IsVisible="{Binding HasDns2}">
-                                    <TextBlock Text="DNS 2" 
+                                    <TextBlock Text="{loc:Loc IPCONFIG_LABEL_DNS2}" 
                                                FontSize="12" 
                                                FontWeight="SemiBold"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -413,7 +414,7 @@
 
                                 <!-- Verbindungsqualität Ampel -->
                                 <StackPanel Spacing="8">
-                                    <TextBlock Text="Verbindungsqualität" 
+                                    <TextBlock Text="{loc:Loc IPCONFIG_CONNECTION_QUALITY}" 
                                                FontSize="12" 
                                                FontWeight="SemiBold"/>
                                     <Grid ColumnDefinitions="Auto,Auto,Auto" 
@@ -442,14 +443,14 @@
 
                                 <!-- System DNS Server (resolvectl) -->
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="System DNS Server" 
+                                        <TextBlock Text="{loc:Loc IPCONFIG_SYSTEM_DNS}" 
                                                FontSize="12" 
                                                FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SystemDnsInfo}" 
+                                        <TextBlock Text="{Binding SystemDnsInfo}" 
                                                FontSize="10" 
                                                Opacity="0.7"
                                                TextWrapping="Wrap"/>
-                                    <Button Content="Aktualisieren"
+                                        <Button Content="{loc:Loc LOGVIEWER_BUTTON_RELOAD}"
                                             Command="{Binding RefreshSystemDnsCommand}"
                                             Padding="4,2"
                                             FontSize="10"

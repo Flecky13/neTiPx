@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              xmlns:converters="using:neTiPx.UI.Avalonia.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
@@ -22,8 +23,8 @@
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Adapter" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Infos zu deinen zwei Adaptern." />
+                        <TextBlock Text="{loc:Loc ADAPTER_TITLE}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc ADAPTER_SUBTITLE}" />
                     </StackPanel>
                     <Image Grid.Column="1"
                            Source="/Assets/toolicon.ico"
@@ -46,23 +47,23 @@
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         IsVisible="{Binding IsPrimaryAdapterVisible}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Netzwerkkarte 1" FontSize="16" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc ADAPTER_NIC1}" FontSize="16" FontWeight="Bold" />
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_NAME}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrimaryAdapterName}" TextWrapping="Wrap" />
                         </Grid>
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="MAC:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_MAC}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrimaryAdapterMac}" TextWrapping="Wrap" />
                         </Grid>
 
-                        <TextBlock Text="IPv4 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
+                        <TextBlock Text="{loc:Loc ADAPTER_LBL_IPV4_INFO}" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
                                    IsVisible="{Binding !IsPrimaryAdapterDown}" />
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="IPv4:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_IPV4}" FontWeight="SemiBold" VerticalAlignment="Top" />
                             <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding PrimaryAdapterIpV4List}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -73,12 +74,12 @@
                         </Grid>
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsPrimaryAdapterDown}">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Gateway:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_GATEWAY}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrimaryAdapterGateway}" TextWrapping="Wrap" />
                         </Grid>
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsPrimaryAdapterDown}">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="DNS4:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS4}" FontWeight="SemiBold" VerticalAlignment="Top" />
                             <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding PrimaryAdapterDns4List}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -89,11 +90,11 @@
                         </Grid>
 
                         <StackPanel IsVisible="{Binding IsPrimaryIpv6Available}">
-                            <TextBlock Text="IPv6 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
+                            <TextBlock Text="{loc:Loc ADAPTER_LBL_IPV6_INFO}" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
                                        IsVisible="{Binding !IsPrimaryAdapterDown}" />
 
                             <Grid ColumnDefinitions="140,*" RowSpacing="6" Margin="0,8,0,0">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="IPv6:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_IPV6}" FontWeight="SemiBold" VerticalAlignment="Top" />
                                 <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding PrimaryAdapterIpV6List}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -104,12 +105,12 @@
                             </Grid>
 
                             <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsPrimaryAdapterDown}">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Gateway6:" FontWeight="SemiBold" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_GATEWAY6}" FontWeight="SemiBold" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PrimaryAdapterGateway6}" TextWrapping="Wrap" />
                             </Grid>
 
                             <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsPrimaryAdapterDown}">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="DNS6:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS6}" FontWeight="SemiBold" VerticalAlignment="Top" />
                                 <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding PrimaryAdapterDns6List}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -131,23 +132,23 @@
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                         IsVisible="{Binding IsSecondaryAdapterVisible}">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Netzwerkkarte 2" FontSize="16" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc ADAPTER_NIC2}" FontSize="16" FontWeight="Bold" />
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_NAME}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SecondaryAdapterName}" TextWrapping="Wrap" />
                         </Grid>
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="MAC:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_MAC}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SecondaryAdapterMac}" TextWrapping="Wrap" />
                         </Grid>
 
-                        <TextBlock Text="IPv4 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
+                        <TextBlock Text="{loc:Loc ADAPTER_LBL_IPV4_INFO}" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
                                    IsVisible="{Binding !IsSecondaryAdapterDown}" />
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="IPv4:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_IPV4}" FontWeight="SemiBold" VerticalAlignment="Top" />
                             <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondaryAdapterIpV4List}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -158,12 +159,12 @@
                         </Grid>
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsSecondaryAdapterDown}">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Gateway:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_GATEWAY}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SecondaryAdapterGateway}" TextWrapping="Wrap" />
                         </Grid>
 
                         <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsSecondaryAdapterDown}">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="DNS4:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS4}" FontWeight="SemiBold" VerticalAlignment="Top" />
                             <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondaryAdapterDns4List}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -174,11 +175,11 @@
                         </Grid>
 
                         <StackPanel IsVisible="{Binding IsSecondaryIpv6Available}">
-                            <TextBlock Text="IPv6 Informationen:" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
+                            <TextBlock Text="{loc:Loc ADAPTER_LBL_IPV6_INFO}" FontWeight="Bold" FontSize="14" Margin="0,8,0,0" 
                                        IsVisible="{Binding !IsSecondaryAdapterDown}" />
 
                             <Grid ColumnDefinitions="140,*" RowSpacing="6" Margin="0,8,0,0">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="IPv6:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_IPV6}" FontWeight="SemiBold" VerticalAlignment="Top" />
                                 <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondaryAdapterIpV6List}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -189,12 +190,12 @@
                             </Grid>
 
                             <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsSecondaryAdapterDown}">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Gateway6:" FontWeight="SemiBold" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_GATEWAY6}" FontWeight="SemiBold" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SecondaryAdapterGateway6}" TextWrapping="Wrap" />
                             </Grid>
 
                             <Grid ColumnDefinitions="140,*" RowSpacing="6" IsVisible="{Binding !IsSecondaryAdapterDown}">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="DNS6:" FontWeight="SemiBold" VerticalAlignment="Top" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS6}" FontWeight="SemiBold" VerticalAlignment="Top" />
                                 <ItemsControl Grid.Row="0" Grid.Column="1" ItemsSource="{Binding SecondaryAdapterDns6List}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -218,15 +219,15 @@
                     <StackPanel Spacing="12">
                         <!-- Titel mit Header -->
                         <Grid ColumnDefinitions="Auto,*,*">
-                            <TextBlock Grid.Column="0" Text="Status - NIC 1" FontSize="16" FontWeight="Bold" Margin="0,0,20,0" />
-                            <TextBlock Grid.Column="1" Text="IPv4" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Text="IPv6" FontWeight="SemiBold" HorizontalAlignment="Center" 
+                            <TextBlock Grid.Column="0" Text="{loc:Loc ADAPTER_STATUS_NIC1}" FontSize="16" FontWeight="Bold" Margin="0,0,20,0" />
+                            <TextBlock Grid.Column="1" Text="{loc:Loc ADAPTER_COL_IPV4}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{loc:Loc ADAPTER_COL_IPV6}" FontWeight="SemiBold" HorizontalAlignment="Center" 
                                        IsVisible="{Binding IsPrimaryIpv6Available}" />
                         </Grid>
                         
                         <Grid ColumnDefinitions="120,*,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
                             <!-- Gateway -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Gateway:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_GATEWAY}" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" VerticalAlignment="Center">
@@ -264,7 +265,7 @@
                             </StackPanel>
                             
                             <!-- DNS1 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="DNS1:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS1}" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" VerticalAlignment="Center">
@@ -302,7 +303,7 @@
                             </StackPanel>
                             
                             <!-- DNS2 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="DNS2:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS2}" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" VerticalAlignment="Center">
@@ -353,15 +354,15 @@
                     <StackPanel Spacing="12">
                         <!-- Titel mit Header -->
                         <Grid ColumnDefinitions="Auto,*,*">
-                            <TextBlock Grid.Column="0" Text="Status - NIC 2" FontSize="16" FontWeight="Bold" Margin="0,0,20,0" />
-                            <TextBlock Grid.Column="1" Text="IPv4" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Text="IPv6" FontWeight="SemiBold" HorizontalAlignment="Center" 
+                            <TextBlock Grid.Column="0" Text="{loc:Loc ADAPTER_STATUS_NIC2}" FontSize="16" FontWeight="Bold" Margin="0,0,20,0" />
+                            <TextBlock Grid.Column="1" Text="{loc:Loc ADAPTER_COL_IPV4}" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{loc:Loc ADAPTER_COL_IPV6}" FontWeight="SemiBold" HorizontalAlignment="Center" 
                                        IsVisible="{Binding IsSecondaryIpv6Available}" />
                         </Grid>
                         
                         <Grid ColumnDefinitions="120,*,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
                             <!-- Gateway -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Gateway:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_GATEWAY}" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" VerticalAlignment="Center">
@@ -399,7 +400,7 @@
                             </StackPanel>
                             
                             <!-- DNS1 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="DNS1:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS1}" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" VerticalAlignment="Center">
@@ -437,7 +438,7 @@
                             </StackPanel>
                             
                             <!-- DNS2 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="DNS2:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{loc:Loc ADAPTER_LBL_DNS2}" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" VerticalAlignment="Center">

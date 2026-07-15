@@ -2,13 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              xmlns:models="using:neTiPx.Core.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.Tools.RoutesView">
 
     <TabControl Margin="16">
-        <TabItem Header="System-Routen">
+        <TabItem Header="{loc:Loc ROUTES_TAB_SYSTEM}">
             <ScrollViewer>
                 <StackPanel Spacing="16" Margin="24">
 
@@ -21,11 +22,11 @@
                 <StackPanel Spacing="12">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="Ständige Routen im System" 
+                            <TextBlock Text="{loc:Loc ROUTES_SECTION_SYSTEM}" 
                                        FontSize="16" 
                                        FontWeight="SemiBold" />
                             <TextBlock x:Name="RoutesStatusText" 
-                                       Text="Wird eingelesen..."
+                                       Text="{loc:Loc ROUTECFG_STATUS_NOT_LOADED}"
                                        FontSize="12"
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                         </StackPanel>
@@ -36,16 +37,16 @@
                                 ToolTip.Tip="Routen aus dem System neu einlesen">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <TextBlock Text="🔄" FontSize="14" />
-                                <TextBlock Text="Neu Einlesen" />
+                                <TextBlock Text="{loc:Loc LOGVIEWER_BUTTON_RELOAD}" />
                             </StackPanel>
                         </Button>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBox x:Name="DestinationFilterBox"
-                                 Watermark="Ziel-IP-Filter, z.B. 10.10.20.5"
+                                 Watermark="{loc:Loc ROUTES_FILTER_PLACEHOLDER}"
                                  Margin="0,0,8,0"
-                                 ToolTip.Tip="Zeigt nur Routen, die für diese Ziel-IP gemäß Routing-Entscheidung in Betracht kommen" />
+                                 ToolTip.Tip="{loc:Loc ROUTES_FILTER_TOOLTIP}" />
                         <Button x:Name="ClearFilterButton" 
                                 Grid.Column="1"
                                 Content="✖"
@@ -61,7 +62,7 @@
                                 Background="Transparent"
                                 BorderThickness="0">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="Zielnetz" 
+                                <TextBlock Text="{loc:Loc ROUTES_HEADER_DEST}" 
                                            FontWeight="SemiBold" 
                                            FontSize="12"
                                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
@@ -77,7 +78,7 @@
                                 Background="Transparent"
                                 BorderThickness="0">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="Subnetzmaske" 
+                                <TextBlock Text="{loc:Loc ROUTES_HEADER_SUBNET}" 
                                            FontWeight="SemiBold" 
                                            FontSize="12"
                                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
@@ -93,7 +94,7 @@
                                 Background="Transparent"
                                 BorderThickness="0">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="Gateway" 
+                                <TextBlock Text="{loc:Loc ROUTES_HEADER_GATEWAY}" 
                                            FontWeight="SemiBold" 
                                            FontSize="12"
                                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
@@ -109,7 +110,7 @@
                                 Background="Transparent"
                                 BorderThickness="0">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="Metrik" 
+                                <TextBlock Text="{loc:Loc ROUTES_HEADER_METRIC}" 
                                            FontWeight="SemiBold" 
                                            FontSize="12"
                                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
@@ -119,7 +120,7 @@
                             </StackPanel>
                         </Button>
                         <TextBlock Grid.Column="4" 
-                                   Text="Aktion" 
+                                   Text="{loc:Loc ROUTES_HEADER_ACTION}" 
                                    FontWeight="SemiBold" 
                                    FontSize="12"
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
@@ -167,10 +168,10 @@
                                                         HorizontalAlignment="Center"
                                                         Padding="8"
                                                         MinWidth="0"
-                                                        ToolTip.Tip="Ständige Route dauerhaft aus dem System entfernen"
+                                                        ToolTip.Tip="{loc:Loc ROUTECFG_TOOLTIP_DELETE_SYSTEM_ROUTE}"
                                                         IsVisible="{Binding CanDeleteFromSystem}"
                                                         Loaded="DeleteButton_Loaded" />
-                                                <TextBlock Text="Systemroute"
+                                                    <TextBlock Text="{loc:Loc ROUTES_BADGE_SYSTEM}"
                                                            VerticalAlignment="Center"
                                                            HorizontalAlignment="Center"
                                                            Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
@@ -193,28 +194,28 @@
                     Padding="16"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Route hinzufügen" 
+                    <TextBlock Text="{loc:Loc ROUTES_SECTION_ADD}" 
                                FontSize="16" 
                                FontWeight="SemiBold" />
 
                     <!-- Spaltenköpfe -->
                     <Grid ColumnDefinitions="2*,2*,2*,Auto">
-                        <TextBlock Text="Zielnetz" 
+                        <TextBlock Text="{loc:Loc ROUTES_HEADER_DEST}" 
                                    FontWeight="SemiBold" 
                                    FontSize="12"
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                         <TextBlock Grid.Column="1" 
-                                   Text="Subnetzmaske" 
+                                   Text="{loc:Loc ROUTES_HEADER_SUBNET}" 
                                    FontWeight="SemiBold" 
                                    FontSize="12"
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                         <TextBlock Grid.Column="2" 
-                                   Text="Gateway" 
+                                   Text="{loc:Loc ROUTES_HEADER_GATEWAY}" 
                                    FontWeight="SemiBold" 
                                    FontSize="12"
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                         <TextBlock Grid.Column="3" 
-                                   Text="Metrik" 
+                                   Text="{loc:Loc ROUTES_HEADER_METRIC}" 
                                    FontWeight="SemiBold" 
                                    FontSize="12"
                                    Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
@@ -223,33 +224,33 @@
                     <!-- Eingabefelder -->
                     <Grid ColumnDefinitions="2*,2*,2*,Auto">
                         <TextBox x:Name="AddDestinationBox"
-                                 Watermark="z.B. 10.10.0.0"
+                                 Watermark="{loc:Loc ROUTES_ADD_DEST_PLACEHOLDER}"
                                  Margin="0,0,8,0"
-                                 ToolTip.Tip="Zielnetzwerk-Adresse, z.B. 10.10.0.0" />
+                                 ToolTip.Tip="{loc:Loc ROUTES_ADD_DEST_TOOLTIP}" />
                         <TextBox x:Name="AddSubnetBox" 
                                  Grid.Column="1"
-                                 Watermark="z.B. 255.255.0.0"
+                                 Watermark="{loc:Loc ROUTES_ADD_SUBNET_PLACEHOLDER}"
                                  Margin="0,0,8,0"
-                                 ToolTip.Tip="Subnetzmaske, z.B. 255.255.0.0" />
+                                 ToolTip.Tip="{loc:Loc ROUTES_ADD_SUBNET_TOOLTIP}" />
                         <TextBox x:Name="AddGatewayBox" 
                                  Grid.Column="2"
-                                 Watermark="z.B. 192.168.1.1"
+                                 Watermark="{loc:Loc ROUTES_ADD_GATEWAY_PLACEHOLDER}"
                                  Margin="0,0,8,0"
-                                 ToolTip.Tip="Gateway-Adresse, z.B. 192.168.1.1" />
+                                 ToolTip.Tip="{loc:Loc ROUTES_ADD_GATEWAY_TOOLTIP}" />
                         <TextBox x:Name="AddMetricBox" 
                                  Grid.Column="3"
-                                 Watermark="1"
+                                 Watermark="{loc:Loc ROUTES_ADD_METRIC_PLACEHOLDER}"
                                  Width="80"
-                                 ToolTip.Tip="Metrik, Standard: 1" />
+                                 ToolTip.Tip="{loc:Loc ROUTES_ADD_METRIC_TOOLTIP}" />
                     </Grid>
 
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <Button x:Name="AddRouteButton" 
                                 Classes="accent"
-                                ToolTip.Tip="Ständige Route zum System hinzufügen">
+                                ToolTip.Tip="{loc:Loc ROUTES_ADD_BUTTON_TOOLTIP}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <TextBlock Text="➕" FontSize="14" />
-                                <TextBlock Text="Route hinzufügen" />
+                                <TextBlock Text="{loc:Loc ROUTES_ADD_BUTTON}" />
                             </StackPanel>
                         </Button>
                         <TextBlock x:Name="AddStatusText" 
@@ -268,7 +269,7 @@
     </TabItem>
 
         <!-- Tab 2: Profil-Routen -->
-        <TabItem Header="Profil-Routen">
+        <TabItem Header="{loc:Loc ROUTES_TAB_PROFILE}">
             <Grid ColumnDefinitions="220,*,240" ColumnSpacing="16" Margin="24">
                 
                 <!-- Linke Spalte: Profil-Liste -->
@@ -279,7 +280,7 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Routen-Profile" 
+                        <TextBlock Text="{loc:Loc ROUTES_PROFILES_TITLE}" 
                                    FontWeight="Bold"
                                    FontSize="16"/>
 
@@ -314,7 +315,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Neues Profil"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_NEW_PROFILE}"/>
                             </StackPanel>
                         </Button>
 
@@ -323,7 +324,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Kopieren"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_COPY_PROFILE}"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -342,9 +343,9 @@
                             
                             <!-- Profilname -->
                             <StackPanel Spacing="4">
-                                <TextBlock Text="Profilname" FontWeight="SemiBold"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_PROFILE_NAME}" FontWeight="SemiBold"/>
                                 <TextBox x:Name="RouteProfileNameBox" 
-                                         Watermark="z.B. Office-Netz"/>
+                                         Watermark="{loc:Loc ROUTES_PROFILE_NAME_PLACEHOLDER}"/>
                                 <TextBlock x:Name="RouteProfileNameError"
                                            Foreground="Red"
                                            FontSize="11"
@@ -355,12 +356,12 @@
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Grid.Column="0" 
-                                               Text="Routen" 
+                                               Text="{loc:Loc TOOLS_ROUTES}" 
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center"/>
                                     <Button Grid.Column="1"
                                             x:Name="AddRouteToProfileButton"
-                                            Content="+ Hinzufügen"
+                                            Content="{loc:Loc ROUTES_ADD_INLINE}"
                                             Padding="8,4"
                                             FontSize="12"/>
                                 </Grid>
@@ -377,28 +378,28 @@
                                                     <!-- Zeile 1: Zielnetz + Subnetzmaske -->
                                                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                                                         <StackPanel Grid.Column="0" Spacing="4">
-                                                            <TextBlock Text="Zielnetz" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{loc:Loc ROUTES_HEADER_DEST}" FontSize="12" FontWeight="SemiBold"/>
                                                             <TextBox Text="{Binding Destination}"
-                                                                     Watermark="10.10.0.0"/>
+                                                                     Watermark="{loc:Loc ROUTES_ADD_DEST_PLACEHOLDER}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="1" Spacing="4">
-                                                            <TextBlock Text="Subnetzmaske" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{loc:Loc ROUTES_HEADER_SUBNET}" FontSize="12" FontWeight="SemiBold"/>
                                                             <TextBox Text="{Binding SubnetMask}"
-                                                                     Watermark="255.255.0.0"/>
+                                                                     Watermark="{loc:Loc ROUTES_ADD_SUBNET_PLACEHOLDER}"/>
                                                         </StackPanel>
                                                     </Grid>
 
                                                     <!-- Zeile 2: Gateway + Metrik -->
                                                     <Grid ColumnDefinitions="*,120" ColumnSpacing="8">
                                                         <StackPanel Grid.Column="0" Spacing="4">
-                                                            <TextBlock Text="Gateway" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{loc:Loc ROUTES_HEADER_GATEWAY}" FontSize="12" FontWeight="SemiBold"/>
                                                             <TextBox Text="{Binding Gateway}"
-                                                                     Watermark="192.168.1.1"/>
+                                                                     Watermark="{loc:Loc ROUTES_ADD_GATEWAY_PLACEHOLDER}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="1" Spacing="4">
-                                                            <TextBlock Text="Metrik" FontSize="12" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{loc:Loc ROUTES_HEADER_METRIC}" FontSize="12" FontWeight="SemiBold"/>
                                                             <NumericUpDown Value="{Binding Metric}"
                                                                            Minimum="1"
                                                                            Maximum="9999"
@@ -408,7 +409,7 @@
 
                                                     <!-- Entfernen Button -->
                                                     <Button x:Name="RemoveRouteFromProfileButton"
-                                                            Content="Entfernen"
+                                                            Content="{loc:Loc ROUTES_REMOVE}"
                                                             Tag="{Binding}"
                                                             HorizontalAlignment="Right"
                                                             Loaded="RemoveRouteButton_Loaded"/>
@@ -431,7 +432,7 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Aktionen" 
+                        <TextBlock Text="{loc:Loc IPCONFIG_ACTIONS}" 
                                    FontWeight="Bold"
                                    FontSize="16"/>
 
@@ -441,7 +442,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" 
                                           Width="16" Height="16"/>
-                                <TextBlock Text="Speichern"/>
+                                <TextBlock Text="{loc:Loc IPCONFIG_SAVE}"/>
                             </StackPanel>
                         </Button>
 
@@ -449,7 +450,7 @@
 
                         <!-- Status -->
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Status" 
+                            <TextBlock Text="{loc:Loc IPCONFIG_STATUS_UNKNOWN}" 
                                        FontWeight="Bold"
                                        FontSize="14"/>
                             
@@ -460,7 +461,7 @@
                                     MinHeight="60"
                                     Background="{DynamicResource CardBackgroundBrush}">
                                 <TextBlock x:Name="RouteProfileStatusText" 
-                                           Text="Bereit" 
+                                           Text="{loc:Loc LOGVIEWER_STATUS_READY}" 
                                            TextWrapping="Wrap"
                                            FontSize="11"
                                            Opacity="0.8"/>
@@ -471,10 +472,10 @@
 
                         <!-- Hinweis -->
                         <StackPanel Spacing="8">
-                            <TextBlock Text="💡 Hinweis" 
+                            <TextBlock Text="{loc:Loc ROUTES_HINT_TITLE}" 
                                        FontWeight="Bold"
                                        FontSize="12"/>
-                            <TextBlock Text="Routen-Profile können in der IP-Konfiguration mit IP-Profilen verknüpft werden."
+                            <TextBlock Text="{loc:Loc ROUTES_HINT_TEXT}"
                                        TextWrapping="Wrap"
                                        FontSize="11"
                                        Opacity="0.7"/>

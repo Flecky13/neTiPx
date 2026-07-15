@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -36,6 +37,14 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? _selectedTheme;
 
+    [ObservableProperty]
+    private ObservableCollection<string> _availableLanguages;
+
+    [ObservableProperty]
+    private string? _selectedLanguage;
+
+    private readonly Dictionary<string, string> _languageDisplayToCode = new(StringComparer.OrdinalIgnoreCase);
+
     // Info-Fenster Einstellungen
     [ObservableProperty]
     private int _hoverWindowPositionIndex; // 0 = Oben, 1 = Unten
@@ -70,11 +79,13 @@ public partial class SettingsViewModel : ObservableObject
         _availableAdapters = new ObservableCollection<string>();
         _availableSecondaryAdapters = new ObservableCollection<string>();
         _availableThemes = new ObservableCollection<string>();
+        _availableLanguages = new ObservableCollection<string>();
         
         LoadAvailableAdapters();
         LoadAdapterSettings();
         LoadHoverWindowSettings();
         LoadThemeSettings();
+        LoadLanguageSettings();
         LoadConnectionQualitySettings();
         LoadAutostartSettings();
     }
@@ -322,6 +333,64 @@ public partial class SettingsViewModel : ObservableObject
         {
             SaveThemeSettings(value);
             ApplyTheme(value);
+        }
+    }
+
+    private void LoadLanguageSettings()
+    {
+        try
+        {
+            var lm = LanguageManager.Instance;
+            AvailableLanguages.Clear();
+            _languageDisplayToCode.Clear();
+
+            const string systemLabel = "System (Automatisch)";
+            AvailableLanguages.Add(systemLabel);
+            _languageDisplayToCode[systemLabel] = "System";
+
+            foreach (var code in lm.GetAvailableLanguages())
+            {
+                var selfName = lm.GetLanguageSelfName(code);
+                var display = $"{selfName} ({code})";
+                AvailableLanguages.Add(display);
+                _languageDisplayToCode[display] = code;
+            }
+
+            var savedCode = _settingsService.GetLanguageCode();
+            var selected = _languageDisplayToCode
+                .FirstOrDefault(kv => kv.Value.Equals(savedCode, StringComparison.OrdinalIgnoreCase))
+                .Key;
+
+            SelectedLanguage = string.IsNullOrWhiteSpace(selected) ? systemLabel : selected;
+        }
+        catch
+        {
+            AvailableLanguages.Clear();
+            AvailableLanguages.Add("System (Automatisch)");
+            SelectedLanguage = "System (Automatisch)";
+        }
+    }
+
+    partial void OnSelectedLanguageChanged(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        if (!_languageDisplayToCode.TryGetValue(value, out var code))
+        {
+            return;
+        }
+
+        try
+        {
+            _settingsService.SetLanguageCode(code);
+            LanguageManager.Instance.LoadLanguage(code);
+        }
+        catch
+        {
+            // Ignore language persistence/apply errors
         }
     }
 

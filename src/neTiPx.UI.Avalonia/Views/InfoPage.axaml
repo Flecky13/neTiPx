@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
              xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.InfoPage"
@@ -21,8 +22,8 @@
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Info" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="Anwendungs Informationen, Hilfe, Update" />
+                        <TextBlock Text="{loc:Loc INFO_TITLE}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc INFO_SUBTITLE}" />
                     </StackPanel>
                     <Image Grid.Column="1"
                            Source="/Assets/toolicon.ico"
@@ -42,25 +43,25 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <!-- Linke Seite: Versions-Informationen -->
                     <StackPanel Grid.Column="0" Spacing="12" VerticalAlignment="Center">
-                        <TextBlock Text="neTiPx - Network Tools" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="{loc:Loc INFO_APP_NAME}" FontSize="18" FontWeight="SemiBold" />
                         
                         <!-- Versionen in einer Zeile -->
                         <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="24" RowDefinitions="Auto,Auto">
                             <!-- Installierte Version -->
                             <StackPanel Grid.Column="0" Spacing="4">
-                                <TextBlock Text="Installierte Version" Opacity="0.7" FontSize="12" />
+                                <TextBlock Text="{loc:Loc INFO_INSTALLED_VERSION}" Opacity="0.7" FontSize="12" />
                                 <TextBlock Text="{Binding AppVersion}" FontSize="16" FontWeight="SemiBold" />
                             </StackPanel>
 
                             <!-- Latest Version -->
                             <StackPanel Grid.Column="1" Spacing="4">
-                                <TextBlock Text="Latest Version (GitHub)" Opacity="0.7" FontSize="12" />
+                                <TextBlock Text="{loc:Loc INFO_LATEST_VERSION}" Opacity="0.7" FontSize="12" />
                                 <TextBlock Text="{Binding LatestVersion}" FontSize="16" FontWeight="SemiBold" />
                             </StackPanel>
 
                             <!-- Update Status -->
                             <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
-                                <TextBlock Text="Status" Opacity="0.7" FontSize="12" />
+                                <TextBlock Text="{loc:Loc INFO_UPDATE_STATUS}" Opacity="0.7" FontSize="12" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Ellipse Width="10" Height="10" Fill="{Binding UpdateStatusColor}" VerticalAlignment="Center" />
                                     <TextBlock Text="{Binding UpdateStatusText}" FontSize="12" Opacity="0.8" VerticalAlignment="Center" />
@@ -69,7 +70,7 @@
                         </Grid>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Plattform" Opacity="0.7" FontSize="12" />
+                            <TextBlock Text="{loc:Loc INFO_PLATFORM}" Opacity="0.7" FontSize="12" />
                             <TextBlock Text="{Binding PlatformInfo}" FontSize="14" />
                         </StackPanel>
                     </StackPanel>
@@ -81,7 +82,7 @@
                                 IsEnabled="{Binding !IsChecking}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🔍" FontSize="16" />
-                                <TextBlock Text="Auf Update Prüfen" />
+                                <TextBlock Text="{loc:Loc INFO_CHECK_UPDATE}" />
                             </StackPanel>
                         </Button>
 
@@ -91,7 +92,7 @@
                                 Command="{Binding DownloadUpdateCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="⬇️" FontSize="16" />
-                                <TextBlock Text="Update Herunterladen" />
+                                <TextBlock Text="{loc:Loc INFO_INSTALL_UPDATE}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -107,24 +108,24 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <!-- Linke Seite: Text und Features -->
                     <StackPanel Grid.Column="0" Spacing="12" Margin="0,0,24,0">
-                        <TextBlock Text="Über neTiPx" FontSize="18" FontWeight="Bold" />
-                        <TextBlock Text="neTiPx ist ein umfassendes Netzwerk-Konfigurations- und Diagnose-Tool für Windows, macOS und Linux." TextWrapping="Wrap" />
+                        <TextBlock Text="{loc:Loc INFO_ABOUT_TITLE}" FontSize="18" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc INFO_ABOUT_TEXT}" TextWrapping="Wrap" />
                         
                         <Separator Margin="0,8" />
                         
                         <StackPanel Spacing="8">
-                            <TextBlock Text="Entwickelt von: Pedro" FontWeight="SemiBold" />
-                            <TextBlock Text="© 2026 neTiPx" Opacity="0.7" />
+                            <TextBlock Text="{loc:Loc INFO_DEVELOPED_BY}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc INFO_COPYRIGHT}" Opacity="0.7" />
                         </StackPanel>
 
                         <StackPanel Spacing="4" Margin="0,8,0,0">
-                            <TextBlock Text="Features:" FontWeight="SemiBold" />
-                            <TextBlock Text="• IP-Profile verwalten und schnell wechseln" />
-                            <TextBlock Text="• Netzwerk-Scanner und PING-Tools" />
-                            <TextBlock Text="• WLAN-Management" />
-                            <TextBlock Text="• Netzwerk-Rechner und Routing" />
-                            <TextBlock Text="• UNC-Pfade verwalten" />
-                            <TextBlock Text="• Plattformübergreifend (Windows, macOS, Linux)" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURES}" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURE_1}" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURE_2}" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURE_3}" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURE_4}" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURE_5}" />
+                            <TextBlock Text="{loc:Loc INFO_FEATURE_6}" />
                         </StackPanel>
                     </StackPanel>
 
@@ -133,25 +134,25 @@
                         <Button Classes="accent" Command="{Binding OpenDocumentationCommand}" HorizontalAlignment="Stretch" MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📄" />
-                                <TextBlock Text="Dokumentation" />
+                                <TextBlock Text="{loc:Loc INFO_DOCUMENTATION}" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding OpenBugReportCommand}" HorizontalAlignment="Stretch" MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="🐛" />
-                                <TextBlock Text="Bug melden" />
+                                <TextBlock Text="{loc:Loc INFO_BUG_REPORT}" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding OpenGitHubRepositoryCommand}" HorizontalAlignment="Stretch" MinWidth="200">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="⭐" />
-                                <TextBlock Text="GitHub Repository" />
+                                <TextBlock Text="{loc:Loc INFO_GITHUB_REPOSITORY}" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding OpenSupportCommand}" HorizontalAlignment="Stretch" MinWidth="200" Background="#756600" Foreground="#000000">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="☕" />
-                                <TextBlock Text="Buy me a coffee" />
+                                <TextBlock Text="{loc:Loc INFO_BUY_COFFEE}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -165,10 +166,10 @@
                     Padding="24"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Lizenz &amp; Kontakt" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="{loc:Loc INFO_LICENSE_TITLE}" FontSize="18" FontWeight="SemiBold" />
 
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Siehe LICENSE im Repository. Für Fragen zum Code bitte Issues/PRs im Repo verwenden."
+                        <TextBlock Text="{loc:Loc INFO_LICENSE_TEXT}"
                                    FontSize="13"
                                    Opacity="0.8"
                                    TextWrapping="Wrap" />

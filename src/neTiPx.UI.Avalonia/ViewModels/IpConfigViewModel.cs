@@ -63,7 +63,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         private string _lastActionMessage = "Bereit";
         private bool _showConnectionStatus = false;
         private StatusMessageType _statusMessageType = StatusMessageType.Info;
-        private string _systemDnsInfo = "Nicht verfügbar";
+        private string _systemDnsInfo = string.Empty;
         private bool _showInputValidationErrors;
         private bool _gatewayHasValidationError;
         private bool _dns1HasValidationError;
@@ -126,6 +126,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             _gatewayPingText = initialPing;
             _dns1PingText = initialPing;
             _dns2PingText = initialPing;
+            _systemDnsInfo = T("IPCONFIG_NO_DNS_INFO");
 
             // System DNS Info initial laden
             RefreshSystemDns();
@@ -1558,7 +1559,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             UncProfileOptions.Add(new UncProfileOption
             {
                 Value = string.Empty,
-                DisplayName = "keine"
+                DisplayName = T("IPCONFIG_NONE_OPTION")
             });
 
             foreach (var profileName in profiles)
@@ -1589,7 +1590,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             RouteProfileOptions.Add(new RouteProfileOption
             {
                 Value = string.Empty,
-                DisplayName = "keine"
+                DisplayName = T("IPCONFIG_NONE_OPTION")
             });
 
             foreach (var profileName in profiles)
@@ -2590,17 +2591,17 @@ namespace neTiPx.UI.Avalonia.ViewModels
                     if (dnsServers.Count > 0)
                     {
                         var distinctServers = dnsServers.Distinct().Take(5).ToList();
-                        SystemDnsInfo = $"Aktive DNS Server:\n{string.Join("\n", distinctServers)}";
+                        SystemDnsInfo = $"{T("IPCONFIG_ACTIVE_DNS_SERVERS")}:\n{string.Join("\n", distinctServers)}";
                         
                         // Prüfe auf Loopback
                         if (distinctServers.Any(s => s.StartsWith("127.") || s == "::1"))
                         {
-                            SystemDnsInfo += "\n\nℹ Loopback DNS erkannt (systemd-resolved)";
+                            SystemDnsInfo += $"\n\n{T("IPCONFIG_LOOPBACK_DNS_DETECTED")}";
                         }
                     }
                     else
                     {
-                        SystemDnsInfo = "Keine DNS Server in resolvectl gefunden";
+                        SystemDnsInfo = T("IPCONFIG_NO_DNS_RESOLVECTL");
                     }
                 }
                 else
@@ -2634,27 +2635,27 @@ namespace neTiPx.UI.Avalonia.ViewModels
 
                     if (nameservers.Count > 0)
                     {
-                        SystemDnsInfo = $"DNS Server (/etc/resolv.conf):\n{string.Join("\n", nameservers)}";
+                        SystemDnsInfo = $"{T("IPCONFIG_DNS_RESOLVCONF_TITLE")}:\n{string.Join("\n", nameservers)}";
                         
                         if (nameservers.Any(s => s.StartsWith("127.")))
                         {
-                            SystemDnsInfo += "\n\nℹ Loopback DNS erkannt";
+                            SystemDnsInfo += $"\n\n{T("IPCONFIG_LOOPBACK_DNS_DETECTED")}";
                         }
                     }
                     else
                     {
-                        SystemDnsInfo = "Keine DNS Server in /etc/resolv.conf gefunden";
+                        SystemDnsInfo = T("IPCONFIG_NO_DNS_RESOLVCONF");
                     }
                 }
                 else
                 {
-                    SystemDnsInfo = "Keine DNS-Informationen verfügbar";
+                    SystemDnsInfo = T("IPCONFIG_NO_DNS_INFO");
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[IpConfig] Fehler beim Lesen von resolv.conf: {ex.Message}");
-                SystemDnsInfo = $"Fehler: {ex.Message}";
+                SystemDnsInfo = $"{T("IPCONFIG_DNS_ERROR_PREFIX")}: {ex.Message}";
             }
         }
 
