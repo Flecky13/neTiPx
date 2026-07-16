@@ -4,7 +4,7 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.0.4.7]
+## [2.0.5.0]
 
 ### Changed
 - **Cross-Plattform-Neuaufbau**: neTiPx wurde als komplette Neuimplementierung auf eine plattformuebergreifende Architektur umgestellt (Linux, Windows, macOS-Basis).
