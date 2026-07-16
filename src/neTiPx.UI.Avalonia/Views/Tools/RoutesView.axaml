@@ -9,6 +9,18 @@
              x:Class="neTiPx.UI.Avalonia.Views.Tools.RoutesView">
 
     <TabControl Margin="16">
+        <TabControl.Styles>
+            <Style Selector="TabItem">
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            </Style>
+            <Style Selector="TabItem:pointerover">
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            </Style>
+            <Style Selector="TabItem:selected">
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            </Style>
+        </TabControl.Styles>
+
         <TabItem Header="{loc:Loc ROUTES_TAB_SYSTEM}">
             <ScrollViewer>
                 <StackPanel Spacing="16" Margin="24">
