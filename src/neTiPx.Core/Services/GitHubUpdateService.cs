@@ -101,6 +101,24 @@ public class GitHubUpdateService
     {
         var platform = GetCurrentPlatform();
         var architecture = GetCurrentArchitecture();
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var windowsAsset = GetPreferredWindowsAsset(assets, architecture);
+            if (windowsAsset != null)
+            {
+                return (windowsAsset.BrowserDownloadUrl, windowsAsset.Name);
+            }
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var linuxAsset = GetPreferredLinuxAsset(assets, architecture);
+            if (linuxAsset != null)
+            {
+                return (linuxAsset.BrowserDownloadUrl, linuxAsset.Name);
+            }
+        }
         
         // Suche nach passendem Asset basierend auf Plattform und Architektur
         var matchingAsset = assets.FirstOrDefault(a => 
@@ -119,6 +137,103 @@ public class GitHubUpdateService
         
         return (setupAsset?.BrowserDownloadUrl ?? assets.FirstOrDefault()?.BrowserDownloadUrl, 
                 setupAsset?.Name ?? assets.FirstOrDefault()?.Name);
+    }
+
+    private static GitHubAsset? GetPreferredWindowsAsset(List<GitHubAsset> assets, string architecture)
+    {
+        var archTokens = GetArchitectureTokens(architecture);
+
+        var candidates = assets
+            .Where(a => a.Name.Contains("windows", StringComparison.OrdinalIgnoreCase) ||
+                        a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ||
+                        a.Name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var setupExeWithArch = candidates.FirstOrDefault(a =>
+            a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
+            a.Name.Contains("setup", StringComparison.OrdinalIgnoreCase) &&
+            archTokens.Any(t => a.Name.Contains(t, StringComparison.OrdinalIgnoreCase)));
+        if (setupExeWithArch != null)
+        {
+            return setupExeWithArch;
+        }
+
+        var setupExeAny = candidates.FirstOrDefault(a =>
+            a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
+            a.Name.Contains("setup", StringComparison.OrdinalIgnoreCase));
+        if (setupExeAny != null)
+        {
+            return setupExeAny;
+        }
+
+        var exeWithArch = candidates.FirstOrDefault(a =>
+            a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
+            archTokens.Any(t => a.Name.Contains(t, StringComparison.OrdinalIgnoreCase)));
+        if (exeWithArch != null)
+        {
+            return exeWithArch;
+        }
+
+        var exeAny = candidates.FirstOrDefault(a => a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+        if (exeAny != null)
+        {
+            return exeAny;
+        }
+
+        return candidates.FirstOrDefault(a => a.Name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static GitHubAsset? GetPreferredLinuxAsset(List<GitHubAsset> assets, string architecture)
+    {
+        var archTokens = GetArchitectureTokens(architecture);
+
+        // Mint/Ubuntu/Debian: .deb zuerst, danach AppImage, dann tar/tar.gz.
+        var candidates = assets
+            .Where(a => a.Name.Contains("linux", StringComparison.OrdinalIgnoreCase) || a.Name.EndsWith(".deb", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var debWithArch = candidates.FirstOrDefault(a =>
+            a.Name.EndsWith(".deb", StringComparison.OrdinalIgnoreCase) &&
+            archTokens.Any(t => a.Name.Contains(t, StringComparison.OrdinalIgnoreCase)));
+        if (debWithArch != null)
+        {
+            return debWithArch;
+        }
+
+        var debAny = candidates.FirstOrDefault(a => a.Name.EndsWith(".deb", StringComparison.OrdinalIgnoreCase));
+        if (debAny != null)
+        {
+            return debAny;
+        }
+
+        var appImage = candidates.FirstOrDefault(a => a.Name.EndsWith(".appimage", StringComparison.OrdinalIgnoreCase));
+        if (appImage != null)
+        {
+            return appImage;
+        }
+
+        var tarWithArch = candidates.FirstOrDefault(a =>
+            (a.Name.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) || a.Name.EndsWith(".tar", StringComparison.OrdinalIgnoreCase)) &&
+            archTokens.Any(t => a.Name.Contains(t, StringComparison.OrdinalIgnoreCase)));
+        if (tarWithArch != null)
+        {
+            return tarWithArch;
+        }
+
+        return candidates.FirstOrDefault(a =>
+            a.Name.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) ||
+            a.Name.EndsWith(".tar", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static List<string> GetArchitectureTokens(string architecture)
+    {
+        return architecture.ToLowerInvariant() switch
+        {
+            "x64" => new List<string> { "x64", "amd64" },
+            "x86" => new List<string> { "x86", "i386", "i686" },
+            "arm64" => new List<string> { "arm64", "aarch64" },
+            _ => new List<string> { architecture.ToLowerInvariant() }
+        };
     }
 
     private string GetCurrentPlatform()
