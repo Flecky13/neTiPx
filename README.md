@@ -12,7 +12,7 @@
 
 > Note: The last pure Windows-only release is version 1.7.2.0.
 >
-> The first multi-platform release is version 2.0.4.7.
+> The first multi-platform release is version 2.0.5.0.
 >
 > Current test status:
 > - Linux: tested
