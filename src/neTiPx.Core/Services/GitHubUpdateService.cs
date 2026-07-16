@@ -71,6 +71,32 @@ public class GitHubUpdateService
         }
     }
 
+    public async Task<string> DownloadAssetAsync(string downloadUrl, string? assetName = null)
+    {
+        if (string.IsNullOrWhiteSpace(downloadUrl))
+        {
+            throw new ArgumentException("Download URL must not be empty.", nameof(downloadUrl));
+        }
+
+        var fileName = ResolveAssetFileName(downloadUrl, assetName);
+        var targetPath = Path.Combine(Path.GetTempPath(), "neTiPx", "updates", fileName);
+        var targetDir = Path.GetDirectoryName(targetPath);
+
+        if (!string.IsNullOrWhiteSpace(targetDir))
+        {
+            Directory.CreateDirectory(targetDir);
+        }
+
+        using var response = await _httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+
+        await using var source = await response.Content.ReadAsStreamAsync();
+        await using var destination = File.Create(targetPath);
+        await source.CopyToAsync(destination);
+
+        return targetPath;
+    }
+
     private (string? downloadUrl, string? assetName) GetPlatformSpecificAsset(List<GitHubAsset> assets)
     {
         var platform = GetCurrentPlatform();
@@ -125,6 +151,30 @@ public class GitHubUpdateService
         var platform = GetCurrentPlatform();
         var arch = GetCurrentArchitecture();
         return $"{platform}-{arch}";
+    }
+
+    private static string ResolveAssetFileName(string downloadUrl, string? assetName)
+    {
+        if (!string.IsNullOrWhiteSpace(assetName))
+        {
+            return assetName;
+        }
+
+        try
+        {
+            var uri = new Uri(downloadUrl);
+            var fromUrl = Path.GetFileName(Uri.UnescapeDataString(uri.AbsolutePath));
+            if (!string.IsNullOrWhiteSpace(fromUrl))
+            {
+                return fromUrl;
+            }
+        }
+        catch
+        {
+            // Ignore URL parsing errors and use fallback name.
+        }
+
+        return $"neTiPx-update-{DateTime.Now:yyyyMMdd-HHmmss}.bin";
     }
 }
 

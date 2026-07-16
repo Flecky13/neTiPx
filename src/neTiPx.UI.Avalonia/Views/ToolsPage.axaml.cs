@@ -14,9 +14,9 @@ public partial class ToolsPage : UserControl
         InitializeComponent();
         
         // Set initial content after initialization
-        if (ToolsListBox.SelectedIndex == 0)
+        if (ToolsListBox.SelectedItem is ListBoxItem item && item.Tag is string tag)
         {
-            UpdateToolContent("Ping");
+            UpdateToolContent(tag);
         }
     }
 

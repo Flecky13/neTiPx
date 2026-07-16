@@ -1,7 +1,11 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,6 +42,9 @@ public partial class InfoViewModel : ObservableObject
     
     [ObservableProperty]
     private string _downloadUrl = string.Empty;
+
+    [ObservableProperty]
+    private string _assetName = string.Empty;
     
     [ObservableProperty]
     private string _releaseUrl = string.Empty;
@@ -87,6 +94,7 @@ public partial class InfoViewModel : ObservableObject
             
             LatestVersion = updateInfo.LatestVersion ?? T("INFO_UNKNOWN");
             DownloadUrl = updateInfo.DownloadUrl ?? string.Empty;
+            AssetName = updateInfo.AssetName ?? string.Empty;
             ReleaseUrl = updateInfo.ReleaseUrl ?? string.Empty;
             
             if (updateInfo.IsUpdateAvailable)
@@ -124,15 +132,127 @@ public partial class InfoViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanDownloadUpdate))]
-    private void DownloadUpdate()
+    private async Task DownloadUpdate()
     {
-        if (!string.IsNullOrEmpty(DownloadUrl))
+        if (string.IsNullOrWhiteSpace(DownloadUrl) || IsChecking)
         {
-            OpenUrl(DownloadUrl);
+            return;
+        }
+
+        IsChecking = true;
+        UpdateStatusText = T("INFO_STATUS_DOWNLOADING");
+        UpdateStatusColor = "Orange";
+
+        try
+        {
+            var downloadedPath = await _updateService.DownloadAssetAsync(DownloadUrl, AssetName);
+            UpdateStatusText = T("INFO_STATUS_STARTING_INSTALL");
+            UpdateStatusColor = "Orange";
+
+            if (TryStartInstaller(downloadedPath))
+            {
+                await Task.Delay(400);
+                ShutdownApplication();
+                return;
+            }
+
+            throw new InvalidOperationException("Installer konnte nicht gestartet werden.");
+        }
+        catch
+        {
+            UpdateStatusText = T("INFO_STATUS_DOWNLOAD_FAILED_OPENING_RELEASE");
+            UpdateStatusColor = "Red";
+            OpenLatestRelease();
+        }
+        finally
+        {
+            IsChecking = false;
         }
     }
 
     private bool CanDownloadUpdate() => IsUpdateAvailable && !string.IsNullOrEmpty(DownloadUrl);
+
+    private bool TryStartInstaller(string packagePath)
+    {
+        if (!File.Exists(packagePath))
+        {
+            return false;
+        }
+
+        var extension = Path.GetExtension(packagePath).ToLowerInvariant();
+
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = packagePath,
+                    UseShellExecute = true
+                });
+                return true;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (extension == ".appimage")
+                {
+                    Process.Start("chmod", $"+x \"{packagePath}\"")?.Dispose();
+                }
+
+                if (extension == ".deb")
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "pkexec",
+                            Arguments = $"dpkg -i \"{packagePath}\"",
+                            UseShellExecute = false
+                        });
+                        return true;
+                    }
+                    catch
+                    {
+                        // Fallback below.
+                    }
+                }
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "xdg-open",
+                    Arguments = $"\"{packagePath}\"",
+                    UseShellExecute = false
+                });
+                return true;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "open",
+                    Arguments = $"\"{packagePath}\"",
+                    UseShellExecute = false
+                });
+                return true;
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void ShutdownApplication()
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            lifetime.Shutdown();
+        }
+    }
 
     [RelayCommand]
     private void OpenLatestRelease()
@@ -197,6 +317,11 @@ public partial class InfoViewModel : ObservableObject
     partial void OnIsUpdateAvailableChanged(bool value)
     {
         // Command CanExecute aktualisieren
+        DownloadUpdateCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnDownloadUrlChanged(string value)
+    {
         DownloadUpdateCommand.NotifyCanExecuteChanged();
     }
 }
