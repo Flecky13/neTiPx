@@ -10,6 +10,17 @@
 
 **neTiPx** is a modern desktop tool for Windows for comfortable management of network adapters and IP configurations. With an intuitive user interface, neTiPx provides quick access to all important network settings and information.
 
+> Note: The last pure Windows-only release is version 1.7.2.0.
+>
+> The first multi-platform release is version 2.0.4.7.
+>
+> Current test status:
+> - Linux: tested
+> - Windows: tested
+> - macOS: should work, but is currently untested
+>
+> If an update installation from 1.7.2.0 to 2.x causes issues, please uninstall the old version and perform a clean install of the new version.
+
 ---
 
 ## 📋 Table of Contents
