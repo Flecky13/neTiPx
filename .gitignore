@@ -95,6 +95,7 @@ Desktop.ini
 .AppleDouble
 .LSOverride
 *.manifest
+!src/neTiPx.UI.Avalonia/app.manifest
 
 ## Temporary files
 ~$*
