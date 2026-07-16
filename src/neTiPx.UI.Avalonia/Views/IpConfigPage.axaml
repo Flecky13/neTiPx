@@ -30,6 +30,12 @@
                         <TextBlock Text="{loc:Loc IPCONFIG_SUBTITLE}"
                                    Opacity="0.7"/>
                     </StackPanel>
+                    <Image Grid.Column="1"
+                           Source="/Assets/toolicon.ico"
+                           Width="120"
+                           Height="120"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right" />
                 </Grid>
             </Border>
 
