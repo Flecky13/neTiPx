@@ -149,10 +149,13 @@ public partial class InfoViewModel : ObservableObject
             UpdateStatusText = T("INFO_STATUS_STARTING_INSTALL");
             UpdateStatusColor = "Orange";
 
-            if (TryStartInstaller(downloadedPath))
+            if (TryStartInstaller(downloadedPath, out var shouldShutdownApp))
             {
-                await Task.Delay(400);
-                ShutdownApplication();
+                if (shouldShutdownApp)
+                {
+                    await Task.Delay(400);
+                    ShutdownApplication(forceCloseMainWindow: true);
+                }
                 return;
             }
 
@@ -172,8 +175,10 @@ public partial class InfoViewModel : ObservableObject
 
     private bool CanDownloadUpdate() => IsUpdateAvailable && !string.IsNullOrEmpty(DownloadUrl);
 
-    private bool TryStartInstaller(string packagePath)
+    private bool TryStartInstaller(string packagePath, out bool shouldShutdownApp)
     {
+        shouldShutdownApp = false;
+
         if (!File.Exists(packagePath))
         {
             return false;
@@ -190,6 +195,7 @@ public partial class InfoViewModel : ObservableObject
                     FileName = packagePath,
                     UseShellExecute = true
                 });
+                shouldShutdownApp = true;
                 return true;
             }
 
@@ -210,6 +216,9 @@ public partial class InfoViewModel : ObservableObject
                             Arguments = $"dpkg -i \"{packagePath}\"",
                             UseShellExecute = false
                         });
+                        // Unter Linux nicht sofort beenden, sonst verschwindet die App,
+                        // bevor die Rechte-Eingabe sauber abgeschlossen ist.
+                        shouldShutdownApp = false;
                         return true;
                     }
                     catch
@@ -224,6 +233,7 @@ public partial class InfoViewModel : ObservableObject
                     Arguments = $"\"{packagePath}\"",
                     UseShellExecute = false
                 });
+                shouldShutdownApp = false;
                 return true;
             }
 
@@ -235,6 +245,7 @@ public partial class InfoViewModel : ObservableObject
                     Arguments = $"\"{packagePath}\"",
                     UseShellExecute = false
                 });
+                shouldShutdownApp = true;
                 return true;
             }
 
@@ -246,10 +257,15 @@ public partial class InfoViewModel : ObservableObject
         }
     }
 
-    private static void ShutdownApplication()
+    private static void ShutdownApplication(bool forceCloseMainWindow = false)
     {
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
         {
+            if (forceCloseMainWindow && lifetime.MainWindow is Views.MainWindow)
+            {
+                Views.MainWindow.AllowCloseOnce();
+            }
+
             lifetime.Shutdown();
         }
     }
