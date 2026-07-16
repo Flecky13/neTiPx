@@ -4,6 +4,18 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.4.7]
+
+### Changed
+- **Cross-Plattform-Neuaufbau**: neTiPx wurde als komplette Neuimplementierung auf eine plattformuebergreifende Architektur umgestellt (Linux, Windows, macOS-Basis).
+- **Funktionsumfang**: Die bisher vorhandenen Kernfunktionen wurden in der neuen Cross-Plattform-Version wieder implementiert.
+
+### Known Limitations
+- **Tools-Bereich**: Nicht alle Tools sind bereits wieder verfuegbar. Fehlende Tools werden schrittweise nachgezogen.
+
+### Installation Hinweis
+- **Update von 1.7.2.0 auf 2.x**: Sollte ein direktes Update fehlschlagen, bitte die alte Version deinstallieren und danach die aktuelle Version frisch installieren.
+
 ## [1.7.2.0]
 
 ### Fixed
