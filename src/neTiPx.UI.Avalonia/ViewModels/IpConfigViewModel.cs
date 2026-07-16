@@ -27,6 +27,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         private static readonly TimeSpan UncApplyPollInterval = TimeSpan.FromSeconds(1);
 
         private static string T(string key) => _lm.Lang(key);
+        private static string TF(string key, params object[] args) => string.Format(T(key), args);
         private readonly IpProfileStore _ipProfileStore = new IpProfileStore();
         private readonly UncPathStore _uncPathStore = new UncPathStore();
         private readonly RouteProfileStore _routeProfileStore = new RouteProfileStore();
@@ -60,7 +61,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
         
         private string _validationMessage = string.Empty;
         private bool _hasValidationErrors;
-        private string _lastActionMessage = "Bereit";
+        private string _lastActionMessage = T("IPCONFIG_STATUS_READY");
         private bool _showConnectionStatus = false;
         private StatusMessageType _statusMessageType = StatusMessageType.Info;
         private string _systemDnsInfo = string.Empty;
@@ -119,7 +120,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             _uiContext = SynchronizationContext.Current;
 
             var initialStatus = T("IPCONFIG_STATUS_UNKNOWN");
-            var initialPing = "Ping: -";
+            var initialPing = T("IPCONFIG_PING_UNKNOWN");
             _gatewayStatusText = initialStatus;
             _dns1StatusText = initialStatus;
             _dns2StatusText = initialStatus;
@@ -1348,13 +1349,13 @@ namespace neTiPx.UI.Avalonia.ViewModels
             if (HasValidationErrors)
             {
                 LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil mit Validierungsfehlern gespeichert: '{SelectedProfile.Name}'");
-                LastActionMessage = $"Profil '{SelectedProfile.Name}' gespeichert (mit Validierungsfehlern).";
+                LastActionMessage = TF("IPCONFIG_STATUS_PROFILE_SAVED_WITH_VALIDATION", SelectedProfile.Name);
                 StatusMessageType = StatusMessageType.Error;
             }
             else
             {
                 LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil speichern: '{SelectedProfile.Name}'");
-                LastActionMessage = $"Profil '{SelectedProfile.Name}' erfolgreich gespeichert.";
+                LastActionMessage = TF("IPCONFIG_STATUS_PROFILE_SAVED_SUCCESS", SelectedProfile.Name);
                 StatusMessageType = StatusMessageType.Success;
             }
 
@@ -1408,7 +1409,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             if (HasValidationErrors)
             {
                 LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"Profil anwenden abgebrochen (Validierungsfehler): '{SelectedProfile.Name}'");
-                LastActionMessage = "Anwenden abgebrochen: Validierungsfehler";
+                LastActionMessage = T("IPCONFIG_STATUS_APPLY_CANCELED_VALIDATION");
                 StatusMessageType = StatusMessageType.Error;
                 return;
             }
@@ -1462,7 +1463,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 {
                     LogHandler.LogErrorMessage("IpConfig", $"Profil anwenden fehlgeschlagen: {error}");
                     ValidationMessage = error ?? T("IPCONFIG_MSG_APPLY_ERROR");
-                    LastActionMessage = $"Fehler beim Anwenden: {error ?? "Unbekannter Fehler"}";
+                    LastActionMessage = TF("IPCONFIG_STATUS_APPLY_FAILED_WITH_REASON", error ?? T("IPCONFIG_STATUS_UNKNOWN"));
                     StatusMessageType = StatusMessageType.Error;
                     HasValidationErrors = true;
                     GatewayStatusText = T("ADAPTER_STA_Error");
@@ -1472,7 +1473,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 }
 
                 LogHandler.LogSystemMessage(LogLevel.INFO, "IpConfig", $"Profil erfolgreich angewendet: '{profile.Name}'");
-                LastActionMessage = $"Profil '{profile.Name}' erfolgreich angewendet.";
+                LastActionMessage = TF("IPCONFIG_STATUS_PROFILE_APPLIED_SUCCESS", profile.Name);
                 StatusMessageType = StatusMessageType.Success;
                 ShowConnectionStatus = true;
                 RefreshSystemDns();
@@ -1491,7 +1492,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 if (string.IsNullOrWhiteSpace(uncProfileName))
                 {
                     ValidationMessage = T("IPCONFIG_MSG_PROFILE_APPLIED");
-                    LastActionMessage = $"Profil '{profile.Name}' erfolgreich angewendet.";
+                    LastActionMessage = TF("IPCONFIG_STATUS_PROFILE_APPLIED_SUCCESS", profile.Name);
                     StatusMessageType = StatusMessageType.Success;
                     HasValidationErrors = false;
                     return;
@@ -1504,7 +1505,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 if (!networkReady)
                 {
                     ValidationMessage = T("IPCONFIG_MSG_UNC_WAIT_TIMEOUT");
-                    LastActionMessage = "Timeout beim Warten auf Netzwerkverbindung.";
+                    LastActionMessage = T("IPCONFIG_STATUS_NETWORK_WAIT_TIMEOUT");
                     StatusMessageType = StatusMessageType.Error;
                     HasValidationErrors = true;
                     return;
@@ -1517,7 +1518,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 if (linkedUncProfile == null)
                 {
                     ValidationMessage = T("IPCONFIG_MSG_UNC_PROFILE_NOT_FOUND");
-                    LastActionMessage = $"UNC-Profil '{uncProfileName}' nicht gefunden.";
+                    LastActionMessage = TF("IPCONFIG_STATUS_UNC_PROFILE_NOT_FOUND", uncProfileName);
                     StatusMessageType = StatusMessageType.Error;
                     HasValidationErrors = true;
                     return;
@@ -1528,14 +1529,14 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 {
                     LogHandler.LogSystemMessage(LogLevel.WARN, "IpConfig", $"UNC-Profil anwenden fehlgeschlagen: {uncMessage}");
                     ValidationMessage = T("IPCONFIG_MSG_UNC_PROFILE_APPLY_FAILED");
-                    LastActionMessage = $"UNC-Profil anwenden fehlgeschlagen: {uncMessage}";
+                    LastActionMessage = TF("IPCONFIG_STATUS_UNC_APPLY_FAILED_WITH_REASON", uncMessage ?? T("IPCONFIG_STATUS_UNKNOWN"));
                     StatusMessageType = StatusMessageType.Error;
                     HasValidationErrors = true;
                     return;
                 }
 
                 ValidationMessage = T("IPCONFIG_MSG_PROFILE_AND_UNC_APPLIED");
-                LastActionMessage = $"Profil und UNC-Profil '{uncProfileName}' erfolgreich angewendet.";
+                LastActionMessage = TF("IPCONFIG_STATUS_PROFILE_AND_UNC_APPLIED_SUCCESS", uncProfileName);
                 StatusMessageType = StatusMessageType.Success;
                 HasValidationErrors = false;
             }
@@ -2248,7 +2249,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 if (selectedProfile == null)
                 {
                     var status = T("ADAPTER_STA_NotConfigured");
-                    var ping = "Ping: -";
+                    var ping = T("IPCONFIG_PING_UNKNOWN");
                     
                     _currentGateway = string.Empty;
                     _currentDns1 = string.Empty;
@@ -2269,7 +2270,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 if (string.IsNullOrWhiteSpace(selectedProfile.AdapterName))
                 {
                     var status = T("ADAPTER_STA_NotConfigured");
-                    var ping = "Ping: -";
+                    var ping = T("IPCONFIG_PING_UNKNOWN");
                     
                     _currentGateway = string.Empty;
                     _currentDns1 = string.Empty;
@@ -2291,7 +2292,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 if (config == null)
                 {
                     var status = T("ADAPTER_STA_NotConfigured");
-                    var ping = "Ping: -";
+                    var ping = T("IPCONFIG_PING_UNKNOWN");
                     
                     _currentGateway = string.Empty;
                     _currentDns1 = string.Empty;
@@ -2335,7 +2336,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 }
                 else
                 {
-                    PostGatewayStatus(T("ADAPTER_STA_Disabled"), "Ping: -", GatewayStatusKind.Unknown);
+                    PostGatewayStatus(T("ADAPTER_STA_Disabled"), T("IPCONFIG_PING_UNKNOWN"), GatewayStatusKind.Unknown);
                 }
 
                 if (checkDns1)
@@ -2344,7 +2345,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 }
                 else
                 {
-                    PostDns1Status(T("ADAPTER_STA_Disabled"), "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns1Status(T("ADAPTER_STA_Disabled"), T("IPCONFIG_PING_UNKNOWN"), GatewayStatusKind.Unknown);
                 }
 
                 if (checkDns2)
@@ -2353,7 +2354,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                 }
                 else
                 {
-                    PostDns2Status(T("ADAPTER_STA_Disabled"), "Ping: -", GatewayStatusKind.Unknown);
+                    PostDns2Status(T("ADAPTER_STA_Disabled"), T("IPCONFIG_PING_UNKNOWN"), GatewayStatusKind.Unknown);
                 }
             }
             catch (Exception ex)
@@ -2413,7 +2414,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
             if (string.IsNullOrWhiteSpace(address))
             {
                 Debug.WriteLine("[ReachabilityDebug][IpConfigPage] Skip ping: address empty");
-                callback(T("ADAPTER_STA_NotConfigured"), "Ping: -", GatewayStatusKind.Unknown);
+                callback(T("ADAPTER_STA_NotConfigured"), T("IPCONFIG_PING_UNKNOWN"), GatewayStatusKind.Unknown);
                 return;
             }
 
@@ -2441,7 +2442,7 @@ namespace neTiPx.UI.Avalonia.ViewModels
                     var statusText = ms <= thresholdFast ? T("ADAPTER_STA_Reachable") : ms <= thresholdNormal ? T("ADAPTER_STA_Slow") : T("ADAPTER_STA_VerySlow");
                     var statusKind = ms <= thresholdFast ? GatewayStatusKind.Good :
                                    ms <= thresholdNormal ? GatewayStatusKind.Warning : GatewayStatusKind.Bad;
-                    callback(statusText, $"Ping: {ms} ms", statusKind);
+                    callback(statusText, TF("IPCONFIG_PING_MS", ms), statusKind);
                 }
                 else
                 {

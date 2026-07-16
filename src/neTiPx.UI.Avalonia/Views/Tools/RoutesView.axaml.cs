@@ -21,6 +21,10 @@ namespace neTiPx.UI.Avalonia.Views.Tools;
 
 public partial class RoutesView : UserControl
 {
+    private static readonly LanguageManager _lm = LanguageManager.Instance;
+    private static string T(string key) => _lm.Lang(key);
+    private static string TF(string key, params object[] args) => string.Format(T(key), args);
+
     private readonly NetworkConfigService _networkConfigService = new();
     private readonly List<RouteEntry> _allRoutes = new();
     private readonly RouteProfileViewModel _routeProfileViewModel = new();
@@ -267,16 +271,16 @@ public partial class RoutesView : UserControl
 
         if (string.IsNullOrWhiteSpace(filterText))
         {
-            RoutesStatusText.Text = $"{FilteredRoutes.Count} Route(n) gefunden";
+            RoutesStatusText.Text = TF("ROUTES_STATUS_FOUND_COUNT", FilteredRoutes.Count);
         }
         else if (IPAddress.TryParse(filterText, out var parsed) && 
                  parsed.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
         {
-            RoutesStatusText.Text = $"{FilteredRoutes.Count} passende Route(n) für: {filterText}";
+            RoutesStatusText.Text = TF("ROUTES_STATUS_MATCHING_FOR_DESTINATION", FilteredRoutes.Count, filterText);
         }
         else
         {
-            RoutesStatusText.Text = "Ungültiger IP-Filter";
+            RoutesStatusText.Text = T("ROUTES_STATUS_INVALID_FILTER");
         }
     }
 

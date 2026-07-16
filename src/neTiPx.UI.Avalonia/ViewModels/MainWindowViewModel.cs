@@ -31,10 +31,21 @@ public partial class MainWindowViewModel : ObservableObject
 
     public MainWindowViewModel()
     {
-        _lm.LanguageChanged += (_, _) => RebuildNavigationItems();
+        _lm.LanguageChanged += OnLanguageChanged;
         RebuildNavigationItems();
         SelectedNavigationItem = NavigationItems[0];
         UpdateCurrentPage();
+    }
+
+    private void OnLanguageChanged(object? sender, System.EventArgs e)
+    {
+        RebuildNavigationItems();
+
+        // Settings enthält dynamische Listen (z.B. Sprachen/Themes), daher Seite neu instanzieren.
+        if (CurrentPageName == "Settings")
+        {
+            UpdateCurrentPage();
+        }
     }
 
     private void RebuildNavigationItems()

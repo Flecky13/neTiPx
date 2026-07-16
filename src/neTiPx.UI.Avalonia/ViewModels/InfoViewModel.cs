@@ -6,11 +6,15 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using neTiPx.Core.Services;
+using neTiPx.UI.Avalonia.Services;
 
 namespace neTiPx.UI.Avalonia.ViewModels;
 
 public partial class InfoViewModel : ObservableObject
 {
+    private static readonly LanguageManager _lm = LanguageManager.Instance;
+    private static string T(string key) => _lm.Lang(key);
+
     private readonly GitHubUpdateService _updateService;
     private Version? _currentVersion;
     
@@ -48,8 +52,8 @@ public partial class InfoViewModel : ObservableObject
         // Version aus der Assembly auslesen
         _currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
         _appVersion = _currentVersion?.ToString(4) ?? "0.0.0.0";
-        _latestVersion = "Wird geprüft...";
-        _updateStatusText = "Noch nicht geprüft";
+        _latestVersion = T("INFO_STATUS_CHECKING");
+        _updateStatusText = T("INFO_STATUS_NOT_CHECKED");
         _updateStatusColor = "Gray";
         _platformInfo = _updateService.GetPlatformDisplayName();
         
@@ -64,8 +68,8 @@ public partial class InfoViewModel : ObservableObject
             return;
         
         IsChecking = true;
-        LatestVersion = "Wird geprüft...";
-        UpdateStatusText = "Prüfe GitHub Releases...";
+        LatestVersion = T("INFO_STATUS_CHECKING");
+        UpdateStatusText = T("INFO_STATUS_CHECKING");
         UpdateStatusColor = "Orange";
         
         try
@@ -74,34 +78,36 @@ public partial class InfoViewModel : ObservableObject
             
             if (!string.IsNullOrEmpty(updateInfo.ErrorMessage))
             {
-                LatestVersion = "Fehler";
-                UpdateStatusText = updateInfo.ErrorMessage;
+                LatestVersion = T("INFO_UNKNOWN");
+                UpdateStatusText = $"{T("INFO_STATUS_CHECK_FAILED")}: {updateInfo.ErrorMessage}";
                 UpdateStatusColor = "Red";
                 IsUpdateAvailable = false;
                 return;
             }
             
-            LatestVersion = updateInfo.LatestVersion ?? "Unbekannt";
+            LatestVersion = updateInfo.LatestVersion ?? T("INFO_UNKNOWN");
             DownloadUrl = updateInfo.DownloadUrl ?? string.Empty;
             ReleaseUrl = updateInfo.ReleaseUrl ?? string.Empty;
             
             if (updateInfo.IsUpdateAvailable)
             {
                 IsUpdateAvailable = true;
-                UpdateStatusText = $"Neue Version verfügbar! ({updateInfo.AssetName})";
+                UpdateStatusText = string.IsNullOrWhiteSpace(updateInfo.AssetName)
+                    ? T("INFO_STATUS_UPDATE_AVAILABLE")
+                    : $"{T("INFO_STATUS_UPDATE_AVAILABLE")} ({updateInfo.AssetName})";
                 UpdateStatusColor = "Green";
             }
             else
             {
                 IsUpdateAvailable = false;
-                UpdateStatusText = "Sie verwenden die neueste Version";
+                UpdateStatusText = T("INFO_STATUS_UP_TO_DATE");
                 UpdateStatusColor = "Green";
             }
         }
         catch (Exception ex)
         {
-            LatestVersion = "Fehler";
-            UpdateStatusText = $"Fehler: {ex.Message}";
+            LatestVersion = T("INFO_UNKNOWN");
+            UpdateStatusText = $"{T("INFO_STATUS_CHECK_FAILED")}: {ex.Message}";
             UpdateStatusColor = "Red";
             IsUpdateAvailable = false;
         }

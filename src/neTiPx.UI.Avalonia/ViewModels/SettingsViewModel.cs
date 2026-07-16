@@ -12,6 +12,9 @@ namespace neTiPx.UI.Avalonia.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+    private static readonly LanguageManager _lm = LanguageManager.Instance;
+    private static string T(string key) => _lm.Lang(key);
+
     private readonly Core.Services.AdapterStore _adapterStore;
     private readonly Core.Services.HoverWindowSettings _hoverWindowSettings;
     private readonly Core.Services.ThemeService _themeService;
@@ -44,6 +47,9 @@ public partial class SettingsViewModel : ObservableObject
     private string? _selectedLanguage;
 
     private readonly Dictionary<string, string> _languageDisplayToCode = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _themeDisplayToName = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _themeNameToDisplay = new(StringComparer.OrdinalIgnoreCase);
+    private bool _isRefreshingLocalizedSelections;
 
     // Info-Fenster Einstellungen
     [ObservableProperty]
@@ -97,6 +103,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         try
         {
+            var noAdapterLabel = GetNoAdapterLabel();
             var adapters = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
                 .OrderBy(n => n.Name)
@@ -111,7 +118,7 @@ public partial class SettingsViewModel : ObservableObject
             
             // Für den sekundären Adapter: Leeren Eintrag am Anfang hinzufügen
             AvailableSecondaryAdapters.Clear();
-            AvailableSecondaryAdapters.Add("(Kein Adapter)");
+            AvailableSecondaryAdapters.Add(noAdapterLabel);
             foreach (var adapter in adapters)
             {
                 AvailableSecondaryAdapters.Add(adapter);
@@ -148,7 +155,7 @@ public partial class SettingsViewModel : ObservableObject
             else
             {
                 // Wenn kein sekundärer Adapter konfiguriert, zeige "(Kein Adapter)"
-                SelectedSecondaryAdapter = "(Kein Adapter)";
+                SelectedSecondaryAdapter = GetNoAdapterLabel();
             }
             
             // Fallback: Ersten zwei Adapter auswählen wenn keine gültige Config
@@ -179,7 +186,7 @@ public partial class SettingsViewModel : ObservableObject
                 }
                 else
                 {
-                    SelectedSecondaryAdapter = "(Kein Adapter)";
+                    SelectedSecondaryAdapter = GetNoAdapterLabel();
                 }
             }
         }
@@ -191,6 +198,11 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     partial void OnSelectedPrimaryAdapterChanged(string? value)
     {
+        if (_isRefreshingLocalizedSelections)
+        {
+            return;
+        }
+
         SaveAdapterSettings();
     }
     
@@ -200,6 +212,11 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     partial void OnSelectedSecondaryAdapterChanged(string? value)
     {
+        if (_isRefreshingLocalizedSelections)
+        {
+            return;
+        }
+
         SaveAdapterSettings();
     }
     
@@ -212,7 +229,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             // "(Kein Adapter)" als null/leer speichern
             var secondaryAdapter = SelectedSecondaryAdapter;
-            if (secondaryAdapter == "(Kein Adapter)")
+            if (IsNoAdapterSelection(secondaryAdapter))
             {
                 secondaryAdapter = null;
             }
@@ -308,19 +325,36 @@ public partial class SettingsViewModel : ObservableObject
         {
             var themes = _themeService.GetAllThemes();
             AvailableThemes.Clear();
+            _themeDisplayToName.Clear();
+            _themeNameToDisplay.Clear();
+
             foreach (var theme in themes)
             {
-                AvailableThemes.Add(theme.Name);
+                var displayName = T(GetThemeLocalizationKey(theme.Name));
+                AvailableThemes.Add(displayName);
+                _themeDisplayToName[displayName] = theme.Name;
+                _themeNameToDisplay[theme.Name] = displayName;
             }
 
             var savedThemeName = _themeService.ReadThemeName();
-            SelectedTheme = savedThemeName;
+            if (_themeNameToDisplay.TryGetValue(savedThemeName, out var savedDisplayName))
+            {
+                SelectedTheme = savedDisplayName;
+            }
+            else if (_themeNameToDisplay.TryGetValue("Blau", out var defaultDisplayName))
+            {
+                SelectedTheme = defaultDisplayName;
+            }
+            else
+            {
+                SelectedTheme = AvailableThemes.FirstOrDefault();
+            }
         }
         catch
         {
             // Defaults
-            AvailableThemes.Add("Blau");
-            SelectedTheme = "Blau";
+            AvailableThemes.Add(T("SETTINGS_THEME_BLUE"));
+            SelectedTheme = T("SETTINGS_THEME_BLUE");
         }
     }
 
@@ -329,22 +363,48 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     partial void OnSelectedThemeChanged(string? value)
     {
+        if (_isRefreshingLocalizedSelections)
+        {
+            return;
+        }
+
         if (value != null)
         {
-            SaveThemeSettings(value);
-            ApplyTheme(value);
+            var themeName = _themeDisplayToName.TryGetValue(value, out var mappedName) ? mappedName : value;
+            SaveThemeSettings(themeName);
+            ApplyTheme(themeName);
         }
+    }
+
+    private static string GetThemeLocalizationKey(string themeName)
+    {
+        return themeName switch
+        {
+            "Rot" => "SETTINGS_THEME_RED",
+            "Orange" => "SETTINGS_THEME_ORANGE",
+            "Prinzessin" => "SETTINGS_THEME_PRINCESS",
+            "Gelb" => "SETTINGS_THEME_YELLOW",
+            "Blau" => "SETTINGS_THEME_BLUE",
+            "Grün" => "SETTINGS_THEME_GREEN",
+            "Braun" => "SETTINGS_THEME_BROWN",
+            "Grau" => "SETTINGS_THEME_GRAY",
+            "Weiß" => "SETTINGS_THEME_WHITE",
+            "Schwarz" => "SETTINGS_THEME_BLACK",
+            _ => "SETTINGS_COLORSCHEME"
+        };
     }
 
     private void LoadLanguageSettings()
     {
+        var wasRefreshing = _isRefreshingLocalizedSelections;
+        _isRefreshingLocalizedSelections = true;
         try
         {
             var lm = LanguageManager.Instance;
             AvailableLanguages.Clear();
             _languageDisplayToCode.Clear();
 
-            const string systemLabel = "System (Automatisch)";
+            var systemLabel = GetSystemLanguageLabel();
             AvailableLanguages.Add(systemLabel);
             _languageDisplayToCode[systemLabel] = "System";
 
@@ -366,13 +426,23 @@ public partial class SettingsViewModel : ObservableObject
         catch
         {
             AvailableLanguages.Clear();
-            AvailableLanguages.Add("System (Automatisch)");
-            SelectedLanguage = "System (Automatisch)";
+            var systemLabel = GetSystemLanguageLabel();
+            AvailableLanguages.Add(systemLabel);
+            SelectedLanguage = systemLabel;
+        }
+        finally
+        {
+            _isRefreshingLocalizedSelections = wasRefreshing;
         }
     }
 
     partial void OnSelectedLanguageChanged(string? value)
     {
+        if (_isRefreshingLocalizedSelections)
+        {
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(value))
         {
             return;
@@ -385,14 +455,111 @@ public partial class SettingsViewModel : ObservableObject
 
         try
         {
+            // Keine Neuinitialisierung auslösen, wenn Sprache effektiv bereits aktiv ist.
+            if (code.Equals(LanguageManager.Instance.CurrentLanguageCode, StringComparison.OrdinalIgnoreCase))
+            {
+                _settingsService.SetLanguageCode(code);
+                return;
+            }
+
             _settingsService.SetLanguageCode(code);
             LanguageManager.Instance.LoadLanguage(code);
+            RefreshLocalizedSelections(code);
         }
         catch
         {
             // Ignore language persistence/apply errors
         }
     }
+
+    private void RefreshLocalizedSelections(string? selectedLanguageCode = null)
+    {
+        _isRefreshingLocalizedSelections = true;
+        try
+        {
+            var selectedPrimaryAdapter = SelectedPrimaryAdapter;
+            var selectedSecondaryAdapter = SelectedSecondaryAdapter;
+            var wasNoAdapterSelected = IsNoAdapterSelection(selectedSecondaryAdapter);
+            var selectedThemeName = ResolveSelectedThemeName();
+            var selectedCode = string.IsNullOrWhiteSpace(selectedLanguageCode)
+                ? ResolveSelectedLanguageCode()
+                : selectedLanguageCode;
+
+            LoadAvailableAdapters();
+            if (!string.IsNullOrWhiteSpace(selectedPrimaryAdapter) && AvailableAdapters.Contains(selectedPrimaryAdapter))
+            {
+                SelectedPrimaryAdapter = selectedPrimaryAdapter;
+            }
+
+            if (wasNoAdapterSelected)
+            {
+                SelectedSecondaryAdapter = GetNoAdapterLabel();
+            }
+            else if (!string.IsNullOrWhiteSpace(selectedSecondaryAdapter) && AvailableSecondaryAdapters.Contains(selectedSecondaryAdapter))
+            {
+                SelectedSecondaryAdapter = selectedSecondaryAdapter;
+            }
+
+            LoadThemeSettings();
+            if (!string.IsNullOrWhiteSpace(selectedThemeName) && _themeNameToDisplay.TryGetValue(selectedThemeName, out var themeDisplay))
+            {
+                SelectedTheme = themeDisplay;
+            }
+
+            LoadLanguageSettings();
+            if (!string.IsNullOrWhiteSpace(selectedCode))
+            {
+                var selectedLanguageDisplay = _languageDisplayToCode
+                    .FirstOrDefault(kv => kv.Value.Equals(selectedCode, StringComparison.OrdinalIgnoreCase))
+                    .Key;
+
+                if (!string.IsNullOrWhiteSpace(selectedLanguageDisplay))
+                {
+                    SelectedLanguage = selectedLanguageDisplay;
+                }
+            }
+        }
+        finally
+        {
+            _isRefreshingLocalizedSelections = false;
+        }
+    }
+
+    private string? ResolveSelectedThemeName()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedTheme) && _themeDisplayToName.TryGetValue(SelectedTheme, out var themeName))
+        {
+            return themeName;
+        }
+
+        return _themeService.ReadThemeName();
+    }
+
+    private string ResolveSelectedLanguageCode()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedLanguage) && _languageDisplayToCode.TryGetValue(SelectedLanguage, out var code))
+        {
+            return code;
+        }
+
+        return _settingsService.GetLanguageCode();
+    }
+
+    private static string GetNoAdapterLabel() => T("SETTINGS_ADAPTER_NONE");
+
+    private static bool IsNoAdapterSelection(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        return value.Equals(GetNoAdapterLabel(), StringComparison.OrdinalIgnoreCase)
+            || value.Equals("(Kein Adapter)", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("SETTINGS_ADAPTER_NONE", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetSystemLanguageLabel() => $"{T("SETTINGS_LANGUAGE_SYSTEM")} (Auto)";
 
     /// <summary>
     /// Speichert das ausgewählte Theme.
