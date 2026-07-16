@@ -242,28 +242,6 @@ namespace neTiPx.UI.Avalonia.Services
             });
         }
 
-        public string GetPingLogFolderPath()
-        {
-            var settings = LoadUserSettings();
-            return settings.PingLogFolderPath ?? string.Empty;
-        }
-
-        public void SetPingLogFolderPath(string folderPath)
-        {
-            UpdateUserSettings(settings => settings.PingLogFolderPath = folderPath ?? string.Empty);
-        }
-
-        public bool GetPingBackgroundActive()
-        {
-            var settings = LoadUserSettings();
-            return settings.PingBackgroundActive;
-        }
-
-        public void SetPingBackgroundActive(bool active)
-        {
-            UpdateUserSettings(settings => settings.PingBackgroundActive = active);
-        }
-
         // Network Scanner Port Settings
         public bool GetScanPortHttp()
         {

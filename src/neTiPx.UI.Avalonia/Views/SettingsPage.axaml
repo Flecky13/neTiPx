@@ -109,18 +109,8 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="{loc:Loc SETTINGS_NETWORK}" FontWeight="Bold" />
-                        <TextBlock Text="{loc:Loc SETTINGS_NETWORK_TIMEOUT_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{loc:Loc SETTINGS_PING_TIMEOUT_MS}" FontWeight="SemiBold" FontSize="12" />
-                            <NumericUpDown Value="1000" Minimum="100" Maximum="10000" Increment="100" />
-                        </StackPanel>
-
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{loc:Loc SETTINGS_SCAN_TIMEOUT_MS}" FontWeight="SemiBold" FontSize="12" />
-                            <NumericUpDown Value="5000" Minimum="1000" Maximum="60000" Increment="1000" />
-                        </StackPanel>
+                        <TextBlock Text="{loc:Loc SETTINGS_PLACEHOLDER}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_PLACEHOLDER_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 
@@ -132,22 +122,8 @@
                         Padding="16"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="{loc:Loc SETTINGS_PING_LOG}" FontWeight="Bold" />
-                        <TextBlock Text="{loc:Loc SETTINGS_PING_LOG_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{loc:Loc SETTINGS_LOG_FOLDER}" FontWeight="SemiBold" FontSize="12" />
-                            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
-                                    BorderThickness="1" 
-                                    CornerRadius="6" 
-                                    Padding="10,8">
-                                <TextBlock Text="{loc:Loc SETTINGS_LOG_FOLDER_PATH_PLACEHOLDER}" Opacity="0.8" />
-                            </Border>
-                        </StackPanel>
-
-                        <Button HorizontalAlignment="Stretch">
-                            <TextBlock Text="{loc:Loc SETTINGS_SELECT_FOLDER}" />
-                        </Button>
+                        <TextBlock Text="{loc:Loc SETTINGS_PLACEHOLDER}" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc SETTINGS_PLACEHOLDER_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
 

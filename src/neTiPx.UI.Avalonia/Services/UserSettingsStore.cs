@@ -26,8 +26,6 @@ namespace neTiPx.UI.Avalonia.Services
             public bool StartMinimizedToTray { get; set; } = false;
             public string? LastCheckedLatestVersion { get; set; }
             public DateTime? LastCheckedAt { get; set; }
-            public string PingLogFolderPath { get; set; } = string.Empty;
-            public bool PingBackgroundActive { get; set; } = false;
 
             // Network Scanner Port Settings
             public bool ScanPortHttp { get; set; } = true;
@@ -156,11 +154,6 @@ namespace neTiPx.UI.Avalonia.Services
                 updateCheckElement.SetAttributeValue("lastCheckedAt", settings.LastCheckedAt.Value.ToString("o"));
             }
 
-            var pingLoggingElement = new XElement("pingLogging",
-                new XAttribute("folderPath", settings.PingLogFolderPath ?? string.Empty),
-                new XAttribute("backgroundActive", settings.PingBackgroundActive)
-            );
-
             var networkScannerElement = new XElement("networkScanner",
                 new XAttribute("scanPortHttp", settings.ScanPortHttp),
                 new XAttribute("scanPortHttps", settings.ScanPortHttps),
@@ -178,7 +171,7 @@ namespace neTiPx.UI.Avalonia.Services
                 new XAttribute("code", settings.LanguageCode ?? "System")
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, pingLoggingElement, networkScannerElement, languageElement);
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, networkScannerElement, languageElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -292,16 +285,6 @@ namespace neTiPx.UI.Avalonia.Services
                     if (DateTime.TryParse(lastCheckedAtRaw, null, System.Globalization.DateTimeStyles.RoundtripKind, out var lastCheckedAt))
                     {
                         settings.LastCheckedAt = lastCheckedAt;
-                    }
-                }
-
-                var pingLoggingElement = root.Element("pingLogging");
-                if (pingLoggingElement != null)
-                {
-                    settings.PingLogFolderPath = (string?)pingLoggingElement.Attribute("folderPath") ?? string.Empty;
-                    if (bool.TryParse((string?)pingLoggingElement.Attribute("backgroundActive"), out var backgroundActive))
-                    {
-                        settings.PingBackgroundActive = backgroundActive;
                     }
                 }
 
