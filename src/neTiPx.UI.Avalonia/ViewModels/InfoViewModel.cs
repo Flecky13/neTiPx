@@ -212,12 +212,26 @@ public partial class InfoViewModel : ObservableObject
                     {
                         Process.Start(new ProcessStartInfo
                         {
+                            FileName = "xdg-open",
+                            Arguments = $"\"{packagePath}\"",
+                            UseShellExecute = false
+                        });
+                        shouldShutdownApp = false;
+                        return true;
+                    }
+                    catch
+                    {
+                        // Fallback below.
+                    }
+
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
                             FileName = "pkexec",
                             Arguments = $"dpkg -i \"{packagePath}\"",
                             UseShellExecute = false
                         });
-                        // Unter Linux nicht sofort beenden, sonst verschwindet die App,
-                        // bevor die Rechte-Eingabe sauber abgeschlossen ist.
                         shouldShutdownApp = false;
                         return true;
                     }
