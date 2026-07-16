@@ -172,13 +172,13 @@
                         <TextBlock Text="{loc:Loc SETTINGS_DATA}" FontWeight="Bold" />
                         <TextBlock Text="{loc:Loc SETTINGS_DATA_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
 
-                        <Button HorizontalAlignment="Stretch">
+                        <Button HorizontalAlignment="Stretch" Click="ExportSettingsButton_OnClick">
                             <TextBlock Text="{loc:Loc SETTINGS_EXPORT}" />
                         </Button>
-                        <Button HorizontalAlignment="Stretch">
+                        <Button HorizontalAlignment="Stretch" Click="ImportSettingsButton_OnClick">
                             <TextBlock Text="{loc:Loc SETTINGS_IMPORT}" />
                         </Button>
-                        <Button HorizontalAlignment="Stretch">
+                        <Button HorizontalAlignment="Stretch" Click="ResetSettingsButton_OnClick">
                             <TextBlock Text="{loc:Loc SETTINGS_RESET}" Foreground="Red" />
                         </Button>
                     </StackPanel>

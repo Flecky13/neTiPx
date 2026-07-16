@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using neTiPx.Core.Helpers;
 using neTiPx.Core.Models;
 using neTiPx.Core.Services;
 using neTiPx.UI.Avalonia.Services;
@@ -679,5 +683,142 @@ public partial class SettingsViewModel : ObservableObject
             // Bei Fehler: Wert zurücksetzen
             StartMinimizedToTray = _settingsService.GetStartMinimizedToTray();
         }
+    }
+
+    public async Task ExportSettingsArchiveAsync(string archivePath)
+    {
+        if (string.IsNullOrWhiteSpace(archivePath))
+        {
+            throw new ArgumentException("Export path must not be empty.", nameof(archivePath));
+        }
+
+        await Task.Run(() =>
+        {
+            var configDir = GetConfigDirectoryPath();
+            var targetPath = Path.GetFullPath(archivePath);
+            var targetDirectory = Path.GetDirectoryName(targetPath);
+
+            if (string.IsNullOrWhiteSpace(targetDirectory))
+            {
+                throw new InvalidOperationException("Could not resolve target directory for export.");
+            }
+
+            Directory.CreateDirectory(targetDirectory);
+
+            using var archive = ZipFile.Open(targetPath, ZipArchiveMode.Create);
+            foreach (var filePath in Directory.GetFiles(configDir, "*", SearchOption.TopDirectoryOnly))
+            {
+                var sourcePath = Path.GetFullPath(filePath);
+                if (string.Equals(sourcePath, targetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var fileName = Path.GetFileName(filePath);
+                archive.CreateEntryFromFile(filePath, fileName, CompressionLevel.Optimal);
+            }
+        });
+    }
+
+    public async Task<string> ExportSettingsArchiveToDefaultLocationAsync()
+    {
+        var configDir = GetConfigDirectoryPath();
+        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var archivePath = Path.Combine(configDir, $"neTiPx-config-backup-{timestamp}.zip");
+        await ExportSettingsArchiveAsync(archivePath);
+        return archivePath;
+    }
+
+    public async Task ImportSettingsArchiveAsync(string archivePath)
+    {
+        if (string.IsNullOrWhiteSpace(archivePath))
+        {
+            throw new ArgumentException("Import path must not be empty.", nameof(archivePath));
+        }
+
+        await Task.Run(() =>
+        {
+            var sourcePath = Path.GetFullPath(archivePath);
+            if (!File.Exists(sourcePath))
+            {
+                throw new FileNotFoundException("Settings archive not found.", sourcePath);
+            }
+
+            var configDir = GetConfigDirectoryPath();
+            Directory.CreateDirectory(configDir);
+
+            using var archive = ZipFile.OpenRead(sourcePath);
+            foreach (var entry in archive.Entries)
+            {
+                if (string.IsNullOrWhiteSpace(entry.Name))
+                {
+                    continue;
+                }
+
+                var destinationPath = Path.Combine(configDir, entry.Name);
+                entry.ExtractToFile(destinationPath, overwrite: true);
+            }
+        });
+
+        ReloadSettingsFromDisk();
+    }
+
+    public async Task<string?> ResetSettingsDataAsync(string? backupArchivePath = null)
+    {
+        string? backupPath = null;
+        if (!string.IsNullOrWhiteSpace(backupArchivePath))
+        {
+            backupPath = Path.GetFullPath(backupArchivePath);
+            await ExportSettingsArchiveAsync(backupPath);
+        }
+
+        await Task.Run(() =>
+        {
+            var configDir = GetConfigDirectoryPath();
+            string? keepPath = null;
+            if (!string.IsNullOrWhiteSpace(backupPath) && File.Exists(backupPath))
+            {
+                keepPath = Path.GetFullPath(backupPath);
+            }
+
+            foreach (var filePath in Directory.GetFiles(configDir, "*", SearchOption.TopDirectoryOnly))
+            {
+                var fullPath = Path.GetFullPath(filePath);
+                if (!string.IsNullOrWhiteSpace(keepPath) && string.Equals(fullPath, keepPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                File.Delete(filePath);
+            }
+        });
+
+        ReloadSettingsFromDisk();
+        return backupPath;
+    }
+
+    private static string GetConfigDirectoryPath()
+    {
+        var configPath = ConfigFileHelper.GetConfigIniPath();
+        var configDir = Path.GetDirectoryName(configPath);
+
+        if (string.IsNullOrWhiteSpace(configDir))
+        {
+            configDir = AppDomain.CurrentDomain.BaseDirectory;
+        }
+
+        Directory.CreateDirectory(configDir);
+        return configDir;
+    }
+
+    private void ReloadSettingsFromDisk()
+    {
+        LoadAvailableAdapters();
+        LoadAdapterSettings();
+        LoadHoverWindowSettings();
+        LoadThemeSettings();
+        LoadLanguageSettings();
+        LoadConnectionQualitySettings();
+        LoadAutostartSettings();
     }
 }
