@@ -9,8 +9,25 @@
              x:Class="neTiPx.UI.Avalonia.Views.UncPathView"
              x:DataType="vm:UncPathViewModel">
     
-    <StackPanel Spacing="16">
-           <TextBlock Text="{loc:Loc TOOLS_UNC_PATH}" FontSize="20" FontWeight="SemiBold" />
+    <StackPanel Spacing="16" Margin="24">
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="24"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{loc:Loc TOOLS_UNC_PATH}" FontSize="24" FontWeight="Bold" />
+                    <TextBlock Text="{loc:Loc IPCONFIG_UNC_PROFILE}" />
+                </StackPanel>
+                <Image Grid.Column="1"
+                       Source="/Assets/toolicon.ico"
+                       Width="120"
+                       Height="120"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right" />
+            </Grid>
+        </Border>
 
         <!-- Hauptbereich: Profile (Links) | Konfiguration (Mitte) | Status (Rechts) -->
         <Grid ColumnDefinitions="200,*,210" ColumnSpacing="16">

@@ -8,6 +8,28 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="neTiPx.UI.Avalonia.Views.Tools.RoutesView">
 
+    <StackPanel Spacing="0">
+
+    <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="24"
+            Margin="24,24,24,0"
+            Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+        <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{loc:Loc TOOLS_ROUTES}" FontSize="24" FontWeight="Bold" />
+                <TextBlock Text="{loc:Loc ROUTES_SECTION_SYSTEM}" />
+            </StackPanel>
+            <Image Grid.Column="1"
+                   Source="/Assets/toolicon.ico"
+                   Width="120"
+                   Height="120"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Right" />
+        </Grid>
+    </Border>
+
     <TabControl Margin="16">
         <TabControl.Styles>
             <Style Selector="TabItem">
@@ -498,4 +520,5 @@
             </Grid>
         </TabItem>
     </TabControl>
+    </StackPanel>
 </UserControl>
