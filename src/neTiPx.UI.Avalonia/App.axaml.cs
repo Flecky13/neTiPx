@@ -11,6 +11,7 @@ using neTiPx.UI.Avalonia.Views;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 
 #if WINDOWS
 using neTiPx.Services.Windows;
@@ -27,6 +28,24 @@ public partial class App : Application
     public static IServiceProvider? ServiceProvider { get; private set; }
     private TrayService? _trayService;
     public static TrayService? TrayService => ((App?)Current)?._trayService;
+    private readonly object _shutdownSync = new();
+    private bool _isExitRequested;
+    private bool _cleanupCompleted;
+
+    private enum ExitReason
+    {
+        UserRequested,
+        SystemShutdown,
+        ProcessExit
+    }
+
+    public static void RequestUserExit()
+    {
+        if (Current is App app)
+        {
+            app.RequestExit(ExitReason.UserRequested, invokeDesktopShutdown: true);
+        }
+    }
 
     public override void Initialize()
     {
@@ -83,11 +102,87 @@ public partial class App : Application
             
             desktop.ShutdownRequested += (sender, e) =>
             {
-                _trayService?.Dispose();
+                RequestExit(ExitReason.SystemShutdown, invokeDesktopShutdown: false);
+            };
+
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+            {
+                RequestExit(ExitReason.ProcessExit, invokeDesktopShutdown: false);
+            };
+
+            AssemblyLoadContext.Default.Unloading += _ =>
+            {
+                RequestExit(ExitReason.ProcessExit, invokeDesktopShutdown: false);
             };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void RequestExit(ExitReason reason, bool invokeDesktopShutdown)
+    {
+        var shouldCallDesktopShutdown = false;
+
+        lock (_shutdownSync)
+        {
+            if (!_isExitRequested)
+            {
+                _isExitRequested = true;
+                shouldCallDesktopShutdown = invokeDesktopShutdown;
+            }
+
+        }
+
+        PerformCleanup();
+
+        if (shouldCallDesktopShutdown)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                MainWindow.AllowCloseForExit();
+
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    desktop.Shutdown();
+                }
+            }, DispatcherPriority.Send);
+        }
+    }
+
+    private void PerformCleanup()
+    {
+        lock (_shutdownSync)
+        {
+            if (_cleanupCompleted)
+            {
+                return;
+            }
+
+            _cleanupCompleted = true;
+        }
+
+        MainWindow.AllowCloseForExit();
+
+        var trayService = _trayService;
+        _trayService = null;
+
+        if (trayService != null)
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                trayService.Dispose();
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(trayService.Dispose, DispatcherPriority.Send);
+            }
+        }
+
+        if (ServiceProvider is IDisposable disposableProvider)
+        {
+            disposableProvider.Dispose();
+            ServiceProvider = null;
+        }
     }
 
     private void ConfigureServices()

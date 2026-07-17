@@ -6,7 +6,7 @@ namespace neTiPx.UI.Avalonia.Views;
 
 public partial class MainWindow : Window
 {
-    private static bool _allowClose;
+    private static bool _allowCloseForExit;
 
     public MainWindow()
     {
@@ -16,16 +16,15 @@ public partial class MainWindow : Window
         Closing += OnWindowClosing;
     }
 
-    public static void AllowCloseOnce()
+    public static void AllowCloseForExit()
     {
-        _allowClose = true;
+        _allowCloseForExit = true;
     }
 
     private void OnWindowClosing(object? sender, CancelEventArgs e)
     {
-        if (_allowClose)
+        if (_allowCloseForExit)
         {
-            _allowClose = false;
             return;
         }
 

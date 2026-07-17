@@ -29,6 +29,7 @@ public class TrayService : IDisposable
     private const int AutoHideSeconds = 5;
     private bool _isHoverWindowVisible = false;
     private double? _cachedWindowHeight = null;
+    private bool _disposed;
 
     public TrayService()
     {
@@ -251,15 +252,7 @@ public class TrayService : IDisposable
 
     private void ExitApplication()
     {
-        Dispose();
-        
-        Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                desktop.Shutdown();
-            }
-        });
+        App.RequestUserExit();
     }
 
     private void HideHoverWindow()
@@ -364,6 +357,20 @@ public class TrayService : IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        _trayIcon.Clicked -= OnTrayIconClicked;
+        _autoHideTimer.Elapsed -= AutoHideTimer_Elapsed;
+        _singleClickTimer.Elapsed -= SingleClickTimer_Elapsed;
+
+        _autoHideTimer.Stop();
+        _singleClickTimer.Stop();
+
         _trayIcon.IsVisible = false;
         _trayIcon.Dispose();
         _autoHideTimer.Dispose();
