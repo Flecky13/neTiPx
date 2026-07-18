@@ -69,12 +69,52 @@
         <Style Selector="CheckBox:pointerover TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
         </Style>
+
+        <!-- RadioButton Style -->
+        <Style Selector="RadioButton">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style Selector="RadioButton /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style Selector="RadioButton TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <!-- Disable RadioButton text color change on hover -->
+        <Style Selector="RadioButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style Selector="RadioButton:pointerover TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
         
         <!-- Button Style -->
         <Style Selector="Button">
             <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        </Style>
+
+        <Style Selector="Button PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style Selector="Button Path">
+            <Setter Property="Stroke" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="Fill" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style Selector="Button:pointerover PathIcon">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+
+        <Style Selector="Button:pointerover Path">
+            <Setter Property="Stroke" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="Fill" Value="{DynamicResource AppTextBrush}" />
         </Style>
         
         <!-- ListBoxItem Styles - Navigation Menu -->

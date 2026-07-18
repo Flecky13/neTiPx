@@ -72,7 +72,10 @@
 
                         <StackPanel Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="🟢" FontSize="16" VerticalAlignment="Center" />
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{DynamicResource SuccessBrush}"
+                                         Stroke="{DynamicResource SuccessBrush}"
+                                         VerticalAlignment="Center" />
                                 <TextBlock Text="{loc:Loc SETTINGS_FAST_MS}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
                             <NumericUpDown Value="{Binding PingThresholdFast}" 
@@ -84,7 +87,10 @@
 
                         <StackPanel Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="🟡" FontSize="16" VerticalAlignment="Center" />
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{DynamicResource WarningBrush}"
+                                         Stroke="{DynamicResource WarningBrush}"
+                                         VerticalAlignment="Center" />
                                 <TextBlock Text="{loc:Loc SETTINGS_NORMAL}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                             </StackPanel>
                             <NumericUpDown Value="{Binding PingThresholdNormal}" 
@@ -95,7 +101,10 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="🔴" FontSize="16" VerticalAlignment="Center" />
+                            <Ellipse Width="12" Height="12"
+                                     Fill="{DynamicResource ErrorBrush}"
+                                     Stroke="{DynamicResource ErrorBrush}"
+                                     VerticalAlignment="Center" />
                             <TextBlock Text="{loc:Loc SETTINGS_SLOW_MS}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
