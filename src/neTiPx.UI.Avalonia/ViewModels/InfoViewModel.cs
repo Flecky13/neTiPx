@@ -277,7 +277,7 @@ public partial class InfoViewModel : ObservableObject
         {
             if (forceCloseMainWindow && lifetime.MainWindow is Views.MainWindow)
             {
-                Views.MainWindow.AllowCloseOnce();
+                Views.MainWindow.AllowCloseForExit();
             }
 
             lifetime.Shutdown();
