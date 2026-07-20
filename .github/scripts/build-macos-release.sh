@@ -23,6 +23,7 @@ fi
 
 OUTPUT_DIR="${ROOT_DIR}/publish/${RID}"
 
+echo "📦 Publishing for ${RID}..."
 dotnet publish "${PROJECT_PATH}" \
   -c Release \
   -r "${RID}" \
@@ -32,6 +33,9 @@ dotnet publish "${PROJECT_PATH}" \
   -o "${OUTPUT_DIR}"
 
 chmod +x "${OUTPUT_DIR}/neTiPx.UI.Avalonia"
+
+echo "Disk space after publish:"
+df -h | head -n 2
 
 APP_NAME="neTiPx"
 APP_BUNDLE="${PACKAGE_DIR}/${APP_NAME}.app"
@@ -69,12 +73,13 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" << EOF
 </plist>
 EOF
 
-if [[ -f "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" ]]; then
-  mkdir -p "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
-  sips -z 512 512 "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" --out "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset/icon_512x512.png" >/dev/null 2>&1 || true
-  iconutil -c icns "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset" -o "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.icns" >/dev/null 2>&1 || true
-  rm -rf "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
-fi
+# Icon conversion entfernt, um Disk Space zu sparen
+# if [[ -f "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" ]]; then
+#   mkdir -p "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
+#   sips -z 512 512 "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" --out "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset/icon_512x512.png" >/dev/null 2>&1 || true
+#   iconutil -c icns "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset" -o "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.icns" >/dev/null 2>&1 || true
+#   rm -rf "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
+# fi
 
 DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-${RID}.dmg"
 DMG_TEMP="${PACKAGE_DIR}/dmg-temp"
@@ -91,12 +96,20 @@ hdiutil create -volname "neTiPx" \
 
 rm -rf "${DMG_TEMP}"
 
+# Cleanup publish directory um Disk Space zu sparen
+echo "🧹 Cleaning up temporary files..."
+rm -rf "${OUTPUT_DIR}"
+
 dmg_file="$(find "${ROOT_DIR}/packages" -maxdepth 1 -type f -name '*.dmg' -print0 | xargs -0 ls -1t | head -n1)"
 if [[ -z "${dmg_file}" ]]; then
-  echo "No .dmg file produced."
+  echo "❌ No .dmg file produced."
   exit 1
 fi
 
 cp "${dmg_file}" "${ROOT_DIR}/release-assets/"
+echo "✅ DMG created: $(basename "${dmg_file}")"
+
+echo "Final disk space:"
+df -h | head -n 2
 
 echo "macOS release asset: $(basename "${dmg_file}")"

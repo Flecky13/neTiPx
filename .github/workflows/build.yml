@@ -107,34 +107,31 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Free Disk Space
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+        sudo rm -rf /Applications/Xcode*.app
+        sudo rm -rf ~/Library/Android
+        sudo rm -rf /usr/local/lib/android
+        brew cleanup --prune=all || true
+        docker system prune -af || true
+        echo "Disk space after cleanup:"
+        df -h
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: Build macOS App Bundle (ARM64)
+      run: bash ./.github/scripts/build-macos-release.sh
 
-    - name: Build
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
-
-    - name: Publish macOS x64
-      run: dotnet publish src/neTiPx.UI.Avalonia/neTiPx.UI.Avalonia.csproj -c Release -r osx-x64 --self-contained -o publish/osx-x64
-
-    - name: Publish macOS ARM64
-      run: dotnet publish src/neTiPx.UI.Avalonia/neTiPx.UI.Avalonia.csproj -c Release -r osx-arm64 --self-contained -o publish/osx-arm64
-
-    - name: Upload macOS x64 Artifact
+    - name: Upload macOS DMG Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: neTiPx-macOS-x64
-        path: publish/osx-x64/
-
-    - name: Upload macOS ARM64 Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: neTiPx-macOS-ARM64
-        path: publish/osx-arm64/
+        name: neTiPx-macOS-DMG
+        path: release-assets/*.dmg
 
   create-release:
     name: Create Release
