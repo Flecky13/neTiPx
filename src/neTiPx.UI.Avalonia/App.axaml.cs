@@ -15,7 +15,7 @@ using System.Runtime.Loader;
 
 #if WINDOWS
 using neTiPx.Services.Windows;
-#elif LINUX || UNIX
+#elif LINUX
 using neTiPx.Services.Linux;
 #elif OSX
 using neTiPx.Services.macOS;
@@ -201,7 +201,7 @@ public partial class App : Application
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            #if LINUX || UNIX
+            #if LINUX
             services.AddLinuxServices();
             #endif
         }

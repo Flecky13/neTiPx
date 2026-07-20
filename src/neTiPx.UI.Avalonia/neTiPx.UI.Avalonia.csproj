@@ -13,11 +13,11 @@
     </PropertyGroup>
 
     <!-- Plattform-spezifische Compilation Symbols -->
-    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
         <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(OS)' == 'Unix' OR '$(OS)' == 'Linux'">
-        <DefineConstants>$(DefineConstants);LINUX;UNIX</DefineConstants>
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+        <DefineConstants>$(DefineConstants);LINUX</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
         <DefineConstants>$(DefineConstants);OSX</DefineConstants>
