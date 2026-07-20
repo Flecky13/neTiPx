@@ -16,7 +16,7 @@ export DOTNET_CLI_HOME="${ROOT_DIR}/.dotnet"
 export NUGET_PACKAGES="${ROOT_DIR}/.nuget/packages"
 mkdir -p "${DOTNET_CLI_HOME}" "${NUGET_PACKAGES}"
 
-VERSION="$(grep -oP '(?<=<Version>)[^<]+' "${ROOT_DIR}/src/Directory.Build.props" | head -n1)"
+VERSION="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "${ROOT_DIR}/src/Directory.Build.props" | head -n1)"
 if [[ -z "${VERSION}" ]]; then
   echo "Version could not be read from src/Directory.Build.props"
   exit 1
@@ -141,7 +141,7 @@ if [[ -f "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" ]]; then
 fi
 
 APPIMAGE_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-x86_64.AppImage"
-"${ROOT_DIR}/.github/scripts/appimagetool-x86_64.AppImage" "${APPDIR}" "${APPIMAGE_FILE}"
+APPIMAGE_EXTRACT_AND_RUN=1 "${ROOT_DIR}/.github/scripts/appimagetool-x86_64.AppImage" "${APPDIR}" "${APPIMAGE_FILE}"
 
 deb_file="$(find "${ROOT_DIR}/packages" -maxdepth 1 -type f -name '*.deb' -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2-)"
 appimage_file="$(find "${ROOT_DIR}/packages" -maxdepth 1 -type f -name '*.AppImage' -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2-)"

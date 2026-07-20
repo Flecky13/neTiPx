@@ -8,7 +8,7 @@ PACKAGE_DIR="${ROOT_DIR}/packages"
 
 mkdir -p "${ROOT_DIR}/release-assets" "${PACKAGE_DIR}"
 
-VERSION="$(grep -oP '(?<=<Version>)[^<]+' "${ROOT_DIR}/src/Directory.Build.props" | head -n1)"
+VERSION="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "${ROOT_DIR}/src/Directory.Build.props" | head -n1)"
 if [[ -z "${VERSION}" ]]; then
   echo "Version could not be read from src/Directory.Build.props"
   exit 1

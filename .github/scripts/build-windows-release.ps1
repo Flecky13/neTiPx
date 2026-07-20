@@ -21,7 +21,27 @@ dotnet publish $ProjectPath `
     -p:PublishTrimmed=false `
     -o $PublishDir
 
-$makensis = (Get-Command makensis -ErrorAction Stop).Source
+$makensis = $null
+try {
+    $makensis = (Get-Command makensis -ErrorAction Stop).Source
+} catch {
+    $candidatePaths = @(
+        "$env:ProgramFiles\NSIS\makensis.exe",
+        "$env:ProgramFiles(x86)\NSIS\makensis.exe",
+        "C:\ProgramData\chocolatey\bin\makensis.exe"
+    )
+    foreach ($candidate in $candidatePaths) {
+        if (Test-Path $candidate) {
+            $makensis = $candidate
+            break
+        }
+    }
+}
+
+if (-not $makensis) {
+    throw "makensis wurde nicht gefunden."
+}
+
 & $makensis "/DProjectRoot=$RootDir" $NsisScript
 
 $setup = Get-ChildItem -Path $PackagesDir -Filter "*Setup*.exe" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
