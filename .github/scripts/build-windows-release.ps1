@@ -28,16 +28,16 @@ Write-Host "✅ dotnet publish abgeschlossen" -ForegroundColor Green
 Write-Host "📄 Lese Version aus $BuildPropsPath..." -ForegroundColor Cyan
 [xml]$buildProps = Get-Content $BuildPropsPath
 $version = $buildProps.Project.PropertyGroup.Version
-if ([string]::IsNullOrWhiteSpac
+if ([string]::IsNullOrWhiteSpace($version)) {
+    throw "Version konnte nicht aus '$BuildPropsPath' gelesen werden."
+}
+$installerVersion = "V$version"
 Write-Host "✅ Version: $installerVersion" -ForegroundColor Green
 
 Write-Host "🔨 Erstelle NSIS Installer..." -ForegroundColor Cyan
 Write-Host "   NSIS Script: $NsisScript" -ForegroundColor Gray
 Write-Host "   Project Root: $RootDir" -ForegroundColor Gray
-Write-Host "   App Version: $installerVersion" -ForegroundColor Graye($version)) {
-    throw "Version konnte nicht aus '$BuildPropsPath' gelesen werden."
-}
-$installerVersion = "V$version"
+Write-Host "   App Version: $installerVersion" -ForegroundColor Gray
 
 $makensis = $null
 try {
@@ -74,6 +74,12 @@ try {
 
 if (-not $makensis) {
     Write-Host "❌ makensis wurde nicht gefunden." -ForegroundColor Red
+    Write-Host "Bitte NSIS installieren: choco install nsis -y" -ForegroundColor Red
+    throw "makensis wurde nicht gefunden. Bitte NSIS installieren."
+}
+
+& $makensis "/DProjectRoot=$RootDir" "/DAppVersion=$installerVersion" $NsisScript
+
 if ($LASTEXITCODE -ne 0) {
     throw "NSIS Installer-Erstellung fehlgeschlagen mit Exit-Code: $LASTEXITCODE"
 }
@@ -81,17 +87,11 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "✅ NSIS Installer erstellt" -ForegroundColor Green
 
 Write-Host "📦 Suche Setup-Datei in $PackagesDir..." -ForegroundColor Cyan
-    Write-Host "Bitte NSIS installieren: choco install nsis -y" -ForegroundColor Red
-    throw "makensis wurde nicht gefunden. Bitte NSIS installieren."
-}
-
-& $makensis "/DProjectRoot=$RootDir" "/DAppVersion=$installerVersion" $NsisScript
-✅ Windows release asset: $($setup.Name)" -ForegroundColor Green
-Write-Host "📂 Kopiert nach: $ReleaseAssetsDir" -ForegroundColor Green
 $setup = Get-ChildItem -Path $PackagesDir -Filter "*Setup*.exe" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $setup) {
     throw "Kein NSIS-Installer in '$PackagesDir' gefunden."
 }
 
 Copy-Item $setup.FullName (Join-Path $ReleaseAssetsDir $setup.Name) -Force
-Write-Host "Windows release asset: $($setup.Name)"
+Write-Host "✅ Windows release asset: $($setup.Name)" -ForegroundColor Green
+Write-Host "📂 Kopiert nach: $ReleaseAssetsDir" -ForegroundColor Green
