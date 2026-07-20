@@ -8,6 +8,7 @@ $PublishDir = Join-Path $RootDir "publish\windows-x64"
 $PackagesDir = Join-Path $RootDir "packages"
 $ReleaseAssetsDir = Join-Path $RootDir "release-assets"
 $NsisScript = Join-Path $RootDir ".github\scripts\neTiPx_Pakage.nsi"
+$BuildPropsPath = Join-Path $RootDir "src\Directory.Build.props"
 
 New-Item -ItemType Directory -Path $PackagesDir -Force | Out-Null
 New-Item -ItemType Directory -Path $ReleaseAssetsDir -Force | Out-Null
@@ -20,6 +21,13 @@ dotnet publish $ProjectPath `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -p:PublishTrimmed=false `
     -o $PublishDir
+
+[xml]$buildProps = Get-Content $BuildPropsPath
+$version = $buildProps.Project.PropertyGroup.Version
+if ([string]::IsNullOrWhiteSpace($version)) {
+    throw "Version konnte nicht aus '$BuildPropsPath' gelesen werden."
+}
+$installerVersion = "V$version"
 
 $makensis = $null
 try {
@@ -42,7 +50,7 @@ if (-not $makensis) {
     throw "makensis wurde nicht gefunden."
 }
 
-& $makensis "/DProjectRoot=$RootDir" $NsisScript
+& $makensis "/DProjectRoot=$RootDir" "/DAppVersion=$installerVersion" $NsisScript
 
 $setup = Get-ChildItem -Path $PackagesDir -Filter "*Setup*.exe" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $setup) {

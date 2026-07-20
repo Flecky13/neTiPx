@@ -56,6 +56,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dpkg-dev
           sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64
+          sudo apt-get install -y desktop-file-utils libglib2.0-bin
           curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" \
             -o "${GITHUB_WORKSPACE}/.github/scripts/appimagetool-x86_64.AppImage"
           chmod +x "${GITHUB_WORKSPACE}/.github/scripts/appimagetool-x86_64.AppImage"

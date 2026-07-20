@@ -17,10 +17,12 @@ Unicode true
 ;--------------------------------
 ; Dateiversion auslesen
 ;--------------------------------
-!getdllversion "${exe_to_read}" expv_
-!define ReleaseVersion "V${expv_1}.${expv_2}.${expv_3}.${expv_4}"
-!define OutFilename "${AppName}_Setup_${ReleaseVersion}.exe"
-!define AppVersion "V${expv_1}.${expv_2}.${expv_3}.${expv_4}"
+!ifndef AppVersion
+  !getdllversion "${exe_to_read}" expv_
+  !define AppVersion "V${expv_1}.${expv_2}.${expv_3}.${expv_4}"
+!endif
+
+!define OutFilename "${AppName}_Setup_${AppVersion}.exe"
 
 Name "${AppName} ${AppVersion}"
 OutFile "${PackagePath}\${OutFilename}"
