@@ -47,7 +47,30 @@ try {
 }
 
 if (-not $makensis) {
-    throw "makensis wurde nicht gefunden."
+    Write-Host "makensis nicht im PATH gefunden. Lade NSIS als Fallback herunter..." -ForegroundColor Yellow
+
+    $nsisVersion = "3.11"
+    $nsisZipUrl = "https://prdownloads.sourceforge.net/nsis/nsis-$nsisVersion.zip"
+    $nsisZipPath = Join-Path $env:RUNNER_TEMP "nsis-$nsisVersion.zip"
+    $nsisExtractPath = Join-Path $env:RUNNER_TEMP "nsis-$nsisVersion"
+
+    Invoke-WebRequest -Uri $nsisZipUrl -OutFile $nsisZipPath
+
+    if (Test-Path $nsisExtractPath) {
+        Remove-Item -Path $nsisExtractPath -Recurse -Force
+    }
+
+    Expand-Archive -Path $nsisZipPath -DestinationPath $nsisExtractPath -Force
+
+    $downloadedMakensis = Get-ChildItem -Path $nsisExtractPath -Filter "makensis.exe" -File -Recurse | Select-Object -First 1
+    if ($downloadedMakensis) {
+        $makensis = $downloadedMakensis.FullName
+        Write-Host "Fallback NSIS gefunden: $makensis" -ForegroundColor Green
+    }
+}
+
+if (-not $makensis) {
+    throw "makensis wurde nicht gefunden (auch nicht nach Fallback-Download)."
 }
 
 & $makensis "/DProjectRoot=$RootDir" "/DAppVersion=$installerVersion" $NsisScript
