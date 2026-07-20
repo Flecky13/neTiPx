@@ -4,6 +4,16 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.6.0]
+
+### Added
+- **CI / Release-Automation**: Neuer manueller GitHub-Workflow fuer Cross-Platform-Releases mit Windows-Setup (.exe), Linux-Paketen (.deb + .AppImage) und macOS-Installer (.dmg).
+- **CI / Packaging-Skripte**: Repo-versionierte Release-Skripte unter `.github/scripts` fuer Windows, Linux und macOS hinzugefuegt.
+
+### Changed
+- **Release-Prozess**: Release-Erzeugung erfolgt nur noch auf ausdruecklichen Wunsch ueber `workflow_dispatch`.
+- **Release-Notes**: GitHub-Release-Beschreibung wird automatisch aus dem passenden Abschnitt in `CHANGELOG.md` uebernommen.
+
 ## [2.0.5.0]
 
 ### Changed

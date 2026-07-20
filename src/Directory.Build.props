@@ -1,9 +1,9 @@
 <Project>
     <PropertyGroup>
         <!-- Zentrale Versionsangabe für alle Projekte -->
-        <Version>2.0.5.3</Version>
-        <AssemblyVersion>2.0.5.3</AssemblyVersion>
-        <FileVersion>2.0.5.3</FileVersion>
+        <Version>2.0.6.0</Version>
+        <AssemblyVersion>2.0.6.0</AssemblyVersion>
+        <FileVersion>2.0.6.0</FileVersion>
         
         <!-- Gemeinsame Metadaten -->
         <Authors>Pedro</Authors>

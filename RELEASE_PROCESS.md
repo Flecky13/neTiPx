@@ -10,6 +10,13 @@ Workflow-Datei:
 
 - Nur manueller Start ueber `workflow_dispatch` mit Parameter `release_tag`
 
+## Release-Text aus CHANGELOG
+
+- Der Workflow liest automatisch den passenden Abschnitt aus `CHANGELOG.md`.
+- Bei `release_tag=v2.0.5.0` wird nach `## [2.0.5.0]` gesucht.
+- Der gefundene Abschnitt wird als Release-Beschreibung verwendet.
+- Wird kein passender Abschnitt gefunden, bricht der Workflow mit Fehler ab.
+
 ## Was gebaut wird
 
 - Windows (`windows-latest`)
@@ -44,7 +51,7 @@ CI-Helfer (Repo-tracked):
 2. Aenderungen committen und nach `master` pushen.
 3. In GitHub Actions den Workflow `Release` manuell starten.
 4. Als `release_tag` den gewuenschten Tag angeben (z. B. `v2.0.6`).
-5. GitHub Release wird erstellt oder aktualisiert und Assets werden hochgeladen.
+5. GitHub Release wird erstellt oder aktualisiert, CHANGELOG-Text uebernommen und Assets werden hochgeladen.
 
 Optional (wenn Tag noch nicht existiert):
 
