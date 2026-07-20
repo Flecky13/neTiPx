@@ -13,6 +13,7 @@ $BuildPropsPath = Join-Path $RootDir "src\Directory.Build.props"
 New-Item -ItemType Directory -Path $PackagesDir -Force | Out-Null
 New-Item -ItemType Directory -Path $ReleaseAssetsDir -Force | Out-Null
 
+Write-Host "📦 Starte dotnet publish für Windows x64..." -ForegroundColor Cyan
 dotnet publish $ProjectPath `
     -c Release `
     -r win-x64 `
@@ -22,9 +23,18 @@ dotnet publish $ProjectPath `
     -p:PublishTrimmed=false `
     -o $PublishDir
 
+Write-Host "✅ dotnet publish abgeschlossen" -ForegroundColor Green
+
+Write-Host "📄 Lese Version aus $BuildPropsPath..." -ForegroundColor Cyan
 [xml]$buildProps = Get-Content $BuildPropsPath
 $version = $buildProps.Project.PropertyGroup.Version
-if ([string]::IsNullOrWhiteSpace($version)) {
+if ([string]::IsNullOrWhiteSpac
+Write-Host "✅ Version: $installerVersion" -ForegroundColor Green
+
+Write-Host "🔨 Erstelle NSIS Installer..." -ForegroundColor Cyan
+Write-Host "   NSIS Script: $NsisScript" -ForegroundColor Gray
+Write-Host "   Project Root: $RootDir" -ForegroundColor Gray
+Write-Host "   App Version: $installerVersion" -ForegroundColor Graye($version)) {
     throw "Version konnte nicht aus '$BuildPropsPath' gelesen werden."
 }
 $installerVersion = "V$version"
@@ -32,49 +42,52 @@ $installerVersion = "V$version"
 $makensis = $null
 try {
     $makensis = (Get-Command makensis -ErrorAction Stop).Source
+    Write-Host "✅ makensis gefunden im PATH: $makensis" -ForegroundColor Green
 } catch {
-    $candidatePaths = @(
-        "$env:ProgramFiles\NSIS\makensis.exe",
-        "$env:ProgramFiles(x86)\NSIS\makensis.exe",
-        "C:\ProgramData\chocolatey\bin\makensis.exe"
-    )
-    foreach ($candidate in $candidatePaths) {
-        if (Test-Path $candidate) {
-            $makensis = $candidate
-            break
+    Write-Host "⚠️ makensis nicht direkt im PATH gefunden, suche in Standard-Pfaden..." -ForegroundColor Yellow
+    
+    # Refresh PATH (wichtig nach choco install)
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    
+    # Erneut versuchen nach PATH-Refresh
+    try {
+        $makensis = (Get-Command makensis -ErrorAction Stop).Source
+        Write-Host "✅ makensis nach PATH-Refresh gefunden: $makensis" -ForegroundColor Green
+    } catch {
+        # Standard-Pfade durchsuchen
+        $candidatePaths = @(
+            "$env:ProgramFiles\NSIS\makensis.exe",
+            "$env:ProgramFiles(x86)\NSIS\makensis.exe",
+            "C:\ProgramData\chocolatey\bin\makensis.exe",
+            "C:\Program Files\NSIS\makensis.exe",
+            "C:\Program Files (x86)\NSIS\makensis.exe"
+        )
+        foreach ($candidate in $candidatePaths) {
+            if (Test-Path $candidate) {
+                $makensis = $candidate
+                Write-Host "✅ makensis gefunden in: $makensis" -ForegroundColor Green
+                break
+            }
         }
     }
 }
 
 if (-not $makensis) {
-    Write-Host "makensis nicht im PATH gefunden. Lade NSIS als Fallback herunter..." -ForegroundColor Yellow
-
-    $nsisVersion = "3.11"
-    $nsisZipUrl = "https://prdownloads.sourceforge.net/nsis/nsis-$nsisVersion.zip"
-    $nsisZipPath = Join-Path $env:RUNNER_TEMP "nsis-$nsisVersion.zip"
-    $nsisExtractPath = Join-Path $env:RUNNER_TEMP "nsis-$nsisVersion"
-
-    Invoke-WebRequest -Uri $nsisZipUrl -OutFile $nsisZipPath
-
-    if (Test-Path $nsisExtractPath) {
-        Remove-Item -Path $nsisExtractPath -Recurse -Force
-    }
-
-    Expand-Archive -Path $nsisZipPath -DestinationPath $nsisExtractPath -Force
-
-    $downloadedMakensis = Get-ChildItem -Path $nsisExtractPath -Filter "makensis.exe" -File -Recurse | Select-Object -First 1
-    if ($downloadedMakensis) {
-        $makensis = $downloadedMakensis.FullName
-        Write-Host "Fallback NSIS gefunden: $makensis" -ForegroundColor Green
-    }
+    Write-Host "❌ makensis wurde nicht gefunden." -ForegroundColor Red
+if ($LASTEXITCODE -ne 0) {
+    throw "NSIS Installer-Erstellung fehlgeschlagen mit Exit-Code: $LASTEXITCODE"
 }
 
-if (-not $makensis) {
-    throw "makensis wurde nicht gefunden (auch nicht nach Fallback-Download)."
+Write-Host "✅ NSIS Installer erstellt" -ForegroundColor Green
+
+Write-Host "📦 Suche Setup-Datei in $PackagesDir..." -ForegroundColor Cyan
+    Write-Host "Bitte NSIS installieren: choco install nsis -y" -ForegroundColor Red
+    throw "makensis wurde nicht gefunden. Bitte NSIS installieren."
 }
 
 & $makensis "/DProjectRoot=$RootDir" "/DAppVersion=$installerVersion" $NsisScript
-
+✅ Windows release asset: $($setup.Name)" -ForegroundColor Green
+Write-Host "📂 Kopiert nach: $ReleaseAssetsDir" -ForegroundColor Green
 $setup = Get-ChildItem -Path $PackagesDir -Filter "*Setup*.exe" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $setup) {
     throw "Kein NSIS-Installer in '$PackagesDir' gefunden."

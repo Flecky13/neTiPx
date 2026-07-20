@@ -25,29 +25,37 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: Install NSIS
+      run: |
+        choco install nsis -y
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        Write-Host "NSIS installed. Path updated."
 
-    - name: Build
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+    - name: Verify NSIS Installation
+      run: |
+        $makensis = Get-Command makensis -ErrorAction SilentlyContinue
+        if ($makensis) {
+          Write-Host "✅ NSIS found at: $($makensis.Source)"
+        } else {
+          Write-Host "❌ NSIS not found in PATH"
+          exit 1
+        }
 
-    - name: Publish Windows x64
-      run: dotnet publish src/neTiPx.UI.Avalonia/neTiPx.UI.Avalonia.csproj -c Release -r win-x64 --self-contained -o publish/win-x64
+    - name: Build Windows Installer
+      run: .\.github\scripts\build-windows-release.ps1
+      shell: pwsh
 
-    - name: Publish Windows ARM64
-      run: dotnet publish src/neTiPx.UI.Avalonia/neTiPx.UI.Avalonia.csproj -c Release -r win-arm64 --self-contained -o publish/win-arm64
-
-    - name: Upload Windows x64 Artifact
+    - name: Upload Windows x64 Installer
       uses: actions/upload-artifact@v4
       with:
-        name: neTiPx-Windows-x64
-        path: publish/win-x64/
+        name: neTiPx-Windows-x64-Installer
+        path: release-assets/*.exe
 
-    - name: Upload Windows ARM64 Artifact
+    - name: Upload Windows x64 Portable
       uses: actions/upload-artifact@v4
       with:
-        name: neTiPx-Windows-ARM64
-        path: publish/win-arm64/
+        name: neTiPx-Windows-x64-Portable
+        path: publish/windows-x64/
 
   build-linux:
     name: Build Linux
