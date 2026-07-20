@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to publish (e.g. v1.2.3)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: "8.0.x"
+
+jobs:
+  build:
+    name: Build & Package (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows
+            os: windows-latest
+            artifact_name: release-windows
+            asset_glob: release-assets/*.exe
+          - target: linux
+            os: ubuntu-latest
+            artifact_name: release-linux
+            asset_glob: release-assets/*.deb
+          - target: macos
+            os: macos-latest
+            artifact_name: release-macos
+            asset_glob: release-assets/*.dmg
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup NSIS (Windows)
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: choco install nsis --no-progress -y
+
+      - name: Setup Linux packaging tools
+        if: matrix.target == 'linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+          sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64
+          curl -L "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" \
+            -o "${GITHUB_WORKSPACE}/.github/scripts/appimagetool-x86_64.AppImage"
+          chmod +x "${GITHUB_WORKSPACE}/.github/scripts/appimagetool-x86_64.AppImage"
+
+      - name: Build Windows Release Assets
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: ./.github/scripts/build-windows-release.ps1
+
+      - name: Build Linux Release Assets
+        if: matrix.target == 'linux'
+        shell: bash
+        run: bash ./.github/scripts/build-linux-release.sh
+
+      - name: Build macOS Release Assets
+        if: matrix.target == 'macos'
+        shell: bash
+        run: bash ./.github/scripts/build-macos-release.sh
+
+      - name: Upload packaging artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.asset_glob }}
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Linux AppImage artifact
+        if: matrix.target == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-appimage
+          path: release-assets/*.AppImage
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish GitHub Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Resolve release tag
+        id: tag
+        shell: bash
+        run: echo "release_tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          name: ${{ steps.tag.outputs.release_tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.deb
+            artifacts/**/*.AppImage
+            artifacts/**/*.dmg
+          fail_on_unmatched_files: true
+          make_latest: true
