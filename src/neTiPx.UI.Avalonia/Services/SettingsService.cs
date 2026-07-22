@@ -14,6 +14,8 @@ namespace neTiPx.UI.Avalonia.Services
         private readonly UserSettingsStore _userSettingsStore = new UserSettingsStore();
         private UserSettingsStore.UserSettings? _cachedSettings;
 
+        public static event EventHandler? UserSettingsChanged;
+
         private UserSettingsStore.UserSettings LoadUserSettings(bool forceReload = false)
         {
             if (forceReload || _cachedSettings == null)
@@ -30,6 +32,7 @@ namespace neTiPx.UI.Avalonia.Services
             update(settings);
             _userSettingsStore.WriteUserSettings(settings);
             _cachedSettings = settings;
+            UserSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public UserSettingsStore.UserSettings GetUserSettings()
@@ -363,6 +366,17 @@ namespace neTiPx.UI.Avalonia.Services
         public void SetLanguageCode(string languageCode)
         {
             UpdateUserSettings(settings => settings.LanguageCode = languageCode ?? "System");
+        }
+
+        public DesktopOverlaySettingsModel GetDesktopOverlaySettings(bool forceReload = false)
+        {
+            var settings = LoadUserSettings(forceReload);
+            return DesktopOverlaySettingsModel.Normalize(settings.DesktopOverlay);
+        }
+
+        public void SetDesktopOverlaySettings(DesktopOverlaySettingsModel overlaySettings)
+        {
+            UpdateUserSettings(settings => settings.DesktopOverlay = DesktopOverlaySettingsModel.Normalize(overlaySettings));
         }
 
     }

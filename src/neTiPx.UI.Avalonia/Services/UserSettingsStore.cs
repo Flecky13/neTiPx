@@ -41,6 +41,9 @@ namespace neTiPx.UI.Avalonia.Services
 
             // Language
             public string LanguageCode { get; set; } = "System";
+
+            // Desktop Overlay
+            public DesktopOverlaySettingsModel DesktopOverlay { get; set; } = DesktopOverlaySettingsModel.CreateDefault();
         }
 
         public UserSettings ReadUserSettings()
@@ -131,6 +134,10 @@ namespace neTiPx.UI.Avalonia.Services
                 new XAttribute("verticalOffsetPixels", Math.Max(0, settings.HoverWindowVerticalOffsetPixels))
             );
 
+            var desktopOverlayElement = new XElement("desktopOverlay",
+                new XCData(DesktopOverlaySettingsSerializer.Serialize(settings.DesktopOverlay))
+            );
+
             var connectionStatusElement = new XElement("connectionStatus",
                 new XAttribute("checkGateway", settings.CheckConnectionGateway),
                 new XAttribute("checkDns1", settings.CheckConnectionDns1),
@@ -171,7 +178,7 @@ namespace neTiPx.UI.Avalonia.Services
                 new XAttribute("code", settings.LanguageCode ?? "System")
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, connectionStatusElement, appBehaviorElement, updateCheckElement, networkScannerElement, languageElement);
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, desktopOverlayElement, connectionStatusElement, appBehaviorElement, updateCheckElement, networkScannerElement, languageElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -236,6 +243,16 @@ namespace neTiPx.UI.Avalonia.Services
                     {
                         settings.HoverWindowVerticalOffsetPixels = Math.Max(0, verticalOffsetPixels);
                     }
+                }
+
+                var desktopOverlayElement = root.Element("desktopOverlay");
+                if (desktopOverlayElement != null)
+                {
+                    settings.DesktopOverlay = DesktopOverlaySettingsSerializer.Deserialize(desktopOverlayElement.Value);
+                }
+                else
+                {
+                    settings.DesktopOverlay = DesktopOverlaySettingsModel.CreateDefault();
                 }
 
                 var connectionStatusElement = root.Element("connectionStatus");

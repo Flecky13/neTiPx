@@ -27,6 +27,7 @@ public partial class App : Application
 {
     public static IServiceProvider? ServiceProvider { get; private set; }
     private TrayService? _trayService;
+    private DesktopOverlayController? _desktopOverlayController;
     public static TrayService? TrayService => ((App?)Current)?._trayService;
     private readonly object _shutdownSync = new();
     private bool _isExitRequested;
@@ -84,6 +85,8 @@ public partial class App : Application
             
             // Initialize TrayService
             _trayService = new TrayService();
+            _desktopOverlayController = new DesktopOverlayController();
+            _ = _desktopOverlayController.InitializeAsync();
             
             if (startMinimized)
             {
@@ -166,6 +169,9 @@ public partial class App : Application
         var trayService = _trayService;
         _trayService = null;
 
+        var desktopOverlayController = _desktopOverlayController;
+        _desktopOverlayController = null;
+
         if (trayService != null)
         {
             if (Dispatcher.UIThread.CheckAccess())
@@ -177,6 +183,8 @@ public partial class App : Application
                 Dispatcher.UIThread.Post(trayService.Dispose, DispatcherPriority.Send);
             }
         }
+
+        desktopOverlayController?.Dispose();
 
         if (ServiceProvider is IDisposable disposableProvider)
         {

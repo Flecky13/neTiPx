@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -24,6 +25,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly Core.Services.ThemeService _themeService;
     private readonly SettingsService _settingsService;
     private readonly AutostartService _autostartService;
+    private bool _isLoadingDesktopOverlaySettings;
     
     [ObservableProperty]
     private ObservableCollection<string> _availableAdapters;
@@ -78,6 +80,69 @@ public partial class SettingsViewModel : ObservableObject
     
     [ObservableProperty]
     private bool _startMinimizedToTray;
+
+    [ObservableProperty]
+    private bool _desktopOverlayEnabled;
+
+    [ObservableProperty]
+    private bool _desktopOverlayHoverInteractive;
+
+    [ObservableProperty]
+    private int _desktopOverlayPositionIndex;
+
+    [ObservableProperty]
+    private decimal _desktopOverlayOffsetX;
+
+    [ObservableProperty]
+    private decimal _desktopOverlayOffsetY;
+
+    [ObservableProperty]
+    private decimal _desktopOverlayWidth;
+
+    [ObservableProperty]
+    private decimal _desktopOverlayHeight;
+
+    [ObservableProperty]
+    private decimal _desktopOverlayFontSize;
+
+    [ObservableProperty]
+    private string _desktopOverlayFontFamily = "Consolas";
+
+    [ObservableProperty]
+    private string _desktopOverlayTextColor = "#FFFFFFFF";
+
+    [ObservableProperty]
+    private string _desktopOverlayBackgroundColor = "#1A1A1A";
+
+    [ObservableProperty]
+    private int _desktopOverlayBackgroundOpacityPercent;
+
+    [ObservableProperty]
+    private int _desktopOverlayPadding;
+
+    [ObservableProperty]
+    private int _desktopOverlayLineSpacing;
+
+    [ObservableProperty]
+    private int _desktopOverlayCornerRadius;
+
+    [ObservableProperty]
+    private bool _desktopOverlayShadowEnabled;
+
+    [ObservableProperty]
+    private int _desktopOverlayNetworkRefreshSeconds;
+
+    [ObservableProperty]
+    private int _desktopOverlayExternalIpRefreshMinutes;
+
+    [ObservableProperty]
+    private int _desktopOverlayRamRefreshSeconds;
+
+    [ObservableProperty]
+    private int _desktopOverlayUptimeRefreshSeconds;
+
+    [ObservableProperty]
+    private ObservableCollection<DesktopOverlayItemSettingViewModel> _desktopOverlayInfoItems;
     
     public SettingsViewModel()
     {
@@ -90,6 +155,7 @@ public partial class SettingsViewModel : ObservableObject
         _availableSecondaryAdapters = new ObservableCollection<string>();
         _availableThemes = new ObservableCollection<string>();
         _availableLanguages = new ObservableCollection<string>();
+        _desktopOverlayInfoItems = new ObservableCollection<DesktopOverlayItemSettingViewModel>();
         
         LoadAvailableAdapters();
         LoadAdapterSettings();
@@ -98,6 +164,7 @@ public partial class SettingsViewModel : ObservableObject
         LoadLanguageSettings();
         LoadConnectionQualitySettings();
         LoadAutostartSettings();
+        LoadDesktopOverlaySettings();
     }
     
     /// <summary>
@@ -522,6 +589,11 @@ public partial class SettingsViewModel : ObservableObject
                     SelectedLanguage = selectedLanguageDisplay;
                 }
             }
+
+            foreach (var item in DesktopOverlayInfoItems)
+            {
+                item.DisplayName = GetOverlayItemDisplayName(item.Key);
+            }
         }
         finally
         {
@@ -684,6 +756,208 @@ public partial class SettingsViewModel : ObservableObject
             StartMinimizedToTray = _settingsService.GetStartMinimizedToTray();
         }
     }
+
+    private void LoadDesktopOverlaySettings()
+    {
+        _isLoadingDesktopOverlaySettings = true;
+        try
+        {
+            var settings = DesktopOverlaySettingsModel.Normalize(_settingsService.GetDesktopOverlaySettings());
+
+            DesktopOverlayEnabled = settings.Enabled;
+            DesktopOverlayHoverInteractive = settings.HoverInteractive;
+            DesktopOverlayPositionIndex = settings.PositionMode switch
+            {
+                DesktopOverlayPositionModes.TopLeft => 0,
+                DesktopOverlayPositionModes.TopRight => 1,
+                DesktopOverlayPositionModes.BottomLeft => 2,
+                DesktopOverlayPositionModes.BottomRight => 3,
+                _ => 4
+            };
+
+            DesktopOverlayOffsetX = settings.OffsetX;
+            DesktopOverlayOffsetY = settings.OffsetY;
+            DesktopOverlayWidth = settings.Width;
+            DesktopOverlayHeight = settings.Height;
+            DesktopOverlayFontSize = (decimal)settings.FontSize;
+            DesktopOverlayFontFamily = settings.FontFamily;
+            DesktopOverlayTextColor = settings.TextColor;
+            DesktopOverlayBackgroundColor = settings.BackgroundColor;
+            DesktopOverlayBackgroundOpacityPercent = settings.BackgroundOpacityPercent;
+            DesktopOverlayPadding = settings.Padding;
+            DesktopOverlayLineSpacing = settings.LineSpacing;
+            DesktopOverlayCornerRadius = settings.CornerRadius;
+            DesktopOverlayShadowEnabled = settings.ShowShadow;
+
+            DesktopOverlayNetworkRefreshSeconds = settings.NetworkRefreshSeconds;
+            DesktopOverlayExternalIpRefreshMinutes = settings.ExternalIpRefreshMinutes;
+            DesktopOverlayRamRefreshSeconds = settings.RamRefreshSeconds;
+            DesktopOverlayUptimeRefreshSeconds = settings.UptimeRefreshSeconds;
+
+            foreach (var item in DesktopOverlayInfoItems)
+            {
+                item.PropertyChanged -= OverlayItem_PropertyChanged;
+            }
+
+            DesktopOverlayInfoItems.Clear();
+            foreach (var item in settings.Items.OrderBy(i => i.Order))
+            {
+                var vm = new DesktopOverlayItemSettingViewModel(
+                    item.Key,
+                    GetOverlayItemDisplayName(item.Key),
+                    item.IsVisible,
+                    item.ShowLabel,
+                    item.ShowValue);
+                vm.PropertyChanged += OverlayItem_PropertyChanged;
+                DesktopOverlayInfoItems.Add(vm);
+            }
+        }
+        catch
+        {
+            // Ignore loading errors and keep defaults.
+        }
+        finally
+        {
+            _isLoadingDesktopOverlaySettings = false;
+        }
+    }
+
+    private void OverlayItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_isLoadingDesktopOverlaySettings)
+        {
+            return;
+        }
+
+        if (e.PropertyName is nameof(DesktopOverlayItemSettingViewModel.IsVisible)
+            or nameof(DesktopOverlayItemSettingViewModel.ShowLabel)
+            or nameof(DesktopOverlayItemSettingViewModel.ShowValue))
+        {
+            SaveDesktopOverlaySettings();
+        }
+    }
+
+    public void MoveDesktopOverlayItem(string sourceKey, string targetKey)
+    {
+        if (string.IsNullOrWhiteSpace(sourceKey) || string.IsNullOrWhiteSpace(targetKey))
+        {
+            return;
+        }
+
+        var sourceIndex = DesktopOverlayInfoItems
+            .Select((item, index) => new { item, index })
+            .FirstOrDefault(x => x.item.Key.Equals(sourceKey, StringComparison.OrdinalIgnoreCase))?.index ?? -1;
+
+        var targetIndex = DesktopOverlayInfoItems
+            .Select((item, index) => new { item, index })
+            .FirstOrDefault(x => x.item.Key.Equals(targetKey, StringComparison.OrdinalIgnoreCase))?.index ?? -1;
+
+        if (sourceIndex < 0 || targetIndex < 0 || sourceIndex == targetIndex)
+        {
+            return;
+        }
+
+        var sourceItem = DesktopOverlayInfoItems[sourceIndex];
+        DesktopOverlayInfoItems.RemoveAt(sourceIndex);
+        if (sourceIndex < targetIndex)
+        {
+            targetIndex--;
+        }
+
+        DesktopOverlayInfoItems.Insert(targetIndex, sourceItem);
+        SaveDesktopOverlaySettings();
+    }
+
+    private void SaveDesktopOverlaySettings()
+    {
+        if (_isLoadingDesktopOverlaySettings)
+        {
+            return;
+        }
+
+        try
+        {
+            var model = new DesktopOverlaySettingsModel
+            {
+                Enabled = DesktopOverlayEnabled,
+                HoverInteractive = DesktopOverlayHoverInteractive,
+                PositionMode = DesktopOverlayPositionIndex switch
+                {
+                    0 => DesktopOverlayPositionModes.TopLeft,
+                    1 => DesktopOverlayPositionModes.TopRight,
+                    2 => DesktopOverlayPositionModes.BottomLeft,
+                    3 => DesktopOverlayPositionModes.BottomRight,
+                    _ => DesktopOverlayPositionModes.Free
+                },
+                OffsetX = (int)DesktopOverlayOffsetX,
+                OffsetY = (int)DesktopOverlayOffsetY,
+                Width = (int)DesktopOverlayWidth,
+                Height = (int)DesktopOverlayHeight,
+                FontSize = (double)DesktopOverlayFontSize,
+                FontFamily = DesktopOverlayFontFamily,
+                TextColor = DesktopOverlayTextColor,
+                BackgroundColor = DesktopOverlayBackgroundColor,
+                BackgroundOpacityPercent = DesktopOverlayBackgroundOpacityPercent,
+                Padding = DesktopOverlayPadding,
+                LineSpacing = DesktopOverlayLineSpacing,
+                CornerRadius = DesktopOverlayCornerRadius,
+                ShowShadow = DesktopOverlayShadowEnabled,
+                NetworkRefreshSeconds = DesktopOverlayNetworkRefreshSeconds,
+                ExternalIpRefreshMinutes = DesktopOverlayExternalIpRefreshMinutes,
+                RamRefreshSeconds = DesktopOverlayRamRefreshSeconds,
+                UptimeRefreshSeconds = DesktopOverlayUptimeRefreshSeconds,
+                Items = DesktopOverlayInfoItems
+                    .Select((item, index) => item.ToModel(index))
+                    .ToList()
+            };
+
+            _settingsService.SetDesktopOverlaySettings(model);
+        }
+        catch
+        {
+            // Ignore persistence errors.
+        }
+    }
+
+    private static string GetOverlayItemDisplayName(string key)
+    {
+        return key switch
+        {
+            DesktopOverlayInfoKeys.ComputerName => T("OVERLAY_INFO_COMPUTER_NAME"),
+            DesktopOverlayInfoKeys.User => T("OVERLAY_INFO_USER"),
+            DesktopOverlayInfoKeys.IPv4 => T("OVERLAY_INFO_IPV4"),
+            DesktopOverlayInfoKeys.IPv6 => T("OVERLAY_INFO_IPV6"),
+            DesktopOverlayInfoKeys.Gateway => T("OVERLAY_INFO_GATEWAY"),
+            DesktopOverlayInfoKeys.ExternalIp => T("OVERLAY_INFO_EXTERNAL_IP"),
+            DesktopOverlayInfoKeys.Domain => T("OVERLAY_INFO_DOMAIN"),
+            DesktopOverlayInfoKeys.OperatingSystem => T("OVERLAY_INFO_OPERATING_SYSTEM"),
+            DesktopOverlayInfoKeys.Uptime => T("OVERLAY_INFO_UPTIME"),
+            DesktopOverlayInfoKeys.RamUsage => T("OVERLAY_INFO_RAM"),
+            DesktopOverlayInfoKeys.NetworkAdapter => T("OVERLAY_INFO_NETWORK_ADAPTER"),
+            _ => key
+        };
+    }
+
+    partial void OnDesktopOverlayEnabledChanged(bool value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayHoverInteractiveChanged(bool value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayPositionIndexChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayOffsetXChanged(decimal value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayOffsetYChanged(decimal value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayWidthChanged(decimal value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayHeightChanged(decimal value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayFontSizeChanged(decimal value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayFontFamilyChanged(string value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayTextColorChanged(string value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayBackgroundColorChanged(string value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayBackgroundOpacityPercentChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayPaddingChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayLineSpacingChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayCornerRadiusChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayShadowEnabledChanged(bool value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayNetworkRefreshSecondsChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayExternalIpRefreshMinutesChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayRamRefreshSecondsChanged(int value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayUptimeRefreshSecondsChanged(int value) => SaveDesktopOverlaySettings();
 
     public async Task ExportSettingsArchiveAsync(string archivePath)
     {

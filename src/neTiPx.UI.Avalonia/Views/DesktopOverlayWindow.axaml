@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
+        x:Class="neTiPx.UI.Avalonia.Views.DesktopOverlayWindow"
+        x:CompileBindings="False"
+        mc:Ignorable="d"
+        d:DesignWidth="360"
+        d:DesignHeight="360"
+        Title="neTiPx Desktop Overlay"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="False"
+        CanResize="False"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Width="360"
+        Height="360">
+
+    <Design.DataContext>
+        <vm:DesktopOverlayViewModel />
+    </Design.DataContext>
+
+    <Border Background="{Binding BackgroundBrush}"
+            CornerRadius="{Binding OverlayCornerRadius}"
+            BoxShadow="{Binding OverlayShadow}"
+            Padding="{Binding OverlayPadding}"
+            IsHitTestVisible="{Binding IsInteractive}"
+            PointerPressed="OverlayRoot_OnPointerPressed">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Lines}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Text}"
+                                   Foreground="{Binding DataContext.TextBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontSize="{Binding DataContext.OverlayFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   FontFamily="{Binding DataContext.OverlayFontFamily, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   Margin="{Binding DataContext.LineItemMargin, RelativeSource={RelativeSource AncestorType=Window}}"
+                                   TextWrapping="Wrap" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Border>
+</Window>

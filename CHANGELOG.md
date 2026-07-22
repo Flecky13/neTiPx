@@ -4,6 +4,22 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.7.0]
+
+### Added
+- **Desktop-Overlay**: Neues, optionales Overlay als eigenes Avalonia-Window mit Live-Anzeige wichtiger System- und Netzwerkdaten.
+- **Desktop-Overlay / Konfiguration**: Umfangreiche Overlay-Einstellungen (Darstellung, Position, Aktualisierungsintervalle, sichtbare Felder, Reihenfolge) inkl. Persistenz in den Benutzereinstellungen.
+- **Desktop-Overlay / Einstellungen-UI**: Neues separates Fenster fuer Overlay-Detailoptionen; auf der normalen Settings-Seite verbleiben Aktivieren/Deaktivieren und ein Button zum Oeffnen des Detailfensters.
+
+### Changed
+- **Desktop-Overlay / Architektur**: Overlay-Logik in dedizierten Controller + ViewModel ausgelagert und an den App-Lifecycle angebunden (Start, Refresh, Cleanup).
+- **Desktop-Overlay / Datenaktualisierung**: Unterschiedliche Refresh-Intervalle fuer Netzwerk, externe IP, RAM und Uptime umgesetzt; UI wird nur bei geaenderten Werten aktualisiert.
+- **Desktop-Overlay / Felder**: Informationen sind modular konfigurierbar (sichtbar, Label anzeigen, Wert anzeigen) und per Drag&Drop sortierbar.
+
+### Fixed
+- **Desktop-Overlay / Build**: Fehler bei Linux-Debug-Build und XAML-Kompilierung behoben (mehrdeutige Service-Referenzen, Constructor-/Binding-Probleme).
+- **Desktop-Overlay / Sofortwirkung**: Aktivieren/Deaktivieren reagiert jetzt unmittelbar ohne App-Neustart (Settings-Reload bei Overlay-Apply erzwungen).
+
 ## [2.0.6.0]
 
 ### Added

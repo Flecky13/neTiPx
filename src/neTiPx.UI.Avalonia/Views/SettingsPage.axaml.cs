@@ -27,6 +27,25 @@ public partial class SettingsPage : UserControl
         InitializeComponent();
     }
 
+    private async void OpenDesktopOverlaySettingsButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        var dialog = new DesktopOverlaySettingsWindow
+        {
+            DataContext = ViewModel,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is Window parentWindow)
+        {
+            await dialog.ShowDialog(parentWindow);
+        }
+        else
+        {
+            dialog.Show();
+        }
+    }
+
     private async void ExportSettingsButton_OnClick(object? sender, RoutedEventArgs e)
     {
         try

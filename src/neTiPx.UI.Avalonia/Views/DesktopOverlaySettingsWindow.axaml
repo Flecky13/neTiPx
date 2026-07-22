@@ -1,0 +1,164 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
+        xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
+        x:Class="neTiPx.UI.Avalonia.Views.DesktopOverlaySettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        mc:Ignorable="d"
+        d:DesignWidth="780"
+        d:DesignHeight="820"
+        Width="780"
+        Height="820"
+        MinWidth="640"
+        MinHeight="520"
+        Title="{loc:Loc OVERLAY_SETTINGS_WINDOW_TITLE}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="12" Margin="16">
+            <TextBlock Text="{loc:Loc OVERLAY_SETTINGS_TITLE}" FontWeight="Bold" FontSize="18" />
+            <TextBlock Text="{loc:Loc OVERLAY_SETTINGS_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+            <CheckBox Content="{loc:Loc OVERLAY_INTERACTIVE_HOVER}"
+                      IsChecked="{Binding DesktopOverlayHoverInteractive}" />
+
+            <TextBlock Text="{loc:Loc OVERLAY_POSITION}" FontWeight="SemiBold" FontSize="12" />
+            <ComboBox SelectedIndex="{Binding DesktopOverlayPositionIndex}">
+                <ComboBoxItem Content="{loc:Loc OVERLAY_POS_TOP_LEFT}" />
+                <ComboBoxItem Content="{loc:Loc OVERLAY_POS_TOP_RIGHT}" />
+                <ComboBoxItem Content="{loc:Loc OVERLAY_POS_BOTTOM_LEFT}" />
+                <ComboBoxItem Content="{loc:Loc OVERLAY_POS_BOTTOM_RIGHT}" />
+                <ComboBoxItem Content="{loc:Loc OVERLAY_POS_FREE}" />
+            </ComboBox>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_OFFSET_X}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayOffsetX}" Minimum="0" Maximum="5000" Increment="5" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_OFFSET_Y}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayOffsetY}" Minimum="0" Maximum="5000" Increment="5" />
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_WIDTH}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayWidth}" Minimum="180" Maximum="1200" Increment="10" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_HEIGHT}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayHeight}" Minimum="120" Maximum="2000" Increment="10" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="{loc:Loc OVERLAY_APPEARANCE}" FontWeight="SemiBold" FontSize="12" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_FONT_SIZE}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayFontSize}" Minimum="9" Maximum="36" Increment="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_FONT_FAMILY}" FontSize="12" />
+                    <TextBox Text="{Binding DesktopOverlayFontFamily}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_TEXT_COLOR}" FontSize="12" />
+                    <TextBox Text="{Binding DesktopOverlayTextColor}" Watermark="#FFFFFFFF" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_BACKGROUND_COLOR}" FontSize="12" />
+                    <TextBox Text="{Binding DesktopOverlayBackgroundColor}" Watermark="#1A1A1A" />
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_BACKGROUND_OPACITY}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayBackgroundOpacityPercent}" Minimum="0" Maximum="100" Increment="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_PADDING}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayPadding}" Minimum="0" Maximum="64" Increment="1" />
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_LINE_SPACING}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayLineSpacing}" Minimum="0" Maximum="32" Increment="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_CORNER_RADIUS}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayCornerRadius}" Minimum="0" Maximum="64" Increment="1" />
+                </StackPanel>
+            </Grid>
+
+            <CheckBox Content="{loc:Loc OVERLAY_SHADOW}"
+                      IsChecked="{Binding DesktopOverlayShadowEnabled}" />
+
+            <TextBlock Text="{loc:Loc OVERLAY_REFRESH}" FontWeight="SemiBold" FontSize="12" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_REFRESH_NETWORK}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayNetworkRefreshSeconds}" Minimum="1" Maximum="3600" Increment="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_REFRESH_EXTERNAL_IP}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayExternalIpRefreshMinutes}" Minimum="1" Maximum="1440" Increment="1" />
+                </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_REFRESH_RAM}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayRamRefreshSeconds}" Minimum="1" Maximum="3600" Increment="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="{loc:Loc OVERLAY_REFRESH_UPTIME}" FontSize="12" />
+                    <NumericUpDown Value="{Binding DesktopOverlayUptimeRefreshSeconds}" Minimum="1" Maximum="3600" Increment="1" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="{loc:Loc OVERLAY_FIELDS}" FontWeight="SemiBold" FontSize="12" />
+            <TextBlock Text="{loc:Loc OVERLAY_FIELDS_HINT}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
+
+            <ListBox ItemsSource="{Binding DesktopOverlayInfoItems}"
+                     BorderThickness="0"
+                     Background="Transparent">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:DesktopOverlayItemSettingViewModel">
+                        <Border Padding="8"
+                                Margin="0,0,0,6"
+                                CornerRadius="6"
+                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                BorderThickness="1"
+                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                DragDrop.AllowDrop="True"
+                                DragDrop.DragOver="OverlayItemDragOver"
+                                DragDrop.Drop="OverlayItemDrop">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                                <TextBlock Grid.Column="0" Text="::" VerticalAlignment="Center" Opacity="0.6" PointerPressed="OverlayItemDragStart_OnPointerPressed" />
+                                <TextBlock Grid.Column="1" Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Column="2" IsChecked="{Binding IsVisible}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Column="3" IsChecked="{Binding ShowLabel}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Column="4" IsChecked="{Binding ShowValue}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                <TextBlock Grid.Column="2" Text="{loc:Loc OVERLAY_COL_VISIBLE}" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" />
+                <TextBlock Grid.Column="3" Text="{loc:Loc OVERLAY_COL_LABEL}" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" />
+                <TextBlock Grid.Column="4" Text="{loc:Loc OVERLAY_COL_VALUE}" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" />
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
