@@ -118,6 +118,7 @@ jobs:
           set -euo pipefail
           tag="${{ steps.tag.outputs.release_tag }}"
           version="${tag#v}"
+          version="${version#V}"
 
           if [[ ! -f CHANGELOG.md ]]; then
             echo "CHANGELOG.md not found"
