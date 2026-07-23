@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Text.Json.Serialization;
 
 namespace neTiPx.Core.Services;
@@ -32,9 +33,7 @@ public class GitHubUpdateService
                 };
             }
 
-            // Version extrahieren (Format: v2.0.1.0 oder 2.0.1.0)
-            var tagName = release.TagName.TrimStart('v');
-            if (!Version.TryParse(tagName, out var latestVersion))
+            if (!TryParseReleaseVersion(release.TagName, out var parsedLatestVersion))
             {
                 return new UpdateInfo 
                 { 
@@ -44,7 +43,9 @@ public class GitHubUpdateService
                 };
             }
 
-            var isUpdateAvailable = latestVersion > currentVersion;
+            var latestVersion = NormalizeVersion(parsedLatestVersion);
+            var normalizedCurrentVersion = NormalizeVersion(currentVersion);
+            var isUpdateAvailable = latestVersion > normalizedCurrentVersion;
             
             // Plattform-spezifischen Download-Link finden
             var (downloadUrl, assetName) = GetPlatformSpecificAsset(release.Assets);
@@ -52,7 +53,7 @@ public class GitHubUpdateService
             return new UpdateInfo
             {
                 IsUpdateAvailable = isUpdateAvailable,
-                LatestVersion = latestVersion.ToString(),
+                LatestVersion = release.TagName,
                 CurrentVersion = currentVersion.ToString(),
                 DownloadUrl = downloadUrl,
                 ReleaseUrl = release.HtmlUrl,
@@ -290,6 +291,55 @@ public class GitHubUpdateService
         }
 
         return $"neTiPx-update-{DateTime.Now:yyyyMMdd-HHmmss}.bin";
+    }
+
+    private static bool TryParseReleaseVersion(string tagName, out Version version)
+    {
+        version = new Version(0, 0, 0, 0);
+
+        if (string.IsNullOrWhiteSpace(tagName))
+        {
+            return false;
+        }
+
+        var candidate = tagName.Trim();
+        if (candidate.StartsWith("refs/tags/", StringComparison.OrdinalIgnoreCase))
+        {
+            candidate = candidate["refs/tags/".Length..];
+        }
+
+        candidate = candidate.TrimStart('v', 'V');
+
+        if (Version.TryParse(candidate, out var direct))
+        {
+            version = direct;
+            return true;
+        }
+
+        var semverCore = candidate.Split('-', '+')[0];
+        if (Version.TryParse(semverCore, out var fromSemVerCore))
+        {
+            version = fromSemVerCore;
+            return true;
+        }
+
+        var match = Regex.Match(candidate, @"\d+(?:\.\d+){1,3}");
+        if (match.Success && Version.TryParse(match.Value, out var extracted))
+        {
+            version = extracted;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static Version NormalizeVersion(Version version)
+    {
+        return new Version(
+            version.Major,
+            version.Minor,
+            version.Build >= 0 ? version.Build : 0,
+            version.Revision >= 0 ? version.Revision : 0);
     }
 }
 

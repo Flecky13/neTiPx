@@ -4,6 +4,12 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.7.1]
+
+### Fixed
+- **Update Prüfung**: Fehler bei Update Prüfung Versionsformat wurde nicht erkannt.
+
+
 ## [2.0.7.0]
 
 ### Added
