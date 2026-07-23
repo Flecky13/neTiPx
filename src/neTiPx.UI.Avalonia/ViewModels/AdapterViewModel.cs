@@ -271,36 +271,38 @@ public partial class AdapterViewModel : ObservableObject
         {
             var store = new Core.Services.AdapterStore();
             var settings = store.ReadAdapters();
-            
-            // Use configured adapters if available
-            if (!string.IsNullOrWhiteSpace(settings.PrimaryAdapter))
+
+            var selectableAdapters = new Core.Services.AdapterDiscoveryService()
+                .GetSelectableAdapters()
+                .Select(n => n.Name)
+                .ToList();
+
+            // Use configured adapters if available and still valid
+            // (filtert z.B. veraltete Einträge mit virtuellen Interfaces heraus)
+            if (!string.IsNullOrWhiteSpace(settings.PrimaryAdapter) &&
+                selectableAdapters.Contains(settings.PrimaryAdapter))
             {
                 SelectedAdapterPrimary = settings.PrimaryAdapter;
             }
-            
-            if (!string.IsNullOrWhiteSpace(settings.SecondaryAdapter))
+
+            if (!string.IsNullOrWhiteSpace(settings.SecondaryAdapter) &&
+                selectableAdapters.Contains(settings.SecondaryAdapter))
             {
                 SelectedAdapterSecondary = settings.SecondaryAdapter;
             }
-            
-            // Fallback: Auto-select first two active adapters if not configured
-            if (string.IsNullOrWhiteSpace(SelectedAdapterPrimary) && 
+
+            // Fallback: Auto-select first two selectable adapters if not configured
+            if (string.IsNullOrWhiteSpace(SelectedAdapterPrimary) &&
                 string.IsNullOrWhiteSpace(SelectedAdapterSecondary))
             {
-                var adapters = NetworkInterface.GetAllNetworkInterfaces()
-                    .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    .Where(n => n.OperationalStatus == OperationalStatus.Up)
-                    .OrderBy(n => n.Name)
-                    .ToList();
-                
-                if (adapters.Count > 0)
+                if (selectableAdapters.Count > 0)
                 {
-                    SelectedAdapterPrimary = adapters[0].Name;
+                    SelectedAdapterPrimary = selectableAdapters[0];
                 }
-                
-                if (adapters.Count > 1)
+
+                if (selectableAdapters.Count > 1)
                 {
-                    SelectedAdapterSecondary = adapters[1].Name;
+                    SelectedAdapterSecondary = selectableAdapters[1];
                 }
             }
         }

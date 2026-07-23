@@ -175,9 +175,9 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             var noAdapterLabel = GetNoAdapterLabel();
-            var adapters = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .OrderBy(n => n.Name)
+            // Nur sinnvolle Adapter anbieten (verbundene zuerst, keine virtuellen Plattform-Interfaces)
+            var adapters = new Core.Services.AdapterDiscoveryService()
+                .GetSelectableAdapters()
                 .Select(n => n.Name)
                 .ToList();
             
