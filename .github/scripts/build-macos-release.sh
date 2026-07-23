@@ -24,6 +24,7 @@ fi
 OUTPUT_DIR="${ROOT_DIR}/publish/${RID}"
 
 echo "📦 Publishing for ${RID}..."
+rm -rf "${OUTPUT_DIR}"
 dotnet publish "${PROJECT_PATH}" \
   -c Release \
   -r "${RID}" \
@@ -45,6 +46,15 @@ mkdir -p "${APP_BUNDLE}/Contents/Resources"
 
 cp "${OUTPUT_DIR}/neTiPx.UI.Avalonia" "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
 chmod +x "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
+
+# Native Libraries (SkiaSharp, HarfBuzz, AvaloniaNative) werden auf macOS NICHT
+# in das Single-File eingebettet und müssen neben der Executable liegen
+cp "${OUTPUT_DIR}"/*.dylib "${APP_BUNDLE}/Contents/MacOS/"
+
+# Sprachdateien mitliefern
+if [[ -d "${OUTPUT_DIR}/lang" ]]; then
+  cp -R "${OUTPUT_DIR}/lang" "${APP_BUNDLE}/Contents/MacOS/lang"
+fi
 
 cat > "${APP_BUNDLE}/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -80,6 +90,10 @@ EOF
 #   iconutil -c icns "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset" -o "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.icns" >/dev/null 2>&1 || true
 #   rm -rf "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
 # fi
+
+# Ad-hoc-Signatur für das Bundle (Apple Silicon verlangt signierte Binaries;
+# ohne Developer-Zertifikat zumindest ad-hoc signieren)
+codesign --force --deep --sign - "${APP_BUNDLE}" || echo "⚠️  codesign failed (continuing)"
 
 DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-${RID}.dmg"
 DMG_TEMP="${PACKAGE_DIR}/dmg-temp"
