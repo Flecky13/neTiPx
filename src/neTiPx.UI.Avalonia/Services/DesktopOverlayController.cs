@@ -183,6 +183,21 @@ public sealed class DesktopOverlayController : IDisposable
         _disposed = true;
         SettingsService.UserSettingsChanged -= OnUserSettingsChanged;
         _window.OverlayMovedByUser -= OnOverlayMovedByUser;
+
+        // Timer und Fenster dürfen nur vom UI-Thread angefasst werden
+        // (Dispose kann z.B. über ProcessExit von einem fremden Thread kommen)
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            CloseOverlay();
+        }
+        else
+        {
+            Dispatcher.UIThread.Post(CloseOverlay, DispatcherPriority.Send);
+        }
+    }
+
+    private void CloseOverlay()
+    {
         _viewModel.Stop();
 
         if (_window.IsVisible)
