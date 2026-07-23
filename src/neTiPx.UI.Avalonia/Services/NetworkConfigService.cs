@@ -680,6 +680,10 @@ namespace neTiPx.UI.Avalonia.Services
                 {
                     return ReadWindowsRoutes();
                 }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    return ReadMacRoutes();
+                }
                 else
                 {
                     return (false, new List<RouteEntry>(), "Plattform wird nicht unterstützt");
@@ -1049,6 +1053,241 @@ namespace neTiPx.UI.Avalonia.Services
             }
         }
 
+        private (bool success, List<RouteEntry> routes, string? error) ReadMacRoutes()
+        {
+            try
+            {
+                // "netstat -rn -f inet" ausführen (macOS-Äquivalent zu "route print -4")
+                var result = RunProcessCapture("netstat", "-rn -f inet");
+                if (!result.success)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"netstat -rn fehlgeschlagen: {result.error}");
+                    return (false, new List<RouteEntry>(), $"netstat -rn Fehler: {result.error}");
+                }
+
+                var routes = ParseMacNetstatRoutes(result.output);
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"macOS Routen gelesen: {routes.Count}");
+
+                return (true, routes, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"ReadMacRoutes Exception: {ex.Message}");
+                return (false, new List<RouteEntry>(), "Fehler beim Lesen der macOS-Routen: " + ex.Message);
+            }
+        }
+
+        private List<RouteEntry> ParseMacNetstatRoutes(string output)
+        {
+            var routes = new List<RouteEntry>();
+            var lines = output.Split('\n');
+            var headerSeen = false;
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.TrimEnd();
+
+                try
+                {
+                    // Beispielzeilen (netstat -rn -f inet):
+                    // Destination        Gateway            Flags               Netif Expire
+                    // default            192.168.1.1        UGScg                 en0
+                    // 127                127.0.0.1          UCS                   lo0
+                    // 169.254            link#14            UCS                   en0      !
+                    // 192.168.1.1/32     link#14            UCS                   en0      !
+                    // 192.168.1.1        0:0:c:9f:f3:4d     UHLWIir               en0   1195
+
+                    if (!headerSeen)
+                    {
+                        headerSeen = line.StartsWith("Destination", StringComparison.OrdinalIgnoreCase);
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(line))
+                    {
+                        continue;
+                    }
+
+                    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length < 3)
+                    {
+                        continue;
+                    }
+
+                    var rawDestination = parts[0];
+                    var rawGateway = parts[1];
+                    var flags = parts[2];
+
+                    // Gateways mit MAC-Adresse (z.B. "0:0:c:9f:f3:4d") sind Nachbar-Cache-Einträge
+                    // (ARP), keine echten Routen -> überspringen
+                    var gatewayIsIp = IsValidIPv4(rawGateway);
+                    if (!gatewayIsIp && rawGateway.Contains(':'))
+                    {
+                        continue;
+                    }
+
+                    if (!TryParseMacDestination(rawDestination, out var destination, out var subnetMask))
+                    {
+                        continue;
+                    }
+
+                    // link#N = On-Link-Route (direkt am Interface, ohne Gateway)
+                    var gateway = gatewayIsIp ? rawGateway : "0.0.0.0";
+
+                    // Löschbar nur, wenn per Gateway geroutet und statisch (Flag 'S').
+                    // Default-Route und Loopback bleiben geschützt (Verlust der Konnektivität).
+                    var canDelete = gatewayIsIp
+                                    && flags.Contains('S')
+                                    && rawDestination != "default"
+                                    && !destination.StartsWith("127.", StringComparison.Ordinal);
+
+                    routes.Add(new RouteEntry
+                    {
+                        Destination = destination,
+                        SubnetMask = subnetMask,
+                        Gateway = gateway,
+                        Metric = 0, // macOS kennt keine Routen-Metrik
+                        CanDeleteFromSystem = canDelete
+                    });
+                }
+                catch (Exception ex)
+                {
+                    LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", $"Fehler beim Parsen der Route '{line}': {ex.Message}");
+                }
+            }
+
+            return routes;
+        }
+
+        private static bool TryParseMacDestination(string rawDestination, out string destination, out string subnetMask)
+        {
+            destination = "0.0.0.0";
+            subnetMask = "0.0.0.0";
+
+            if (rawDestination == "default")
+            {
+                return true;
+            }
+
+            var prefixLength = -1;
+            var addressPart = rawDestination;
+
+            // CIDR-Notation: "192.168.1.0/24" oder verkürzt "10.77.34/23"
+            var slashIndex = rawDestination.IndexOf('/');
+            if (slashIndex >= 0)
+            {
+                addressPart = rawDestination[..slashIndex];
+                if (!int.TryParse(rawDestination[(slashIndex + 1)..], out prefixLength)
+                    || prefixLength < 0 || prefixLength > 32)
+                {
+                    return false;
+                }
+            }
+
+            // netstat kürzt Null-Oktette ab: "127" = 127.0.0.0/8, "169.254" = 169.254.0.0/16
+            var octets = addressPart.Split('.');
+            if (octets.Length == 0 || octets.Length > 4)
+            {
+                return false;
+            }
+
+            foreach (var octet in octets)
+            {
+                if (!int.TryParse(octet, out var value) || value < 0 || value > 255)
+                {
+                    return false;
+                }
+            }
+
+            if (prefixLength < 0)
+            {
+                // Ohne CIDR-Angabe: Anzahl der Oktette bestimmt das Präfix,
+                // vollständige Adresse = Host-Route (/32)
+                prefixLength = octets.Length * 8;
+            }
+
+            destination = string.Join('.', octets.Concat(Enumerable.Repeat("0", 4 - octets.Length)));
+            subnetMask = PrefixLengthToSubnetMask(prefixLength);
+            return true;
+        }
+
+        private (bool success, string? error) AddMacRoute(string destination, string subnetMask, string gateway)
+        {
+            // Hinweis: macOS unterstützt keine Routen-Metrik und keine persistenten Routen;
+            // die Route gilt bis zum nächsten Neustart
+            var command = $"route -n add -net {destination} -netmask {subnetMask} {gateway}";
+            return RunMacShellCommandsElevated(new List<string> { command });
+        }
+
+        private (bool success, string? error) DeleteMacRoute(string destination, string subnetMask, string gateway)
+        {
+            var command = IsValidIPv4(gateway)
+                ? $"route -n delete -net {destination} -netmask {subnetMask} {gateway}"
+                : $"route -n delete -net {destination} -netmask {subnetMask}";
+            return RunMacShellCommandsElevated(new List<string> { command });
+        }
+
+        private static (bool success, string? error) RunMacShellCommandsElevated(IReadOnlyList<string> commands)
+        {
+            if (commands.Count == 0)
+            {
+                return (true, null);
+            }
+
+            LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"macOS Shell-Befehle starten ({commands.Count} Befehl(e))");
+            foreach (var cmd in commands)
+            {
+                LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"  CMD: {cmd}");
+            }
+
+            try
+            {
+                // osascript zeigt den systemeigenen Admin-Passwort-Dialog (Pendant zu pkexec)
+                var shellCommand = string.Join(" && ", commands);
+                var escaped = shellCommand.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                var appleScript = $"do shell script \"{escaped}\" with administrator privileges";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "osascript",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+                psi.ArgumentList.Add("-e");
+                psi.ArgumentList.Add(appleScript);
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    return (false, "Prozess konnte nicht gestartet werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    LogHandler.LogErrorMessage("NetConfig", $"macOS Shell-Befehle fehlgeschlagen (ExitCode={process.ExitCode}): {error}");
+                    return (false, string.IsNullOrWhiteSpace(error) ? "Shell-Befehle fehlgeschlagen." : error.Trim());
+                }
+
+                if (!string.IsNullOrWhiteSpace(output))
+                {
+                    LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"shell output: {output}");
+                }
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogErrorMessage("NetConfig", "RunMacShellCommandsElevated fehlgeschlagen", ex);
+                return (false, "Fehler beim Ausführen von Shell-Befehlen: " + ex.Message);
+            }
+        }
+
         public (bool success, string? error) DeleteRoute(RouteEntry route)
         {
             var destination = route.Destination?.Trim() ?? string.Empty;
@@ -1105,6 +1344,10 @@ namespace neTiPx.UI.Avalonia.Services
                     $"route delete {destination} mask {normalizedSubnetMask} {route.Gateway}"
                 };
                 return RunNetshCommandsElevated(commands);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return DeleteMacRoute(destination, normalizedSubnetMask, route.Gateway);
             }
             else
             {
@@ -1309,6 +1552,10 @@ namespace neTiPx.UI.Avalonia.Services
                     $"route -p add {sanitizedRoute.Destination} mask {normalizedSubnetMask} {sanitizedRoute.Gateway} metric {sanitizedRoute.Metric}"
                 };
                 return RunNetshCommandsElevated(commands);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return AddMacRoute(sanitizedRoute.Destination, normalizedSubnetMask, sanitizedRoute.Gateway);
             }
             else
             {
