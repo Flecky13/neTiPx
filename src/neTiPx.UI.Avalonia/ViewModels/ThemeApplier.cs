@@ -50,6 +50,7 @@ public static class ThemeApplier
         // Override Avalonia system resources to apply theme globally
         resources["SystemControlBackgroundAltHighBrush"] = new SolidColorBrush(cardBgColor);
         resources["SystemControlBackgroundAltMediumBrush"] = new SolidColorBrush(appBgColor);
+        resources["SystemControlBackgroundChromeMediumLowBrush"] = new SolidColorBrush(cardBgColor);
         resources["SystemControlForegroundBaseLowBrush"] = new SolidColorBrush(cardBorderColor);
         resources["SystemControlForegroundBaseHighBrush"] = new SolidColorBrush(textColor);
         resources["SystemControlForegroundBaseMediumBrush"] = new SolidColorBrush(textSecondaryColor);

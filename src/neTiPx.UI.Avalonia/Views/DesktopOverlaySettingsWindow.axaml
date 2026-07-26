@@ -13,9 +13,20 @@
         Height="820"
         MinWidth="640"
         MinHeight="520"
+        Background="{DynamicResource AppBackgroundBrush}"
         Title="{loc:Loc OVERLAY_SETTINGS_WINDOW_TITLE}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Background="{DynamicResource AppBackgroundBrush}">
         <StackPanel Spacing="12" Margin="16">
             <TextBlock Text="{loc:Loc OVERLAY_SETTINGS_TITLE}" FontWeight="Bold" FontSize="18" />
             <TextBlock Text="{loc:Loc OVERLAY_SETTINGS_DESC}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
@@ -138,7 +149,7 @@
                                 CornerRadius="6"
                                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                                 BorderThickness="1"
-                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                Background="{DynamicResource CardBackgroundBrush}"
                                 DragDrop.AllowDrop="True"
                                 DragDrop.DragOver="OverlayItemDragOver"
                                 DragDrop.Drop="OverlayItemDrop">
