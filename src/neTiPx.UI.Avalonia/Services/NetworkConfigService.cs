@@ -43,6 +43,10 @@ namespace neTiPx.UI.Avalonia.Services
             {
                 return ApplyProfileWindows(profile);
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return ApplyProfileMacOS(profile);
+            }
             else
             {
                 return (false, "Betriebssystem wird nicht unterstützt.");
@@ -330,6 +334,97 @@ namespace neTiPx.UI.Avalonia.Services
 
             LogHandler.LogSystemMessage(LogLevel.INFO, "NetConfig", $"Wende {runtimeRouteCommands.Count} temporäre Route(n) per ip route an");
             return RunShellCommandsElevated(runtimeRouteCommands);
+        }
+
+        private (bool success, string? error) ApplyProfileMacOS(IpProfile profile)
+        {
+            var networkInterface = FindNetworkInterface(profile.AdapterName!);
+            if (networkInterface == null)
+            {
+                return (false, $"Netzwerkadapter '{profile.AdapterName}' nicht gefunden. Bitte Adapter neu laden.");
+            }
+
+            var serviceName = FindMacOSNetworkService(networkInterface.Name);
+            if (serviceName == null)
+            {
+                return (false, $"Für den Adapter '{networkInterface.Name}' wurde kein macOS-Netzwerkdienst gefunden.");
+            }
+
+            var commands = new List<string>();
+            if (profile.Mode.Equals("DHCP", StringComparison.OrdinalIgnoreCase))
+            {
+                commands.Add(BuildShellCommand("/usr/sbin/networksetup", "-setdhcp", serviceName));
+                commands.Add(BuildShellCommand("/usr/sbin/networksetup", "-setdnsservers", serviceName, "Empty"));
+            }
+            else
+            {
+                var entries = profile.IpAddresses.Where(entry => !string.IsNullOrWhiteSpace(entry.IpAddress)).ToList();
+                if (entries.Count == 0)
+                {
+                    return (false, "Mindestens eine IP-Adresse ist erforderlich.");
+                }
+
+                var first = entries[0];
+                var (valid, errorMessage, normalizedSubnetMask) = ValidateIpGatewaySubnet(first.IpAddress, first.SubnetMask, profile.Gateway);
+                if (!valid)
+                {
+                    return (false, errorMessage);
+                }
+
+                // networksetup erwartet auch ohne Standardgateway einen Routerwert.
+                var gateway = IsValidIPv4(profile.Gateway) ? profile.Gateway : "0.0.0.0";
+                commands.Add(BuildShellCommand("/usr/sbin/networksetup", "-setmanual", serviceName, first.IpAddress, normalizedSubnetMask, gateway));
+
+                var dnsServers = new List<string>();
+                if (IsValidIPv4(profile.Dns1)) dnsServers.Add(profile.Dns1);
+                if (IsValidIPv4(profile.Dns2)) dnsServers.Add(profile.Dns2);
+                commands.Add(BuildShellCommand(
+                    "/usr/sbin/networksetup",
+                    new[] { "-setdnsservers", serviceName }
+                        .Concat(dnsServers.Count == 0 ? new[] { "Empty" } : dnsServers)
+                        .ToArray()));
+
+                for (var i = 1; i < entries.Count; i++)
+                {
+                    var entry = entries[i];
+                    var (entryValid, entryError, entryMask) = ValidateIpGatewaySubnet(entry.IpAddress, entry.SubnetMask, string.Empty);
+                    if (!entryValid)
+                    {
+                        return (false, $"Validierungsfehler in IP #{i + 1}: {entryError}");
+                    }
+
+                    commands.Add(BuildShellCommand("/sbin/ifconfig", networkInterface.Name, "alias", entry.IpAddress, "netmask", entryMask));
+                }
+            }
+
+            if (profile.RoutesEnabled)
+            {
+                foreach (var route in profile.Routes)
+                {
+                    var (routeValid, routeError) = ValidateRoute(route);
+                    if (!routeValid)
+                    {
+                        return (false, routeError);
+                    }
+
+                    if (!TryNormalizeSubnetMask(route.SubnetMask, out var routeMask))
+                    {
+                        return (false, $"Subnetzmaske '{route.SubnetMask}' ist ungueltig.");
+                    }
+
+                    var routeCommand = BuildMacOSRouteCommand("add", route.Destination, routeMask, route.Gateway);
+                    commands.Add(routeCommand);
+                }
+            }
+
+            // macOS besitzt keine systemweite, unterstützte API für dauerhafte manuelle Routen.
+            // Die Routen bleiben bis zum nächsten Neustart bzw. Netzwerkwechsel aktiv.
+            if (profile.RoutesEnabled && IsPersistentRouteMode(profile.RoutePersistenceMode))
+            {
+                LogHandler.LogSystemMessage(LogLevel.WARN, "NetConfig", "macOS-Routen werden temporär gesetzt; dauerhafte Routen benötigen eine LaunchDaemon-Konfiguration.");
+            }
+
+            return RunMacOSCommandsElevated(commands);
         }
 
         private static bool IsPersistentRouteMode(string? routePersistenceMode)
@@ -667,6 +762,84 @@ namespace neTiPx.UI.Avalonia.Services
             }
         }
 
+        private static (bool success, string? error) RunMacOSCommandsElevated(IReadOnlyList<string> commands)
+        {
+            if (commands.Count == 0)
+            {
+                return (true, null);
+            }
+
+            try
+            {
+                var shellScript = string.Join(" && ", commands);
+                var appleScript = $"do shell script \"{shellScript.Replace("\\", "\\\\").Replace("\"", "\\\"")}\" with administrator privileges";
+                var result = RunProcess("/usr/bin/osascript", "-e", appleScript);
+                if (!result.success)
+                {
+                    var message = result.error ?? "macOS-Befehl fehlgeschlagen.";
+                    if (message.Contains("User canceled", StringComparison.OrdinalIgnoreCase) || message.Contains("-128", StringComparison.Ordinal))
+                    {
+                        return (false, "Berechtigungsabfrage abgebrochen.");
+                    }
+
+                    return (false, message);
+                }
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LogHandler.LogErrorMessage("NetConfig", "macOS-Befehle fehlgeschlagen", ex);
+                return (false, "Fehler beim Anwenden: " + ex.Message);
+            }
+        }
+
+        private static (bool success, string output, string? error) RunProcess(string fileName, params string[] arguments)
+        {
+            try
+            {
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = fileName,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+                foreach (var argument in arguments)
+                {
+                    processInfo.ArgumentList.Add(argument);
+                }
+
+                using var process = Process.Start(processInfo);
+                if (process == null)
+                {
+                    return (false, string.Empty, "Prozess konnte nicht gestartet werden.");
+                }
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                return process.ExitCode == 0
+                    ? (true, output, null)
+                    : (false, output, string.IsNullOrWhiteSpace(error) ? $"Befehl fehlgeschlagen (Exit-Code {process.ExitCode})." : error.Trim());
+            }
+            catch (Exception ex)
+            {
+                return (false, string.Empty, ex.Message);
+            }
+        }
+
+        private static string BuildShellCommand(string executable, params string[] arguments)
+        {
+            return string.Join(" ", new[] { QuoteForShell(executable) }.Concat(arguments.Select(QuoteForShell)));
+        }
+
+        private static string QuoteForShell(string value)
+        {
+            return $"'{value.Replace("'", "'\\\"'\\\"'")}'";
+        }
+
         public (bool success, List<RouteEntry> routes, string? error) ReadAllPersistentRoutes()
         {
             try
@@ -676,10 +849,14 @@ namespace neTiPx.UI.Avalonia.Services
                 {
                     return ReadLinuxRoutes();
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    return ReadWindowsRoutes();
-                }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return ReadWindowsRoutes();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return ReadMacOSRoutes();
+            }
                 else
                 {
                     return (false, new List<RouteEntry>(), "Plattform wird nicht unterstützt");
@@ -732,6 +909,137 @@ namespace neTiPx.UI.Avalonia.Services
                 LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"ReadLinuxRoutes Exception: {ex.Message}");
                 return (false, new List<RouteEntry>(), "Fehler beim Lesen der Linux-Routen: " + ex.Message);
             }
+        }
+
+        private (bool success, List<RouteEntry> routes, string? error) ReadMacOSRoutes()
+        {
+            var result = RunProcess("/usr/sbin/netstat", "-rn", "-f", "inet");
+            if (!result.success)
+            {
+                return (false, new List<RouteEntry>(), result.error);
+            }
+
+            var routes = new List<RouteEntry>();
+            foreach (var line in result.output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (line.StartsWith("Internet:", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("Destination", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var parts = line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 4 || parts[0].Contains(':'))
+                {
+                    continue;
+                }
+
+                var destination = parts[0] == "default" ? "0.0.0.0" : parts[0];
+                var gateway = parts[1];
+                var flags = parts[2];
+                var slashIndex = destination.IndexOf('/');
+                var subnetMask = "255.255.255.255";
+                if (destination == "0.0.0.0")
+                {
+                    subnetMask = "0.0.0.0";
+                }
+                else if (slashIndex > 0 && int.TryParse(destination[(slashIndex + 1)..], out var prefix))
+                {
+                    destination = destination[..slashIndex];
+                    subnetMask = PrefixLengthToSubnetMask(prefix);
+                }
+
+                if (gateway.StartsWith("link#", StringComparison.OrdinalIgnoreCase) || !IsValidIPv4(destination))
+                {
+                    continue;
+                }
+
+                routes.Add(new RouteEntry
+                {
+                    Destination = destination,
+                    SubnetMask = subnetMask,
+                    Gateway = IsValidIPv4(gateway) ? gateway : "0.0.0.0",
+                    CanDeleteFromSystem = flags.Contains('S') && !flags.Contains('C')
+                });
+            }
+
+            return (true, routes, null);
+        }
+
+        private (bool success, string? error) AddMacOSRoute(string destination, string subnetMask, string gateway, int metric)
+        {
+            if (string.IsNullOrWhiteSpace(gateway) || !IsValidIPv4(gateway))
+            {
+                return (false, "Gateway ist ungültig.");
+            }
+
+            return RunMacOSCommandsElevated(new[] { BuildMacOSRouteCommand("add", destination, subnetMask, gateway) });
+        }
+
+        private (bool success, string? error) DeleteMacOSRoute(string destination, string subnetMask, string gateway)
+        {
+            return RunMacOSCommandsElevated(new[] { BuildMacOSRouteCommand("delete", destination, subnetMask, gateway) });
+        }
+
+        private static string BuildMacOSRouteCommand(string action, string destination, string subnetMask, string gateway)
+        {
+            var prefix = SubnetMaskToPrefix(subnetMask);
+            var target = destination == "0.0.0.0" && prefix == 0 ? "default" : $"{destination}/{prefix}";
+            var arguments = string.IsNullOrWhiteSpace(gateway) || gateway == "0.0.0.0"
+                ? new[] { "-n", action, "-net", target }
+                : new[] { "-n", action, "-net", target, gateway };
+            return BuildShellCommand("/sbin/route", arguments);
+        }
+
+        private static string? FindMacOSNetworkService(string deviceName)
+        {
+            var result = RunProcess("/usr/sbin/networksetup", "-listnetworkserviceorder");
+            if (!result.success)
+            {
+                LogHandler.LogSystemMessage(LogLevel.ERROR, "NetConfig", $"macOS-Netzwerkdienste konnten nicht gelesen werden: {result.error}");
+                return null;
+            }
+
+            string? serviceName = null;
+            foreach (var line in result.output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (IsMacOSNetworkServiceHeader(line))
+                {
+                    var closingParenthesis = line.IndexOf(')');
+                    serviceName = closingParenthesis >= 0 ? line[(closingParenthesis + 1)..].Trim() : null;
+                }
+                // Die Beschriftung vor dem Gerätenamen ist abhängig von der macOS-Sprache
+                // (z. B. "Device" oder "Gerät"). Der Interface-Name selbst bleibt en0, en1 usw.
+                else if (serviceName != null && ContainsMacOSInterfaceName(line, deviceName))
+                {
+                    return serviceName;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool ContainsMacOSInterfaceName(string line, string deviceName)
+        {
+            var tokens = line.Split(new[] { ' ', ':', ',', '(', ')' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return tokens.Any(token => string.Equals(token, deviceName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool IsMacOSNetworkServiceHeader(string line)
+        {
+            if (!line.StartsWith('('))
+            {
+                return false;
+            }
+
+            var closingParenthesis = line.IndexOf(')');
+            if (closingParenthesis <= 1)
+            {
+                return false;
+            }
+
+            var identifier = line[1..closingParenthesis];
+            return identifier == "*" || identifier.All(char.IsDigit);
         }
 
         private List<RouteEntry> ParseLinuxIpRoutes(string output)
@@ -1106,6 +1414,10 @@ namespace neTiPx.UI.Avalonia.Services
                 };
                 return RunNetshCommandsElevated(commands);
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return DeleteMacOSRoute(destination, normalizedSubnetMask, route.Gateway);
+            }
             else
             {
                 return (false, "Plattform wird nicht unterstützt.");
@@ -1310,6 +1622,10 @@ namespace neTiPx.UI.Avalonia.Services
                 };
                 return RunNetshCommandsElevated(commands);
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return AddMacOSRoute(sanitizedRoute.Destination, normalizedSubnetMask, sanitizedRoute.Gateway, sanitizedRoute.Metric);
+            }
             else
             {
                 return (false, "Plattform wird nicht unterstützt.");
@@ -1346,6 +1662,11 @@ namespace neTiPx.UI.Avalonia.Services
             if (!TryNormalizeSubnetMask(subnetMask, out var normalizedSubnetMask))
             {
                 return (false, "Route kann nicht geloescht werden: Subnetzmaske ist ungueltig.");
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return DeleteMacOSRoute(destination, normalizedSubnetMask, route.Gateway);
             }
 
             var prefix = $"{destination}/{prefixLength}";
@@ -1396,6 +1717,11 @@ namespace neTiPx.UI.Avalonia.Services
                 return (false, $"Subnetzmaske '{sanitizedRoute.SubnetMask}' ist ungueltig.");
             }
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return AddMacOSRoute(sanitizedRoute.Destination, normalizedSubnetMask, sanitizedRoute.Gateway, sanitizedRoute.Metric);
+            }
+
             var persistentRoutes = GetPersistentRoutesForLookup();
             if (PersistentRouteExists(sanitizedRoute.Destination, normalizedSubnetMask, sanitizedRoute.Gateway, persistentRoutes))
             {
@@ -1428,6 +1754,13 @@ namespace neTiPx.UI.Avalonia.Services
                 var debug = new StringBuilder();
                 debug.AppendLine($"AdapterKey: {profile.AdapterName}");
                 debug.AppendLine($"Resolved Adapter: {ni.Name}");
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    var macResult = ReadMacOSRoutes();
+                    debug.AppendLine($"macOS netstat routes: {macResult.routes.Count}");
+                    return (macResult.success, macResult.routes, macResult.error, debug.ToString());
+                }
 
                 var routeSnapshot = ReadRouteSnapshot(includeRoutePrint: true, includeCim: true, includeNetRoutes: false);
                 if (routeSnapshot.CimResult.success)
