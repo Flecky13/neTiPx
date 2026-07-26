@@ -4,6 +4,19 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.7.2]
+
+### Added
+- **macOS / IP-Konfiguration**: IP-Profile können auf macOS jetzt angewendet werden, inklusive DHCP, manueller IPv4-Konfiguration, DNS-Servern und zusätzlichen IP-Adressen.
+- **macOS / Routen**: Statische IPv4-Routen können auf macOS eingelesen, hinzugefügt und gelöscht werden.
+
+### Changed
+- **macOS / Berechtigungen**: Netzwerkänderungen werden über die macOS-Administrationsabfrage ausgeführt; ein Abbruch der Abfrage wird verständlich an die Anwendung zurückgemeldet.
+
+### Fixed
+- **macOS / Plattformunterstützung**: Die IP-Konfigurations- und Routenfunktionen erkennen macOS nun als unterstütztes Betriebssystem.
+- **macOS / Netzwerkrouten**: Routen werden über die lokale macOS-Routingtabelle ermittelt. Dauerhafte Routen werden als temporär behandelt, da macOS dafür keine entsprechende systemweite Standard-API anbietet.
+
 ## [2.0.7.1]
 
 ### Added
