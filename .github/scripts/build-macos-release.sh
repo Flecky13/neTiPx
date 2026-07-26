@@ -28,8 +28,8 @@ dotnet publish "${PROJECT_PATH}" \
   -c Release \
   -r "${RID}" \
   --self-contained true \
-  -p:PublishSingleFile=true \
-  -p:IncludeNativeLibrariesForSelfExtract=true \
+  -p:PublishSingleFile=false \
+  -p:IncludeNativeLibrariesForSelfExtract=false \
   -o "${OUTPUT_DIR}"
 
 chmod +x "${OUTPUT_DIR}/neTiPx.UI.Avalonia"
@@ -43,7 +43,7 @@ rm -rf "${APP_BUNDLE}"
 mkdir -p "${APP_BUNDLE}/Contents/MacOS"
 mkdir -p "${APP_BUNDLE}/Contents/Resources"
 
-cp "${OUTPUT_DIR}/neTiPx.UI.Avalonia" "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
+cp -R "${OUTPUT_DIR}/"* "${APP_BUNDLE}/Contents/MacOS/"
 chmod +x "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
 
 cat > "${APP_BUNDLE}/Contents/Info.plist" << EOF
