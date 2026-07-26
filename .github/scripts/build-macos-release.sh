@@ -9,107 +9,152 @@ PACKAGE_DIR="${ROOT_DIR}/packages"
 mkdir -p "${ROOT_DIR}/release-assets" "${PACKAGE_DIR}"
 
 VERSION="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "${ROOT_DIR}/src/Directory.Build.props" | head -n1)"
+
 if [[ -z "${VERSION}" ]]; then
-  echo "Version could not be read from src/Directory.Build.props"
-  exit 1
+    echo "❌ Unable to determine version."
+    exit 1
 fi
 
 ARCH="$(uname -m)"
+
 if [[ "${ARCH}" == "arm64" ]]; then
-  RID="osx-arm64"
+    RID="osx-arm64"
 else
-  RID="osx-x64"
+    RID="osx-x64"
 fi
 
 OUTPUT_DIR="${ROOT_DIR}/publish/${RID}"
 
-echo "📦 Publishing for ${RID}..."
+echo "📦 Publishing ${RID}..."
+
 dotnet publish "${PROJECT_PATH}" \
-  -c Release \
-  -r "${RID}" \
-  --self-contained true \
-  -p:PublishSingleFile=false \
-  -p:IncludeNativeLibrariesForSelfExtract=false \
-  -o "${OUTPUT_DIR}"
+    -c Release \
+    -r "${RID}" \
+    --self-contained true \
+    -p:PublishSingleFile=false \
+    -p:IncludeNativeLibrariesForSelfExtract=false \
+    -o "${OUTPUT_DIR}"
 
-chmod +x "${OUTPUT_DIR}/neTiPx.UI.Avalonia"
+echo
+echo "==============================="
+echo "Publish directory:"
+ls -lah "${OUTPUT_DIR}"
+echo "==============================="
+echo
 
-echo "Disk space after publish:"
-df -h | head -n 2
+#
+# Automatically determine executable
+#
+EXECUTABLE="$(find "${OUTPUT_DIR}" -maxdepth 1 -type f -perm -111 | head -n1)"
+
+if [[ -z "${EXECUTABLE}" ]]; then
+    echo "❌ No executable found."
+    exit 1
+fi
+
+EXECUTABLE_NAME="$(basename "${EXECUTABLE}")"
+
+echo "Executable:"
+echo "  ${EXECUTABLE_NAME}"
 
 APP_NAME="neTiPx"
 APP_BUNDLE="${PACKAGE_DIR}/${APP_NAME}.app"
+
 rm -rf "${APP_BUNDLE}"
+
 mkdir -p "${APP_BUNDLE}/Contents/MacOS"
 mkdir -p "${APP_BUNDLE}/Contents/Resources"
 
-cp -R "${OUTPUT_DIR}/"* "${APP_BUNDLE}/Contents/MacOS/"
-chmod +x "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
+#
+# Copy complete publish directory
+#
+cp -R "${OUTPUT_DIR}/." "${APP_BUNDLE}/Contents/MacOS/"
 
-cat > "${APP_BUNDLE}/Contents/Info.plist" << EOF
+chmod +x "${APP_BUNDLE}/Contents/MacOS/${EXECUTABLE_NAME}"
+
+cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
 <plist version="1.0">
 <dict>
+
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+
     <key>CFBundleExecutable</key>
-    <string>${APP_NAME}</string>
+    <string>${EXECUTABLE_NAME}</string>
+
     <key>CFBundleIdentifier</key>
     <string>com.netipx.app</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
     <key>CFBundleName</key>
     <string>${APP_NAME}</string>
+
     <key>CFBundleDisplayName</key>
-    <string>neTiPx</string>
+    <string>${APP_NAME}</string>
+
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+
     <key>CFBundleShortVersionString</key>
     <string>${VERSION}</string>
+
     <key>CFBundleVersion</key>
-    <string>${VERSION}.0</string>
+    <string>${VERSION}</string>
+
     <key>LSMinimumSystemVersion</key>
     <string>10.15</string>
+
     <key>NSHighResolutionCapable</key>
     <true/>
+
 </dict>
 </plist>
 EOF
 
-# Icon conversion entfernt, um Disk Space zu sparen
-# if [[ -f "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" ]]; then
-#   mkdir -p "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
-#   sips -z 512 512 "${ROOT_DIR}/src/neTiPx.UI.Avalonia/Assets/toolicon.png" --out "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset/icon_512x512.png" >/dev/null 2>&1 || true
-#   iconutil -c icns "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset" -o "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.icns" >/dev/null 2>&1 || true
-#   rm -rf "${APP_BUNDLE}/Contents/Resources/${APP_NAME}.iconset"
-# fi
+#
+# Ad-hoc signing (no Apple account required)
+#
+codesign \
+    --force \
+    --deep \
+    --sign - \
+    "${APP_BUNDLE}" || true
 
-DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-${RID}.dmg"
+#
+# Smoke test
+#
+echo
+echo "Bundle contents:"
+find "${APP_BUNDLE}" | head -50
+echo
+
 DMG_TEMP="${PACKAGE_DIR}/dmg-temp"
+DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-${RID}.dmg"
+
 rm -rf "${DMG_TEMP}"
 mkdir -p "${DMG_TEMP}"
+
 cp -R "${APP_BUNDLE}" "${DMG_TEMP}/"
 ln -s /Applications "${DMG_TEMP}/Applications"
 
-hdiutil create -volname "neTiPx" \
-  -srcfolder "${DMG_TEMP}" \
-  -ov \
-  -format UDZO \
-  "${DMG_FILE}"
+hdiutil create \
+    -volname "neTiPx" \
+    -srcfolder "${DMG_TEMP}" \
+    -format UDZO \
+    -ov \
+    "${DMG_FILE}"
 
 rm -rf "${DMG_TEMP}"
-
-# Cleanup publish directory um Disk Space zu sparen
-echo "🧹 Cleaning up temporary files..."
 rm -rf "${OUTPUT_DIR}"
 
-dmg_file="$(find "${ROOT_DIR}/packages" -maxdepth 1 -type f -name '*.dmg' -print0 | xargs -0 ls -1t | head -n1)"
-if [[ -z "${dmg_file}" ]]; then
-  echo "❌ No .dmg file produced."
-  exit 1
-fi
+cp "${DMG_FILE}" "${ROOT_DIR}/release-assets/"
 
-cp "${dmg_file}" "${ROOT_DIR}/release-assets/"
-echo "✅ DMG created: $(basename "${dmg_file}")"
-
-echo "Final disk space:"
-df -h | head -n 2
-
-echo "macOS release asset: $(basename "${dmg_file}")"
+echo
+echo "✅ Created:"
+echo "  ${DMG_FILE}"
