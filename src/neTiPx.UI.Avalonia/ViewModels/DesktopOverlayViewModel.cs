@@ -12,6 +12,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Win32;
 using neTiPx.Core.Services;
 using neTiPx.UI.Avalonia.Services;
 
@@ -207,6 +208,23 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
         changed |= UpdateValue(DesktopOverlayInfoKeys.User, Environment.UserName);
         changed |= UpdateValue(DesktopOverlayInfoKeys.Domain, GetDomainOrWorkgroup());
         changed |= UpdateValue(DesktopOverlayInfoKeys.OperatingSystem, RuntimeInformation.OSDescription.Trim());
+        changed |= UpdateValue(DesktopOverlayInfoKeys.OperatingSystemName, RuntimeInformation.OSDescription.Trim());
+        changed |= UpdateValue(DesktopOverlayInfoKeys.OperatingSystemVersion, Environment.OSVersion.VersionString);
+        changed |= UpdateValue(DesktopOverlayInfoKeys.ComputerModel, GetComputerModel());
+        changed |= UpdateValue(DesktopOverlayInfoKeys.ComputerManufacturer, GetComputerManufacturer());
+        changed |= UpdateValue(DesktopOverlayInfoKeys.CpuModel, GetCpuModel());
+        changed |= UpdateValue(DesktopOverlayInfoKeys.ProcessorCount, Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture));
+
+        if (TryGetSystemDriveUsage(out var freeSpace, out var usedSpace))
+        {
+            changed |= UpdateValue(DesktopOverlayInfoKeys.DiskFreeSpace, FormatBytes(freeSpace));
+            changed |= UpdateValue(DesktopOverlayInfoKeys.DiskUsedSpace, FormatBytes(usedSpace));
+        }
+        else
+        {
+            changed |= UpdateValue(DesktopOverlayInfoKeys.DiskFreeSpace, "-");
+            changed |= UpdateValue(DesktopOverlayInfoKeys.DiskUsedSpace, "-");
+        }
 
         var activeAdapterName = GetActiveAdapterName();
         changed |= UpdateValue(DesktopOverlayInfoKeys.NetworkAdapter, string.IsNullOrWhiteSpace(activeAdapterName) ? "-" : activeAdapterName);
@@ -288,6 +306,107 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
         return string.IsNullOrWhiteSpace(line) ? "-" : line.Trim();
     }
 
+    private static string GetComputerModel()
+    {
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\BIOS", "SystemProductName", null)?.ToString() ?? "-";
+            }
+
+            if (OperatingSystem.IsLinux() && File.Exists("/sys/class/dmi/id/product_name"))
+            {
+                return File.ReadAllText("/sys/class/dmi/id/product_name").Trim();
+            }
+        }
+        catch
+        {
+            // The model is optional and not available on every platform.
+        }
+
+        return "-";
+    }
+
+    private static string GetComputerManufacturer()
+    {
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\BIOS", "SystemManufacturer", null)?.ToString() ?? "-";
+            }
+
+            if (OperatingSystem.IsLinux() && File.Exists("/sys/class/dmi/id/sys_vendor"))
+            {
+                return File.ReadAllText("/sys/class/dmi/id/sys_vendor").Trim();
+            }
+        }
+        catch
+        {
+            // The manufacturer is optional and not available on every platform.
+        }
+
+        return "-";
+    }
+
+    private static string GetCpuModel()
+    {
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString", null)?.ToString() ?? "-";
+            }
+
+            if (OperatingSystem.IsLinux() && File.Exists("/proc/cpuinfo"))
+            {
+                var modelLine = File.ReadLines("/proc/cpuinfo")
+                    .FirstOrDefault(line => line.StartsWith("model name", StringComparison.OrdinalIgnoreCase));
+                return modelLine?.Split(':', 2).LastOrDefault()?.Trim() ?? "-";
+            }
+        }
+        catch
+        {
+            // The CPU model is optional and not available on every platform.
+        }
+
+        return "-";
+    }
+
+    private static bool TryGetSystemDriveUsage(out long freeSpace, out long usedSpace)
+    {
+        freeSpace = 0;
+        usedSpace = 0;
+
+        try
+        {
+            var systemRoot = OperatingSystem.IsWindows()
+                ? Path.GetPathRoot(Environment.SystemDirectory)
+                : Path.DirectorySeparatorChar.ToString();
+            var drive = DriveInfo.GetDrives().FirstOrDefault(candidate =>
+                candidate.IsReady && string.Equals(candidate.RootDirectory.FullName, systemRoot, StringComparison.OrdinalIgnoreCase));
+
+            if (drive == null)
+            {
+                return false;
+            }
+
+            freeSpace = drive.AvailableFreeSpace;
+            usedSpace = drive.TotalSize - drive.AvailableFreeSpace;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        return string.Format(CultureInfo.InvariantCulture, "{0:0.0} GB", bytes / 1024d / 1024d / 1024d);
+    }
+
     private bool UpdateValue(string key, string value)
     {
         var normalized = string.IsNullOrWhiteSpace(value) ? "-" : value.Trim();
@@ -307,32 +426,19 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
 
         foreach (var item in orderedItems)
         {
-            if (!item.IsVisible)
+            if (item.Key.Equals(DesktopOverlayInfoKeys.FreeText, StringComparison.OrdinalIgnoreCase))
             {
+                if (!string.IsNullOrWhiteSpace(item.CustomText))
+                {
+                    next.Add(new DesktopOverlayLineViewModel(item.Key, item.CustomText));
+                }
+
                 continue;
             }
 
             var value = _values.TryGetValue(item.Key, out var currentValue) ? currentValue : "-";
-            var label = GetLabel(item.Key);
-
-            string text;
-            if (item.ShowLabel && item.ShowValue)
-            {
-                text = $"{label}: {value}";
-            }
-            else if (item.ShowLabel)
-            {
-                text = label;
-            }
-            else if (item.ShowValue)
-            {
-                text = value;
-            }
-            else
-            {
-                continue;
-            }
-
+            var label = string.IsNullOrWhiteSpace(item.CustomText) ? GetLabel(item.Key) : item.CustomText;
+            var text = item.ShowLabel ? $"{label}: {value}" : value;
             next.Add(new DesktopOverlayLineViewModel(item.Key, text));
         }
 
@@ -473,6 +579,15 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
             DesktopOverlayInfoKeys.Uptime => T("OVERLAY_INFO_UPTIME"),
             DesktopOverlayInfoKeys.RamUsage => T("OVERLAY_INFO_RAM"),
             DesktopOverlayInfoKeys.NetworkAdapter => T("OVERLAY_INFO_NETWORK_ADAPTER"),
+            DesktopOverlayInfoKeys.ComputerModel => T("OVERLAY_INFO_COMPUTER_MODEL"),
+            DesktopOverlayInfoKeys.ComputerManufacturer => T("OVERLAY_INFO_COMPUTER_MANUFACTURER"),
+            DesktopOverlayInfoKeys.OperatingSystemName => T("OVERLAY_INFO_OPERATING_SYSTEM_NAME"),
+            DesktopOverlayInfoKeys.OperatingSystemVersion => T("OVERLAY_INFO_OPERATING_SYSTEM_VERSION"),
+            DesktopOverlayInfoKeys.DiskFreeSpace => T("OVERLAY_INFO_DISK_FREE_SPACE"),
+            DesktopOverlayInfoKeys.DiskUsedSpace => T("OVERLAY_INFO_DISK_USED_SPACE"),
+            DesktopOverlayInfoKeys.CpuModel => T("OVERLAY_INFO_CPU_MODEL"),
+            DesktopOverlayInfoKeys.ProcessorCount => T("OVERLAY_INFO_PROCESSOR_COUNT"),
+            DesktopOverlayInfoKeys.FreeText => T("OVERLAY_INFO_FREE_TEXT"),
             _ => key
         };
     }

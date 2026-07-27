@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using neTiPx.Core.Helpers;
 using neTiPx.Core.Models;
 using neTiPx.Core.Services;
@@ -143,6 +144,8 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<DesktopOverlayItemSettingViewModel> _desktopOverlayInfoItems;
+
+    public ObservableCollection<DesktopOverlayInfoOption> DesktopOverlayInfoOptions { get; } = new();
     
     public SettingsViewModel()
     {
@@ -156,6 +159,7 @@ public partial class SettingsViewModel : ObservableObject
         _availableThemes = new ObservableCollection<string>();
         _availableLanguages = new ObservableCollection<string>();
         _desktopOverlayInfoItems = new ObservableCollection<DesktopOverlayItemSettingViewModel>();
+        RefreshDesktopOverlayInfoOptions();
         
         LoadAvailableAdapters();
         LoadAdapterSettings();
@@ -590,10 +594,7 @@ public partial class SettingsViewModel : ObservableObject
                 }
             }
 
-            foreach (var item in DesktopOverlayInfoItems)
-            {
-                item.DisplayName = GetOverlayItemDisplayName(item.Key);
-            }
+            RefreshDesktopOverlayInfoOptions();
         }
         finally
         {
@@ -803,11 +804,10 @@ public partial class SettingsViewModel : ObservableObject
             foreach (var item in settings.Items.OrderBy(i => i.Order))
             {
                 var vm = new DesktopOverlayItemSettingViewModel(
+                    DesktopOverlayInfoOptions,
                     item.Key,
-                    GetOverlayItemDisplayName(item.Key),
-                    item.IsVisible,
                     item.ShowLabel,
-                    item.ShowValue);
+                    item.CustomText);
                 vm.PropertyChanged += OverlayItem_PropertyChanged;
                 DesktopOverlayInfoItems.Add(vm);
             }
@@ -829,9 +829,9 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        if (e.PropertyName is nameof(DesktopOverlayItemSettingViewModel.IsVisible)
+        if (e.PropertyName is nameof(DesktopOverlayItemSettingViewModel.SelectedInfoOption)
             or nameof(DesktopOverlayItemSettingViewModel.ShowLabel)
-            or nameof(DesktopOverlayItemSettingViewModel.ShowValue))
+            or nameof(DesktopOverlayItemSettingViewModel.CustomText))
         {
             SaveDesktopOverlaySettings();
         }
@@ -865,6 +865,35 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         DesktopOverlayInfoItems.Insert(targetIndex, sourceItem);
+        SaveDesktopOverlaySettings();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAddDesktopOverlayItem))]
+    private void AddDesktopOverlayItem()
+    {
+        var selectedKey = DesktopOverlayInfoKeys.AvailableKeys.FirstOrDefault(key =>
+            !DesktopOverlayInfoItems.Any(item => item.Key.Equals(key, StringComparison.OrdinalIgnoreCase)))
+            ?? DesktopOverlayInfoKeys.AvailableKeys[0];
+
+        var item = new DesktopOverlayItemSettingViewModel(DesktopOverlayInfoOptions, selectedKey, showLabel: true, customText: string.Empty);
+        item.PropertyChanged += OverlayItem_PropertyChanged;
+        DesktopOverlayInfoItems.Add(item);
+        AddDesktopOverlayItemCommand.NotifyCanExecuteChanged();
+        SaveDesktopOverlaySettings();
+    }
+
+    private bool CanAddDesktopOverlayItem() => DesktopOverlayInfoItems.Count < 20;
+
+    [RelayCommand]
+    private void RemoveDesktopOverlayItem(DesktopOverlayItemSettingViewModel? item)
+    {
+        if (item == null || !DesktopOverlayInfoItems.Remove(item))
+        {
+            return;
+        }
+
+        item.PropertyChanged -= OverlayItem_PropertyChanged;
+        AddDesktopOverlayItemCommand.NotifyCanExecuteChanged();
         SaveDesktopOverlaySettings();
     }
 
@@ -934,8 +963,33 @@ public partial class SettingsViewModel : ObservableObject
             DesktopOverlayInfoKeys.Uptime => T("OVERLAY_INFO_UPTIME"),
             DesktopOverlayInfoKeys.RamUsage => T("OVERLAY_INFO_RAM"),
             DesktopOverlayInfoKeys.NetworkAdapter => T("OVERLAY_INFO_NETWORK_ADAPTER"),
+            DesktopOverlayInfoKeys.ComputerModel => T("OVERLAY_INFO_COMPUTER_MODEL"),
+            DesktopOverlayInfoKeys.ComputerManufacturer => T("OVERLAY_INFO_COMPUTER_MANUFACTURER"),
+            DesktopOverlayInfoKeys.OperatingSystemName => T("OVERLAY_INFO_OPERATING_SYSTEM_NAME"),
+            DesktopOverlayInfoKeys.OperatingSystemVersion => T("OVERLAY_INFO_OPERATING_SYSTEM_VERSION"),
+            DesktopOverlayInfoKeys.DiskFreeSpace => T("OVERLAY_INFO_DISK_FREE_SPACE"),
+            DesktopOverlayInfoKeys.DiskUsedSpace => T("OVERLAY_INFO_DISK_USED_SPACE"),
+            DesktopOverlayInfoKeys.CpuModel => T("OVERLAY_INFO_CPU_MODEL"),
+            DesktopOverlayInfoKeys.ProcessorCount => T("OVERLAY_INFO_PROCESSOR_COUNT"),
+            DesktopOverlayInfoKeys.FreeText => T("OVERLAY_INFO_FREE_TEXT"),
             _ => key
         };
+    }
+
+    private void RefreshDesktopOverlayInfoOptions()
+    {
+        foreach (var option in DesktopOverlayInfoOptions)
+        {
+            option.DisplayName = GetOverlayItemDisplayName(option.Key);
+        }
+
+        if (DesktopOverlayInfoOptions.Count == 0)
+        {
+            foreach (var key in DesktopOverlayInfoKeys.AvailableKeys)
+            {
+                DesktopOverlayInfoOptions.Add(new DesktopOverlayInfoOption(key, GetOverlayItemDisplayName(key)));
+            }
+        }
     }
 
     partial void OnDesktopOverlayEnabledChanged(bool value) => SaveDesktopOverlaySettings();

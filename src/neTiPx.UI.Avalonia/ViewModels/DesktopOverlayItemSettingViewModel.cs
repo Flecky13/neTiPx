@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using neTiPx.UI.Avalonia.Services;
 
@@ -5,38 +7,67 @@ namespace neTiPx.UI.Avalonia.ViewModels;
 
 public sealed partial class DesktopOverlayItemSettingViewModel : ObservableObject
 {
-    public DesktopOverlayItemSettingViewModel(string key, string displayName, bool isVisible, bool showLabel, bool showValue)
+    public DesktopOverlayItemSettingViewModel(
+        ObservableCollection<DesktopOverlayInfoOption> infoOptions,
+        string key,
+        bool showLabel,
+        string? customText)
     {
-        Key = key;
-        _displayName = displayName;
-        _isVisible = isVisible;
+        InfoOptions = infoOptions;
+        _selectedInfoOption = infoOptions.FirstOrDefault(option => option.Key == key);
         _showLabel = showLabel;
-        _showValue = showValue;
+        _customText = customText ?? string.Empty;
     }
 
-    public string Key { get; }
+    public ObservableCollection<DesktopOverlayInfoOption> InfoOptions { get; }
 
     [ObservableProperty]
-    private string _displayName;
-
-    [ObservableProperty]
-    private bool _isVisible;
+    private DesktopOverlayInfoOption? _selectedInfoOption;
 
     [ObservableProperty]
     private bool _showLabel;
 
     [ObservableProperty]
-    private bool _showValue;
+    private string _customText;
+
+    public string Key => SelectedInfoOption?.Key ?? string.Empty;
+
+    public string DisplayName => SelectedInfoOption?.DisplayName ?? string.Empty;
+
+    public bool IsFreeText => Key.Equals(DesktopOverlayInfoKeys.FreeText, System.StringComparison.OrdinalIgnoreCase);
+
+    public bool ShowLabelSelector => !IsFreeText;
+
+    partial void OnSelectedInfoOptionChanged(DesktopOverlayInfoOption? value)
+    {
+        OnPropertyChanged(nameof(Key));
+        OnPropertyChanged(nameof(DisplayName));
+        OnPropertyChanged(nameof(IsFreeText));
+        OnPropertyChanged(nameof(ShowLabelSelector));
+    }
 
     public DesktopOverlayItemSetting ToModel(int order)
     {
         return new DesktopOverlayItemSetting
         {
             Key = Key,
-            IsVisible = IsVisible,
             ShowLabel = ShowLabel,
-            ShowValue = ShowValue,
+            CustomText = CustomText,
             Order = order
         };
     }
+}
+
+public sealed partial class DesktopOverlayInfoOption : ObservableObject
+{
+    public DesktopOverlayInfoOption(string key, string displayName)
+    {
+        Key = key;
+        _displayName = displayName;
+    }
+
+    public string Key { get; }
+
+    [ObservableProperty]
+    private string _displayName;
 }

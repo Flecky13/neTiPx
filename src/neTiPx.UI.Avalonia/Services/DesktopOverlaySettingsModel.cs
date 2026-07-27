@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace neTiPx.UI.Avalonia.Services;
 
@@ -18,6 +19,15 @@ public static class DesktopOverlayInfoKeys
     public const string Uptime = "uptime";
     public const string RamUsage = "ramUsage";
     public const string NetworkAdapter = "networkAdapter";
+    public const string ComputerModel = "computerModel";
+    public const string ComputerManufacturer = "computerManufacturer";
+    public const string OperatingSystemName = "operatingSystemName";
+    public const string OperatingSystemVersion = "operatingSystemVersion";
+    public const string DiskFreeSpace = "diskFreeSpace";
+    public const string DiskUsedSpace = "diskUsedSpace";
+    public const string CpuModel = "cpuModel";
+    public const string ProcessorCount = "processorCount";
+    public const string FreeText = "freeText";
 
     public static readonly string[] DefaultOrder =
     {
@@ -33,6 +43,25 @@ public static class DesktopOverlayInfoKeys
         RamUsage,
         NetworkAdapter
     };
+
+    public static readonly string[] AvailableKeys = DefaultOrder
+        .Concat(new[]
+        {
+            ComputerModel,
+            ComputerManufacturer,
+            OperatingSystemName,
+            OperatingSystemVersion,
+            DiskFreeSpace,
+            DiskUsedSpace,
+            CpuModel,
+            ProcessorCount,
+            FreeText
+        })
+        .ToArray();
+
+    public static bool IsKnown(string? key) =>
+        !string.IsNullOrWhiteSpace(key)
+        && AvailableKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
 }
 
 public static class DesktopOverlayPositionModes
@@ -56,10 +85,15 @@ public static class DesktopOverlayPositionModes
 public sealed class DesktopOverlayItemSetting
 {
     public string Key { get; set; } = string.Empty;
-    public bool IsVisible { get; set; } = true;
     public bool ShowLabel { get; set; } = true;
-    public bool ShowValue { get; set; } = true;
+    public string CustomText { get; set; } = string.Empty;
     public int Order { get; set; }
+
+    // Used only while reading settings created before the list-based UI.
+    // A hidden legacy entry maps naturally to an entry removed from the list.
+    [JsonPropertyName("isVisible")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? LegacyIsVisible { get; set; }
 }
 
 public sealed class DesktopOverlaySettingsModel
@@ -103,9 +137,7 @@ public sealed class DesktopOverlaySettingsModel
             model.Items.Add(new DesktopOverlayItemSetting
             {
                 Key = DesktopOverlayInfoKeys.DefaultOrder[i],
-                IsVisible = true,
                 ShowLabel = true,
-                ShowValue = true,
                 Order = i
             });
         }
@@ -137,39 +169,23 @@ public sealed class DesktopOverlaySettingsModel
         normalized.RamRefreshSeconds = Math.Clamp(normalized.RamRefreshSeconds, 1, 3600);
         normalized.UptimeRefreshSeconds = Math.Clamp(normalized.UptimeRefreshSeconds, 1, 3600);
 
-        var byKey = (normalized.Items ?? new List<DesktopOverlayItemSetting>())
-            .Where(item => item != null && !string.IsNullOrWhiteSpace(item.Key))
-            .GroupBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
-
-        normalized.Items = new List<DesktopOverlayItemSetting>();
-
-        for (var i = 0; i < DesktopOverlayInfoKeys.DefaultOrder.Length; i++)
-        {
-            var key = DesktopOverlayInfoKeys.DefaultOrder[i];
-            if (byKey.TryGetValue(key, out var existing))
+        // The default list is used only for a new configuration.  Once the user
+        // has edited the list, omitted entries must remain omitted.
+        normalized.Items = (normalized.Items ?? new List<DesktopOverlayItemSetting>())
+            .Where(item => item != null
+                && item.LegacyIsVisible != false
+                && DesktopOverlayInfoKeys.IsKnown(item.Key))
+            .OrderBy(item => item.Order)
+            .Take(20)
+            .Select((item, index) => new DesktopOverlayItemSetting
             {
-                normalized.Items.Add(new DesktopOverlayItemSetting
-                {
-                    Key = key,
-                    IsVisible = existing.IsVisible,
-                    ShowLabel = existing.ShowLabel,
-                    ShowValue = existing.ShowValue,
-                    Order = i
-                });
-            }
-            else
-            {
-                normalized.Items.Add(new DesktopOverlayItemSetting
-                {
-                    Key = key,
-                    IsVisible = true,
-                    ShowLabel = true,
-                    ShowValue = true,
-                    Order = i
-                });
-            }
-        }
+                Key = DesktopOverlayInfoKeys.AvailableKeys.First(key =>
+                    key.Equals(item.Key, StringComparison.OrdinalIgnoreCase)),
+                ShowLabel = item.ShowLabel,
+                CustomText = (item.CustomText ?? string.Empty).Trim()[..Math.Min((item.CustomText ?? string.Empty).Trim().Length, 32)],
+                Order = index
+            })
+            .ToList();
 
         return normalized;
     }

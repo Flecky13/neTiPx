@@ -139,6 +139,10 @@
             <TextBlock Text="{loc:Loc OVERLAY_FIELDS}" FontWeight="SemiBold" FontSize="12" />
             <TextBlock Text="{loc:Loc OVERLAY_FIELDS_HINT}" FontSize="11" Opacity="0.7" TextWrapping="Wrap" />
 
+            <Button Command="{Binding AddDesktopOverlayItemCommand}"
+                    HorizontalAlignment="Left"
+                    Content="{loc:Loc OVERLAY_FIELDS_ADD}" />
+
             <ListBox ItemsSource="{Binding DesktopOverlayInfoItems}"
                      BorderThickness="0"
                      Background="Transparent">
@@ -153,23 +157,42 @@
                                 DragDrop.AllowDrop="True"
                                 DragDrop.DragOver="OverlayItemDragOver"
                                 DragDrop.Drop="OverlayItemDrop">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                            <Grid ColumnDefinitions="Auto,*,*,Auto,Auto" ColumnSpacing="8">
                                 <TextBlock Grid.Column="0" Text="::" VerticalAlignment="Center" Opacity="0.6" PointerPressed="OverlayItemDragStart_OnPointerPressed" />
-                                <TextBlock Grid.Column="1" Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                                <CheckBox Grid.Column="2" IsChecked="{Binding IsVisible}" VerticalAlignment="Center" />
-                                <CheckBox Grid.Column="3" IsChecked="{Binding ShowLabel}" VerticalAlignment="Center" />
-                                <CheckBox Grid.Column="4" IsChecked="{Binding ShowValue}" VerticalAlignment="Center" />
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding InfoOptions}"
+                                          SelectedItem="{Binding SelectedInfoOption}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:DesktopOverlayInfoOption">
+                                            <TextBlock Text="{Binding DisplayName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBox Grid.Column="2"
+                                         Text="{Binding CustomText}"
+                                         MaxLength="32"
+                                         Watermark="{loc:Loc OVERLAY_CUSTOM_TEXT}" />
+                                <CheckBox Grid.Column="3"
+                                          Content="{loc:Loc OVERLAY_SHOW_LABEL}"
+                                          IsChecked="{Binding ShowLabel}"
+                                          IsVisible="{Binding ShowLabelSelector}"
+                                          VerticalAlignment="Center" />
+                                <Button Grid.Column="4"
+                                        Command="{Binding $parent[Window].((vm:SettingsViewModel)DataContext).RemoveDesktopOverlayItemCommand}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip.Tip="{loc:Loc OVERLAY_FIELDS_REMOVE}"
+                                        Padding="4"
+                                        Background="Transparent">
+                                    <PathIcon Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                              Width="14"
+                                              Height="14" />
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
-                <TextBlock Grid.Column="2" Text="{loc:Loc OVERLAY_COL_VISIBLE}" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" />
-                <TextBlock Grid.Column="3" Text="{loc:Loc OVERLAY_COL_LABEL}" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" />
-                <TextBlock Grid.Column="4" Text="{loc:Loc OVERLAY_COL_VALUE}" FontSize="11" Opacity="0.7" HorizontalAlignment="Center" />
-            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Window>
