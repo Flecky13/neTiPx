@@ -4,6 +4,20 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.7.3]
+
+### Added
+
+- **Desktop-Overlay / Informationsliste**: Einträge können nun hinzugefügt, gelöscht und per Dropdown aus den verfügbaren Informationen ausgewählt werden; die Liste ist auf 20 Einträge begrenzt.
+
+- **Desktop-Overlay / Eigene Beschriftung**: Pro Eintrag kann eine eigene Beschriftung oder ein Freitext mit bis zu 32 Zeichen hinterlegt werden. Freitext wird ohne separaten Wert angezeigt.
+
+- **Desktop-Overlay / Zusätzliche Systemwerte**: Rechnermodell, Hersteller, Betriebssystemname und -version, freier und belegter Speicher des Systemlaufwerks, CPU-Modell sowie logische Prozessorkerne können angezeigt werden.
+
+### Changed
+
+- **Desktop-Overlay / Darstellung der Informationen**: Die bisherige Sichtbarkeitsauswahl wurde durch eine editierbare Liste ersetzt. Pro Eintrag lässt sich wählen, ob Beschreibung und Wert oder nur der Wert angezeigt werden.
+
 ## [2.0.7.2]
 
 ### Added
