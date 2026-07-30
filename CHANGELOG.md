@@ -4,6 +4,22 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.7.4]
+
+### Added
+
+- **Desktop-Overlay / Dienststatus**: Der Status frei auswählbarer Systemdienste kann jetzt im Overlay angezeigt werden. Die Anzeige unterscheidet zwischen `Running` und `Stopped`.
+
+### Changed
+
+- **Desktop-Overlay / Dienstauswahl**: Dienstwahl als durchsuchbare Autovervollständigung umgesetzt. Ohne Suchtext stehen alle Dienste zur Auswahl; die Eingabe filtert die Liste nach enthaltenem Text.
+- **Desktop-Overlay / Dienstliste**: Darstellung und Farben der Dienstsuche an die übrigen Dropdowns der Overlay-Einstellungen angepasst, damit die Einträge auch unter Windows und in dunklen Farbschemata lesbar bleiben.
+- **Desktop-Overlay / Freie Positionierung**: Während der temporären Interaktion sind die übrigen Overlay-Einstellungen gesperrt. Das verhindert, dass Layoutänderungen die noch nicht bestätigte Position überschreiben.
+
+### Fixed
+
+- **Desktop-Overlay / Freie Positionierung**: Die beim Verschieben gewählte Position wird beim Deaktivieren der temporären Interaktion gespeichert und beim Schließen des Einstellungsfensters automatisch bestätigt. Das Overlay springt dadurch nicht mehr auf eine andere Position.
+
 ## [2.0.7.3]
 
 ### Added

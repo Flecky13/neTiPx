@@ -146,6 +146,8 @@ public partial class SettingsViewModel : ObservableObject
     private ObservableCollection<DesktopOverlayItemSettingViewModel> _desktopOverlayInfoItems;
 
     public ObservableCollection<DesktopOverlayInfoOption> DesktopOverlayInfoOptions { get; } = new();
+    public ObservableCollection<SystemServiceInfo> DesktopOverlayServices { get; } = new();
+    public bool IsDesktopOverlaySettingsEditable => !DesktopOverlayHoverInteractive;
     
     public SettingsViewModel()
     {
@@ -169,6 +171,7 @@ public partial class SettingsViewModel : ObservableObject
         LoadConnectionQualitySettings();
         LoadAutostartSettings();
         LoadDesktopOverlaySettings();
+        _ = LoadDesktopOverlayServicesAsync();
     }
     
     /// <summary>
@@ -805,9 +808,11 @@ public partial class SettingsViewModel : ObservableObject
             {
                 var vm = new DesktopOverlayItemSettingViewModel(
                     DesktopOverlayInfoOptions,
+                    DesktopOverlayServices,
                     item.Key,
                     item.ShowLabel,
-                    item.CustomText);
+                    item.CustomText,
+                    item.ServiceName);
                 vm.PropertyChanged += OverlayItem_PropertyChanged;
                 DesktopOverlayInfoItems.Add(vm);
             }
@@ -831,26 +836,27 @@ public partial class SettingsViewModel : ObservableObject
 
         if (e.PropertyName is nameof(DesktopOverlayItemSettingViewModel.SelectedInfoOption)
             or nameof(DesktopOverlayItemSettingViewModel.ShowLabel)
-            or nameof(DesktopOverlayItemSettingViewModel.CustomText))
+            or nameof(DesktopOverlayItemSettingViewModel.CustomText)
+            or nameof(DesktopOverlayItemSettingViewModel.ServiceName))
         {
             SaveDesktopOverlaySettings();
         }
     }
 
-    public void MoveDesktopOverlayItem(string sourceKey, string targetKey)
+    public void MoveDesktopOverlayItem(string sourceId, string targetId)
     {
-        if (string.IsNullOrWhiteSpace(sourceKey) || string.IsNullOrWhiteSpace(targetKey))
+        if (string.IsNullOrWhiteSpace(sourceId) || string.IsNullOrWhiteSpace(targetId))
         {
             return;
         }
 
         var sourceIndex = DesktopOverlayInfoItems
             .Select((item, index) => new { item, index })
-            .FirstOrDefault(x => x.item.Key.Equals(sourceKey, StringComparison.OrdinalIgnoreCase))?.index ?? -1;
+            .FirstOrDefault(x => x.item.DragId.Equals(sourceId, StringComparison.Ordinal))?.index ?? -1;
 
         var targetIndex = DesktopOverlayInfoItems
             .Select((item, index) => new { item, index })
-            .FirstOrDefault(x => x.item.Key.Equals(targetKey, StringComparison.OrdinalIgnoreCase))?.index ?? -1;
+            .FirstOrDefault(x => x.item.DragId.Equals(targetId, StringComparison.Ordinal))?.index ?? -1;
 
         if (sourceIndex < 0 || targetIndex < 0 || sourceIndex == targetIndex)
         {
@@ -872,10 +878,12 @@ public partial class SettingsViewModel : ObservableObject
     private void AddDesktopOverlayItem()
     {
         var selectedKey = DesktopOverlayInfoKeys.AvailableKeys.FirstOrDefault(key =>
+            !key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)
+            &&
             !DesktopOverlayInfoItems.Any(item => item.Key.Equals(key, StringComparison.OrdinalIgnoreCase)))
             ?? DesktopOverlayInfoKeys.AvailableKeys[0];
 
-        var item = new DesktopOverlayItemSettingViewModel(DesktopOverlayInfoOptions, selectedKey, showLabel: true, customText: string.Empty);
+        var item = new DesktopOverlayItemSettingViewModel(DesktopOverlayInfoOptions, DesktopOverlayServices, selectedKey, showLabel: true, customText: string.Empty);
         item.PropertyChanged += OverlayItem_PropertyChanged;
         DesktopOverlayInfoItems.Add(item);
         AddDesktopOverlayItemCommand.NotifyCanExecuteChanged();
@@ -906,6 +914,11 @@ public partial class SettingsViewModel : ObservableObject
 
         try
         {
+            // The free position is updated directly by the overlay window while it is being dragged.
+            // Keep those coordinates when another setting (for example temporary interaction) is saved.
+            var existingSettings = DesktopOverlaySettingsModel.Normalize(
+                _settingsService.GetDesktopOverlaySettings(forceReload: true));
+
             var model = new DesktopOverlaySettingsModel
             {
                 Enabled = DesktopOverlayEnabled,
@@ -920,6 +933,8 @@ public partial class SettingsViewModel : ObservableObject
                 },
                 OffsetX = (int)DesktopOverlayOffsetX,
                 OffsetY = (int)DesktopOverlayOffsetY,
+                FreeX = existingSettings.FreeX,
+                FreeY = existingSettings.FreeY,
                 Width = (int)DesktopOverlayWidth,
                 Height = (int)DesktopOverlayHeight,
                 FontSize = (double)DesktopOverlayFontSize,
@@ -992,8 +1007,27 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    private async Task LoadDesktopOverlayServicesAsync()
+    {
+        var services = await SystemServiceInfoProvider.GetServicesAsync();
+        DesktopOverlayServices.Clear();
+        foreach (var service in services)
+        {
+            DesktopOverlayServices.Add(service);
+        }
+
+        foreach (var item in DesktopOverlayInfoItems)
+        {
+            item.RefreshServices();
+        }
+    }
+
     partial void OnDesktopOverlayEnabledChanged(bool value) => SaveDesktopOverlaySettings();
-    partial void OnDesktopOverlayHoverInteractiveChanged(bool value) => SaveDesktopOverlaySettings();
+    partial void OnDesktopOverlayHoverInteractiveChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsDesktopOverlaySettingsEditable));
+        SaveDesktopOverlaySettings();
+    }
     partial void OnDesktopOverlayPositionIndexChanged(int value) => SaveDesktopOverlaySettings();
     partial void OnDesktopOverlayOffsetXChanged(decimal value) => SaveDesktopOverlaySettings();
     partial void OnDesktopOverlayOffsetYChanged(decimal value) => SaveDesktopOverlaySettings();

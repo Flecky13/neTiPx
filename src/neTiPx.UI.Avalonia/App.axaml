@@ -42,7 +42,7 @@
         <Style Selector="ComboBoxItem:selected">
             <Setter Property="Foreground" Value="{DynamicResource ListBoxItemForegroundSelected}" />
         </Style>
-        
+
         <!-- CheckBox Style -->
         <Style Selector="CheckBox">
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />

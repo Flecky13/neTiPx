@@ -594,6 +594,8 @@
   "OVERLAY_INFO_DISK_USED_SPACE": "Used disk space",
   "OVERLAY_INFO_CPU_MODEL": "Processor",
   "OVERLAY_INFO_PROCESSOR_COUNT": "Logical processor cores",
+  "OVERLAY_INFO_SERVICE_STATUS": "Service status",
+  "OVERLAY_SERVICE_SELECT": "Select or search service",
   "OVERLAY_INFO_FREE_TEXT": "Free text",
   "UNC_ADD": "+ Add",
   "UNC_CONNECTED_PATHS": "Connected UNC paths",

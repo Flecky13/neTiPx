@@ -35,6 +35,7 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
     private DateTime _lastExternalIpRefreshUtc = DateTime.MinValue;
     private DateTime _lastRamRefreshUtc = DateTime.MinValue;
     private DateTime _lastUptimeRefreshUtc = DateTime.MinValue;
+    private DateTime _lastServiceRefreshUtc = DateTime.MinValue;
 
     public DesktopOverlayViewModel()
     {
@@ -132,6 +133,7 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
         _lastExternalIpRefreshUtc = DateTime.MinValue;
         _lastRamRefreshUtc = DateTime.MinValue;
         _lastUptimeRefreshUtc = DateTime.MinValue;
+        _lastServiceRefreshUtc = DateTime.MinValue;
         await RefreshByScheduleAsync(force: true);
     }
 
@@ -187,6 +189,16 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
                 }
 
                 _lastUptimeRefreshUtc = now;
+            }
+
+            if (force || now - _lastServiceRefreshUtc >= TimeSpan.FromSeconds(_settings.NetworkRefreshSeconds))
+            {
+                if (await RefreshServiceStatusesAsync())
+                {
+                    anyValueChanged = true;
+                }
+
+                _lastServiceRefreshUtc = now;
             }
 
             if (anyValueChanged || force)
@@ -270,6 +282,23 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
         var percent = totalBytes > 0 ? (usedBytes / (double)totalBytes) * 100 : 0;
         var formatted = string.Format(CultureInfo.InvariantCulture, "{0:0.0} GB / {1:0.0} GB ({2:0}%)", usedGb, totalGb, percent);
         return UpdateValue(DesktopOverlayInfoKeys.RamUsage, formatted);
+    }
+
+    private async Task<bool> RefreshServiceStatusesAsync()
+    {
+        var serviceNames = _settings.Items
+            .Where(item => item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.ServiceName)
+            .Where(name => !string.IsNullOrWhiteSpace(name));
+        var statuses = await SystemServiceInfoProvider.GetStatusesAsync(serviceNames);
+        var changed = false;
+        foreach (var item in _settings.Items.Where(item => item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)))
+        {
+            var status = statuses.TryGetValue(item.ServiceName, out var value) ? value : "-";
+            changed |= UpdateValue(GetValueKey(item), status);
+        }
+
+        return changed;
     }
 
     private static string GetInfoValue(string[,]? info, string key)
@@ -436,8 +465,12 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
                 continue;
             }
 
-            var value = _values.TryGetValue(item.Key, out var currentValue) ? currentValue : "-";
-            var label = string.IsNullOrWhiteSpace(item.CustomText) ? GetLabel(item.Key) : item.CustomText;
+            var value = _values.TryGetValue(GetValueKey(item), out var currentValue) ? currentValue : "-";
+            var label = string.IsNullOrWhiteSpace(item.CustomText)
+                ? (item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)
+                    ? (string.IsNullOrWhiteSpace(item.ServiceName) ? GetLabel(item.Key) : item.ServiceName)
+                    : GetLabel(item.Key))
+                : item.CustomText;
             var text = item.ShowLabel ? $"{label}: {value}" : value;
             next.Add(new DesktopOverlayLineViewModel(item.Key, text));
         }
@@ -453,6 +486,11 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
             Lines.Add(line);
         }
     }
+
+    private static string GetValueKey(DesktopOverlayItemSetting item) =>
+        item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)
+            ? $"{item.Key}:{item.ServiceName}"
+            : item.Key;
 
     private bool IsLineSetEqual(IReadOnlyList<DesktopOverlayLineViewModel> next)
     {
@@ -587,6 +625,7 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
             DesktopOverlayInfoKeys.DiskUsedSpace => T("OVERLAY_INFO_DISK_USED_SPACE"),
             DesktopOverlayInfoKeys.CpuModel => T("OVERLAY_INFO_CPU_MODEL"),
             DesktopOverlayInfoKeys.ProcessorCount => T("OVERLAY_INFO_PROCESSOR_COUNT"),
+            DesktopOverlayInfoKeys.ServiceStatus => T("OVERLAY_INFO_SERVICE_STATUS"),
             DesktopOverlayInfoKeys.FreeText => T("OVERLAY_INFO_FREE_TEXT"),
             _ => key
         };

@@ -9,17 +9,23 @@ public sealed partial class DesktopOverlayItemSettingViewModel : ObservableObjec
 {
     public DesktopOverlayItemSettingViewModel(
         ObservableCollection<DesktopOverlayInfoOption> infoOptions,
+        ObservableCollection<SystemServiceInfo> services,
         string key,
         bool showLabel,
-        string? customText)
+        string? customText,
+        string? serviceName = null)
     {
         InfoOptions = infoOptions;
+        Services = services;
         _selectedInfoOption = infoOptions.FirstOrDefault(option => option.Key == key);
         _showLabel = showLabel;
         _customText = customText ?? string.Empty;
+        _serviceName = serviceName ?? string.Empty;
+        ResolveSelectedService();
     }
 
     public ObservableCollection<DesktopOverlayInfoOption> InfoOptions { get; }
+    public ObservableCollection<SystemServiceInfo> Services { get; }
 
     [ObservableProperty]
     private DesktopOverlayInfoOption? _selectedInfoOption;
@@ -30,6 +36,17 @@ public sealed partial class DesktopOverlayItemSettingViewModel : ObservableObjec
     [ObservableProperty]
     private string _customText;
 
+    [ObservableProperty]
+    private string _serviceName;
+
+    [ObservableProperty]
+    private SystemServiceInfo? _selectedService;
+
+    [ObservableProperty]
+    private bool _isServiceDropDownOpen;
+
+    public string DragId { get; } = System.Guid.NewGuid().ToString("N");
+
     public string Key => SelectedInfoOption?.Key ?? string.Empty;
 
     public string DisplayName => SelectedInfoOption?.DisplayName ?? string.Empty;
@@ -38,12 +55,38 @@ public sealed partial class DesktopOverlayItemSettingViewModel : ObservableObjec
 
     public bool ShowLabelSelector => !IsFreeText;
 
+    public bool IsServiceStatus => Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, System.StringComparison.OrdinalIgnoreCase);
+
     partial void OnSelectedInfoOptionChanged(DesktopOverlayInfoOption? value)
     {
         OnPropertyChanged(nameof(Key));
         OnPropertyChanged(nameof(DisplayName));
         OnPropertyChanged(nameof(IsFreeText));
         OnPropertyChanged(nameof(ShowLabelSelector));
+        OnPropertyChanged(nameof(IsServiceStatus));
+    }
+
+    partial void OnSelectedServiceChanged(SystemServiceInfo? value)
+    {
+        if (value != null && !string.Equals(ServiceName, value.Name, System.StringComparison.OrdinalIgnoreCase))
+        {
+            ServiceName = value.Name;
+        }
+
+    }
+
+    partial void OnServiceNameChanged(string value) => ResolveSelectedService();
+
+    public void RefreshServices() => ResolveSelectedService();
+
+    public void ResolveSelectedService()
+    {
+        var selected = Services.FirstOrDefault(service =>
+            service.Name.Equals(ServiceName, System.StringComparison.OrdinalIgnoreCase));
+        if (!ReferenceEquals(SelectedService, selected))
+        {
+            SelectedService = selected;
+        }
     }
 
     public DesktopOverlayItemSetting ToModel(int order)
@@ -53,6 +96,7 @@ public sealed partial class DesktopOverlayItemSettingViewModel : ObservableObjec
             Key = Key,
             ShowLabel = ShowLabel,
             CustomText = CustomText,
+            ServiceName = ServiceName,
             Order = order
         };
     }

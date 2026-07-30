@@ -10,6 +10,13 @@ public partial class DesktopOverlaySettingsWindow : Window
     public DesktopOverlaySettingsWindow()
     {
         InitializeComponent();
+        Closed += (_, _) =>
+        {
+            if (DataContext is SettingsViewModel viewModel)
+            {
+                viewModel.DesktopOverlayHoverInteractive = false;
+            }
+        };
     }
 
     private async void OverlayItemDragStart_OnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -25,7 +32,7 @@ public partial class DesktopOverlaySettingsWindow : Window
         }
 
         var data = new DataTransfer();
-        data.Add(DataTransferItem.CreateText(item.Key));
+        data.Add(DataTransferItem.CreateText(item.DragId));
         await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Move);
     }
 
@@ -39,6 +46,14 @@ public partial class DesktopOverlaySettingsWindow : Window
         else
         {
             e.DragEffects = DragDropEffects.None;
+        }
+    }
+
+    private void ServiceSelector_OnGotFocus(object? sender, GotFocusEventArgs e)
+    {
+        if (sender is Control { DataContext: DesktopOverlayItemSettingViewModel item })
+        {
+            item.IsServiceDropDownOpen = true;
         }
     }
 
@@ -60,6 +75,6 @@ public partial class DesktopOverlaySettingsWindow : Window
             return;
         }
 
-        viewModel.MoveDesktopOverlayItem(sourceKey, targetItem.Key);
+        viewModel.MoveDesktopOverlayItem(sourceKey, targetItem.DragId);
     }
 }

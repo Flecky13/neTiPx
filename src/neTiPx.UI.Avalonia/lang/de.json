@@ -594,6 +594,8 @@
   "OVERLAY_INFO_DISK_USED_SPACE": "Festplatte belegt",
   "OVERLAY_INFO_CPU_MODEL": "Prozessor",
   "OVERLAY_INFO_PROCESSOR_COUNT": "Logische Prozessorkerne",
+  "OVERLAY_INFO_SERVICE_STATUS": "Dienststatus",
+  "OVERLAY_SERVICE_SELECT": "Dienst auswählen oder suchen",
   "OVERLAY_INFO_FREE_TEXT": "Freitext",
   "UNC_ADD": "+ Hinzufugen",
   "UNC_CONNECTED_PATHS": "Verbundene UNC-Pfade",

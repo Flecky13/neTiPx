@@ -18,7 +18,6 @@ public sealed class DesktopOverlayController : IDisposable
 
     private bool _disposed;
     private bool _isApplyingSettings;
-    private bool _isPersistingFreePosition;
 
     public DesktopOverlayController()
     {
@@ -26,7 +25,6 @@ public sealed class DesktopOverlayController : IDisposable
         _viewModel = new DesktopOverlayViewModel();
         _window = new DesktopOverlayWindow(_viewModel);
 
-        _window.OverlayMovedByUser += OnOverlayMovedByUser;
         SettingsService.UserSettingsChanged += OnUserSettingsChanged;
     }
 
@@ -60,6 +58,18 @@ public sealed class DesktopOverlayController : IDisposable
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                // Moving is deliberately only persisted when temporary interaction is turned off.
+                // Applying the unchecked setting must therefore capture the window's current location
+                // before ApplyWindowPosition could move it back to an older saved location.
+                if (_viewModel.IsFreeMoveMode && _viewModel.IsInteractive
+                    && string.Equals(settings.PositionMode, DesktopOverlayPositionModes.Free, StringComparison.OrdinalIgnoreCase)
+                    && !settings.HoverInteractive)
+                {
+                    settings.FreeX = Math.Max(0, _window.Position.X);
+                    settings.FreeY = Math.Max(0, _window.Position.Y);
+                    _settingsService.SetDesktopOverlaySettings(settings);
+                }
+
                 _viewModel.ApplySettings(settings);
 
                 _window.Width = settings.Width;
@@ -144,35 +154,6 @@ public sealed class DesktopOverlayController : IDisposable
         _window.Position = new PixelPoint(Math.Max(workArea.X, x), Math.Max(workArea.Y, y));
     }
 
-    private void OnOverlayMovedByUser()
-    {
-        if (_isPersistingFreePosition || _isApplyingSettings || _disposed)
-        {
-            return;
-        }
-
-        var settings = DesktopOverlaySettingsModel.Normalize(_settingsService.GetDesktopOverlaySettings(forceReload: true));
-        if (!string.Equals(settings.PositionMode, DesktopOverlayPositionModes.Free, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        _isPersistingFreePosition = true;
-
-        try
-        {
-            settings.FreeX = Math.Max(0, _window.Position.X);
-            settings.FreeY = Math.Max(0, _window.Position.Y);
-            settings.Width = Math.Clamp((int)Math.Round(_window.Width), 180, 1200);
-            settings.Height = Math.Clamp((int)Math.Round(_window.Height), 120, 2000);
-            _settingsService.SetDesktopOverlaySettings(settings);
-        }
-        finally
-        {
-            _isPersistingFreePosition = false;
-        }
-    }
-
     public void Dispose()
     {
         if (_disposed)
@@ -182,7 +163,6 @@ public sealed class DesktopOverlayController : IDisposable
 
         _disposed = true;
         SettingsService.UserSettingsChanged -= OnUserSettingsChanged;
-        _window.OverlayMovedByUser -= OnOverlayMovedByUser;
         _viewModel.Stop();
 
         if (_window.IsVisible)

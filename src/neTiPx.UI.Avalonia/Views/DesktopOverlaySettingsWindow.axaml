@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
         xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
+        xmlns:services="using:neTiPx.UI.Avalonia.Services"
         x:Class="neTiPx.UI.Avalonia.Views.DesktopOverlaySettingsWindow"
         x:DataType="vm:SettingsViewModel"
         mc:Ignorable="d"
@@ -34,6 +35,8 @@
             <CheckBox Content="{loc:Loc OVERLAY_INTERACTIVE_HOVER}"
                       IsChecked="{Binding DesktopOverlayHoverInteractive}" />
 
+            <StackPanel Spacing="12"
+                        IsEnabled="{Binding IsDesktopOverlaySettingsEditable}">
             <TextBlock Text="{loc:Loc OVERLAY_POSITION}" FontWeight="SemiBold" FontSize="12" />
             <ComboBox SelectedIndex="{Binding DesktopOverlayPositionIndex}">
                 <ComboBoxItem Content="{loc:Loc OVERLAY_POS_TOP_LEFT}" />
@@ -168,10 +171,32 @@
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
-                                <TextBox Grid.Column="2"
-                                         Text="{Binding CustomText}"
-                                         MaxLength="32"
-                                         Watermark="{loc:Loc OVERLAY_CUSTOM_TEXT}" />
+                                <StackPanel Grid.Column="2" Spacing="4">
+                                    <TextBlock Text="{loc:Loc OVERLAY_SERVICE_SELECT}"
+                                               FontSize="11"
+                                               Opacity="0.7"
+                                               IsVisible="{Binding IsServiceStatus}" />
+                                    <AutoCompleteBox ItemsSource="{Binding Services}"
+                                                     SelectedItem="{Binding SelectedService}"
+                                                     IsDropDownOpen="{Binding IsServiceDropDownOpen, Mode=TwoWay}"
+                                                     FilterMode="Contains"
+                                                     MinimumPrefixLength="0"
+                                                     GotFocus="ServiceSelector_OnGotFocus"
+                                                     IsVisible="{Binding IsServiceStatus}">
+                                        <AutoCompleteBox.ItemTemplate>
+                                            <DataTemplate x:DataType="services:SystemServiceInfo">
+                                                <Border Background="{DynamicResource ComboBoxDropDownBackground}"
+                                                        Padding="6,4">
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               Foreground="{DynamicResource ListBoxItemForeground}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </AutoCompleteBox.ItemTemplate>
+                                    </AutoCompleteBox>
+                                    <TextBox Text="{Binding CustomText}"
+                                             MaxLength="32"
+                                             Watermark="{loc:Loc OVERLAY_CUSTOM_TEXT}" />
+                                </StackPanel>
                                 <CheckBox Grid.Column="3"
                                           Content="{loc:Loc OVERLAY_SHOW_LABEL}"
                                           IsChecked="{Binding ShowLabel}"
@@ -193,6 +218,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Window>

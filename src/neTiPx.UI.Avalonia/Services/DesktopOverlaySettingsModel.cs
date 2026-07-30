@@ -27,6 +27,7 @@ public static class DesktopOverlayInfoKeys
     public const string DiskUsedSpace = "diskUsedSpace";
     public const string CpuModel = "cpuModel";
     public const string ProcessorCount = "processorCount";
+    public const string ServiceStatus = "serviceStatus";
     public const string FreeText = "freeText";
 
     public static readonly string[] DefaultOrder =
@@ -55,6 +56,7 @@ public static class DesktopOverlayInfoKeys
             DiskUsedSpace,
             CpuModel,
             ProcessorCount,
+            ServiceStatus,
             FreeText
         })
         .ToArray();
@@ -87,6 +89,7 @@ public sealed class DesktopOverlayItemSetting
     public string Key { get; set; } = string.Empty;
     public bool ShowLabel { get; set; } = true;
     public string CustomText { get; set; } = string.Empty;
+    public string ServiceName { get; set; } = string.Empty;
     public int Order { get; set; }
 
     // Used only while reading settings created before the list-based UI.
@@ -183,6 +186,9 @@ public sealed class DesktopOverlaySettingsModel
                     key.Equals(item.Key, StringComparison.OrdinalIgnoreCase)),
                 ShowLabel = item.ShowLabel,
                 CustomText = (item.CustomText ?? string.Empty).Trim()[..Math.Min((item.CustomText ?? string.Empty).Trim().Length, 32)],
+                ServiceName = item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)
+                    ? (item.ServiceName ?? string.Empty).Trim()[..Math.Min((item.ServiceName ?? string.Empty).Trim().Length, 256)]
+                    : string.Empty,
                 Order = index
             })
             .ToList();
