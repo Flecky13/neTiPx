@@ -12,6 +12,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using System.Threading;
 
 #if WINDOWS
 using neTiPx.Services.Windows;
@@ -32,6 +33,7 @@ public partial class App : Application
     private readonly object _shutdownSync = new();
     private bool _isExitRequested;
     private bool _cleanupCompleted;
+    private int _mainWindowActivationRequested;
 
     private enum ExitReason
     {
@@ -45,6 +47,17 @@ public partial class App : Application
         if (Current is App app)
         {
             app.RequestExit(ExitReason.UserRequested, invokeDesktopShutdown: true);
+        }
+    }
+
+    /// <summary>
+    /// Brings the existing application window back when a second process is started.
+    /// </summary>
+    public static void RequestMainWindowActivation()
+    {
+        if (Current is App app)
+        {
+            app.RequestMainWindowActivationCore();
         }
     }
 
@@ -82,6 +95,11 @@ public partial class App : Application
             
             // Weise das Fenster zu
             desktop.MainWindow = mainWindow;
+
+            if (Program.ConsumeActivationRequest())
+            {
+                RequestMainWindowActivationCore();
+            }
             
             // Initialize TrayService
             _trayService = new TrayService();
@@ -120,6 +138,36 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void RequestMainWindowActivationCore()
+    {
+        Interlocked.Exchange(ref _mainWindowActivationRequested, 1);
+        Dispatcher.UIThread.Post(ActivateMainWindowIfRequested, DispatcherPriority.Send);
+    }
+
+    private void ActivateMainWindowIfRequested()
+    {
+        if (Interlocked.Exchange(ref _mainWindowActivationRequested, 0) == 0 ||
+            ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop ||
+            desktop.MainWindow is not Window mainWindow)
+        {
+            return;
+        }
+
+        mainWindow.ShowInTaskbar = true;
+
+        if (!mainWindow.IsVisible)
+        {
+            mainWindow.Show();
+        }
+
+        if (mainWindow.WindowState == WindowState.Minimized)
+        {
+            mainWindow.WindowState = WindowState.Normal;
+        }
+
+        mainWindow.Activate();
     }
 
     private void RequestExit(ExitReason reason, bool invokeDesktopShutdown)

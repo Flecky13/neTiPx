@@ -17,11 +17,22 @@ fi
 
 ARCH="$(uname -m)"
 
-if [[ "${ARCH}" == "arm64" ]]; then
-    RID="osx-arm64"
-else
-    RID="osx-x64"
-fi
+for RID in osx-x64 osx-arm64
+do
+    echo "Publishing $RID"
+
+    dotnet publish \
+        "$PROJECT_PATH" \
+        -c Release \
+        -r "$RID" \
+        --self-contained true \
+        -o "${ROOT_DIR}/publish/$RID"
+
+    # App Bundle erstellen
+    # signieren
+    # DMG erzeugen
+
+done
 
 OUTPUT_DIR="${ROOT_DIR}/publish/${RID}"
 
