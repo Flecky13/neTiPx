@@ -4,9 +4,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 PROJECT_PATH="${ROOT_DIR}/src/neTiPx.UI.Avalonia/neTiPx.UI.Avalonia.csproj"
-PACKAGE_DIR="${ROOT_DIR}/packages"
 
-mkdir -p "${ROOT_DIR}/release-assets" "${PACKAGE_DIR}"
+PACKAGE_DIR="${ROOT_DIR}/packages"
+RELEASE_DIR="${ROOT_DIR}/release-assets"
+
+mkdir -p "${PACKAGE_DIR}"
+mkdir -p "${RELEASE_DIR}"
 
 VERSION="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' "${ROOT_DIR}/src/Directory.Build.props" | head -n1)"
 
@@ -15,58 +18,75 @@ if [[ -z "${VERSION}" ]]; then
     exit 1
 fi
 
-ARCH="$(uname -m)"
+X64_DIR="${ROOT_DIR}/publish/osx-x64"
+ARM64_DIR="${ROOT_DIR}/publish/osx-arm64"
+UNIVERSAL_DIR="${ROOT_DIR}/publish/universal"
+
+rm -rf "${ROOT_DIR}/publish"
+mkdir -p "${UNIVERSAL_DIR}"
+
+############################################################
+# Publish
+############################################################
 
 for RID in osx-x64 osx-arm64
 do
-    echo "Publishing $RID"
+    echo
+    echo "=========================================="
+    echo "Publishing ${RID}"
+    echo "=========================================="
 
-    dotnet publish \
-        "$PROJECT_PATH" \
+    dotnet publish "${PROJECT_PATH}" \
         -c Release \
-        -r "$RID" \
+        -r "${RID}" \
         --self-contained true \
-        -o "${ROOT_DIR}/publish/$RID"
-
-    # App Bundle erstellen
-    # signieren
-    # DMG erzeugen
-
+        -p:PublishSingleFile=false \
+        -p:IncludeNativeLibrariesForSelfExtract=false \
+        -o "${ROOT_DIR}/publish/${RID}"
 done
 
-OUTPUT_DIR="${ROOT_DIR}/publish/${RID}"
-
-echo "📦 Publishing ${RID}..."
-
-dotnet publish "${PROJECT_PATH}" \
-    -c Release \
-    -r "${RID}" \
-    --self-contained true \
-    -p:PublishSingleFile=false \
-    -p:IncludeNativeLibrariesForSelfExtract=false \
-    -o "${OUTPUT_DIR}"
+############################################################
+# Universal Publish vorbereiten
+############################################################
 
 echo
-echo "==============================="
-echo "Publish directory:"
-ls -lah "${OUTPUT_DIR}"
-echo "==============================="
-echo
+echo "Creating universal publish..."
 
-#
-# Automatically determine executable
-#
-EXECUTABLE="$(find "${OUTPUT_DIR}" -maxdepth 1 -type f -perm -111 | head -n1)"
+cp -R "${X64_DIR}/." "${UNIVERSAL_DIR}/"
 
-if [[ -z "${EXECUTABLE}" ]]; then
-    echo "❌ No executable found."
-    exit 1
-fi
+############################################################
+# Alle Mach-O Dateien zusammenführen
+############################################################
 
-EXECUTABLE_NAME="$(basename "${EXECUTABLE}")"
+find "${X64_DIR}" -type f | while read FILE
+do
+    REL="${FILE#${X64_DIR}/}"
 
-echo "Executable:"
-echo "  ${EXECUTABLE_NAME}"
+    ARM_FILE="${ARM64_DIR}/${REL}"
+    OUT_FILE="${UNIVERSAL_DIR}/${REL}"
+
+    [[ -f "${ARM_FILE}" ]] || continue
+
+    TYPE=$(file -b "${FILE}")
+
+    if [[ "${TYPE}" == *"Mach-O"* ]]; then
+
+        echo "Universal: ${REL}"
+
+        mkdir -p "$(dirname "${OUT_FILE}")"
+
+        lipo -create \
+            "${FILE}" \
+            "${ARM_FILE}" \
+            -output "${OUT_FILE}"
+
+        chmod +x "${OUT_FILE}"
+    fi
+done
+
+############################################################
+# App Bundle
+############################################################
 
 APP_NAME="neTiPx"
 APP_BUNDLE="${PACKAGE_DIR}/${APP_NAME}.app"
@@ -76,82 +96,93 @@ rm -rf "${APP_BUNDLE}"
 mkdir -p "${APP_BUNDLE}/Contents/MacOS"
 mkdir -p "${APP_BUNDLE}/Contents/Resources"
 
-#
-# Copy complete publish directory
-#
-cp -R "${OUTPUT_DIR}/." "${APP_BUNDLE}/Contents/MacOS/"
+cp -R "${UNIVERSAL_DIR}/." "${APP_BUNDLE}/Contents/MacOS/"
 
-chmod +x "${APP_BUNDLE}/Contents/MacOS/${EXECUTABLE_NAME}"
+EXECUTABLE="${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
+
+if [[ ! -f "${EXECUTABLE}" ]]; then
+    EXECUTABLE="$(find "${APP_BUNDLE}/Contents/MacOS" -maxdepth 1 -type f -perm -111 | head -n1)"
+fi
+
+EXECUTABLE_NAME="$(basename "${EXECUTABLE}")"
 
 cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-
 <plist version="1.0">
 <dict>
 
-    <key>CFBundleDevelopmentRegion</key>
-    <string>English</string>
+<key>CFBundleDevelopmentRegion</key>
+<string>English</string>
 
-    <key>CFBundleExecutable</key>
-    <string>${EXECUTABLE_NAME}</string>
+<key>CFBundleExecutable</key>
+<string>${EXECUTABLE_NAME}</string>
 
-    <key>CFBundleIdentifier</key>
-    <string>com.netipx.app</string>
+<key>CFBundleIdentifier</key>
+<string>com.netipx.app</string>
 
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
+<key>CFBundlePackageType</key>
+<string>APPL</string>
 
-    <key>CFBundleName</key>
-    <string>${APP_NAME}</string>
+<key>CFBundleName</key>
+<string>${APP_NAME}</string>
 
-    <key>CFBundleDisplayName</key>
-    <string>${APP_NAME}</string>
+<key>CFBundleDisplayName</key>
+<string>${APP_NAME}</string>
 
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
+<key>CFBundleVersion</key>
+<string>${VERSION}</string>
 
-    <key>CFBundleShortVersionString</key>
-    <string>${VERSION}</string>
+<key>CFBundleShortVersionString</key>
+<string>${VERSION}</string>
 
-    <key>CFBundleVersion</key>
-    <string>${VERSION}</string>
+<key>LSMinimumSystemVersion</key>
+<string>10.15</string>
 
-    <key>LSMinimumSystemVersion</key>
-    <string>10.15</string>
-
-    <key>NSHighResolutionCapable</key>
-    <true/>
+<key>NSHighResolutionCapable</key>
+<true/>
 
 </dict>
 </plist>
 EOF
 
-#
-# Ad-hoc signing (no Apple account required)
-#
+############################################################
+# Signieren
+############################################################
+
+echo
+echo "Signing..."
+
 codesign \
     --force \
     --deep \
     --sign - \
     "${APP_BUNDLE}" || true
 
-#
-# Smoke test
-#
+############################################################
+# Kontrolle
+############################################################
+
 echo
-echo "Bundle contents:"
-find "${APP_BUNDLE}" | head -50
-echo
+echo "Universal executable:"
+
+lipo -info "${EXECUTABLE}" || true
+
+############################################################
+# DMG
+############################################################
 
 DMG_TEMP="${PACKAGE_DIR}/dmg-temp"
-DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-${RID}.dmg"
+
+DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS.dmg"
 
 rm -rf "${DMG_TEMP}"
+
 mkdir -p "${DMG_TEMP}"
 
 cp -R "${APP_BUNDLE}" "${DMG_TEMP}/"
+
 ln -s /Applications "${DMG_TEMP}/Applications"
 
 hdiutil create \
@@ -162,10 +193,19 @@ hdiutil create \
     "${DMG_FILE}"
 
 rm -rf "${DMG_TEMP}"
-rm -rf "${OUTPUT_DIR}"
 
-cp "${DMG_FILE}" "${ROOT_DIR}/release-assets/"
+cp "${DMG_FILE}" "${RELEASE_DIR}/"
 
 echo
-echo "✅ Created:"
-echo "  ${DMG_FILE}"
+echo "=========================================="
+echo "SUCCESS"
+echo "=========================================="
+
+echo
+echo "Created:"
+echo "${DMG_FILE}"
+
+echo
+lipo -info "${EXECUTABLE}"
+
+rm -rf "${ROOT_DIR}/publish"
