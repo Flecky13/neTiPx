@@ -89,6 +89,7 @@ namespace neTiPx.UI.Avalonia.Services
             return Directory
                 .GetFiles(dir, "*.json")
                 .Select(f => Path.GetFileNameWithoutExtension(f).ToLowerInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(c => c)
                 .ToList();
         }
@@ -142,7 +143,22 @@ namespace neTiPx.UI.Avalonia.Services
             var path = Path.Combine(dir, code + ".json");
 
             if (!File.Exists(path))
-                return null;
+            {
+                // Case-sensitive file systems (Linux/macOS) need a fallback
+                // when the requested language code casing differs from the file name.
+                var match = Directory
+                    .GetFiles(dir, "*.json")
+                    .FirstOrDefault(file =>
+                        string.Equals(
+                            Path.GetFileNameWithoutExtension(file),
+                            code,
+                            StringComparison.OrdinalIgnoreCase));
+
+                if (string.IsNullOrWhiteSpace(match))
+                    return null;
+
+                path = match;
+            }
 
             try
             {
