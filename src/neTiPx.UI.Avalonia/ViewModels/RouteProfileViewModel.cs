@@ -131,7 +131,7 @@ public sealed partial class RouteProfileViewModel : ObservableObject
     [RelayCommand]
     private void DeleteProfile(RouteProfile? profile)
     {
-        if (profile == null || RouteProfiles.Count <= 1)
+        if (profile == null)
             return;
 
         var index = RouteProfiles.IndexOf(profile);
@@ -143,8 +143,13 @@ public sealed partial class RouteProfileViewModel : ObservableObject
             var newIndex = Math.Min(index, RouteProfiles.Count - 1);
             SelectedProfile = RouteProfiles[newIndex];
         }
+        else
+        {
+            SelectedProfile = null;
+        }
 
         StatusMessage = $"Profil '{profile.Name}' gelöscht";
+        RefreshCommandStates();
     }
 
     [RelayCommand(CanExecute = nameof(CanAddRoute))]

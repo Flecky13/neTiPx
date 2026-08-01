@@ -74,10 +74,7 @@
                         <ListBoxItem Tag="Ping">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="📡" />
-                                <StackPanel Orientation="Horizontal" Spacing="0">
-                                    <TextBlock Text="{loc:Loc TOOLS_PING}" />
-                                    <TextBlock Text=" (Draft)" />
-                                </StackPanel>
+                                <TextBlock Text="{loc:Loc TOOLS_PING}" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="Wlan">

@@ -4,6 +4,25 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.8.0]
+
+### Added
+
+- **Tools / Ping**: Neuer Ping-Monitor mit eigener Tool-Seite hinzugefuegt. Ziele koennen angelegt, bearbeitet, pausiert, geloescht und manuell sofort getestet werden.
+- **Tools / Ping / Monitoring**: Pro Ziel getrennte IPv4/IPv6-Auswertung mit Statusanzeige, Min/Avg/Max-Latenz, Erfolgs-/Fehlerzaehlern und Trendkurven integriert.
+- **Tools / Ping / Persistenz**: Ping-Ziele inklusive Intervall, Aktiv-Status, Hintergrundmodus und Reihenfolge werden dauerhaft in einer XML-Konfiguration gespeichert.
+
+### Changed
+
+- **Tools / Navigation**: Der Ping-Bereich ist nicht mehr als `Draft` gekennzeichnet und direkt als eigenstaendiges Tool verfuegbar.
+- **App / Hintergrunddienste**: Ping-Monitoring wird beim App-Start initialisiert, damit Hintergrundtests auch ohne geoeffnete Tool-Seite konsistent laufen.
+- **Tools / Routen / Schutzdialoge**: Beim Loeschen von Routen bzw. Routenprofilen mit Verwendungen in IP-Profilen werden jetzt erweiterte Entscheidungsdialoge (Abbrechen, zum Profil wechseln, Loeschen/Bereinigen) angezeigt.
+
+### Fixed
+
+- **Tools / Routen / Profilkonsistenz**: Beim Entfernen einer Route aus einem Routenprofil werden verknuepfte IP-Profile mitgespeichert, sodass Referenzen und Route-Listen konsistent bleiben.
+- **Tools / Routen / Aufraeumen**: Beim Loeschen verwendeter Systemrouten oder Routenprofile werden betroffene IP-Profile automatisch bereinigt (Verknuepfung entfernt, Routen angepasst).
+
 ## [2.0.7.5]
 
 ### Added

@@ -83,6 +83,9 @@ public partial class App : Application
             
             var settingsService = new SettingsService();
             bool startMinimizedSetting = settingsService.GetStartMinimizedToTray();
+
+            // Start background ping monitoring independently from the tool page.
+            ServiceProvider?.GetService<PingMonitorService>()?.Initialize();
             
             // Nur minimiert starten, wenn BEIDE Bedingungen erfüllt sind
             bool startMinimized = hasMinimizedParam && startMinimizedSetting;
@@ -270,6 +273,10 @@ public partial class App : Application
 
         // ViewModels registrieren (später)
         // services.AddTransient<MainWindowViewModel>();
+
+        services.AddSingleton<SettingsService>();
+        services.AddSingleton<PingMonitorStore>();
+        services.AddSingleton<PingMonitorService>();
 
         ServiceProvider = services.BuildServiceProvider();
     }

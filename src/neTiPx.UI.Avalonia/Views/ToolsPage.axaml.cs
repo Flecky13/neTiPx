@@ -38,9 +38,15 @@ public partial class ToolsPage : UserControl
             
         ToolsContentControl.Content = toolName switch
         {
+            "Ping" => CreatePingPanel(),
             "NetworkCalculator" => CreateNetworkCalculatorPanel(),
             _ => CreateDraftPanel(toolName)
         };
+    }
+
+    private Control CreatePingPanel()
+    {
+        return new PingView();
     }
 
     private Control CreateNetworkCalculatorPanel()

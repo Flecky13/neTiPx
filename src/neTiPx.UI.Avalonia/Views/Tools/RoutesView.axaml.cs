@@ -10,6 +10,7 @@ using neTiPx.Core.Models;
 using neTiPx.UI.Avalonia.Helpers;
 using neTiPx.UI.Avalonia.Services;
 using neTiPx.UI.Avalonia.ViewModels;
+using neTiPx.UI.Avalonia.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,6 +27,7 @@ public partial class RoutesView : UserControl
     private static string TF(string key, params object[] args) => string.Format(T(key), args);
 
     private readonly NetworkConfigService _networkConfigService = new();
+    private readonly IpProfileStore _ipProfileStore = new();
     private readonly List<RouteEntry> _allRoutes = new();
     private readonly RouteProfileViewModel _routeProfileViewModel = new();
 
@@ -42,6 +44,13 @@ public partial class RoutesView : UserControl
         SubnetMask,
         Gateway,
         Metric
+    }
+
+    private enum RouteUsageDeleteDecision
+    {
+        Cancel,
+        DeleteAndCleanup,
+        SwitchToProfile
     }
 
     public RoutesView()
@@ -201,12 +210,94 @@ public partial class RoutesView : UserControl
         }
     }
 
-    private void RemoveRouteFromProfile_Click(object? sender, RoutedEventArgs e)
+    private async void RemoveRouteFromProfile_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.Tag is RouteEntry route)
+        if (sender is not Button button || button.Tag is not RouteEntry route)
+            return;
+
+        var selectedRouteProfile = _routeProfileViewModel.SelectedProfile;
+        if (selectedRouteProfile == null)
+            return;
+
+        var linkedIpProfiles = FindIpProfilesUsingRouteProfile(selectedRouteProfile.Name);
+        if (linkedIpProfiles.Count > 0)
         {
-            _routeProfileViewModel.RemoveRouteCommand.Execute(route);
+            var decision = await ShowProfileRouteUsageDeleteDialog(selectedRouteProfile, route, linkedIpProfiles);
+
+            if (decision == RouteUsageDeleteDecision.Cancel)
+                return;
+
+            if (decision == RouteUsageDeleteDecision.SwitchToProfile)
+            {
+                SwitchToIpConfigWithProfile(linkedIpProfiles[0].Name);
+                return;
+            }
         }
+
+        _routeProfileViewModel.RemoveRouteCommand.Execute(route);
+
+        if (linkedIpProfiles.Count > 0)
+        {
+            _routeProfileViewModel.SaveCurrentProfileForProfileSwitch();
+            var updatedProfiles = RefreshLinkedIpProfiles(linkedIpProfiles);
+            _routeProfileViewModel.StatusMessage =
+                $"Route entfernt. {updatedProfiles} verknüpfte IP-Profil(e) aktualisiert.";
+        }
+    }
+
+    private void DeleteRouteProfileButton_Loaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Click -= DeleteRouteProfile_Click;
+            button.Click += DeleteRouteProfile_Click;
+        }
+    }
+
+    private async void DeleteRouteProfile_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button || button.Tag is not RouteProfile profile)
+            return;
+
+        var linkedIpProfiles = FindIpProfilesUsingRouteProfile(profile.Name);
+        var confirmed = false;
+
+        if (linkedIpProfiles.Count > 0)
+        {
+            var decision = await ShowRouteProfileUsageDeleteDialog(profile, linkedIpProfiles);
+
+            if (decision == RouteUsageDeleteDecision.Cancel)
+                return;
+
+            if (decision == RouteUsageDeleteDecision.SwitchToProfile)
+            {
+                SwitchToIpConfigWithProfile(linkedIpProfiles[0].Name);
+                return;
+            }
+
+            confirmed = true;
+        }
+
+        if (!confirmed)
+        {
+            confirmed = await ShowConfirmDialog(
+                "Profil löschen",
+                $"Möchten Sie das Routenprofil '{profile.Name}' wirklich löschen?");
+        }
+
+        if (!confirmed)
+            return;
+
+        _routeProfileViewModel.DeleteProfileCommand.Execute(profile);
+
+        if (linkedIpProfiles.Count > 0)
+        {
+            var updated = CleanupIpProfilesAfterRouteProfileDelete(linkedIpProfiles);
+            _routeProfileViewModel.StatusMessage =
+                $"Routenprofil gelöscht. {updated} verknüpfte IP-Profil(e) bereinigt.";
+        }
+
+        UpdateRouteProfileUI();
     }
 
     private void DeleteButton_Loaded(object? sender, RoutedEventArgs e)
@@ -444,13 +535,30 @@ public partial class RoutesView : UserControl
         if (!route.CanDeleteFromSystem)
             return;
 
-        // Bestätigungsdialog
-        var result = await ShowConfirmDialog(
-            "Route löschen",
-            $"Möchten Sie diese ständige Route wirklich aus dem System entfernen?\n\n{route.Destination} / {route.SubnetMask} via {route.Gateway}");
+        var profilesUsingRoute = FindIpProfilesUsingRoute(route);
+        if (profilesUsingRoute.Count > 0)
+        {
+            var decision = await ShowRouteUsageDeleteDialog(route, profilesUsingRoute);
 
-        if (!result)
-            return;
+            if (decision == RouteUsageDeleteDecision.Cancel)
+                return;
+
+            if (decision == RouteUsageDeleteDecision.SwitchToProfile)
+            {
+                SwitchToIpConfigWithProfile(profilesUsingRoute[0].Name);
+                return;
+            }
+        }
+        else
+        {
+            // Standard-Bestätigung, wenn keine Profil-Verwendung vorliegt.
+            var result = await ShowConfirmDialog(
+                "Route löschen",
+                $"Möchten Sie diese ständige Route wirklich aus dem System entfernen?\n\n{route.Destination} / {route.SubnetMask} via {route.Gateway}");
+
+            if (!result)
+                return;
+        }
 
         LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", 
             $"Route löschen: {route.Destination} mask {route.SubnetMask} via {route.Gateway}");
@@ -463,8 +571,387 @@ public partial class RoutesView : UserControl
             return;
         }
 
+        if (profilesUsingRoute.Count > 0)
+        {
+            var updatedProfiles = RemoveRouteFromIpProfiles(route, profilesUsingRoute);
+            LogHandler.LogSystemMessage(LogLevel.INFO, "Routes",
+                $"Route zusätzlich aus {updatedProfiles} IP-Profil(en) entfernt");
+        }
+
         LogHandler.LogSystemMessage(LogLevel.INFO, "Routes", "Route erfolgreich gelöscht");
         await LoadRoutesAsync();
+    }
+
+    private List<IpProfile> FindIpProfilesUsingRoute(RouteEntry route)
+    {
+        var profiles = _ipProfileStore.ReadAllProfiles();
+        return profiles
+            .Where(profile => profile.Routes.Any(profileRoute => RoutesAreEquivalent(profileRoute, route)))
+            .ToList();
+    }
+
+    private List<IpProfile> FindIpProfilesUsingRouteProfile(string routeProfileName)
+    {
+        var profileName = routeProfileName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(profileName))
+            return [];
+
+        var profiles = _ipProfileStore.ReadAllProfiles();
+        return profiles
+            .Where(profile => string.Equals(
+                profile.LinkedRouteProfileName?.Trim(),
+                profileName,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private int RefreshLinkedIpProfiles(IEnumerable<IpProfile> profiles)
+    {
+        var updated = 0;
+
+        foreach (var profile in profiles)
+        {
+            _ipProfileStore.SaveProfile(profile, profile.Name);
+            updated++;
+        }
+
+        return updated;
+    }
+
+    private int CleanupIpProfilesAfterRouteProfileDelete(IEnumerable<IpProfile> profiles)
+    {
+        var updated = 0;
+
+        foreach (var profile in profiles)
+        {
+            profile.LinkedRouteProfileName = string.Empty;
+            profile.RoutesEnabled = false;
+            profile.Routes.Clear();
+            _ipProfileStore.SaveProfile(profile, profile.Name);
+            updated++;
+        }
+
+        return updated;
+    }
+
+    private int RemoveRouteFromIpProfiles(RouteEntry route, IEnumerable<IpProfile> profiles)
+    {
+        var updatedProfiles = 0;
+
+        foreach (var profile in profiles)
+        {
+            var matchingRoutes = profile.Routes
+                .Where(profileRoute => RoutesAreEquivalent(profileRoute, route))
+                .ToList();
+
+            if (matchingRoutes.Count == 0)
+                continue;
+
+            foreach (var matchingRoute in matchingRoutes)
+                profile.Routes.Remove(matchingRoute);
+
+            _ipProfileStore.SaveProfile(profile, profile.Name);
+            updatedProfiles++;
+        }
+
+        return updatedProfiles;
+    }
+
+    private static bool RoutesAreEquivalent(RouteEntry left, RouteEntry right)
+    {
+        return string.Equals((left.Destination ?? string.Empty).Trim(), (right.Destination ?? string.Empty).Trim(), StringComparison.OrdinalIgnoreCase)
+            && string.Equals((left.SubnetMask ?? string.Empty).Trim(), (right.SubnetMask ?? string.Empty).Trim(), StringComparison.OrdinalIgnoreCase)
+            && string.Equals((left.Gateway ?? string.Empty).Trim(), (right.Gateway ?? string.Empty).Trim(), StringComparison.OrdinalIgnoreCase)
+            && NormalizeMetric(left.Metric) == NormalizeMetric(right.Metric);
+    }
+
+    private static int NormalizeMetric(int metric) => metric > 0 ? metric : 1;
+
+    private void SwitchToIpConfigWithProfile(string profileName)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is not Window window)
+            return;
+
+        if (window.DataContext is not MainWindowViewModel mainWindowViewModel)
+            return;
+
+        mainWindowViewModel.NavigateToCommand.Execute("IpConfig");
+
+        if (mainWindowViewModel.CurrentPage is IpConfigPage ipConfigPage)
+        {
+            var target = ipConfigPage.ViewModel.IpProfiles
+                .FirstOrDefault(p => string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase));
+
+            if (target != null)
+            {
+                ipConfigPage.ViewModel.SelectedProfile = target;
+            }
+        }
+    }
+
+    private async Task<RouteUsageDeleteDecision> ShowRouteUsageDeleteDialog(RouteEntry route, List<IpProfile> profilesUsingRoute)
+    {
+        var decision = RouteUsageDeleteDecision.Cancel;
+        Window? dialog = null;
+
+        var profileList = string.Join("\n- ", profilesUsingRoute.Select(p => p.Name));
+        var message =
+            $"Diese Route wird verwendet:\n{route.Destination} / {route.SubnetMask} via {route.Gateway}\n\n" +
+            $"Verwendet in {profilesUsingRoute.Count} IP-Profil(en):\n- {profileList}\n\n" +
+            "Bitte wählen Sie eine Aktion:";
+
+        dialog = new Window
+        {
+            Title = "Route wird verwendet",
+            Width = 560,
+            Height = 320,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(20),
+                Spacing = 20,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = message,
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Spacing = 10,
+                        Children =
+                        {
+                            new Button
+                            {
+                                Content = "Nein (Abbrechen)",
+                                Width = 140,
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.Cancel;
+                                    dialog?.Close();
+                                })
+                            },
+                            new Button
+                            {
+                                Content = "Zum Profil wechseln",
+                                Width = 160,
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.SwitchToProfile;
+                                    dialog?.Close();
+                                })
+                            },
+                            new Button
+                            {
+                                Content = "Ja (Löschen + Bereinigen)",
+                                Width = 180,
+                                Classes = { "accent" },
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.DeleteAndCleanup;
+                                    dialog?.Close();
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is Window parentWindow)
+        {
+            await dialog.ShowDialog(parentWindow);
+        }
+        else
+        {
+            dialog.Show();
+        }
+
+        return decision;
+    }
+
+    private async Task<RouteUsageDeleteDecision> ShowProfileRouteUsageDeleteDialog(
+        RouteProfile routeProfile,
+        RouteEntry route,
+        List<IpProfile> linkedIpProfiles)
+    {
+        var decision = RouteUsageDeleteDecision.Cancel;
+        Window? dialog = null;
+
+        var profileList = string.Join("\n- ", linkedIpProfiles.Select(p => p.Name));
+        var message =
+            $"Diese Profil-Route wird verwendet:\n{route.Destination} / {route.SubnetMask} via {route.Gateway}\n\n" +
+            $"Routen-Profil: {routeProfile.Name}\n" +
+            $"Verwendet in {linkedIpProfiles.Count} IP-Profil(en):\n- {profileList}\n\n" +
+            "Bitte wählen Sie eine Aktion:";
+
+        dialog = new Window
+        {
+            Title = "Profil-Route wird verwendet",
+            Width = 620,
+            Height = 340,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(20),
+                Spacing = 20,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = message,
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Spacing = 10,
+                        Children =
+                        {
+                            new Button
+                            {
+                                Content = "Nein (Abbrechen)",
+                                Width = 140,
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.Cancel;
+                                    dialog?.Close();
+                                })
+                            },
+                            new Button
+                            {
+                                Content = "Zum Profil wechseln",
+                                Width = 160,
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.SwitchToProfile;
+                                    dialog?.Close();
+                                })
+                            },
+                            new Button
+                            {
+                                Content = "Ja (Löschen + Bereinigen)",
+                                Width = 180,
+                                Classes = { "accent" },
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.DeleteAndCleanup;
+                                    dialog?.Close();
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is Window parentWindow)
+        {
+            await dialog.ShowDialog(parentWindow);
+        }
+        else
+        {
+            dialog.Show();
+        }
+
+        return decision;
+    }
+
+    private async Task<RouteUsageDeleteDecision> ShowRouteProfileUsageDeleteDialog(
+        RouteProfile routeProfile,
+        List<IpProfile> linkedIpProfiles)
+    {
+        var decision = RouteUsageDeleteDecision.Cancel;
+        Window? dialog = null;
+
+        var profileList = string.Join("\n- ", linkedIpProfiles.Select(p => p.Name));
+        var message =
+            $"Das Routen-Profil '{routeProfile.Name}' wird verwendet.\n\n" +
+            $"Verwendet in {linkedIpProfiles.Count} IP-Profil(en):\n- {profileList}\n\n" +
+            "Bitte wählen Sie eine Aktion:";
+
+        dialog = new Window
+        {
+            Title = "Routen-Profil wird verwendet",
+            Width = 620,
+            Height = 320,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new StackPanel
+            {
+                Margin = new Thickness(20),
+                Spacing = 20,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = message,
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Spacing = 10,
+                        Children =
+                        {
+                            new Button
+                            {
+                                Content = "Nein (Abbrechen)",
+                                Width = 140,
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.Cancel;
+                                    dialog?.Close();
+                                })
+                            },
+                            new Button
+                            {
+                                Content = "Zum Profil wechseln",
+                                Width = 160,
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.SwitchToProfile;
+                                    dialog?.Close();
+                                })
+                            },
+                            new Button
+                            {
+                                Content = "Ja (Löschen + Bereinigen)",
+                                Width = 180,
+                                Classes = { "accent" },
+                                Command = new RelayCommand(() =>
+                                {
+                                    decision = RouteUsageDeleteDecision.DeleteAndCleanup;
+                                    dialog?.Close();
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is Window parentWindow)
+        {
+            await dialog.ShowDialog(parentWindow);
+        }
+        else
+        {
+            dialog.Show();
+        }
+
+        return decision;
     }
 
     private async void AddRoute_Click(object? sender, RoutedEventArgs e)

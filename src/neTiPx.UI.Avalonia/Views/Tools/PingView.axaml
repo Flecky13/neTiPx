@@ -1,0 +1,164 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
+             xmlns:models="using:neTiPx.UI.Avalonia.Models"
+             xmlns:vm="using:neTiPx.UI.Avalonia.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="neTiPx.UI.Avalonia.Views.Tools.PingView"
+             x:Name="Root"
+             x:DataType="vm:PingToolViewModel">
+
+    <StackPanel Spacing="16" Margin="0,0,28,0">
+        <TextBlock Text="{loc:Loc PING_TITLE}" FontSize="24" FontWeight="Bold" />
+
+        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+            <StackPanel Spacing="10">
+                <TextBlock Text="{loc:Loc PING_CONFIG_TITLE}" FontSize="16" FontWeight="SemiBold" />
+
+                <Grid ColumnDefinitions="3*,Auto,Auto,Auto" ColumnSpacing="8">
+                    <StackPanel>
+                        <TextBlock Text="{loc:Loc PING_TARGET_HEADER}" FontSize="12" Opacity="0.7" />
+                        <TextBox Text="{Binding TargetInput}"
+                                 Watermark="{loc:Loc PING_TARGET_PLACEHOLDER}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Width="130">
+                        <TextBlock Text="{loc:Loc PING_INTERVAL_HEADER}" FontSize="12" Opacity="0.7" />
+                        <ComboBox SelectedItem="{Binding SelectedIntervalSeconds}"
+                                  ItemsSource="{Binding AvailableIntervals}"
+                                  IsEditable="True"
+                                  Text="{Binding IntervalInput}" />
+                    </StackPanel>
+
+                    <CheckBox Grid.Column="2"
+                              VerticalAlignment="Bottom"
+                              IsChecked="{Binding BackgroundEnabled}"
+                              Content="{loc:Loc PING_CONFIG_BACKGROUND_ACTIVE}" />
+
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                        <Button Content="{Binding SubmitButtonText}" Click="SaveInput_Click" Classes="accent" />
+                        <Button Content="{loc:Loc PING_DIALOG_CANCEL}" Click="CancelEdit_Click" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="{Binding StatusMessage}" FontSize="12" Opacity="0.75" />
+            </StackPanel>
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding Items}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:PingMonitorItem">
+                    <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="0,0,0,10"
+                            Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Target}" FontSize="18" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding TargetTypeLabel}" FontSize="12" Opacity="0.7" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding RunningStateText, StringFormat=Status: {0}}"
+                                               HorizontalAlignment="Right" />
+                                    <TextBlock Text="{Binding BackgroundModeText}"
+                                               FontSize="12"
+                                               Opacity="0.8"
+                                               HorizontalAlignment="Right" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="2*,2*" ColumnSpacing="12">
+                                <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1" CornerRadius="6" Padding="10">
+                                    <StackPanel Spacing="4">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <TextBlock Text="{Binding ResolvedIpv4, StringFormat=IPv4: {0}}"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Ipv4TotalsText}"
+                                                       FontSize="11"
+                                                       Opacity="0.85" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <TextBlock Text="{Binding Ipv4StatusLine}" FontSize="14" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Ipv4MinAvgMaxText}"
+                                                       FontSize="11"
+                                                       Opacity="0.85" />
+                                        </Grid>
+                                        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,4,0,0">
+                                            <Canvas Width="220" Height="52">
+                                                <Path Data="{Binding Ipv4TrendPath}" Stroke="#4CAF50" StrokeThickness="2" />
+                                            </Canvas>
+                                        </Border>
+                                        <TextBlock Text="{Binding Ipv4TrendSummary}" FontSize="11" Opacity="0.75" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Column="1" BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1" CornerRadius="6" Padding="10">
+                                    <StackPanel Spacing="4">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <TextBlock Text="{Binding ResolvedIpv6, StringFormat=IPv6: {0}}"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Ipv6TotalsText}"
+                                                       FontSize="11"
+                                                       Opacity="0.85" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <TextBlock Text="{Binding Ipv6StatusLine}" FontSize="14" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Ipv6MinAvgMaxText}"
+                                                       FontSize="11"
+                                                       Opacity="0.85" />
+                                        </Grid>
+                                        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,4,0,0">
+                                            <Canvas Width="220" Height="52">
+                                                <Path Data="{Binding Ipv6TrendPath}" Stroke="#2196F3" StrokeThickness="2" />
+                                            </Canvas>
+                                        </Border>
+                                        <TextBlock Text="{Binding Ipv6TrendSummary}" FontSize="11" Opacity="0.75" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                <TextBlock Text="{Binding LastResponseText, StringFormat=Letzte Antwort: {0}}" />
+                                <TextBlock Grid.Column="1" Text="{Binding IntervalSeconds, StringFormat=Intervall: {0} Sek}" />
+                                <TextBlock Grid.Column="2" Text="{Binding LastCheckedText, StringFormat=Letzte Prüfung: {0}}" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*" ColumnSpacing="12">
+                                <TextBlock Text="{Binding LastErrorText, StringFormat=Letzter Fehler: {0}}" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
+                                <Button Content="{Binding StartPauseGlyph}"
+                                        ToolTip.Tip="{Binding StartPauseTooltip}"
+                                        Tag="{Binding}"
+                                        Click="StartPause_Click" />
+                                <Button Grid.Column="1"
+                                    Content="🔄"
+                                    Tag="{Binding}"
+                                    Click="Refresh_Click"
+                                    IsEnabled="{Binding !IsRunning}" />
+                                <Button Grid.Column="2" Content="✏" Tag="{Binding}" Click="Edit_Click" />
+                                <Button Grid.Column="3" Content="🗑" Tag="{Binding}" Click="Delete_Click" />
+                                <TextBlock Grid.Column="5" Text="{Binding IntervalSeconds, StringFormat=Intervall: {0}s}" VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>
