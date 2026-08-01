@@ -193,12 +193,8 @@ create_dmg_from_bundle() {
 }
 
 APP_BUNDLE_UNIVERSAL="${PACKAGE_DIR}/${APP_NAME}.app"
-APP_BUNDLE_X64="${PACKAGE_DIR}/${APP_NAME}-x86_64.app"
-APP_BUNDLE_ARM64="${PACKAGE_DIR}/${APP_NAME}-arm64.app"
 
 DMG_FILE_UNIVERSAL="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS.dmg"
-DMG_FILE_X64="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS-x86_64.dmg"
-DMG_FILE_ARM64="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS-arm64.dmg"
 
 ############################################################
 # Signieren
@@ -208,8 +204,6 @@ echo
 echo "Signing..."
 
 EXECUTABLE_UNIVERSAL="$(create_app_bundle "${UNIVERSAL_DIR}" "${APP_BUNDLE_UNIVERSAL}")"
-EXECUTABLE_X64="$(create_app_bundle "${X64_DIR}" "${APP_BUNDLE_X64}")"
-EXECUTABLE_ARM64="$(create_app_bundle "${ARM64_DIR}" "${APP_BUNDLE_ARM64}")"
 
 ############################################################
 # Kontrolle
@@ -220,21 +214,11 @@ echo "Universal executable:"
 
 lipo -info "${EXECUTABLE_UNIVERSAL}" || true
 
-echo
-echo "x86_64 executable:"
-lipo -info "${EXECUTABLE_X64}" || true
-
-echo
-echo "arm64 executable:"
-lipo -info "${EXECUTABLE_ARM64}" || true
-
 ############################################################
 # DMG
 ############################################################
 
 create_dmg_from_bundle "${APP_BUNDLE_UNIVERSAL}" "${DMG_FILE_UNIVERSAL}"
-create_dmg_from_bundle "${APP_BUNDLE_X64}" "${DMG_FILE_X64}"
-create_dmg_from_bundle "${APP_BUNDLE_ARM64}" "${DMG_FILE_ARM64}"
 
 echo
 echo "=========================================="
@@ -244,8 +228,6 @@ echo "=========================================="
 echo
 echo "Created:"
 echo "${DMG_FILE_UNIVERSAL}"
-echo "${DMG_FILE_X64}"
-echo "${DMG_FILE_ARM64}"
 
 echo
 lipo -info "${EXECUTABLE_UNIVERSAL}"

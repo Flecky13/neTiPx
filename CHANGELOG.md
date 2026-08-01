@@ -8,12 +8,13 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- **macOS / Release-Artefakte**: Build erzeugt jetzt drei DMG-Varianten: `macOS` (Universal), `macOS-x86_64` und `macOS-arm64`.
+- **macOS / Release-Artefakte**: Build erzeugt jetzt ein Universal-DMG (`macOS`), das sowohl auf Apple Silicon als auch auf Intel-macOS genutzt werden kann.
 
 ### Changed
 
 - **macOS / Build-Pipeline**: Release-Skript auf Multi-Arch-Publish (`osx-x64`, `osx-arm64`) umgestellt und zu einem Universal-Bundle zusammengeführt.
 - **macOS / Packaging**: App-Bundle- und DMG-Erzeugung in wiederverwendbare Schritte aufgeteilt; `release-assets` wird direkt aus dem Build befüllt.
+- **macOS / Distribution**: Separate DMG-Ausgaben für `x86_64` und `arm64` entfallen zugunsten einer einzigen Universal-DMG.
 
 ### Fixed
 
