@@ -71,6 +71,14 @@ do
 
     if [[ "${TYPE}" == *"Mach-O"* ]]; then
 
+        ARCH_X64="$(lipo -archs "${FILE}" 2>/dev/null || true)"
+        ARCH_ARM64="$(lipo -archs "${ARM_FILE}" 2>/dev/null || true)"
+
+        if [[ -n "${ARCH_X64}" && "${ARCH_X64}" == "${ARCH_ARM64}" ]]; then
+            echo "Skip universal merge (same arch: ${REL} -> ${ARCH_X64})"
+            continue
+        fi
+
         echo "Universal: ${REL}"
 
         mkdir -p "$(dirname "${OUT_FILE}")"
@@ -89,24 +97,29 @@ done
 ############################################################
 
 APP_NAME="neTiPx"
-APP_BUNDLE="${PACKAGE_DIR}/${APP_NAME}.app"
+APP_EXECUTABLE_NAME="neTiPx.UI.Avalonia"
+create_app_bundle() {
+    local source_dir="$1"
+    local app_bundle="$2"
 
-rm -rf "${APP_BUNDLE}"
+    rm -rf "${app_bundle}"
 
-mkdir -p "${APP_BUNDLE}/Contents/MacOS"
-mkdir -p "${APP_BUNDLE}/Contents/Resources"
+    mkdir -p "${app_bundle}/Contents/MacOS"
+    mkdir -p "${app_bundle}/Contents/Resources"
 
-cp -R "${UNIVERSAL_DIR}/." "${APP_BUNDLE}/Contents/MacOS/"
+    cp -R "${source_dir}/." "${app_bundle}/Contents/MacOS/"
 
-EXECUTABLE="${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
+    local executable="${app_bundle}/Contents/MacOS/${APP_EXECUTABLE_NAME}"
 
-if [[ ! -f "${EXECUTABLE}" ]]; then
-    EXECUTABLE="$(find "${APP_BUNDLE}/Contents/MacOS" -maxdepth 1 -type f -perm -111 | head -n1)"
-fi
+    if [[ -z "${executable}" || ! -f "${executable}" ]]; then
+        echo "❌ Expected executable not found: ${APP_EXECUTABLE_NAME}"
+        exit 1
+    fi
 
-EXECUTABLE_NAME="$(basename "${EXECUTABLE}")"
+    local executable_name
+    executable_name="$(basename "${executable}")"
 
-cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
+    cat > "${app_bundle}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -117,7 +130,7 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
 <string>English</string>
 
 <key>CFBundleExecutable</key>
-<string>${EXECUTABLE_NAME}</string>
+<string>${executable_name}</string>
 
 <key>CFBundleIdentifier</key>
 <string>com.netipx.app</string>
@@ -147,6 +160,46 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
 </plist>
 EOF
 
+    codesign \
+        --force \
+        --deep \
+        --sign - \
+        "${app_bundle}" || true
+
+    echo "${executable}"
+}
+
+create_dmg_from_bundle() {
+    local app_bundle="$1"
+    local dmg_file="$2"
+
+    local dmg_temp="${PACKAGE_DIR}/dmg-temp-$(basename "${dmg_file}" .dmg)"
+
+    rm -rf "${dmg_temp}"
+    mkdir -p "${dmg_temp}"
+
+    cp -R "${app_bundle}" "${dmg_temp}/"
+    ln -s /Applications "${dmg_temp}/Applications"
+
+    hdiutil create \
+        -volname "neTiPx" \
+        -srcfolder "${dmg_temp}" \
+        -format UDZO \
+        -ov \
+        "${dmg_file}"
+
+    rm -rf "${dmg_temp}"
+    cp "${dmg_file}" "${RELEASE_DIR}/"
+}
+
+APP_BUNDLE_UNIVERSAL="${PACKAGE_DIR}/${APP_NAME}.app"
+APP_BUNDLE_X64="${PACKAGE_DIR}/${APP_NAME}-x86_64.app"
+APP_BUNDLE_ARM64="${PACKAGE_DIR}/${APP_NAME}-arm64.app"
+
+DMG_FILE_UNIVERSAL="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS.dmg"
+DMG_FILE_X64="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS-x86_64.dmg"
+DMG_FILE_ARM64="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS-arm64.dmg"
+
 ############################################################
 # Signieren
 ############################################################
@@ -154,11 +207,9 @@ EOF
 echo
 echo "Signing..."
 
-codesign \
-    --force \
-    --deep \
-    --sign - \
-    "${APP_BUNDLE}" || true
+EXECUTABLE_UNIVERSAL="$(create_app_bundle "${UNIVERSAL_DIR}" "${APP_BUNDLE_UNIVERSAL}")"
+EXECUTABLE_X64="$(create_app_bundle "${X64_DIR}" "${APP_BUNDLE_X64}")"
+EXECUTABLE_ARM64="$(create_app_bundle "${ARM64_DIR}" "${APP_BUNDLE_ARM64}")"
 
 ############################################################
 # Kontrolle
@@ -167,34 +218,23 @@ codesign \
 echo
 echo "Universal executable:"
 
-lipo -info "${EXECUTABLE}" || true
+lipo -info "${EXECUTABLE_UNIVERSAL}" || true
+
+echo
+echo "x86_64 executable:"
+lipo -info "${EXECUTABLE_X64}" || true
+
+echo
+echo "arm64 executable:"
+lipo -info "${EXECUTABLE_ARM64}" || true
 
 ############################################################
 # DMG
 ############################################################
 
-DMG_TEMP="${PACKAGE_DIR}/dmg-temp"
-
-DMG_FILE="${PACKAGE_DIR}/neTiPx-${VERSION}-macOS.dmg"
-
-rm -rf "${DMG_TEMP}"
-
-mkdir -p "${DMG_TEMP}"
-
-cp -R "${APP_BUNDLE}" "${DMG_TEMP}/"
-
-ln -s /Applications "${DMG_TEMP}/Applications"
-
-hdiutil create \
-    -volname "neTiPx" \
-    -srcfolder "${DMG_TEMP}" \
-    -format UDZO \
-    -ov \
-    "${DMG_FILE}"
-
-rm -rf "${DMG_TEMP}"
-
-cp "${DMG_FILE}" "${RELEASE_DIR}/"
+create_dmg_from_bundle "${APP_BUNDLE_UNIVERSAL}" "${DMG_FILE_UNIVERSAL}"
+create_dmg_from_bundle "${APP_BUNDLE_X64}" "${DMG_FILE_X64}"
+create_dmg_from_bundle "${APP_BUNDLE_ARM64}" "${DMG_FILE_ARM64}"
 
 echo
 echo "=========================================="
@@ -203,9 +243,11 @@ echo "=========================================="
 
 echo
 echo "Created:"
-echo "${DMG_FILE}"
+echo "${DMG_FILE_UNIVERSAL}"
+echo "${DMG_FILE_X64}"
+echo "${DMG_FILE_ARM64}"
 
 echo
-lipo -info "${EXECUTABLE}"
+lipo -info "${EXECUTABLE_UNIVERSAL}"
 
 rm -rf "${ROOT_DIR}/publish"

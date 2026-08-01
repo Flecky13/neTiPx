@@ -31,18 +31,26 @@ class Program
             return;
         }
 
-        using var activationEvent = new EventWaitHandle(
-            initialState: false,
-            EventResetMode.AutoReset,
-            ActivationEventName);
+        if (OperatingSystem.IsWindows())
+        {
+            using var activationEvent = new EventWaitHandle(
+                initialState: false,
+                EventResetMode.AutoReset,
+                ActivationEventName);
 
-        _ = Task.Run(() => WaitForActivationRequests(activationEvent));
+            _ = Task.Run(() => WaitForActivationRequests(activationEvent));
+        }
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
     private static void SignalExistingInstance()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
         // A second launch can arrive in the few milliseconds between acquiring
         // the mutex and creating the event in the first process.
         for (var attempt = 0; attempt < 20; attempt++)
