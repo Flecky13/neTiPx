@@ -4,6 +4,22 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.7.5]
+
+### Added
+
+- **macOS / Release-Artefakte**: Build erzeugt jetzt drei DMG-Varianten: `macOS` (Universal), `macOS-x86_64` und `macOS-arm64`.
+
+### Changed
+
+- **macOS / Build-Pipeline**: Release-Skript auf Multi-Arch-Publish (`osx-x64`, `osx-arm64`) umgestellt und zu einem Universal-Bundle zusammengeführt.
+- **macOS / Packaging**: App-Bundle- und DMG-Erzeugung in wiederverwendbare Schritte aufgeteilt; `release-assets` wird direkt aus dem Build befüllt.
+
+### Fixed
+
+- **Windows / App-Start**: Single-Instance-Logik ergänzt. Ein zweiter Start öffnet keine zusätzliche Instanz mehr, sondern aktiviert das bereits laufende Hauptfenster.
+- **macOS / x86_64-Build**: Release-Build für Intel-macOS korrigiert, damit x86_64-Artefakte wieder zuverlässig erstellt werden.
+
 ## [2.0.7.4]
 
 ### Added
