@@ -67,7 +67,7 @@ public partial class PingMonitorItem : ObservableObject
 
     public string RunningStateText => IsRunning ? "Aktiv" : "Pausiert";
 
-    public string StartPauseGlyph => IsRunning ? "⏸" : "▶";
+    public string StartPauseGlyph => IsRunning ? "⏸️" : "▶️";
 
     public string StartPauseTooltip => IsRunning ? "Pausieren" : "Starten";
 
@@ -99,7 +99,7 @@ public partial class PingMonitorItem : ObservableObject
     private string _resolvedIpv6 = "-";
 
     [ObservableProperty]
-    private string _ipv4Indicator = "⚪";
+    private string _ipv4Indicator = "🟡";
 
     partial void OnIpv4IndicatorChanged(string value)
     {
@@ -115,7 +115,7 @@ public partial class PingMonitorItem : ObservableObject
     }
 
     [ObservableProperty]
-    private string _ipv6Indicator = "⚪";
+    private string _ipv6Indicator = "🟡";
 
     partial void OnIpv6IndicatorChanged(string value)
     {

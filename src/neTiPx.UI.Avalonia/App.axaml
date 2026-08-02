@@ -11,6 +11,11 @@
         <Style Selector="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
         </Style>
+
+        <!-- Prefer color emoji fonts for navigation icon glyphs across platforms -->
+        <Style Selector="TextBlock.NavIconEmoji">
+            <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji, Segoe UI Symbol" />
+        </Style>
         
         <!-- ComboBox Style -->
         <Style Selector="ComboBox">
@@ -145,7 +150,7 @@
         <Style Selector="ListBoxItem Button:pressed /template/ ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
         </Style>
-        
+
         <!-- NumericUpDown Style -->
         <Style Selector="NumericUpDown">
             <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />

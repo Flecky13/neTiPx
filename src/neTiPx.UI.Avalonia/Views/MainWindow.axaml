@@ -55,11 +55,11 @@
                                         Padding="2,6">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <TextBlock Text="{Binding Icon}" 
+                                                   Classes="NavIconEmoji"
                                                    FontSize="16" 
                                                    VerticalAlignment="Center" 
                                                    Width="20" 
-                                                   TextAlignment="Center"
-                                                   Foreground="{DynamicResource NavigationViewItemForeground}" />
+                                                   TextAlignment="Center" />
                                         <TextBlock Text="{Binding DisplayName}" 
                                                    VerticalAlignment="Center"
                                                    IsVisible="{Binding $parent[Window].DataContext.IsPaneOpen}"
@@ -88,11 +88,11 @@
                                             Padding="2,6">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <TextBlock Text="{Binding Icon}" 
+                                                       Classes="NavIconEmoji"
                                                        FontSize="16" 
                                                        VerticalAlignment="Center" 
                                                        Width="20" 
-                                                       TextAlignment="Center"
-                                                       Foreground="{DynamicResource NavigationViewItemForeground}" />
+                                                       TextAlignment="Center" />
                                             <TextBlock Text="{Binding DisplayName}" 
                                                        VerticalAlignment="Center"
                                                        IsVisible="{Binding $parent[Window].DataContext.IsPaneOpen}"

@@ -54,14 +54,14 @@ public partial class MainWindowViewModel : ObservableObject
 
         NavigationItems.Clear();
         NavigationItems.Add(new NavigationItem { Name = "Adapters", DisplayName = _lm.Lang("NAV_ADAPTERS"), Icon = "🔌" });
-        NavigationItems.Add(new NavigationItem { Name = "IpConfig", DisplayName = _lm.Lang("NAV_IPCONFIG"), Icon = "⚙️" });
-        NavigationItems.Add(new NavigationItem { Name = "Routes", DisplayName = _lm.Lang("TOOLS_ROUTES"), Icon = "🗺️" });
-        NavigationItems.Add(new NavigationItem { Name = "UncPath", DisplayName = _lm.Lang("TOOLS_UNC_PATH"), Icon = "🗂️" });
-        NavigationItems.Add(new NavigationItem { Name = "Tools", DisplayName = _lm.Lang("NAV_TOOLS"), Icon = "🔧" });
+        NavigationItems.Add(new NavigationItem { Name = "IpConfig", DisplayName = _lm.Lang("NAV_IPCONFIG"), Icon = "🧩" });
+        NavigationItems.Add(new NavigationItem { Name = "Routes", DisplayName = _lm.Lang("TOOLS_ROUTES"), Icon = "🧭" });
+        NavigationItems.Add(new NavigationItem { Name = "UncPath", DisplayName = _lm.Lang("TOOLS_UNC_PATH"), Icon = "📁" });
+        NavigationItems.Add(new NavigationItem { Name = "Tools", DisplayName = _lm.Lang("NAV_TOOLS"), Icon = "🧰" });
 
         FooterNavigationItems.Clear();
-        FooterNavigationItems.Add(new NavigationItem { Name = "Info", DisplayName = _lm.Lang("NAV_INFO"), Icon = "ℹ️" });
-        FooterNavigationItems.Add(new NavigationItem { Name = "Settings", DisplayName = _lm.Lang("NAV_SETTINGS"), Icon = "⚙️" });
+        FooterNavigationItems.Add(new NavigationItem { Name = "Info", DisplayName = _lm.Lang("NAV_INFO"), Icon = "💡" });
+        FooterNavigationItems.Add(new NavigationItem { Name = "Settings", DisplayName = _lm.Lang("NAV_SETTINGS"), Icon = "🛠️" });
 
         var selected = NavigationItems.FirstOrDefault(item => item.Name == current)
                        ?? FooterNavigationItems.FirstOrDefault(item => item.Name == current)

@@ -10,6 +10,17 @@
              x:Name="Root"
              x:DataType="vm:PingToolViewModel">
 
+    <UserControl.Styles>
+        <Style Selector="Button.PingEmojiButton">
+            <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji, Segoe UI Symbol" />
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+
+        <Style Selector="TextBlock.PingStatusEmoji">
+            <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji, Segoe UI Symbol" />
+        </Style>
+    </UserControl.Styles>
+
     <StackPanel Spacing="16" Margin="0,0,28,0">
         <TextBlock Text="{loc:Loc PING_TITLE}" FontSize="24" FontWeight="Bold" />
 
@@ -89,7 +100,7 @@
                                                        Opacity="0.85" />
                                         </Grid>
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                            <TextBlock Text="{Binding Ipv4StatusLine}" FontSize="14" />
+                                            <TextBlock Classes="PingStatusEmoji" Text="{Binding Ipv4StatusLine}" FontSize="14" />
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding Ipv4MinAvgMaxText}"
                                                        FontSize="11"
@@ -115,7 +126,7 @@
                                                        Opacity="0.85" />
                                         </Grid>
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                            <TextBlock Text="{Binding Ipv6StatusLine}" FontSize="14" />
+                                            <TextBlock Classes="PingStatusEmoji" Text="{Binding Ipv6StatusLine}" FontSize="14" />
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding Ipv6MinAvgMaxText}"
                                                        FontSize="11"
@@ -143,16 +154,18 @@
 
                             <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
                                 <Button Content="{Binding StartPauseGlyph}"
+                                        Classes="PingEmojiButton"
                                         ToolTip.Tip="{Binding StartPauseTooltip}"
                                         Tag="{Binding}"
                                         Click="StartPause_Click" />
                                 <Button Grid.Column="1"
                                     Content="🔄"
+                                    Classes="PingEmojiButton"
                                     Tag="{Binding}"
                                     Click="Refresh_Click"
                                     IsEnabled="{Binding !IsRunning}" />
-                                <Button Grid.Column="2" Content="✏" Tag="{Binding}" Click="Edit_Click" />
-                                <Button Grid.Column="3" Content="🗑" Tag="{Binding}" Click="Delete_Click" />
+                                <Button Grid.Column="2" Classes="PingEmojiButton" Content="📝" Tag="{Binding}" Click="Edit_Click" />
+                                <Button Grid.Column="3" Classes="PingEmojiButton" Content="🗑️" Tag="{Binding}" Click="Delete_Click" />
                                 <TextBlock Grid.Column="5" Text="{Binding IntervalSeconds, StringFormat=Intervall: {0}s}" VerticalAlignment="Center" />
                             </Grid>
                         </StackPanel>

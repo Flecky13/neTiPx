@@ -290,7 +290,7 @@ public sealed class PingMonitorService : IDisposable
                     await ProbeAddressAndUpdateAsync(item, ipAddress, AddressFamily.InterNetwork, token).ConfigureAwait(false);
                     UpdateOnUi(() =>
                     {
-                        item.Ipv6Indicator = "⚫";
+                        item.Ipv6Indicator = "🟡";
                         item.Ipv6StatusText = StatusNoIpv6;
                     });
                     return;
@@ -308,7 +308,7 @@ public sealed class PingMonitorService : IDisposable
                     await ProbeAddressAndUpdateAsync(item, ipAddress, AddressFamily.InterNetworkV6, token).ConfigureAwait(false);
                     UpdateOnUi(() =>
                     {
-                        item.Ipv4Indicator = "⚫";
+                        item.Ipv4Indicator = "🟡";
                         item.Ipv4StatusText = StatusNoIpv4;
                     });
                     return;
@@ -368,7 +368,7 @@ public sealed class PingMonitorService : IDisposable
         {
             UpdateOnUi(() =>
             {
-                item.Ipv4Indicator = "⚫";
+                item.Ipv4Indicator = "🟡";
                 item.Ipv4StatusText = StatusNoIpv4;
             });
         }
@@ -381,7 +381,7 @@ public sealed class PingMonitorService : IDisposable
         {
             UpdateOnUi(() =>
             {
-                item.Ipv6Indicator = "⚫";
+                item.Ipv6Indicator = "🟡";
                 item.Ipv6StatusText = StatusNoIpv6;
             });
         }
