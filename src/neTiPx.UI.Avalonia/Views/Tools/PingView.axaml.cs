@@ -17,10 +17,8 @@ public partial class PingView : UserControl
     {
         InitializeComponent();
 
-        var monitorService = App.ServiceProvider?.GetService<PingMonitorService>()
-            ?? throw new InvalidOperationException("PingMonitorService is not available.");
-
-        _viewModel = new PingToolViewModel(monitorService);
+        _viewModel = App.ServiceProvider?.GetRequiredService<PingToolViewModel>()
+            ?? throw new InvalidOperationException("PingToolViewModel is not available.");
         DataContext = _viewModel;
 
         Loaded += (_, _) =>

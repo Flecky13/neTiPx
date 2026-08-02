@@ -277,6 +277,7 @@ public partial class App : Application
         services.AddSingleton<SettingsService>();
         services.AddSingleton<PingMonitorStore>();
         services.AddSingleton<PingMonitorService>();
+        services.AddTransient<PingToolViewModel>();
 
         ServiceProvider = services.BuildServiceProvider();
     }

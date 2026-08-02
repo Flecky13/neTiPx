@@ -98,6 +98,9 @@ done
 
 APP_NAME="neTiPx"
 APP_EXECUTABLE_NAME="neTiPx.UI.Avalonia"
+ICON_SOURCE_ICNS="${ROOT_DIR}/Bilder/toolicon.icns"
+ICON_FILE_NAME="toolicon.icns"
+
 create_app_bundle() {
     local source_dir="$1"
     local app_bundle="$2"
@@ -108,6 +111,13 @@ create_app_bundle() {
     mkdir -p "${app_bundle}/Contents/Resources"
 
     cp -R "${source_dir}/." "${app_bundle}/Contents/MacOS/"
+
+    if [[ -f "${ICON_SOURCE_ICNS}" ]]; then
+        cp "${ICON_SOURCE_ICNS}" "${app_bundle}/Contents/Resources/${ICON_FILE_NAME}"
+    else
+        echo "❌ App icon missing: ${ICON_SOURCE_ICNS}"
+        exit 1
+    fi
 
     local executable="${app_bundle}/Contents/MacOS/${APP_EXECUTABLE_NAME}"
 
@@ -143,6 +153,9 @@ create_app_bundle() {
 
 <key>CFBundleDisplayName</key>
 <string>${APP_NAME}</string>
+
+<key>CFBundleIconFile</key>
+<string>${ICON_FILE_NAME}</string>
 
 <key>CFBundleVersion</key>
 <string>${VERSION}</string>
