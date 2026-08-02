@@ -17,11 +17,16 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Tools / Navigation**: Der Ping-Bereich ist nicht mehr als `Draft` gekennzeichnet und direkt als eigenstaendiges Tool verfuegbar.
 - **App / Hintergrunddienste**: Ping-Monitoring wird beim App-Start initialisiert, damit Hintergrundtests auch ohne geoeffnete Tool-Seite konsistent laufen.
 - **Tools / Routen / Schutzdialoge**: Beim Loeschen von Routen bzw. Routenprofilen mit Verwendungen in IP-Profilen werden jetzt erweiterte Entscheidungsdialoge (Abbrechen, zum Profil wechseln, Loeschen/Bereinigen) angezeigt.
+- **Navigation / Icons / Windows**: Navigation und Tool-Listen verwenden fuer Emoji-Symbole jetzt explizite Emoji-Font-Fallbacks (`Segoe UI Emoji`, `Noto Color Emoji`, `Apple Color Emoji`), damit Icons unter Windows farbig und besser erkennbar dargestellt werden.
+- **Tools / Ping / Aktionsicons**: Start/Pause, Refresh, Bearbeiten und Loeschen wurden auf farbstabile Emoji-Darstellung umgestellt.
+- **Tools / Ping / Statusanzeige**: Statuszeilen fuer IPv4/IPv6 verwenden Emoji-Font-Fallbacks, sodass farbige Statusindikatoren auch unter Windows konsistent dargestellt werden.
 
 ### Fixed
 
 - **Tools / Routen / Profilkonsistenz**: Beim Entfernen einer Route aus einem Routenprofil werden verknuepfte IP-Profile mitgespeichert, sodass Referenzen und Route-Listen konsistent bleiben.
 - **Tools / Routen / Aufraeumen**: Beim Loeschen verwendeter Systemrouten oder Routenprofile werden betroffene IP-Profile automatisch bereinigt (Verknuepfung entfernt, Routen angepasst).
+- **Tools / Ping / 3-Zustandsanzeige**: Ping-Indikatoren wurden auf drei farbige Zustaende vereinheitlicht (`Gruen`, `Gelb`, `Rot`); bisherige neutrale schwarze/weiße Symbole entfallen.
+- **Windows / Debug-Skript**: `Installation/Windows/debug-run.ps1` stellt das urspruengliche Arbeitsverzeichnis nach `dotnet run` wieder her (`Push-Location`/`Pop-Location`), damit die Shell nicht im Projektordner verbleibt.
 
 ## [2.0.7.5]
 
