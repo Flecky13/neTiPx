@@ -149,7 +149,7 @@
                                 <TextBlock Text="{loc:Loc INFO_GITHUB_REPOSITORY}" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding OpenSupportCommand}" HorizontalAlignment="Stretch" MinWidth="200" Background="#756600" Foreground="#000000">
+                        <Button Command="{Binding OpenSupportCommand}" HorizontalAlignment="Stretch" MinWidth="200" Classes="accent">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="☕" />
                                 <TextBlock Text="{loc:Loc INFO_BUY_COFFEE}" />

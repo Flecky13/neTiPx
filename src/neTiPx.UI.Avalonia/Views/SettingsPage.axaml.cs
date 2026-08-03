@@ -188,10 +188,12 @@ public partial class SettingsPage : UserControl
             Height = 220,
             CanResize = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = GetThemeBrush("AppBackgroundBrush", Colors.White),
             Content = new StackPanel
             {
                 Margin = new Thickness(20),
                 Spacing = 20,
+                Background = GetThemeBrush("AppBackgroundBrush", Colors.White),
                 Children =
                 {
                     new TextBlock
@@ -268,10 +270,12 @@ public partial class SettingsPage : UserControl
             Height = 210,
             CanResize = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = GetThemeBrush("AppBackgroundBrush", Colors.White),
             Content = new StackPanel
             {
                 Margin = new Thickness(20),
                 Spacing = 20,
+                Background = GetThemeBrush("AppBackgroundBrush", Colors.White),
                 Children =
                 {
                     new TextBlock
@@ -337,10 +341,12 @@ public partial class SettingsPage : UserControl
             Height = 200,
             CanResize = false,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = GetThemeBrush("AppBackgroundBrush", Colors.White),
             Content = new StackPanel
             {
                 Margin = new Thickness(20),
                 Spacing = 20,
+                Background = GetThemeBrush("AppBackgroundBrush", Colors.White),
                 Children =
                 {
                     new TextBlock
@@ -368,6 +374,16 @@ public partial class SettingsPage : UserControl
         {
             dialog.Show();
         }
+    }
+
+    private static IBrush GetThemeBrush(string resourceKey, Color fallbackColor)
+    {
+        if (Application.Current?.Resources.TryGetValue(resourceKey, out var resource) == true && resource is IBrush brush)
+        {
+            return brush;
+        }
+
+        return new SolidColorBrush(fallbackColor);
     }
 
     private class DialogRelayCommand : System.Windows.Input.ICommand
