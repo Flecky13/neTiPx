@@ -13,18 +13,18 @@
     <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
             BorderThickness="1"
             CornerRadius="8"
-            Padding="24"
+            Padding="16"
             Margin="24,24,24,0"
             Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
         <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Spacing="8">
+            <StackPanel Spacing="5">
                 <TextBlock Text="{loc:Loc TOOLS_ROUTES}" FontSize="24" FontWeight="Bold" />
                 <TextBlock Text="{loc:Loc ROUTES_SECTION_SYSTEM}" />
             </StackPanel>
             <Image Grid.Column="1"
                    Source="/Assets/toolicon.ico"
-                   Width="120"
-                   Height="120"
+                   Width="77"
+                   Height="77"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Right" />
         </Grid>

@@ -21,9 +21,9 @@
                     BorderThickness="1"
                     Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="8"
-                    Padding="24">
+                    Padding="16">
                 <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Spacing="8">
+                    <StackPanel Spacing="5">
                         <TextBlock Text="{loc:Loc IPCONFIG_TITLE}" 
                                    FontSize="24" 
                                    FontWeight="Bold"/>
@@ -32,8 +32,8 @@
                     </StackPanel>
                     <Image Grid.Column="1"
                            Source="/Assets/toolicon.ico"
-                           Width="120"
-                           Height="120"
+                              Width="77"
+                              Height="77"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Right" />
                 </Grid>

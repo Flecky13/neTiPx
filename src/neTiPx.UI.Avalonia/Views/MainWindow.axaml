@@ -9,7 +9,7 @@
         x:Class="neTiPx.UI.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="neTiPx"
-        Width="1280" Height="960"
+        Width="1280" Height="820"
         MinWidth="960" MinHeight="800"
         Icon="/Assets/toolicon.ico">
 

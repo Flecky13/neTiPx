@@ -10,21 +10,36 @@
         <Style Selector="TextBlock.ToolEmojiIcon">
             <Setter Property="FontFamily" Value="Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji, Segoe UI Symbol" />
         </Style>
-        <Style Selector="ListBoxItem">
+        <Style Selector="ListBox.ToolsMenuList ListBoxItem">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
             <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="4,2" />
+            <Setter Property="FocusAdorner" Value="{x:Null}" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            Padding="{TemplateBinding Padding}"
+                            Margin="{TemplateBinding Margin}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
         </Style>
-        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+        <Style Selector="ListBox.ToolsMenuList ListBoxItem:pointerover">
             <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
         </Style>
-        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+        <Style Selector="ListBox.ToolsMenuList ListBoxItem:selected">
             <Setter Property="Background" Value="{DynamicResource SystemControlHighlightAccentBrush}" />
         </Style>
-        <Style Selector="ListBoxItem:selected:focus /template/ ContentPresenter">
+        <Style Selector="ListBox.ToolsMenuList ListBoxItem:selected:focus">
             <Setter Property="Background" Value="{DynamicResource SystemControlHighlightAccentBrush}" />
         </Style>
-        <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter">
+        <Style Selector="ListBox.ToolsMenuList ListBoxItem:selected:pointerover">
             <Setter Property="Background" Value="{DynamicResource SystemControlHighlightAccentBrush}" />
         </Style>
     </UserControl.Styles>
@@ -35,18 +50,18 @@
                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                 BorderThickness="1" 
                 CornerRadius="8" 
-                Padding="24" 
+                Padding="16" 
                 Margin="24,24,24,0"
                 Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
             <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Spacing="8">
+                <StackPanel Spacing="5">
                     <TextBlock Text="{loc:Loc TOOLS_TITLE}" FontSize="24" FontWeight="Bold" />
                     <TextBlock Text="{loc:Loc TOOLS_SUBTITLE}" />
                 </StackPanel>
                 <Image Grid.Column="1"
                        Source="/Assets/toolicon.ico"
-                       Width="120"
-                       Height="120"
+                       Width="77"
+                       Height="77"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Right" />
             </Grid>
@@ -62,8 +77,11 @@
                 <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                         BorderThickness="1" 
                         CornerRadius="8"
+                        Padding="2"
+                        ClipToBounds="True"
                         Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                     <ListBox x:Name="ToolsListBox" 
+                             Classes="ToolsMenuList"
                              SelectionChanged="ToolsListBox_SelectionChanged"
                              Background="Transparent"
                              Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
