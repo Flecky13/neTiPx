@@ -4,6 +4,18 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.8.1]
+
+### Changed
+
+- **UI / Headerbereiche**: Kopfbereiche mit neTiPx-Icon auf mehreren Seiten kompakter gestaltet (reduzierte Icon-Groesse, Abstaende und Padding), um mehr vertikalen Platz fuer Inhalte zu schaffen.
+- **Tools / Werkzeugseite / Layout**: Linke Tool-Navigation von `SplitView` auf ein stabiles 2-Spalten-Grid umgestellt, analog zu den Profilseiten.
+
+### Fixed
+
+- **UI / Dialoge / Theme**: Hover-Fenster sowie programmatisch erzeugte Bestaetigungs-/Info-Dialoge verwenden nun Theme-Ressourcen statt harter Farben, damit die ausgewaehlte Farbpalette unter Windows und macOS konsistent angewendet wird.
+- **Tools / Werkzeugseite / Eckenartefakte**: Darstellungsartefakte an den Ecken der linken Tool-Navigation (u. a. unter Windows/Linux sichtbar) wurden durch Template-/Container-Bereinigung und Layout-Umstellung beseitigt.
+
 ## [2.0.8.0]
 
 ### Added
