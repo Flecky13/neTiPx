@@ -3,21 +3,71 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using neTiPx.UI.Avalonia.Services;
 using neTiPx.UI.Avalonia.Views.Tools;
 
 namespace neTiPx.UI.Avalonia.Views;
 
 public partial class ToolsPage : UserControl
 {
+    private static readonly FontFamily _emojiFont =
+        new("Segoe UI Emoji, Noto Color Emoji, Apple Color Emoji, Segoe UI Symbol");
+
     public ToolsPage()
     {
         InitializeComponent();
-        
-        // Set initial content after initialization
-        if (ToolsListBox.SelectedItem is ListBoxItem item && item.Tag is string tag)
+        BuildToolItems();
+    }
+
+    private void BuildToolItems()
+    {
+        var vis = new PageVisibilityStore().Read();
+        var lm  = LanguageManager.Instance;
+
+        ToolsListBox.Items.Clear();
+
+        if (vis.ShowToolNetCalc)   ToolsListBox.Items.Add(MakeItem("NetworkCalculator", "🔢", lm.Lang("TOOLS_NET_CALC")));
+        if (vis.ShowToolPing)      ToolsListBox.Items.Add(MakeItem("Ping",              "📡", lm.Lang("TOOLS_PING")));
+        if (vis.ShowToolWlan)      ToolsListBox.Items.Add(MakeItem("Wlan",              "📶", lm.Lang("TOOLS_WLAN") + " (Draft)"));
+        if (vis.ShowToolNetScan)   ToolsListBox.Items.Add(MakeItem("NetworkScanner",    "🔍", lm.Lang("TOOLS_NET_SCAN") + " (Draft)"));
+        if (vis.ShowToolLogViewer) ToolsListBox.Items.Add(MakeItem("LogViewer",         "📄", lm.Lang("TOOLS_LOG_VIEWER") + " (Draft)"));
+
+        if (ToolsListBox.ItemCount > 0)
         {
-            UpdateToolContent(tag);
+            ToolsListBox.SelectedIndex = 0;
+            if (ToolsListBox.SelectedItem is ListBoxItem first && first.Tag is string t)
+                UpdateToolContent(t);
         }
+    }
+
+    private ListBoxItem MakeItem(string tag, string emoji, string label)
+    {
+        return new ListBoxItem
+        {
+            Tag = tag,
+            Content = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = emoji,
+                        FontFamily = _emojiFont,
+                        FontSize = 16,
+                        Width = 20,
+                        TextAlignment = TextAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    },
+                    new TextBlock
+                    {
+                        Text = label,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                }
+            }
+        };
     }
 
     private void ToolsListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)

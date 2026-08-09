@@ -19,7 +19,19 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Spacing="5">
                         <TextBlock Text="{loc:Loc SETTINGS_TITLE}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock Text="{loc:Loc SETTINGS_SUBTITLE_PRE}" />
+                        <StackPanel Orientation="Horizontal" Spacing="0">
+                            <TextBlock Text="{loc:Loc SETTINGS_SUBTITLE_PRE}" VerticalAlignment="Center" />
+                            <TextBlock Text=" " />
+                            <!-- versteckter Klickbereich – öffnet Seiten-Sichtbarkeit -->
+                            <Button x:Name="WuenschenButton"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="0"
+                                    Cursor="Hand"
+                                    Click="WuenschenButton_Click">
+                                <TextBlock Text="{loc:Loc SETTINGS_SUBTITLE_LINK}" />
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                     <Image Grid.Column="1"
                            Source="/Assets/toolicon.ico"

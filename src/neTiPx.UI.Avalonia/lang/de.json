@@ -599,6 +599,13 @@
   "OVERLAY_ADAPTER_SELECT": "Netzwerkkarte auswählen",
   "OVERLAY_ADAPTER_AUTO": "Automatisch (aktiver Adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Freitext",
+  "PAGES_VIS_TITLE": "Seiten-Sichtbarkeit",
+  "PAGES_VIS_DESC": "Haupt- und Werkzeugseiten ein- oder ausblenden.",
+  "PAGES_VIS_GROUP_MAIN": "Hauptseiten",
+  "PAGES_VIS_GROUP_TOOLS": "Werkzeuge",
+  "PAGES_VIS_CANCEL": "Abbrechen",
+  "PAGES_VIS_APPLY": "Übernehmen",
+
   "UNC_ADD": "+ Hinzufugen",
   "UNC_CONNECTED_PATHS": "Verbundene UNC-Pfade",
   "UNC_DISCONNECT": "Trennen",

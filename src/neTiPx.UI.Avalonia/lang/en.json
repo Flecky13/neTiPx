@@ -599,6 +599,13 @@
   "OVERLAY_ADAPTER_SELECT": "Select network adapter",
   "OVERLAY_ADAPTER_AUTO": "Automatic (active adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Free text",
+    "PAGES_VIS_TITLE": "Page Visibility",
+  "PAGES_VIS_DESC": "Show or hide main pages and tool pages.",
+  "PAGES_VIS_GROUP_MAIN": "Main Pages",
+  "PAGES_VIS_GROUP_TOOLS": "Tools",
+  "PAGES_VIS_CANCEL": "Cancel",
+  "PAGES_VIS_APPLY": "Apply",
+
   "UNC_ADD": "+ Add",
   "UNC_CONNECTED_PATHS": "Connected UNC paths",
   "UNC_DISCONNECT": "Disconnect",

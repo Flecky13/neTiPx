@@ -61,8 +61,8 @@ Hierlang für [Deutsch](README.de.md)
 - 📄 (DRAFT) **Log Viewer**: Open and live display of log files with filtering, highlight rules, 16-color swatch selection and optional auto-scroll
 - 🛣️ **Routes Tool**: Display current IPv4 routes including delete function for user-defined/persistent routes and direct addition of new routes
 - 🧩 **Modular Tools Page**: Ping, WLAN, Network Calculator, Network Scanner, Log Viewer and Routes as separate subpages with lazy loading
-- 🗂️ (DRAFT) **Page Visibility**: Main and tool pages can be shown/hidden via `PagesVisibility.xml`
-- 🛠️ (DRAFT) **Hidden Admin Configuration**: On the Settings page, the word `Wünschen` opens a dialog for managing page visibility
+- 🗂️ **Page Visibility**: Main and tool pages can be shown/hidden via `PagesVisibility.xml`
+- 🛠️ **Hidden Admin Configuration**: On the Settings page, the word `Wünschen` opens a dialog for managing page visibility
 
 Back to
 [Table of Contents](#-table-of-contents)
@@ -208,6 +208,14 @@ Configure the application to your needs:
 - The application supports multiple languages. The display language can be selected via the dropdown menu in the settings.
 - The dropdown shows the native names of the languages (e.g. "Deutsch", "English", "Español"), loaded dynamically from the language files.
 - Language changes take effect immediately across the entire user interface.
+
+#### 🗂️ Page Visibility
+
+- **Hidden access**: Clicking the word `Wünschen` in the subtitle of the Settings page opens the configuration dialog.
+- **Main pages**: IP Configuration, Routes, UNC Paths and Tools can be hidden individually. Adapter Info, Info and Settings are always visible.
+- **Tools**: Individual tool sub-pages (Network Calculator, Ping, WLAN Scanner, Network Scanner, Log Viewer) can be shown or hidden independently. Disabling the main Tools page automatically locks all tool sub-pages.
+- **Persistence**: The configuration is saved in `%APPDATA%\neTiPx\PagesVisibility.xml` and loaded automatically on next start.
+- **Live update**: Navigation is updated immediately after confirming.
 
 Back to
 [Table of Contents](#-table-of-contents)

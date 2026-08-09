@@ -30,6 +30,7 @@ public partial class App : Application
     private TrayService? _trayService;
     private DesktopOverlayController? _desktopOverlayController;
     public static TrayService? TrayService => ((App?)Current)?._trayService;
+    public static MainWindowViewModel? MainViewModel { get; private set; }
     private readonly object _shutdownSync = new();
     private bool _isExitRequested;
     private bool _cleanupCompleted;
@@ -95,6 +96,7 @@ public partial class App : Application
             
             // Erstelle MainWindow
             var mainWindow = new MainWindow();
+            MainViewModel = mainWindow.DataContext as MainWindowViewModel;
             
             // Weise das Fenster zu
             desktop.MainWindow = mainWindow;

@@ -567,6 +567,13 @@
   "OVERLAY_ADAPTER_AUTO": "Automatisch (aktiver Adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Freitext",
 
+    "PAGES_VIS_TITLE": "Site-Sichtbarkeit",
+  "PAGES_VIS_DESC": "Hauptsite und Werkzeugsite i- oder uusblende.",
+  "PAGES_VIS_GROUP_MAIN": "Hauptsite",
+  "PAGES_VIS_GROUP_TOOLS": "Werkzeug",
+  "PAGES_VIS_CANCEL": "Abbreche",
+  "PAGES_VIS_APPLY": "Ueberneh",
+
   "UNC_ADD": "+ Hinzufügen",
   "UNC_CONNECTED_PATHS": "Angeschlossene UNC-Pfade",
   "UNC_DISCONNECT": "Verbindung trennen",

@@ -4,6 +4,17 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.9.1]
+
+### Added
+
+- **Einstellungen / Seiten-Sichtbarkeit**: Versteckter Knopf „Wünschen" im Einstellungs-Header öffnet ein neues Dialog-Fenster zur Verwaltung der Navigationssichtbarkeit.
+- **Einstellungen / Seiten-Sichtbarkeit / Dialog**: Haupt- und Werkzeugseiten können einzeln ein- oder ausgeblendet werden. Adapter-Infos, Info und Einstellungen sind immer sichtbar. Werkzeug-Checkboxen werden gesperrt, wenn die Werkzeug-Hauptseite deaktiviert ist.
+- **Einstellungen / Seiten-Sichtbarkeit / Persistenz**: Konfiguration wird dauerhaft in `PagesVisibility.xml` im AppData-Ordner gespeichert und beim Start sowie nach jeder Änderung geladen.
+- **Navigation / Live-Aktualisierung**: Nach dem Schliessen des Dialogs wird die Hauptnavigation sofort neu aufgebaut; die aktive Seite bleibt erhalten oder wechselt auf Adapter-Infos, wenn sie ausgeblendet wurde.
+- **Werkzeuge / Sichtbarkeit**: Werkzeug-Eintraege in der linken Werkzeugliste werden per Konfiguration gefiltert — nicht sichtbare Eintraege werden gar nicht erst zur Liste hinzugefuegt.
+- **Lokalisierung / Seiten-Sichtbarkeit**: Alle Texte des neuen Dialogs sind in allen 12 Sprachdateien hinterlegt.
+
 ## [2.0.8.2]
 
 ### Changed

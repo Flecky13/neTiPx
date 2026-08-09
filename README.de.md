@@ -61,8 +61,8 @@ Thisway for [English](README.md)
 - 📄 (DRAFT) **Log Viewer**: Öffnen und Live-Anzeigen von Logdateien mit Filter, Highlight-Regeln, 16-Farben-Swatch-Auswahl und optionalem Auto-Scroll
 - 🛣️ **Routen Tool**: Anzeige aktueller IPv4-Routen inkl. Löschfunktion für benutzerseitige/persistente Routen und direktem Hinzufügen neuer Routen
 - 🧩 **Modulare Tools-Seite**: Ping, WLAN, Netzwerk-Rechner, Netzwerkscanner, Log Viewer und Routen als eigene Unterseiten mit Lazy-Loading
-- 🗂️ (DRAFT) **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
-- 🛠️ (DRAFT) **Versteckte Admin-Konfiguration**: Auf der Settings-Seite öffnet das Wort `Wünschen` einen Dialog zur Pflege der Seiten-Sichtbarkeit
+- 🗂️ **Seiten-Sichtbarkeit**: Haupt- und Toolseiten können über `PagesVisibility.xml` ein-/ausgeblendet werden
+- 🛠️ **Versteckte Admin-Konfiguration**: Auf der Settings-Seite öffnet das Wort `Wünschen` einen Dialog zur Pflege der Seiten-Sichtbarkeit
 
 zurück zum
 [Inhaltsverzeichnis](#-inhaltsverzeichnis)
@@ -208,6 +208,14 @@ Konfigurieren Sie die Anwendung nach Ihren Bedürfnissen:
 - Die Anwendung unterstützt mehrere Sprachen. Über das Dropdown-Menü in den Einstellungen kann die Anzeigesprache gewählt werden.
 - Im Dropdown werden die Eigenbezeichnungen der Sprachen (z. B. „Deutsch", „English", „Español") angezeigt. Diese werden dynamisch aus den Sprachdateien geladen.
 - Änderungen der Sprache wirken sich sofort auf die gesamte Benutzeroberfläche aus.
+
+#### 🗂️ Seiten-Sichtbarkeit
+
+- **Versteckter Zugang**: Ein Klick auf das Wort `Wünschen` im Untertitel der Einstellungsseite öffnet den Konfigurationsdialog.
+- **Hauptseiten**: IP-Konfiguration, Routen, UNC-Pfade und Werkzeuge können einzeln ausgeblendet werden. Adapter-Infos, Info und Einstellungen sind immer sichtbar.
+- **Werkzeuge**: Einzelne Werkzeug-Unterseiten (Netzwerk-Rechner, Ping, WLAN Scanner, Netzwerkscanner, Log Viewer) können unabhängig ein- oder ausgeblendet werden. Wird die Werkzeug-Hauptseite deaktiviert, werden alle Werkzeug-Unterseiten automatisch gesperrt.
+- **Persistenz**: Die Konfiguration wird in `%APPDATA%\neTiPx\PagesVisibility.xml` gespeichert und beim nächsten Start automatisch geladen.
+- **Live-Aktualisierung**: Die Navigation wird sofort nach dem Bestätigen aktualisiert.
 
 zurück zum
 [Inhaltsverzeichnis](#-inhaltsverzeichnis)

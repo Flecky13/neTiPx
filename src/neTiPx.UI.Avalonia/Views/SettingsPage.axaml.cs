@@ -27,6 +27,23 @@ public partial class SettingsPage : UserControl
         InitializeComponent();
     }
 
+    private async void WuenschenButton_Click(object? sender, RoutedEventArgs e)
+    {
+        var dialog = new PagesVisibilityWindow
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        var topLevel = TopLevel.GetTopLevel(this);
+        bool applied = false;
+        if (topLevel is Window parentWindow)
+            applied = await dialog.ShowDialog<bool>(parentWindow);
+        else
+            dialog.Show();
+
+        if (applied)
+            App.MainViewModel?.RebuildNavigation();
+    }
+
     private async void OpenDesktopOverlaySettingsButton_OnClick(object? sender, RoutedEventArgs e)
     {
         var dialog = new DesktopOverlaySettingsWindow

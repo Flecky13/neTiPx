@@ -48,29 +48,42 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+    public void RebuildNavigation() => RebuildNavigationItems();
+
     private void RebuildNavigationItems()
     {
         var current = CurrentPageName;
+        var vis = new PageVisibilityStore().Read();
 
         NavigationItems.Clear();
         NavigationItems.Add(new NavigationItem { Name = "Adapters", DisplayName = _lm.Lang("NAV_ADAPTERS"), Icon = "🔌" });
-        NavigationItems.Add(new NavigationItem { Name = "IpConfig", DisplayName = _lm.Lang("NAV_IPCONFIG"), Icon = "🧩" });
-        NavigationItems.Add(new NavigationItem { Name = "Routes", DisplayName = _lm.Lang("TOOLS_ROUTES"), Icon = "🧭" });
-        NavigationItems.Add(new NavigationItem { Name = "UncPath", DisplayName = _lm.Lang("TOOLS_UNC_PATH"), Icon = "📁" });
-        NavigationItems.Add(new NavigationItem { Name = "Tools", DisplayName = _lm.Lang("NAV_TOOLS"), Icon = "🧰" });
+        if (vis.ShowIpConfig)
+            NavigationItems.Add(new NavigationItem { Name = "IpConfig", DisplayName = _lm.Lang("NAV_IPCONFIG"), Icon = "🧩" });
+        if (vis.ShowRoutes)
+            NavigationItems.Add(new NavigationItem { Name = "Routes", DisplayName = _lm.Lang("TOOLS_ROUTES"), Icon = "🧭" });
+        if (vis.ShowUncPath)
+            NavigationItems.Add(new NavigationItem { Name = "UncPath", DisplayName = _lm.Lang("TOOLS_UNC_PATH"), Icon = "📁" });
+        if (vis.ShowTools)
+            NavigationItems.Add(new NavigationItem { Name = "Tools", DisplayName = _lm.Lang("NAV_TOOLS"), Icon = "🧰" });
 
         FooterNavigationItems.Clear();
         FooterNavigationItems.Add(new NavigationItem { Name = "Info", DisplayName = _lm.Lang("NAV_INFO"), Icon = "💡" });
         FooterNavigationItems.Add(new NavigationItem { Name = "Settings", DisplayName = _lm.Lang("NAV_SETTINGS"), Icon = "🛠️" });
 
-        var selected = NavigationItems.FirstOrDefault(item => item.Name == current)
-                       ?? FooterNavigationItems.FirstOrDefault(item => item.Name == current)
-                       ?? NavigationItems.FirstOrDefault();
+        // Wenn die aktuelle Seite ausgeblendet wurde, auf Adapters fallen.
+        var visible = NavigationItems.Concat(FooterNavigationItems).Select(i => i.Name).ToHashSet();
+        var targetName = visible.Contains(current) ? current : "Adapters";
+        if (targetName != current)
+            CurrentPageName = targetName;
 
+        // Seite immer neu instanziieren, damit Visibility-Änderungen (z.B. ToolsPage) sofort greifen.
+        UpdateCurrentPage();
+
+        var selected = NavigationItems.FirstOrDefault(i => i.Name == targetName)
+                       ?? FooterNavigationItems.FirstOrDefault(i => i.Name == targetName)
+                       ?? NavigationItems.FirstOrDefault();
         if (selected != null)
-        {
             SelectedNavigationItem = selected;
-        }
     }
 
     [RelayCommand]

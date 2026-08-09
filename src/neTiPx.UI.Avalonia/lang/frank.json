@@ -588,7 +588,14 @@
 "OVERLAY_ADAPTER_AUTO": "Automatisch (aktiver Adapter)",
 "OVERLAY_INFO_FREE_TEXT": "Freitext",
 
-"UNC_ADD": "+ Dazua",
+  "PAGES_VIS_TITLE": "Seiten-Sichtbarkeit",
+  "PAGES_VIS_DESC": "Hauptseiten un Werkzeugseiten ei- odder ausblende.",
+  "PAGES_VIS_GROUP_MAIN": "Hauptseiten",
+  "PAGES_VIS_GROUP_TOOLS": "Werkzeuge",
+  "PAGES_VIS_CANCEL": "Abbreche",
+  "PAGES_VIS_APPLY": "Uebernehme",
+
+  "UNC_ADD": "+ Dazua",
 "UNC_CONNECTED_PATHS": "Angschlossene UNC-Pfade",
 "UNC_DISCONNECT": "Verbindung trenne",
 "UNC_NONE_CONNECTED": "Kaa verbundene UNC-Pfade",

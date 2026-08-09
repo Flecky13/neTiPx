@@ -567,6 +567,13 @@
   "OVERLAY_ADAPTER_AUTO": "Automatyczny (aktywny adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Dowolny tekst",
 
+    "PAGES_VIS_TITLE": "Widocznosc stron",
+  "PAGES_VIS_DESC": "Pokazuj lub ukrywaj strony glowne i strony narzedzi.",
+  "PAGES_VIS_GROUP_MAIN": "Strony glowne",
+  "PAGES_VIS_GROUP_TOOLS": "Narzedzia",
+  "PAGES_VIS_CANCEL": "Anuluj",
+  "PAGES_VIS_APPLY": "Zatwierdz",
+
   "UNC_ADD": "+ Dodaj",
   "UNC_CONNECTED_PATHS": "Połączone ścieżki UNC",
   "UNC_DISCONNECT": "Rozłącz",

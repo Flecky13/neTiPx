@@ -82,45 +82,7 @@
                          Background="Transparent"
                          Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
                          BorderThickness="0">
-                    <ListBoxItem Tag="NetworkCalculator" IsSelected="True">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="ToolEmojiIcon" Text="🔢" />
-                            <TextBlock Text="{loc:Loc TOOLS_NET_CALC}" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="Ping">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="ToolEmojiIcon" Text="📡" />
-                            <TextBlock Text="{loc:Loc TOOLS_PING}" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="Wlan">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="ToolEmojiIcon" Text="📶" />
-                            <StackPanel Orientation="Horizontal" Spacing="0">
-                                <TextBlock Text="{loc:Loc TOOLS_WLAN}" />
-                                <TextBlock Text=" (Draft)" />
-                            </StackPanel>
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="NetworkScanner">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="ToolEmojiIcon" Text="🔍" />
-                            <StackPanel Orientation="Horizontal" Spacing="0">
-                                <TextBlock Text="{loc:Loc TOOLS_NET_SCAN}" />
-                                <TextBlock Text=" (Draft)" />
-                            </StackPanel>
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="LogViewer">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="ToolEmojiIcon" Text="📄" />
-                            <StackPanel Orientation="Horizontal" Spacing="0">
-                                <TextBlock Text="{loc:Loc TOOLS_LOG_VIEWER}" />
-                                <TextBlock Text=" (Draft)" />
-                            </StackPanel>
-                        </StackPanel>
-                    </ListBoxItem>
+                    <!-- Items werden in Code-Behind per PageVisibilityStore befüllt -->
                 </ListBox>
             </Border>
 

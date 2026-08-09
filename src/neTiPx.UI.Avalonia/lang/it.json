@@ -567,6 +567,13 @@
   "OVERLAY_ADAPTER_AUTO": "Automatico (adattatore attivo)",
   "OVERLAY_INFO_FREE_TEXT": "Testo libero",
 
+    "PAGES_VIS_TITLE": "Visibilita delle pagine",
+  "PAGES_VIS_DESC": "Mostrare o nascondere le pagine principali e degli strumenti.",
+  "PAGES_VIS_GROUP_MAIN": "Pagine principali",
+  "PAGES_VIS_GROUP_TOOLS": "Strumenti",
+  "PAGES_VIS_CANCEL": "Annulla",
+  "PAGES_VIS_APPLY": "Applica",
+
   "UNC_ADD": "+ Aggiungere",
   "UNC_CONNECTED_PATHS": "Percorsi UNC connessi",
   "UNC_DISCONNECT": "Disconnetti",

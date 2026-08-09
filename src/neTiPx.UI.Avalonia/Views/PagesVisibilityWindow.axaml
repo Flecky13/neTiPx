@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loc="using:neTiPx.UI.Avalonia.Markup"
+        mc:Ignorable="d"
+        x:Class="neTiPx.UI.Avalonia.Views.PagesVisibilityWindow"
+        Title="neTiPx"
+        Width="420" Height="560"
+        MinWidth="380" MinHeight="500"
+        CanResize="True"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackgroundBrush}">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="16" Margin="20,20,20,8">
+
+                <TextBlock x:Name="TxtTitle"
+                           FontSize="18" FontWeight="Bold" />
+                <TextBlock x:Name="TxtDesc"
+                           FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                <!-- Hauptseiten -->
+                <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1" CornerRadius="6" Padding="12"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="8">
+                        <TextBlock x:Name="TxtGroupMain" FontWeight="SemiBold" FontSize="13" />
+
+                        <CheckBox x:Name="CbAdapters"
+                                  IsChecked="True" IsEnabled="False" />
+                        <CheckBox x:Name="CbIpConfig" />
+                        <CheckBox x:Name="CbRoutes" />
+                        <CheckBox x:Name="CbUncPath" />
+                        <CheckBox x:Name="CbTools" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Werkzeuge -->
+                <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1" CornerRadius="6" Padding="12"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="8">
+                        <TextBlock x:Name="TxtGroupTools" FontWeight="SemiBold" FontSize="13" />
+
+                        <CheckBox x:Name="CbToolNetCalc" />
+                        <CheckBox x:Name="CbToolPing" />
+                        <CheckBox x:Name="CbToolWlan" />
+                        <CheckBox x:Name="CbToolNetScan" />
+                        <CheckBox x:Name="CbToolLogViewer" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons immer am unteren Rand sichtbar -->
+        <Border Grid.Row="1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button x:Name="BtnCancel"  Click="BtnCancel_Click" />
+                <Button x:Name="BtnApply"   Classes="accent" Click="BtnApply_Click" />
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Window>

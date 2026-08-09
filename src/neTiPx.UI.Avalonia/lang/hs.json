@@ -580,6 +580,13 @@
 "OVERLAY_ADAPTER_AUTO": "Automatisch (aktiver Adapter)",
 "OVERLAY_INFO_FREE_TEXT": "Freitext",
 
+"PAGES_VIS_TITLE": "Seite-Sichtbarkeit",
+"PAGES_VIS_DESC": "Hauptseite un Werkzeugseite ei- odder ausblende.",
+"PAGES_VIS_GROUP_MAIN": "Hauptseite",
+"PAGES_VIS_GROUP_TOOLS": "Werkzeuge",
+"PAGES_VIS_CANCEL": "Abbreche",
+"PAGES_VIS_APPLY": "Übernehme",
+
 "UNC_ADD": "+ Dezu",
 "UNC_CONNECTED_PATHS": "Verbunne UNC-Pfade",
 "UNC_DISCONNECT": "Verbindung trenne",
