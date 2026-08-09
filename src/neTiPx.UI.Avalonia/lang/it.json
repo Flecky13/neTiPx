@@ -563,6 +563,8 @@
   "OVERLAY_INFO_PROCESSOR_COUNT": "Core logici del processore",
   "OVERLAY_INFO_SERVICE_STATUS": "Stato del servizio",
   "OVERLAY_SERVICE_SELECT": "Seleziona o cerca servizio",
+    "OVERLAY_ADAPTER_SELECT": "Seleziona adattatore di rete",
+  "OVERLAY_ADAPTER_AUTO": "Automatico (adattatore attivo)",
   "OVERLAY_INFO_FREE_TEXT": "Testo libero",
 
   "UNC_ADD": "+ Aggiungere",

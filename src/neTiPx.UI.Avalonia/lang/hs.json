@@ -576,6 +576,8 @@
 "OVERLAY_INFO_PROCESSOR_COUNT": "Logische Prozessorkerne",
 "OVERLAY_INFO_SERVICE_STATUS": "Dienststatus",
 "OVERLAY_SERVICE_SELECT": "Dienst auswähle odder suche",
+"OVERLAY_ADAPTER_SELECT": "Netzwerkkart auswähle",
+"OVERLAY_ADAPTER_AUTO": "Automatisch (aktiver Adapter)",
 "OVERLAY_INFO_FREE_TEXT": "Freitext",
 
 "UNC_ADD": "+ Dezu",

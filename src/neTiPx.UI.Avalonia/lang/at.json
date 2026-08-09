@@ -563,6 +563,8 @@
   "OVERLAY_INFO_PROCESSOR_COUNT": "Logische Prozessorkerne",
   "OVERLAY_INFO_SERVICE_STATUS": "Dienststatus",
   "OVERLAY_SERVICE_SELECT": "Dienst auswählen oder suchen",
+  "OVERLAY_ADAPTER_SELECT": "Netzwerkkarte auswählen",
+  "OVERLAY_ADAPTER_AUTO": "Automatisch (aktiver Adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Freitext",
 
   "UNC_ADD": "+ Hinzufügen",

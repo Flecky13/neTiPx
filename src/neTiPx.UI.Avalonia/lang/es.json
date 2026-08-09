@@ -563,6 +563,8 @@
   "OVERLAY_INFO_PROCESSOR_COUNT": "Núcleos lógicos del procesador",
   "OVERLAY_INFO_SERVICE_STATUS": "Estado del servicio",
   "OVERLAY_SERVICE_SELECT": "Seleccionar o buscar servicio",
+    "OVERLAY_ADAPTER_SELECT": "Seleccionar adaptador de red",
+  "OVERLAY_ADAPTER_AUTO": "Automático (adaptador activo)",
   "OVERLAY_INFO_FREE_TEXT": "Texto libre",
 
   "UNC_ADD": "+ Añadir",

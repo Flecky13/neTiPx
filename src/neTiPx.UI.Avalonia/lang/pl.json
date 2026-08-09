@@ -563,6 +563,8 @@
   "OVERLAY_INFO_PROCESSOR_COUNT": "Logiczne rdzenie procesora",
   "OVERLAY_INFO_SERVICE_STATUS": "Status usługi",
   "OVERLAY_SERVICE_SELECT": "Wybierz lub wyszukaj usługę",
+    "OVERLAY_ADAPTER_SELECT": "Wybierz kartę sieciową",
+  "OVERLAY_ADAPTER_AUTO": "Automatyczny (aktywny adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Dowolny tekst",
 
   "UNC_ADD": "+ Dodaj",
