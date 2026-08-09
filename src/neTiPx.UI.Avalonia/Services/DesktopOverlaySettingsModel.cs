@@ -64,6 +64,19 @@ public static class DesktopOverlayInfoKeys
     public static bool IsKnown(string? key) =>
         !string.IsNullOrWhiteSpace(key)
         && AvailableKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
+
+    public static bool SupportsAdapterSelection(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return false;
+        }
+
+        return key.Equals(IPv4, StringComparison.OrdinalIgnoreCase)
+            || key.Equals(IPv6, StringComparison.OrdinalIgnoreCase)
+            || key.Equals(Gateway, StringComparison.OrdinalIgnoreCase)
+            || key.Equals(NetworkAdapter, StringComparison.OrdinalIgnoreCase);
+    }
 }
 
 public static class DesktopOverlayPositionModes
@@ -90,6 +103,7 @@ public sealed class DesktopOverlayItemSetting
     public bool ShowLabel { get; set; } = true;
     public string CustomText { get; set; } = string.Empty;
     public string ServiceName { get; set; } = string.Empty;
+    public string AdapterName { get; set; } = string.Empty;
     public int Order { get; set; }
 
     // Used only while reading settings created before the list-based UI.
@@ -188,6 +202,9 @@ public sealed class DesktopOverlaySettingsModel
                 CustomText = (item.CustomText ?? string.Empty).Trim()[..Math.Min((item.CustomText ?? string.Empty).Trim().Length, 32)],
                 ServiceName = item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)
                     ? (item.ServiceName ?? string.Empty).Trim()[..Math.Min((item.ServiceName ?? string.Empty).Trim().Length, 256)]
+                    : string.Empty,
+                AdapterName = DesktopOverlayInfoKeys.SupportsAdapterSelection(item.Key)
+                    ? (item.AdapterName ?? string.Empty).Trim()[..Math.Min((item.AdapterName ?? string.Empty).Trim().Length, 256)]
                     : string.Empty,
                 Order = index
             })

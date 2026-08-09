@@ -596,6 +596,8 @@
   "OVERLAY_INFO_PROCESSOR_COUNT": "Logical processor cores",
   "OVERLAY_INFO_SERVICE_STATUS": "Service status",
   "OVERLAY_SERVICE_SELECT": "Select or search service",
+  "OVERLAY_ADAPTER_SELECT": "Select network adapter",
+  "OVERLAY_ADAPTER_AUTO": "Automatic (active adapter)",
   "OVERLAY_INFO_FREE_TEXT": "Free text",
   "UNC_ADD": "+ Add",
   "UNC_CONNECTED_PATHS": "Connected UNC paths",

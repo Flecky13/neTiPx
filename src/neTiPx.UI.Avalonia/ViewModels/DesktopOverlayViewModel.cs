@@ -241,20 +241,85 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
         var activeAdapterName = GetActiveAdapterName();
         changed |= UpdateValue(DesktopOverlayInfoKeys.NetworkAdapter, string.IsNullOrWhiteSpace(activeAdapterName) ? "-" : activeAdapterName);
 
-        if (string.IsNullOrWhiteSpace(activeAdapterName))
+        var networkItems = _settings.Items
+            .Where(item => DesktopOverlayInfoKeys.SupportsAdapterSelection(item.Key))
+            .ToList();
+
+        if (networkItems.Count == 0)
         {
-            changed |= UpdateValue(DesktopOverlayInfoKeys.IPv4, "-");
-            changed |= UpdateValue(DesktopOverlayInfoKeys.IPv6, "-");
-            changed |= UpdateValue(DesktopOverlayInfoKeys.Gateway, "-");
+            if (string.IsNullOrWhiteSpace(activeAdapterName))
+            {
+                changed |= UpdateValue(DesktopOverlayInfoKeys.IPv4, "-");
+                changed |= UpdateValue(DesktopOverlayInfoKeys.IPv6, "-");
+                changed |= UpdateValue(DesktopOverlayInfoKeys.Gateway, "-");
+                return changed;
+            }
+
+            var info = _networkInfoService.GetNetworkInfo(activeAdapterName);
+            changed |= UpdateValue(DesktopOverlayInfoKeys.IPv4, FirstLine(GetInfoValue(info, "IPv4")));
+            changed |= UpdateValue(DesktopOverlayInfoKeys.IPv6, FirstLine(GetInfoValue(info, "IPv6")));
+            changed |= UpdateValue(DesktopOverlayInfoKeys.Gateway, FirstLine(GetInfoValue(info, "Gateway4")));
             return changed;
         }
 
-        var info = _networkInfoService.GetNetworkInfo(activeAdapterName);
-        changed |= UpdateValue(DesktopOverlayInfoKeys.IPv4, FirstLine(GetInfoValue(info, "IPv4")));
-        changed |= UpdateValue(DesktopOverlayInfoKeys.IPv6, FirstLine(GetInfoValue(info, "IPv6")));
-        changed |= UpdateValue(DesktopOverlayInfoKeys.Gateway, FirstLine(GetInfoValue(info, "Gateway4")));
+        var adapterInfoCache = new Dictionary<string, string[,]?>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in networkItems)
+        {
+            var resolvedAdapter = ResolveOverlayAdapterName(item, activeAdapterName);
+            var itemValue = ResolveNetworkItemValue(item, resolvedAdapter, adapterInfoCache);
+            changed |= UpdateValue(GetValueKey(item), itemValue);
+        }
 
         return changed;
+    }
+
+    private string ResolveOverlayAdapterName(DesktopOverlayItemSetting item, string activeAdapterName)
+    {
+        if (!string.IsNullOrWhiteSpace(item.AdapterName))
+        {
+            return item.AdapterName.Trim();
+        }
+
+        return activeAdapterName;
+    }
+
+    private string ResolveNetworkItemValue(
+        DesktopOverlayItemSetting item,
+        string adapterName,
+        Dictionary<string, string[,]?> adapterInfoCache)
+    {
+        if (string.IsNullOrWhiteSpace(adapterName))
+        {
+            return "-";
+        }
+
+        if (item.Key.Equals(DesktopOverlayInfoKeys.NetworkAdapter, StringComparison.OrdinalIgnoreCase))
+        {
+            return adapterName;
+        }
+
+        if (!adapterInfoCache.TryGetValue(adapterName, out var info))
+        {
+            info = _networkInfoService.GetNetworkInfo(adapterName);
+            adapterInfoCache[adapterName] = info;
+        }
+
+        if (item.Key.Equals(DesktopOverlayInfoKeys.IPv4, StringComparison.OrdinalIgnoreCase))
+        {
+            return FirstLine(GetInfoValue(info, "IPv4"));
+        }
+
+        if (item.Key.Equals(DesktopOverlayInfoKeys.IPv6, StringComparison.OrdinalIgnoreCase))
+        {
+            return FirstLine(GetInfoValue(info, "IPv6"));
+        }
+
+        if (item.Key.Equals(DesktopOverlayInfoKeys.Gateway, StringComparison.OrdinalIgnoreCase))
+        {
+            return FirstLine(GetInfoValue(info, "Gateway4"));
+        }
+
+        return "-";
     }
 
     private async Task<bool> RefreshExternalIpAsync()
@@ -490,6 +555,8 @@ public sealed partial class DesktopOverlayViewModel : ObservableObject
     private static string GetValueKey(DesktopOverlayItemSetting item) =>
         item.Key.Equals(DesktopOverlayInfoKeys.ServiceStatus, StringComparison.OrdinalIgnoreCase)
             ? $"{item.Key}:{item.ServiceName}"
+            : DesktopOverlayInfoKeys.SupportsAdapterSelection(item.Key)
+                ? $"{item.Key}:{(string.IsNullOrWhiteSpace(item.AdapterName) ? "auto" : item.AdapterName.Trim())}"
             : item.Key;
 
     private bool IsLineSetEqual(IReadOnlyList<DesktopOverlayLineViewModel> next)

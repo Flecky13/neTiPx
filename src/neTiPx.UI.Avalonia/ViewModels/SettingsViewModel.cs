@@ -146,6 +146,7 @@ public partial class SettingsViewModel : ObservableObject
     private ObservableCollection<DesktopOverlayItemSettingViewModel> _desktopOverlayInfoItems;
 
     public ObservableCollection<DesktopOverlayInfoOption> DesktopOverlayInfoOptions { get; } = new();
+    public ObservableCollection<DesktopOverlayAdapterOption> DesktopOverlayAdapterOptions { get; } = new();
     public ObservableCollection<SystemServiceInfo> DesktopOverlayServices { get; } = new();
     public bool IsDesktopOverlaySettingsEditable => !DesktopOverlayHoverInteractive;
     
@@ -201,10 +202,13 @@ public partial class SettingsViewModel : ObservableObject
             {
                 AvailableSecondaryAdapters.Add(adapter);
             }
+
+            RefreshDesktopOverlayAdapterOptions(adapters);
         }
         catch
         {
             // Ignore errors during adapter enumeration
+            RefreshDesktopOverlayAdapterOptions(Array.Empty<string>());
         }
     }
     
@@ -808,10 +812,12 @@ public partial class SettingsViewModel : ObservableObject
             {
                 var vm = new DesktopOverlayItemSettingViewModel(
                     DesktopOverlayInfoOptions,
+                    DesktopOverlayAdapterOptions,
                     DesktopOverlayServices,
                     item.Key,
                     item.ShowLabel,
                     item.CustomText,
+                    item.AdapterName,
                     item.ServiceName);
                 vm.PropertyChanged += OverlayItem_PropertyChanged;
                 DesktopOverlayInfoItems.Add(vm);
@@ -837,6 +843,8 @@ public partial class SettingsViewModel : ObservableObject
         if (e.PropertyName is nameof(DesktopOverlayItemSettingViewModel.SelectedInfoOption)
             or nameof(DesktopOverlayItemSettingViewModel.ShowLabel)
             or nameof(DesktopOverlayItemSettingViewModel.CustomText)
+            or nameof(DesktopOverlayItemSettingViewModel.SelectedAdapterOption)
+            or nameof(DesktopOverlayItemSettingViewModel.AdapterName)
             or nameof(DesktopOverlayItemSettingViewModel.ServiceName))
         {
             SaveDesktopOverlaySettings();
@@ -883,7 +891,7 @@ public partial class SettingsViewModel : ObservableObject
             !DesktopOverlayInfoItems.Any(item => item.Key.Equals(key, StringComparison.OrdinalIgnoreCase)))
             ?? DesktopOverlayInfoKeys.AvailableKeys[0];
 
-        var item = new DesktopOverlayItemSettingViewModel(DesktopOverlayInfoOptions, DesktopOverlayServices, selectedKey, showLabel: true, customText: string.Empty);
+        var item = new DesktopOverlayItemSettingViewModel(DesktopOverlayInfoOptions, DesktopOverlayAdapterOptions, DesktopOverlayServices, selectedKey, showLabel: true, customText: string.Empty);
         item.PropertyChanged += OverlayItem_PropertyChanged;
         DesktopOverlayInfoItems.Add(item);
         AddDesktopOverlayItemCommand.NotifyCanExecuteChanged();
@@ -1004,6 +1012,25 @@ public partial class SettingsViewModel : ObservableObject
             {
                 DesktopOverlayInfoOptions.Add(new DesktopOverlayInfoOption(key, GetOverlayItemDisplayName(key)));
             }
+        }
+    }
+
+    private void RefreshDesktopOverlayAdapterOptions(IEnumerable<string> adapterNames)
+    {
+        DesktopOverlayAdapterOptions.Clear();
+        DesktopOverlayAdapterOptions.Add(new DesktopOverlayAdapterOption(string.Empty, T("OVERLAY_ADAPTER_AUTO")));
+
+        foreach (var adapterName in adapterNames
+                     .Where(name => !string.IsNullOrWhiteSpace(name))
+                     .Distinct(StringComparer.OrdinalIgnoreCase)
+                     .OrderBy(name => name, StringComparer.OrdinalIgnoreCase))
+        {
+            DesktopOverlayAdapterOptions.Add(new DesktopOverlayAdapterOption(adapterName, adapterName));
+        }
+
+        foreach (var item in DesktopOverlayInfoItems)
+        {
+            item.RefreshAdapters();
         }
     }
 

@@ -4,6 +4,17 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.8.2]
+
+### Changed
+
+- **Tools / Ping / Konfigurationsbereich**: Oberen Eingabebereich von einer reinen `StackPanel`-Anordnung auf ein mehrzeiliges Grid umgestellt, damit Ziel, Intervall und Aktionen stabiler ausgerichtet sind.
+- **Tools / Ping / Aktionsleiste**: Checkbox und Buttons (Speichern/Abbrechen) neu positioniert und vertikal zentriert fuer eine bessere Bedienbarkeit.
+
+### Fixed
+
+- **Linux / Systray / IP-Profile**: IP-Profile wurden im Tray-Kontextmenue unter Linux nicht angezeigt, obwohl sie korrekt geladen wurden. Untermenüs werden von einigen Linux-Desktop-Umgebungen (z. B. Cinnamon) nicht zuverlaessig dargestellt (bekanntes Avalonia-X11-Problem). Profile werden unter Linux jetzt als flache Eintraege direkt im Hauptmenue angezeigt; unter Windows und macOS bleibt das Untermenue erhalten.
+
 ## [2.0.8.1]
 
 ### Changed

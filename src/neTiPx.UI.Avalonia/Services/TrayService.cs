@@ -12,6 +12,7 @@ using neTiPx.Core.Models;
 using neTiPx.Core.Services;
 using neTiPx.UI.Avalonia.Helpers;
 using neTiPx.UI.Avalonia.Views;
+using System.Runtime.InteropServices;
 using Timer = System.Timers.Timer;
 
 namespace neTiPx.UI.Avalonia.Services;
@@ -276,45 +277,77 @@ public class TrayService : IDisposable
             
             LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"IP-Profile geladen: {profiles.Count}");
             
-            // Always add the menu item, even if no profiles exist
-            var profilesSubmenu = new NativeMenu();
-            
-            if (profiles.Count == 0)
+            // Linux tray integrations often render nested menus unreliably.
+            // Build a flat section there so profile entries stay visible.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // Show a message that no profiles exist
-                var noProfilesItem = new NativeMenuItem("(Keine Profile vorhanden)");
-                profilesSubmenu.Add(noProfilesItem);
+                var header = new NativeMenuItem("IP-Profile")
+                {
+                    IsEnabled = false
+                };
+                parentMenu.Add(header);
+
+                if (profiles.Count == 0)
+                {
+                    parentMenu.Add(new NativeMenuItem("  (Keine Profile vorhanden)") { IsEnabled = false });
+                }
+                else
+                {
+                    foreach (var profile in profiles)
+                    {
+                        var displayName = profile.Name;
+                        if (!string.IsNullOrWhiteSpace(profile.AdapterName))
+                        {
+                            displayName = $"{profile.Name} ({profile.AdapterName})";
+                        }
+
+                        var profileItem = new NativeMenuItem($"  {displayName}");
+                        var profileName = profile.Name;
+                        profileItem.Click += (_, _) => ApplyIpProfile(profileName);
+                        parentMenu.Add(profileItem);
+
+                        LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"Profil hinzugefügt: '{displayName}'");
+                    }
+                }
             }
             else
             {
-                // Add all profiles to submenu
-                foreach (var profile in profiles)
-                {
-                    // Format: "Name (Adapter)" oder nur "Name" wenn kein Adapter
-                    var displayName = profile.Name;
-                    if (!string.IsNullOrWhiteSpace(profile.AdapterName))
-                    {
-                        displayName = $"{profile.Name} ({profile.AdapterName})";
-                    }
-                    
-                    var profileItem = new NativeMenuItem(displayName);
-                    
-                    // Capture profile name for the click handler
-                    var profileName = profile.Name;
-                    profileItem.Click += (_, _) => ApplyIpProfile(profileName);
-                    
-                    profilesSubmenu.Add(profileItem);
-                    LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"Profil hinzugefügt: '{displayName}'");
-                }
-            }
+                var profilesSubmenu = new NativeMenu();
 
-            // Create parent menu item with submenu
-            var profilesParentItem = new NativeMenuItem("IP-Profile")
-            {
-                Menu = profilesSubmenu
-            };
-            
-            parentMenu.Add(profilesParentItem);
+                if (profiles.Count == 0)
+                {
+                    var noProfilesItem = new NativeMenuItem("(Keine Profile vorhanden)")
+                    {
+                        IsEnabled = false
+                    };
+                    profilesSubmenu.Add(noProfilesItem);
+                }
+                else
+                {
+                    foreach (var profile in profiles)
+                    {
+                        var displayName = profile.Name;
+                        if (!string.IsNullOrWhiteSpace(profile.AdapterName))
+                        {
+                            displayName = $"{profile.Name} ({profile.AdapterName})";
+                        }
+
+                        var profileItem = new NativeMenuItem(displayName);
+                        var profileName = profile.Name;
+                        profileItem.Click += (_, _) => ApplyIpProfile(profileName);
+                        profilesSubmenu.Add(profileItem);
+
+                        LogHandler.LogSystemMessage(LogLevel.INFO, "TrayService", $"Profil hinzugefügt: '{displayName}'");
+                    }
+                }
+
+                var profilesParentItem = new NativeMenuItem("IP-Profile")
+                {
+                    Menu = profilesSubmenu
+                };
+
+                parentMenu.Add(profilesParentItem);
+            }
         }
         catch (Exception ex)
         {

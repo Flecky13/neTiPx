@@ -172,6 +172,19 @@
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
                                 <StackPanel Grid.Column="2" Spacing="4">
+                                    <TextBlock Text="{loc:Loc OVERLAY_ADAPTER_SELECT}"
+                                               FontSize="11"
+                                               Opacity="0.7"
+                                               IsVisible="{Binding IsAdapterSelectable}" />
+                                    <ComboBox ItemsSource="{Binding AdapterOptions}"
+                                              SelectedItem="{Binding SelectedAdapterOption}"
+                                              IsVisible="{Binding IsAdapterSelectable}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:DesktopOverlayAdapterOption">
+                                                <TextBlock Text="{Binding DisplayName}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                     <TextBlock Text="{loc:Loc OVERLAY_SERVICE_SELECT}"
                                                FontSize="11"
                                                Opacity="0.7"
