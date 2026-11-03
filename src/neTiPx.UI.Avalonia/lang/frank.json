@@ -371,6 +371,7 @@
 "PING_DIALOG_CANCEL": "Abbrecha",
 "PING_RESPONSE_PLACEHOLDER": "-- ms",
 "PING_STATUS_ERROR": "Fehler",
+"PING_COMPACT_VIEW": "Kompaktansicht",
 "PING_CONFIG_BACKGROUND_ACTIVE": "im Hinnergrund weiter aktiv",
 "PING_TARGET_HEADER": "Zieladress",
 "PING_STATUS_DISABLED": "Deaktiviert",

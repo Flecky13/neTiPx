@@ -120,6 +120,7 @@
   "TOOLS_UNC_PATH": "UNC Pfade",
   "PING_TITLE": "PING-Tool",
   "PING_CONFIG_TITLE": "Konfiguration",
+  "PING_COMPACT_VIEW": "Kompaktansicht",
   "PING_CONFIG_BACKGROUND_ACTIVE": "im Hintergrund weiter aktiv",
   "PING_TARGET_HEADER": "Zieladresse",
   "PING_TARGET_PLACEHOLDER": "IP-Adresse oder Hostname (z.B. 8.8.8.8, google.com)",

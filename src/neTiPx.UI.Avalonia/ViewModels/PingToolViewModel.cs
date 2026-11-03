@@ -27,6 +27,9 @@ public partial class PingToolViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
+    [ObservableProperty]
+    private bool _isCompactView;
+
     private readonly PingMonitorService _monitorService;
 
     public ObservableCollection<int> AvailableIntervals { get; } = new() { 1, 2, 5, 10, 30, 60 };
@@ -34,6 +37,8 @@ public partial class PingToolViewModel : ObservableObject
     public ReadOnlyObservableCollection<PingMonitorItem> Items => _monitorService.Items;
 
     public string SubmitButtonText => EditingItem == null ? "Hinzufügen" : "Übernehmen";
+
+    public bool IsDetailedView => !IsCompactView;
 
     public PingToolViewModel(PingMonitorService monitorService)
     {
@@ -51,6 +56,11 @@ public partial class PingToolViewModel : ObservableObject
     partial void OnEditingItemChanged(PingMonitorItem? value)
     {
         OnPropertyChanged(nameof(SubmitButtonText));
+    }
+
+    partial void OnIsCompactViewChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsDetailedView));
     }
 
     public void OnPageLoaded()

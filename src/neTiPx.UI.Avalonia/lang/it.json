@@ -357,6 +357,7 @@
   "PING_DIALOG_CANCEL": "Cancellare",
   "PING_RESPONSE_PLACEHOLDER": "-- ms",
   "PING_STATUS_ERROR": "Errore",
+  "PING_COMPACT_VIEW": "Vista compatta",
   "PING_CONFIG_BACKGROUND_ACTIVE": "rimanere attivo in background",
   "PING_TARGET_HEADER": "Indirizzo di destinazione",
   "PING_STATUS_DISABLED": "Disabilitato",

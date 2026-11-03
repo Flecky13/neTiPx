@@ -22,7 +22,13 @@
     </UserControl.Styles>
 
     <StackPanel Spacing="16" Margin="0,0,28,0">
-        <TextBlock Text="{loc:Loc PING_TITLE}" FontSize="24" FontWeight="Bold" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <TextBlock Text="{loc:Loc PING_TITLE}" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" />
+            <CheckBox Grid.Column="1"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding IsCompactView}"
+                      Content="{loc:Loc PING_COMPACT_VIEW}" />
+        </Grid>
 
         <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
                 BorderThickness="1"
@@ -93,7 +99,7 @@
                                 </StackPanel>
                             </Grid>
 
-                            <Grid ColumnDefinitions="2*,2*" ColumnSpacing="12">
+                            <Grid ColumnDefinitions="2*,2*" ColumnSpacing="12" IsVisible="{Binding DataContext.IsDetailedView, ElementName=Root}">
                                 <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1" CornerRadius="6" Padding="10">
                                     <StackPanel Spacing="4">
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
@@ -148,17 +154,17 @@
                                 </Border>
                             </Grid>
 
-                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12" IsVisible="{Binding DataContext.IsDetailedView, ElementName=Root}">
                                 <TextBlock Text="{Binding LastResponseText, StringFormat=Letzte Antwort: {0}}" />
                                 <TextBlock Grid.Column="1" Text="{Binding IntervalSeconds, StringFormat=Intervall: {0} Sek}" />
                                 <TextBlock Grid.Column="2" Text="{Binding LastCheckedText, StringFormat=Letzte Prüfung: {0}}" />
                             </Grid>
 
-                            <Grid ColumnDefinitions="*" ColumnSpacing="12">
+                            <Grid ColumnDefinitions="*" ColumnSpacing="12" IsVisible="{Binding DataContext.IsDetailedView, ElementName=Root}">
                                 <TextBlock Text="{Binding LastErrorText, StringFormat=Letzter Fehler: {0}}" />
                             </Grid>
 
-                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
+                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding DataContext.IsDetailedView, ElementName=Root}">
                                 <Button Content="{Binding StartPauseGlyph}"
                                         Classes="PingEmojiButton"
                                         ToolTip.Tip="{Binding StartPauseTooltip}"
@@ -173,6 +179,58 @@
                                 <Button Grid.Column="2" Classes="PingEmojiButton" Content="📝" Tag="{Binding}" Click="Edit_Click" />
                                 <Button Grid.Column="3" Classes="PingEmojiButton" Content="🗑️" Tag="{Binding}" Click="Delete_Click" />
                                 <TextBlock Grid.Column="5" Text="{Binding IntervalSeconds, StringFormat=Intervall: {0}s}" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid RowDefinitions="Auto,Auto" RowSpacing="6" IsVisible="{Binding DataContext.IsCompactView, ElementName=Root}">
+                                <Grid ColumnDefinitions="2.2*,1.2*,1.8*,Auto,Auto" ColumnSpacing="8">
+                                    <TextBlock Text="{Binding ResolvedIpv4, StringFormat=IPv4: {0}}"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Ipv4TotalsText}"
+                                               FontSize="11"
+                                               Opacity="0.9"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2"
+                                               Classes="PingStatusEmoji"
+                                               Text="{Binding Ipv4StatusLine}"
+                                               FontSize="13"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <Button Grid.Column="3"
+                                            Content="{Binding StartPauseGlyph}"
+                                            Classes="PingEmojiButton"
+                                            ToolTip.Tip="{Binding StartPauseTooltip}"
+                                            Tag="{Binding}"
+                                            Click="StartPause_Click" />
+                                    <Button Grid.Column="4"
+                                            Content="🔄"
+                                            Classes="PingEmojiButton"
+                                            Tag="{Binding}"
+                                            Click="Refresh_Click"
+                                            IsEnabled="{Binding !IsRunning}" />
+                                </Grid>
+
+                                <Grid Grid.Row="1" ColumnDefinitions="2.2*,1.2*,1.8*,Auto,Auto" ColumnSpacing="8">
+                                    <TextBlock Text="{Binding ResolvedIpv6, StringFormat=IPv6: {0}}"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Ipv6TotalsText}"
+                                               FontSize="11"
+                                               Opacity="0.9"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2"
+                                               Classes="PingStatusEmoji"
+                                               Text="{Binding Ipv6StatusLine}"
+                                               FontSize="13"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <Button Grid.Column="3" Classes="PingEmojiButton" Content="📝" Tag="{Binding}" Click="Edit_Click" />
+                                    <Button Grid.Column="4" Classes="PingEmojiButton" Content="🗑️" Tag="{Binding}" Click="Delete_Click" />
+                                </Grid>
                             </Grid>
                         </StackPanel>
                     </Border>
