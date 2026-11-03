@@ -4,6 +4,25 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.9.3]
+
+### Added
+
+- **Tools / Ping / Kompaktansicht**: Neue Umschaltung per Checkbox im Kopfbereich der Ping-Seite. Die Kompaktansicht zeigt pro Ziel eine 2-Zeilen-Darstellung mit IPv4-/IPv6-Status, Gesamt/Verlust sowie den wichtigsten Aktionen.
+- **Einstellungen / Daten / Import-Auswahl**: Nach dem Einlesen einer Konfigurations-ZIP erscheint ein Auswahlfenster, in dem einzelne Einträge gezielt ein- oder abgewählt werden können. Standardmäßig sind alle Einträge aktiv.
+
+### Changed
+
+- **Einstellungen / Daten / Export**: Export umfasst jetzt rekursiv den gesamten Konfigurationsordner (inklusive Desktop-Overlay-Konfiguration und weiterer Unterordnerdateien).
+- **Einstellungen / Daten / Import**: Import kann optional auf ausgewählte ZIP-Einträge begrenzt werden; ausgewählte Dateien werden gezielt überschrieben.
+- **Lokalisierung / Ping**: Neuer Sprachschlüssel `PING_COMPACT_VIEW` in allen Sprachdateien ergänzt.
+
+### Fixed
+
+- **Einstellungen / Daten / Import / Sicherheit**: Zielpfade beim ZIP-Import werden auf gültige Konfigurationspfade begrenzt (Schutz gegen ungültige/ausbrechende Pfade).
+- **Einstellungen / Daten / Neustart nach Import**: Neustartlogik nach erfolgreichem Import stabilisiert. Der Relaunch erfolgt verzögert über einen Helper, damit der Single-Instance-Mutex sauber freigegeben wird und die App zuverlässig neu startet.
+- **Einstellungen / Import-Dialog / Build**: C#-Erzeugung des Import-Auswahldialogs korrigiert (Grid-Attached-Properties), wodurch Compilerfehler beim Linux-Debug-Start behoben wurden.
+
 ## [2.0.9.1]
 
 ### Added
