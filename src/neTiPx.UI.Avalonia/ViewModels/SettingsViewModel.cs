@@ -1095,7 +1095,7 @@ public partial class SettingsViewModel : ObservableObject
             Directory.CreateDirectory(targetDirectory);
 
             using var archive = ZipFile.Open(targetPath, ZipArchiveMode.Create);
-            foreach (var filePath in Directory.GetFiles(configDir, "*", SearchOption.TopDirectoryOnly))
+            foreach (var filePath in Directory.GetFiles(configDir, "*", SearchOption.AllDirectories))
             {
                 var sourcePath = Path.GetFullPath(filePath);
                 if (string.Equals(sourcePath, targetPath, StringComparison.OrdinalIgnoreCase))
@@ -1103,8 +1103,14 @@ public partial class SettingsViewModel : ObservableObject
                     continue;
                 }
 
-                var fileName = Path.GetFileName(filePath);
-                archive.CreateEntryFromFile(filePath, fileName, CompressionLevel.Optimal);
+                if (string.Equals(Path.GetExtension(sourcePath), ".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var relativePath = Path.GetRelativePath(configDir, filePath)
+                    .Replace(Path.DirectorySeparatorChar, '/');
+                archive.CreateEntryFromFile(filePath, relativePath, CompressionLevel.Optimal);
             }
         });
     }
@@ -1119,6 +1125,36 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     public async Task ImportSettingsArchiveAsync(string archivePath)
+    {
+        await ImportSettingsArchiveAsync(archivePath, selectedEntries: null);
+    }
+
+    public async Task<IReadOnlyList<string>> GetImportableSettingsArchiveEntriesAsync(string archivePath)
+    {
+        if (string.IsNullOrWhiteSpace(archivePath))
+        {
+            throw new ArgumentException("Import path must not be empty.", nameof(archivePath));
+        }
+
+        return await Task.Run<IReadOnlyList<string>>(() =>
+        {
+            var sourcePath = Path.GetFullPath(archivePath);
+            if (!File.Exists(sourcePath))
+            {
+                throw new FileNotFoundException("Settings archive not found.", sourcePath);
+            }
+
+            using var archive = ZipFile.OpenRead(sourcePath);
+            return archive.Entries
+                .Where(entry => !string.IsNullOrWhiteSpace(entry.Name))
+                .Select(entry => entry.FullName.Replace('\\', '/'))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        });
+    }
+
+    public async Task ImportSettingsArchiveAsync(string archivePath, IReadOnlyCollection<string>? selectedEntries)
     {
         if (string.IsNullOrWhiteSpace(archivePath))
         {
@@ -1136,6 +1172,18 @@ public partial class SettingsViewModel : ObservableObject
             var configDir = GetConfigDirectoryPath();
             Directory.CreateDirectory(configDir);
 
+            HashSet<string>? selectedEntrySet = null;
+            if (selectedEntries != null)
+            {
+                selectedEntrySet = new HashSet<string>(
+                    selectedEntries
+                        .Where(name => !string.IsNullOrWhiteSpace(name))
+                        .Select(name => name.Replace('\\', '/')),
+                    StringComparer.OrdinalIgnoreCase);
+            }
+
+            var configRoot = Path.GetFullPath(configDir);
+
             using var archive = ZipFile.OpenRead(sourcePath);
             foreach (var entry in archive.Entries)
             {
@@ -1144,7 +1192,24 @@ public partial class SettingsViewModel : ObservableObject
                     continue;
                 }
 
-                var destinationPath = Path.Combine(configDir, entry.Name);
+                var entryName = entry.FullName.Replace('\\', '/');
+                if (selectedEntrySet != null && !selectedEntrySet.Contains(entryName))
+                {
+                    continue;
+                }
+
+                var destinationPath = Path.GetFullPath(Path.Combine(configDir, entryName));
+                if (!destinationPath.StartsWith(configRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var destinationDirectory = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrWhiteSpace(destinationDirectory))
+                {
+                    Directory.CreateDirectory(destinationDirectory);
+                }
+
                 entry.ExtractToFile(destinationPath, overwrite: true);
             }
         });
@@ -1209,5 +1274,6 @@ public partial class SettingsViewModel : ObservableObject
         LoadLanguageSettings();
         LoadConnectionQualitySettings();
         LoadAutostartSettings();
+        LoadDesktopOverlaySettings();
     }
 }
