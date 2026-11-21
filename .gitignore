@@ -150,3 +150,6 @@ settings.local.json
 *.g.i.cs
 *.xaml.g.cs
 *.designer.cs
+PING_LOGGING_TEST_GUIDE.md
+.gitignore
+PING_LOGGING_DEVELOPER_GUIDE.md

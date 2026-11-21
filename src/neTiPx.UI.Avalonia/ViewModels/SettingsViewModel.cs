@@ -145,6 +145,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<DesktopOverlayItemSettingViewModel> _desktopOverlayInfoItems;
 
+    // Ping Logging Settings
+    [ObservableProperty]
+    private bool _pingLoggingEnabled;
+
+    [ObservableProperty]
+    private string _pingLogDirectory = string.Empty;
+
     public ObservableCollection<DesktopOverlayInfoOption> DesktopOverlayInfoOptions { get; } = new();
     public ObservableCollection<DesktopOverlayAdapterOption> DesktopOverlayAdapterOptions { get; } = new();
     public ObservableCollection<SystemServiceInfo> DesktopOverlayServices { get; } = new();
@@ -172,6 +179,7 @@ public partial class SettingsViewModel : ObservableObject
         LoadConnectionQualitySettings();
         LoadAutostartSettings();
         LoadDesktopOverlaySettings();
+        LoadPingLoggingSettings();
         _ = LoadDesktopOverlayServicesAsync();
     }
     
@@ -1275,5 +1283,59 @@ public partial class SettingsViewModel : ObservableObject
         LoadConnectionQualitySettings();
         LoadAutostartSettings();
         LoadDesktopOverlaySettings();
+        LoadPingLoggingSettings();
+    }
+
+    private void LoadPingLoggingSettings()
+    {
+        try
+        {
+            PingLoggingEnabled = _settingsService.GetPingLoggingEnabled();
+            PingLogDirectory = _settingsService.GetPingLogDirectory();
+        }
+        catch
+        {
+            PingLoggingEnabled = false;
+            PingLogDirectory = string.Empty;
+        }
+    }
+
+    partial void OnPingLoggingEnabledChanged(bool value)
+    {
+        _settingsService.SetPingLoggingEnabled(value);
+    }
+
+    partial void OnPingLogDirectoryChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            _settingsService.SetPingLogDirectory(value);
+        }
+    }
+
+    [RelayCommand]
+    public void BrowsePingLogDirectory()
+    {
+        try
+        {
+            var currentDir = PingLogDirectory;
+            if (string.IsNullOrWhiteSpace(currentDir) || !Directory.Exists(currentDir))
+            {
+                currentDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            }
+
+            var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = currentDir,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+            process?.Dispose();
+        }
+        catch
+        {
+            // Fehler beim Öffnen des Verzeichnisses
+        }
     }
 }
+

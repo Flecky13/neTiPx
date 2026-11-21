@@ -42,8 +42,8 @@
                 </Grid>
             </Border>
 
-            <!-- 3x3 Grid für Konfigurationsbereiche -->
-            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*,*" RowSpacing="16" ColumnSpacing="16">
+            <!-- 3x3 Grid für Konfigurationsbereiche + Ping-Logging -->
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*,*" RowSpacing="16" ColumnSpacing="16">
                 <!-- Oben Links: Netzwerkadapter -->
                 <Border Grid.Row="0" Grid.Column="0" 
                         BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
@@ -284,6 +284,48 @@
                                                    Minimum="0" Maximum="5000" Increment="10" />
                                 </StackPanel>
                             </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Unten Links: Ping-Logging -->
+                <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="16"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Ping-Protokollierung" FontWeight="Bold" />
+                        <TextBlock Text="Speichert die Ergebnisse von Ping-Tests in Log-Dateien (eine Log-Datei pro Zieladresse). Jede Zeile enthält den Zeitstempel und das Ergebnis des Tests." 
+                                   FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+
+                        <StackPanel Spacing="8">
+                            <!-- Logging aktivieren -->
+                            <StackPanel Spacing="4">
+                                <CheckBox IsChecked="{Binding PingLoggingEnabled}" Content="Ping-Protokollierung aktivieren" />
+                            </StackPanel>
+
+                            <!-- Log-Verzeichnis -->
+                            <StackPanel Spacing="4" IsEnabled="{Binding PingLoggingEnabled}">
+                                <TextBlock Text="Speicherort für Logs" FontWeight="SemiBold" FontSize="12" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <TextBox Grid.Column="0" 
+                                             Text="{Binding PingLogDirectory}" 
+                                             IsReadOnly="True"
+                                             IsEnabled="False"
+                                             Padding="8"
+                                             MinHeight="32"
+                                             VerticalContentAlignment="Center" />
+                                    <Button Grid.Column="1" 
+                                            Content="Öffnen" 
+                                            Command="{Binding BrowsePingLogDirectoryCommand}"
+                                            MinWidth="80"
+                                            HorizontalAlignment="Right" />
+                                </Grid>
+                                <TextBlock Text="Format: &lt;zieladresse&gt;.log (z.B. google.com.log, 8.8.8.8.log)" 
+                                           FontSize="11" Opacity="0.6" FontStyle="Italic" />
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </Border>

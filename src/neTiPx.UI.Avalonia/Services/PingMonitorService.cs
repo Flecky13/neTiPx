@@ -25,6 +25,7 @@ public sealed class PingMonitorService : IDisposable
 
     private readonly PingMonitorStore _store;
     private readonly SettingsService _settingsService;
+    private readonly PingLogger _logger;
     private readonly ObservableCollection<PingMonitorItem> _items = new();
     private readonly Dictionary<Guid, RuntimeEntry> _runtimeEntries = new();
     private readonly object _sync = new();
@@ -38,6 +39,7 @@ public sealed class PingMonitorService : IDisposable
     {
         _store = store;
         _settingsService = settingsService;
+        _logger = new PingLogger(settingsService);
         Items = new ReadOnlyObservableCollection<PingMonitorItem>(_items);
     }
 
@@ -162,6 +164,8 @@ public sealed class PingMonitorService : IDisposable
 
             _runtimeEntries.Clear();
         }
+
+        _logger.Dispose();
     }
 
     private void ApplyMonitoringPolicyToAll()
@@ -344,6 +348,7 @@ public sealed class PingMonitorService : IDisposable
         catch
         {
             SetErrorState(item, StatusDnsError, StatusDnsError);
+            _ = _logger.LogDnsErrorAsync(item.Target, StatusDnsError);
             return;
         }
 
@@ -419,19 +424,23 @@ public sealed class PingMonitorService : IDisposable
                         item.LastSuccessLatencyMs = latency;
                     });
 
+                    _ = _logger.LogPingSuccessAsync(item.Target, family, latency);
                     break;
                 }
                 case IPStatus.TimedOut:
                     UpdateFamilyError(item, family, "🔴", StatusTimeout);
+                    _ = _logger.LogPingFailureAsync(item.Target, family, StatusTimeout);
                     break;
                 case IPStatus.DestinationHostUnreachable:
                 case IPStatus.DestinationNetworkUnreachable:
                 case IPStatus.DestinationUnreachable:
                 case IPStatus.BadRoute:
                     UpdateFamilyError(item, family, "🔴", StatusHostUnreachable);
+                    _ = _logger.LogPingFailureAsync(item.Target, family, StatusHostUnreachable);
                     break;
                 default:
                     UpdateFamilyError(item, family, "🔴", StatusNetworkError);
+                    _ = _logger.LogPingFailureAsync(item.Target, family, StatusNetworkError);
                     break;
             }
         }
@@ -441,18 +450,22 @@ public sealed class PingMonitorService : IDisposable
                 || ex.Message.Contains("verweigert", StringComparison.OrdinalIgnoreCase))
             {
                 UpdateFamilyError(item, family, "🔴", StatusAccessDenied);
+                _ = _logger.LogPingFailureAsync(item.Target, family, StatusAccessDenied);
                 return;
             }
 
             UpdateFamilyError(item, family, "🔴", StatusUnknownError);
+            _ = _logger.LogPingFailureAsync(item.Target, family, StatusUnknownError);
         }
         catch (SocketException)
         {
             UpdateFamilyError(item, family, "🔴", StatusNetworkError);
+            _ = _logger.LogPingFailureAsync(item.Target, family, StatusNetworkError);
         }
         catch
         {
             UpdateFamilyError(item, family, "🔴", StatusUnknownError);
+            _ = _logger.LogPingFailureAsync(item.Target, family, StatusUnknownError);
         }
     }
 

@@ -44,6 +44,10 @@ namespace neTiPx.UI.Avalonia.Services
 
             // Desktop Overlay
             public DesktopOverlaySettingsModel DesktopOverlay { get; set; } = DesktopOverlaySettingsModel.CreateDefault();
+
+            // Ping Logging Settings
+            public bool PingLoggingEnabled { get; set; } = false;
+            public string PingLogDirectory { get; set; } = string.Empty;
         }
 
         public UserSettings ReadUserSettings()
@@ -178,7 +182,12 @@ namespace neTiPx.UI.Avalonia.Services
                 new XAttribute("code", settings.LanguageCode ?? "System")
             );
 
-            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, desktopOverlayElement, connectionStatusElement, appBehaviorElement, updateCheckElement, networkScannerElement, languageElement);
+            var pingLoggingElement = new XElement("pingLogging",
+                new XAttribute("enabled", settings.PingLoggingEnabled),
+                new XAttribute("directory", settings.PingLogDirectory ?? string.Empty)
+            );
+
+            var root2 = new XElement("userSettings", colorThemeElement2, hoverWindowElement, desktopOverlayElement, connectionStatusElement, appBehaviorElement, updateCheckElement, networkScannerElement, languageElement, pingLoggingElement);
             var doc2 = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root2);
             doc2.Save(path);
         }
@@ -336,6 +345,20 @@ namespace neTiPx.UI.Avalonia.Services
                     var langCode = (string?)languageElement.Attribute("code");
                     if (!string.IsNullOrWhiteSpace(langCode))
                         settings.LanguageCode = langCode;
+                }
+
+                var pingLoggingElement = root.Element("pingLogging");
+                if (pingLoggingElement != null)
+                {
+                    if (bool.TryParse((string?)pingLoggingElement.Attribute("enabled"), out var enabled))
+                    {
+                        settings.PingLoggingEnabled = enabled;
+                    }
+                    var directory = (string?)pingLoggingElement.Attribute("directory");
+                    if (!string.IsNullOrWhiteSpace(directory))
+                    {
+                        settings.PingLogDirectory = directory;
+                    }
                 }
 
                 return settings;

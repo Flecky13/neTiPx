@@ -379,5 +379,38 @@ namespace neTiPx.UI.Avalonia.Services
             UpdateUserSettings(settings => settings.DesktopOverlay = DesktopOverlaySettingsModel.Normalize(overlaySettings));
         }
 
+        // Ping Logging Settings
+        public bool GetPingLoggingEnabled()
+        {
+            var settings = LoadUserSettings();
+            return settings.PingLoggingEnabled;
+        }
+
+        public void SetPingLoggingEnabled(bool enabled)
+        {
+            UpdateUserSettings(settings => settings.PingLoggingEnabled = enabled);
+        }
+
+        public string GetPingLogDirectory()
+        {
+            var settings = LoadUserSettings();
+            if (string.IsNullOrWhiteSpace(settings.PingLogDirectory))
+            {
+                return GetDefaultPingLogDirectory();
+            }
+            return settings.PingLogDirectory;
+        }
+
+        public void SetPingLogDirectory(string directory)
+        {
+            UpdateUserSettings(settings => settings.PingLogDirectory = directory ?? string.Empty);
+        }
+
+        private static string GetDefaultPingLogDirectory()
+        {
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            return Path.Combine(appDataPath, "neTiPx", "PingLogs");
+        }
+
     }
 }
