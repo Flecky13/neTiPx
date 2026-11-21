@@ -4,6 +4,20 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.9.4]
+
+### Added
+
+- **Tools / Ping / Logging**: Optionales Protokollieren aller Ping-Ergebnisse aktiviert. Für jedes Ziel wird eine eigene `.log`-Datei erstellt.
+- **Tools / Ping / Log-Inhalte**: Log-Einträge enthalten Zeitstempel, IPv4-/IPv6-Hinweis sowie erfolgreiche Latenzen, Fehlermeldungen und DNS-Fehler.
+- **Einstellungen / Ping / Speicherort**: Standardmässiges Ping-Log-Verzeichnis `neTiPx/PingLogs` im Anwendungsdatenordner; das Verzeichnis kann über die Einstellungsseite geöffnet werden.
+- **Einstellungen / Ping / Persistenz**: Aktivierung und Speicherort der Ping-Protokollierung werden in `userSettings.xml` gespeichert.
+
+### Changed
+
+- **Einstellungen / Daten**: Das obere Einstellungsraster enthält jetzt direkt eine eigene Karte zur Konfiguration der Ping-Protokollierung.
+- **Tools / Ping / Fehlerbehandlung**: Logging läuft isoliert vom Ping-Monitoring und beeinflusst erfolgreiche oder fehlgeschlagene Ping-Auswertungen nicht.
+
 ## [2.0.9.3]
 
 ### Added
