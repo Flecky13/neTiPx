@@ -4,6 +4,12 @@ Alle wichtigen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.0.9.5]
+
+### Fixed
+
+- **Info / Update / Linux**: `.deb`-Updates starten unter Linux jetzt bevorzugt über Paketinstallationsbefehle (z. B. `pkexec` + `apt`/`dpkg`) statt ausschließlich via `xdg-open`, damit KDE/Mint-Paketinstallation zuverlässiger gestartet wird.
+
 ## [2.0.9.4]
 
 ### Added

@@ -185,6 +185,8 @@ public partial class InfoViewModel : ObservableObject
         }
 
         var extension = Path.GetExtension(packagePath).ToLowerInvariant();
+        var isTarArchive = packagePath.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) ||
+                           packagePath.EndsWith(".tar", StringComparison.OrdinalIgnoreCase);
 
         try
         {
@@ -203,42 +205,83 @@ public partial class InfoViewModel : ObservableObject
             {
                 if (extension == ".appimage")
                 {
-                    Process.Start("chmod", $"+x \"{packagePath}\"")?.Dispose();
+                    using var chmodProcess = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "chmod",
+                        Arguments = $"+x \"{packagePath}\"",
+                        UseShellExecute = false
+                    });
+                    chmodProcess?.WaitForExit(5000);
+
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = packagePath,
+                        UseShellExecute = false
+                    });
+                    shouldShutdownApp = true;
+                    return true;
                 }
 
                 if (extension == ".deb")
                 {
-                    try
+                    var debInstallCommands = new[]
                     {
-                        Process.Start(new ProcessStartInfo
+                        new ProcessStartInfo
                         {
-                            FileName = "xdg-open",
-                            Arguments = $"\"{packagePath}\"",
+                            FileName = "pkexec",
+                            Arguments = $"apt install -y \"{packagePath}\"",
                             UseShellExecute = false
-                        });
-                        shouldShutdownApp = false;
-                        return true;
-                    }
-                    catch
-                    {
-                        // Fallback below.
-                    }
-
-                    try
-                    {
-                        Process.Start(new ProcessStartInfo
+                        },
+                        new ProcessStartInfo
+                        {
+                            FileName = "pkexec",
+                            Arguments = $"apt-get install -y \"{packagePath}\"",
+                            UseShellExecute = false
+                        },
+                        new ProcessStartInfo
                         {
                             FileName = "pkexec",
                             Arguments = $"dpkg -i \"{packagePath}\"",
                             UseShellExecute = false
-                        });
-                        shouldShutdownApp = false;
-                        return true;
-                    }
-                    catch
+                        },
+                        new ProcessStartInfo
+                        {
+                            FileName = "gdebi-gtk",
+                            Arguments = $"\"{packagePath}\"",
+                            UseShellExecute = false
+                        },
+                        new ProcessStartInfo
+                        {
+                            FileName = "mintinstall",
+                            Arguments = $"\"{packagePath}\"",
+                            UseShellExecute = false
+                        },
+                        new ProcessStartInfo
+                        {
+                            FileName = "xdg-open",
+                            Arguments = $"\"{packagePath}\"",
+                            UseShellExecute = false
+                        }
+                    };
+
+                    foreach (var command in debInstallCommands)
                     {
-                        // Fallback below.
+                        try
+                        {
+                            Process.Start(command);
+                            shouldShutdownApp = false;
+                            return true;
+                        }
+                        catch
+                        {
+                            // Try next installer command.
+                        }
                     }
+                }
+
+                if (isTarArchive)
+                {
+                    return false;
                 }
 
                 Process.Start(new ProcessStartInfo
